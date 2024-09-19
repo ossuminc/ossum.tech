@@ -1,3 +1,3 @@
-# Docify&tm;
+# Docify
 
-Contents coming soon. 
+Docify is the tool that turns your RIDDL model into an interactive web site. 
