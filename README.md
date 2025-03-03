@@ -1,2 +1,2 @@
 # ossum.tech
-Static web site content for Ossum technology
+This repository provides the documentation site for Ossum's technologies.
