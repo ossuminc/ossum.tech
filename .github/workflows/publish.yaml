@@ -1,70 +1,28 @@
-# Workflow for building and deploying Markdown sources to GitHub Pages
-name: Deploy Technical Documentation to GitHub Pages
-
+name: publishing
 on:
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
-    paths:
-      - 'docs/**'
-      - '.github/workflows/publish.yml'
-      - '**/*.wsd'
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    branches:
+      - main
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress
-# and latest queued. However, do NOT cancel in-progress runs as we want to allow these production
-# deployments to complete.
-concurrency:
-  group: "writerside-pages"
-  cancel-in-progress: false
-
-# Default to bash
-defaults:
-  run:
-    shell: bash
-
-
+  contents: write
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Java (Writerside requires Java)
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21' # Use Java 21 as specified in your project
-
-      - name: Set up Writerside environment (optional)
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
         run: |
-          echo "Setting up Writerside toolchain..."
-          # Writerside CLI setup (if applicable)
-          # Uncomment below and update if you're using a specific Writerside CLI
-          # wget https://example.com/writerside-cli.zip -O writerside-cli.zip
-          # unzip writerside-cli.zip -d writerside-cli
-
-      - name: Build Documentation with Writerside
-        run: |
-          echo "Building Writerside documentation..."
-          ./gradlew writersideBuild || echo "Ensure 'writersideBuild' task exists in your Gradle build file."
-
-      - name: Upload docs directory
-        uses: actions/upload-pages-artifact@v3
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
         with:
-          path: './docs' # Ensure Writerside outputs to this folder
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+      - run: pip install mkdocs-material
+      - run: mkdocs gh-deploy --force
