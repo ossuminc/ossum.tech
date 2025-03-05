@@ -5,10 +5,20 @@ theme:
   name: material
   logo: assets/images/logo_alt_and_name_1_256.png
   favicon: images/favicon.png
+  font:
+    text: Encode Sans
+    code: Roboto Mono
   features:
     - search.suggest
     - search.share
     - search.highlight
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+
+
   custom_dir: overrides
   palette:
     # Palette toggle for automatic mode
