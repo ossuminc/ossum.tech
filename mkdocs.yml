@@ -7,7 +7,7 @@ copyright: >
 theme:
   name: material
   logo: assets/images/logo_alt_and_name_1_256.png
-  favicon: images/favicon.png
+  favicon: assets/images/favicon.png
   font:
     text: Encode Sans
     code: Roboto Mono
