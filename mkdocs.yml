@@ -6,7 +6,8 @@ copyright: >
   <a href="#__consent">Change cookie settings</a>
 theme:
   name: material
-  logo: assets/images/logo_alt_and_name_1_256.png
+  custom_dir: overrides
+  logo: assets/images/ossum_logo_and_name-01.png
   favicon: assets/images/favicon.png
   font:
     text: Encode Sans
