@@ -1,6 +1,9 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: Ossum Technologies
 site_url: https://ossum.tech/
+copyright: >
+  Copyright &copy; 2019-2025 Ossum Inc. -
+  <a href="#__consent">Change cookie settings</a>
 theme:
   name: material
   logo: assets/images/logo_alt_and_name_1_256.png
@@ -9,17 +12,18 @@ theme:
     text: Encode Sans
     code: Roboto Mono
   features:
-    - search.suggest
-    - search.share
-    - search.highlight
+    - announce.dismiss
+    - content.tooltips
+    - header.autohide
+    - navigation.footer
     - navigation.instant
     - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
-
-
-  custom_dir: overrides
+    - search.suggest
+    - search.share
+    - search.highlight
   palette:
     # Palette toggle for automatic mode
     - media: "(prefers-color-scheme)"
@@ -42,6 +46,7 @@ theme:
         name: Switch to system preference
 extra_css:
   - stylesheets/extra.css
+
 extra_javascript:
   - javascripts/extra.js
 
@@ -49,6 +54,27 @@ extra:
   analytics:
     provider: google
     property: G-97Q04B6XCX
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    cookies:
+      analytics: GA_ossum_tech
+      github: GH_ossum_tech
+    consent:
+      actions:
+        - accept
+        - reject
+        - manage
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/ossum-inc/
+    - icon: fontawesome/brands/github
+      link: https://www.github.com/ossuminc
+  generator: false
 
 markdown_extensions:
     # Python Markdown
@@ -86,3 +112,4 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
+
