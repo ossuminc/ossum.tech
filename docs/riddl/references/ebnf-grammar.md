@@ -1,10 +1,10 @@
 # Formal EBNF Grammar
 
-Below is the formal Extended Backus-Naur Form (EBNF) grammar for RIDDL. 
-This grammar provides a precise definition of RIDDL syntax and can be used as a 
-reference when constructing valid RIDDL expressions. This grammar was 
-automaticaly extracted from the reference grammar written in Scala/fastparse 
-form at March 1, 2025. The maintainers will keep it up to date.  
+Below is the formal Extended Backus-Naur Form (EBNF) grammar for RIDDL.
+This grammar provides a precise definition of RIDDL syntax and can be used as a
+reference when constructing valid RIDDL expressions. This grammar was
+automatically extracted from the reference grammar written in Scala/fastparse
+form and last updated January 17, 2026. The maintainers will keep it up to date.
 
 ```ebnf
 (* RIDDL Grammar in EBNF *)
@@ -29,9 +29,10 @@ end_of_line_comment = "//" {any_char_except_newline} newline ;
 
 (* Main Structure *)
 root = {root_content}+ ;
-root_content = module_content | module | root_include ;
+root_content = bast_import | module_content | module | root_include ;
 module_content = domain | author | comment ;
 root_include = "include" literal_string ;
+bast_import = "import" literal_string ;  (* path must end with .bast *)
 
 (* Module *)
 module = "module" identifier "is" "{" {module_content | module_include}+ "}" [with_metadata] ;
@@ -41,7 +42,7 @@ module_include = "include" literal_string ;
 domain = "domain" identifier "is" "{" domain_body "}" [with_metadata] ;
 domain_body = domain_definitions | "???" ;
 domain_definitions = {domain_content}+ ;
-domain_content = vital_definition_contents | author | context | domain | user | epic | saga | import_def | domain_include | comment ;
+domain_content = vital_definition_contents | author | context | domain | user | epic | saga | import_def | bast_import | domain_include | comment ;
 import_def = "import" "domain" identifier "from" literal_string ;
 domain_include = "include" literal_string ;
 
@@ -73,13 +74,13 @@ aggregate_use_case = "type" | "command" | "query" | "event" | "result" | "record
 (* Type Expressions *)
 type_expression = cardinality(
     predefined_types | pattern_type | unique_id_type | enumeration | sequence_type | mapping_from_to | a_set_type |
-    graph_type | table_type | replica_type | range_type | decimal_type | alternation | entity_reference_type | 
+    graph_type | table_type | replica_type | range_type | decimal_type | alternation | entity_reference_type |
     aggregation | aggregate_use_case_type_expression | aliased_type_expression
 ) ;
 
 cardinality = ["many"] ["optional"] type_expression_base ["?" | "*" | "+"] ;
 type_expression_base = predefined_types | pattern_type | unique_id_type | enumeration | sequence_type | mapping_from_to | a_set_type |
-    graph_type | table_type | replica_type | range_type | decimal_type | alternation | entity_reference_type | 
+    graph_type | table_type | replica_type | range_type | decimal_type | alternation | entity_reference_type |
     aggregation | aggregate_use_case_type_expression | aliased_type_expression ;
 
 (* Predefined Types *)
@@ -181,28 +182,36 @@ on_message_clause = "on" message_ref ["from" [identifier ":"] message_origins] "
 message_origins = inlet_ref | processor_ref | user_ref | epic_ref ;
 
 (* Statements *)
-statement = send_statement | arbitrary_statement | error_statement | the_set_statement | tell_statement | call_statement |
-    stop_statement | if_then_else_statement | for_each_statement | code_statement | comment | reply_statement |
-    focus_statement | morph_statement | become_statement | return_statement | read_statement | write_statement ;
+(* Core statements available in all contexts *)
+statement = when_statement | match_statement | send_statement | tell_statement |
+    the_set_statement | let_statement | prompt_statement | code_statement |
+    error_statement | comment ;
 
+(* Entity-specific statements *)
+entity_statement = statement | morph_statement | become_statement ;
+
+(* Control flow *)
+when_statement = "when" literal_string "then" pseudo_code_block "end" ;
+match_statement = "match" literal_string "{" {match_case}+ ["default" "{" {statement} "}"] "}" ;
+match_case = "case" literal_string "{" {statement} "}" ;
+
+(* Message operations *)
 send_statement = "send" message_ref "to" (outlet_ref | inlet_ref) ;
-arbitrary_statement = literal_string ;
-error_statement = "error" literal_string ;
-the_set_statement = "set" field_ref "to" literal_string ;
 tell_statement = "tell" message_ref "to" processor_ref ;
-call_statement = "call" function_ref ;
-stop_statement = "stop" ;
-if_then_else_statement = "if" literal_string "then" pseudo_code_block ["else" pseudo_code_block "end"] ;
-for_each_statement = "foreach" (field_ref | inlet_ref | outlet_ref) "do" pseudo_code_block "end" ;
+
+(* Variable operations *)
+the_set_statement = "set" field_ref "to" literal_string ;
+let_statement = "let" identifier "=" literal_string ;
+
+(* General statements *)
+prompt_statement = "prompt" literal_string ;
 code_statement = "```" ("scala" | "java" | "python" | "mojo") code_contents "```" ;
 code_contents = {any_char_except_triple_backtick} ;
-reply_statement = "reply" ["with"] message_ref ;
-focus_statement = "focus" "on" group_ref ;
+error_statement = "error" literal_string ;
+
+(* Entity state transitions *)
 morph_statement = "morph" entity_ref "to" state_ref "with" message_ref ;
 become_statement = "become" entity_ref "to" handler_ref ;
-return_statement = "return" literal_string ;
-read_statement = ("read" | "get" | "query" | "find" | "select") literal_string "from" type_ref "where" literal_string ;
-write_statement = ("write" | "put" | "create" | "update" | "delete" | "remove" | "append" | "insert" | "modify") literal_string "to" type_ref ;
 
 (* Pseudo Code Block *)
 pseudo_code_block = "???" | {statement} | "{" {statement} "}" ;
@@ -290,7 +299,7 @@ interaction = parallel_interactions | optional_interactions | sequential_interac
 parallel_interactions = "parallel" "{" interactions "}" ;
 optional_interactions = "optional" "{" interactions "}" ;
 sequential_interactions = "sequence" "{" interactions "}" ;
-step_interactions = "step" (focus_on_group_step | direct_user_to_url | select_input_step | take_input_step | 
+step_interactions = "step" (focus_on_group_step | direct_user_to_url | select_input_step | take_input_step |
                             show_output_step | self_processing_step | send_message_step | arbitrary_step | vague_step) ;
 focus_on_group_step = "focus" user_ref "on" group_ref [with_metadata] ;
 direct_user_to_url = "direct" user_ref "to" http_url [with_metadata] ;
@@ -306,7 +315,7 @@ vague_step = "is" literal_string literal_string literal_string [with_metadata] ;
 user = "user" identifier "is" literal_string [with_metadata] ;
 
 (* Author-related *)
-author = "author" identifier "is" "{" [("???" | ("name" "is" literal_string "email" "is" literal_string 
+author = "author" identifier "is" "{" [("???" | ("name" "is" literal_string "email" "is" literal_string
         ["organization" "is" literal_string] ["title" "is" literal_string] ["url" "is" http_url]))] "}" [with_metadata] ;
 
 (* URLs *)

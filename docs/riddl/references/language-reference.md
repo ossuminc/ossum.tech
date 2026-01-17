@@ -242,11 +242,9 @@ Commands should always result in one or more events being emitted. This follows 
 ```
 handler ProductCommandHandler is {
   on command UpdatePrice is {
-    if "newPrice > 0" then {
+    when "newPrice > 0" then {
       morph entity Product to state ProductData with command UpdatePrice
       tell event PriceUpdated to entity Product  // Emitting an event is essential
-    } else {
-      error "Price must be greater than zero"
     } end
   }
 } with {
@@ -265,10 +263,11 @@ Handlers process commands and emit events:
 ```
 handler ProductCommandHandler is {
   on command UpdatePrice is {
-    if "newPrice > 0" then {
+    when "newPrice > 0" then {
       morph entity Product to state ProductData with command UpdatePrice
       tell event PriceUpdated to entity Product
-    } else {
+    } end
+    when "newPrice <= 0" then {
       error "Price must be greater than zero"
     } end
   }
@@ -297,44 +296,55 @@ tell command ProcessPayment to entity PaymentService
 ```
 
 ### Set Statement
-Assigns values:
+Assigns values to fields:
 ```
 set field status to "Active"
 ```
 
-### If Statement
-Conditional logic:
+### Let Statement
+Creates a local variable binding:
 ```
-if "condition" then {
-  // actions
-} else if "another condition" then {
-  // actions
-} else {
+let totalPrice = "subtotal + tax + shipping"
+```
+
+### When Statement
+Conditional logic (replaces the former `if` statement):
+```
+when "condition" then {
   // actions
 } end
 ```
 
-The `end` keyword is required to terminate if statements.
+The `end` keyword is required to terminate when statements. Note: there is no
+`else` clause - use multiple `when` statements for different conditions.
 
-### Foreach Statement
-Iteration:
+### Match Statement
+Pattern matching for multiple conditions:
 ```
-foreach field Cart.items do {
-  // actions for each item
-} end
+match "orderStatus" {
+  case "pending" {
+    tell event OrderPending to entity Order
+  }
+  case "shipped" {
+    tell event OrderShipped to entity Order
+  }
+  case "delivered" {
+    tell event OrderDelivered to entity Order
+  }
+  default {
+    error "Unknown order status"
+  }
+}
 ```
 
-The `end` keyword is required to terminate foreach loops.
+### Prompt Statement
+Describes an action in natural language for implementation:
+```
+prompt "Calculate the total price including all applicable taxes and discounts"
+```
 
-### Arbitrary Statement
-Allows for implementation code inside functions and handler actions:
-```
-"var subtotal = 0;
- for (var i = 0; i < items.length; i++) {
-   subtotal += items[i].totalPrice;
- }
- return subtotal;"
-```
+This is useful for describing complex business logic that will be implemented
+in target code.
 
 ## Functions
 
@@ -351,9 +361,9 @@ function calculateTotal is {
   returns {
     total is Price
   }
-  
-  // Implementation using arbitrary statement
-  "return subtotal + taxes + shipping - discount;"
+
+  // Implementation using prompt statement
+  prompt "Calculate total by adding subtotal, taxes, and shipping, then subtracting discount"
 } with {
   briefly as "Calculates the final cart total"
   described by {
@@ -414,12 +424,12 @@ repository CartRepository is {
   schema CartData is relational of
     cart as Cart
     link cartItems as field Cart.items.id to field Product.id
-    
+
   handler CartRepositoryHandler is {
     on event CartCreated is {
-      write "Create new cart record" to Cart
+      prompt "Persist the new cart record to the database"
     }
-    
+
     // Other event handlers
   } with {
     briefly as "Handles persistence of cart events"
@@ -562,9 +572,9 @@ entity Product is {
 1. **Include Metadata**: Add descriptions to all definitions with `with` clauses after their closing braces
 2. **Be Explicit**: Always specify reference types (entity, command, event, etc.)
 3. **Place Functions Close to Usage**: Define functions within the entities that use them
-4. **End Control Structures**: Always terminate control structures with `end` keyword
-5. **Use Field References**: In foreach loops, use `foreach field X.items`
-6. **Provide Default Actions**: Use `"nothing"` for empty else branches
+4. **End When Statements**: Always terminate `when` statements with the `end` keyword
+5. **Use Match for Multiple Conditions**: Prefer `match` over multiple `when` statements for readability
+6. **Use Prompt for Complex Logic**: Use `prompt` to describe business logic for implementation
 7. **Model Complete Flows**: Include UI components and user interactions
 8. **Maintain Semantic Consistency**: Use the same field names for the same concepts
 9. **Emit Events from Commands**: Ensure commands emit events to follow reactive principles
@@ -574,8 +584,8 @@ entity Product is {
 
 ## Common Syntax Issues
 
-1. Don't use assignment operators (`=`); use `set field x to "value"`
-2. Don't forget `end` after if statements and foreach loops
+1. Don't use assignment operators (`=`) for fields; use `set field x to "value"` (but `let x = "value"` is valid for local bindings)
+2. Don't forget `end` after `when` statements
 3. Always include reference types before identifiers
 4. Use proper syntax for function parameters and return values
 5. Make sure all morph/tell statements have correct type references
@@ -584,6 +594,8 @@ entity Product is {
 8. Never place entity, type, or repository definitions directly within a domain - they must be in a context
 9. Never place definitions inside an author - authors only contain metadata
 10. Make sure each context contains related definitions that form a bounded context
+11. Use `when` for conditionals (not `if` which is no longer supported)
+12. Use `prompt` for describing implementation logic (not bare quoted strings)
 
 ## Incomplete Definitions
 
@@ -650,8 +662,8 @@ From the formal grammar analysis, several important syntax points deserve specia
 3. **Nested Element Validation**: Elements can only be nested within specific parent elements according to strict containment rules. For example, types must be defined within contexts, not directly within domains.
 
 4. **Termination of Statements**: Control flow statements must be properly terminated:
-   - If statements must end with the `end` keyword
-   - Foreach loops must end with the `end` keyword
+   - `when` statements must end with the `end` keyword
+   - `match` statements are terminated by the closing brace
    - Other statements are implicitly terminated
 
 5. **Handler Clauses**: Handlers must use specific clause types:
@@ -662,4 +674,14 @@ From the formal grammar analysis, several important syntax points deserve specia
    - `on other` for default/catch-all behavior
 
 6. **Readability Words**: While readability words like `is`, `as`, `by`, etc. are often optional, their proper placement significantly improves model clarity. Use them consistently.
+
+7. **New Statement Types** (as of January 2026):
+   - `when` replaces the former `if-then-else` statement
+   - `match` provides pattern matching for multiple conditions
+   - `let` creates local variable bindings
+   - `prompt` replaces bare quoted strings for describing implementation logic
+
+8. **Removed Statements**: The following statements have been removed from the language:
+   - `if`, `foreach`, `call`, `stop`, `focus`, `reply`, `return`, `read`, `write`
+   - Use `when` for conditionals, `match` for pattern matching, and `prompt` for implementation descriptions
 
