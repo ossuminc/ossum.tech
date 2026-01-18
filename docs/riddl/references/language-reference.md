@@ -31,8 +31,37 @@ RIDDL emphasizes:
 Everything that has a name and can have metadata is known as a Definition in RIDDL.
 
 ### Branches
-Every 
+Branch definitions are containers that hold other definitions. They form the
+hierarchical structure of a RIDDL model:
+- **Root**: The implicit top-level container (not explicitly defined)
+- **Module**: Organizes root content for large models
+- **Domain**: Contains bounded contexts and domain-wide definitions
+- **Context**: Contains entities, repositories, sagas, and other processors
+- **Entity**: Contains states, handlers, functions, and message types
+- **Epic**: Contains use cases describing user interactions
+- **Saga**: Contains steps for multi-step processes with compensation
+
 ### Processors
+
+Processors are definitions that can receive and process messages. They form the
+active components of a RIDDL model:
+
+- **Entity**: Stateful processor with commands, events, states, and handlers.
+  Entities are the primary business objects that maintain state and respond to
+  commands.
+- **Adaptor**: Translates messages between contexts. Defined with a direction
+  (`from` or `to`) relative to a context.
+- **Repository**: Handles persistence of data. Contains schemas and handlers
+  for storage operations.
+- **Projector**: Projects events to a repository, often transforming or
+  aggregating data for read models (CQRS pattern).
+- **Streamlet**: Processes streaming data. Subtypes include `source`, `sink`,
+  `flow`, `merge`, `split`, `router`, and `void`.
+- **Saga**: Orchestrates multi-step processes with compensation logic for
+  failure recovery.
+
+All processors can contain handlers, functions, types, and other processor-
+specific definitions.
 
 ### Domain Hierarchy
 
@@ -55,12 +84,46 @@ RIDDL models are organized hierarchically:
 - **Saga**: A component that defines the orchestration of multi-step atomic process with 
   compensation actions to undo the process when errors arise.
 - **Epic**: A collection of use cases to show an expected usage pattern
-- **Case**: A Specific user interaction flow
+- **Case**: A specific user interaction flow
 
-The hierarchy 
+The hierarchy follows strict containment rules: Root → Module/Domain → Context →
+Entity/Repository/Saga/Streamlet → States/Handlers/Functions. Each level can
+only contain specific definition types as detailed in the Containment Rules
+section below.
 
 ### Data Types
-Riddl has a rich 
+
+RIDDL has a rich type system supporting both simple and complex data structures:
+
+**Predefined Types:**
+- **Strings**: `String`, `String(min,max)` with length constraints
+- **Numbers**: `Integer`, `Natural`, `Whole`, `Real`, `Number`, `Decimal(w,f)`
+- **Boolean**: `Boolean`
+- **Temporal**: `Date`, `Time`, `DateTime`, `TimeStamp`, `Duration`,
+  `ZonedDateTime(zone)`
+- **Identifiers**: `UUID`, `UserId`, `Id(entity path)`
+- **Other**: `URL`, `URL(scheme)`, `Currency(code)`, `Location`, `Nothing`,
+  `Abstract`
+- **Physical**: `Length`, `Mass`, `Current`, `Temperature`, `Luminosity`, `Mole`
+
+**Pattern Types:**
+- `Pattern("regex")` - String matching a regular expression
+
+**Compound Types:**
+- **Aggregation**: `{ field1 is Type1, field2 is Type2 }` - Named field collections
+- **Alternation**: `one of { TypeA, TypeB, TypeC }` - Union/sum types
+- **Enumeration**: `any of { Value1, Value2, Value3 }` - Enumerated values
+
+**Collection Types:**
+- **Sequence**: `sequence of Type` or `many Type`
+- **Set**: `set of Type`
+- **Mapping**: `mapping from KeyType to ValueType`
+- **Optional**: `optional Type` or `Type?`
+
+**Special Types:**
+- **Entity Reference**: `reference to entity Path`
+- **Unique ID**: `Id(entity Path)` - Type-safe entity identifier
+
 ### Basic Syntax Elements
 
 1. **Readability Words**: Optional words that improve human readability of a model
