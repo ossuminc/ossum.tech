@@ -87,7 +87,7 @@ With those clarifying simplifications, here's the hierarchy:
         4. [Statement](statement.md)
       9. [Function](function.md)
         2. [Statement](statement.md)
-      10 [Streamlet](streamlet.md)
+      10. [Streamlet](streamlet.md)
         1. [Type](type.md)
         2. [Inlet](inlet.md)
         3. [Outlet](outlet.md)
