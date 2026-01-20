@@ -191,7 +191,8 @@ statement = when_statement | match_statement | send_statement | tell_statement |
 entity_statement = statement | morph_statement | become_statement ;
 
 (* Control flow *)
-when_statement = "when" literal_string "then" pseudo_code_block "end" ;
+when_condition = literal_string | ["!"] identifier ;
+when_statement = "when" when_condition "then" pseudo_code_block ["else" pseudo_code_block] "end" ;
 match_statement = "match" literal_string "{" {match_case}+ ["default" "{" {statement} "}"] "}" ;
 match_case = "case" literal_string "{" {statement} "}" ;
 

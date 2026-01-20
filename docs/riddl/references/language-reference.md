@@ -378,8 +378,30 @@ when "condition" then {
 } end
 ```
 
-The `end` keyword is required to terminate when statements. Note: there is no
-`else` clause - use multiple `when` statements for different conditions.
+The `end` keyword is required to terminate when statements.
+
+**Condition Types:**
+The `when` statement accepts three forms of conditions:
+- Literal string: `when "user is authenticated" then`
+- Identifier reference: `when authorized then` (using a `let` binding)
+- Negated identifier: `when !authorized then`
+
+**Optional Else Block:**
+An `else` clause can handle the false case:
+```
+let authorized = "user has permission"
+when authorized then {
+  send event ActionCompleted to outlet Events
+} else {
+  error "User not authorized"
+} end
+```
+
+Alternatively, use multiple `when` statements with negation:
+```
+when authorized then { ... } end
+when !authorized then { ... } end
+```
 
 ### Match Statement
 Pattern matching for multiple conditions:
