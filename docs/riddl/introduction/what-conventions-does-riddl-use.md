@@ -182,55 +182,83 @@ that concept's name.  This is a simple convention used throughout the language f
 concept types and references to them.
 
 ## File Inclusion
-RIDDL allows source input to be included, inline, from other files. That is,
-the parser will substitute the text of an included file, replacing the `include`
-directive. This is much like the C preprocessor `#include` directive. RIDDL
-always parses the entire specification but the `include` directive allows you to
-organize that specification into many (even nested) files. Note that include
-directives are only permitted within container definitions. Doing so prevents
-fragments of definitions from being separated into individual files.
+
+RIDDL allows source input to be included, inline, from other files. The
+`include` keyword specifies a file path (relative to the current file) whose
+contents will be parsed as if they appeared at that location. This allows you
+to organize large specifications into multiple files.
+
+!!! note "Syntax"
+    The `include` keyword takes a literal string path: `include "path/to/file"`
+
+Include statements are only permitted within container definitions. This
+prevents fragments of definitions from being separated across files.
 
 For example, this is allowed:
+
 ```riddl
-domain ThingAmaJig {
-#include "thingamajig/thing-context"
-#include "thingamajig/ama-topic"
-#include "thingamajig/jig-context"
+domain ThingAmaJig is {
+  include "thingamajig/thing-context.riddl"
+  include "thingamajig/ama-topic.riddl"
+  include "thingamajig/jig-context.riddl"
 }
 ```
-while this is not:
+
+While this is **not** allowed:
+
 ```riddl
 domain
-#include "ThingAmaJig-domain"
+include "ThingAmaJig-domain.riddl"  // ERROR: include inside definition name
 ```
-because it is not specified within the contained portion of a container. A
-`domain` is a container, but it needs a name and that name cannot be buried in
-an include file. As a rule of thumb, you can always use `#include` right after
-an opening curly brace of a container definition.
 
-## Directives
-RIDDL supports the notion of directives that are specified as a complete line
-whose first character is the hash mark. The directive extends to the end of that
-line. Hash marks at other locations on a line are not recognized as directives.
-The subsections below define the kinds of directives supported by RIDDL's
-compiler.
+The domain needs a name before its body begins. As a rule, you can use
+`include` right after the opening curly brace of any container definition.
 
-{{< hint type=warning title="Warning" >}}
-Directives have not yet been implemented in RIDDL
-{{< /hint >}}
+### Organizing Large Models
 
-## Substitutions
-For example:
+A typical organization for a large model:
+
+```
+myproject/
+├── main.riddl              # Top-level file
+├── catalog/
+│   ├── catalog-context.riddl
+│   └── product-entity.riddl
+├── shopping/
+│   ├── shopping-context.riddl
+│   └── cart-entity.riddl
+└── fulfillment/
+    └── fulfillment-context.riddl
+```
+
+With `main.riddl` containing:
+
 ```riddl
-#define x = expialidocious
+domain OnlineRetail is {
+  include "catalog/catalog-context.riddl"
+  include "shopping/shopping-context.riddl"
+  include "fulfillment/fulfillment-context.riddl"
+}
 ```
-defines a symbol x that has the value `expialidocious` . Wherever `$x` is seen
-in the input it will be replaced with `expialidocious` before being lexically
-interpreted by the compiler.
 
-{{< hint type=warning title="Warning" >}}
-Substitutions have not yet been implemented in RIDDL
-{{< /hint >}}
+## Future: Directives and Substitutions
+
+!!! warning "Not Yet Implemented"
+    The following features are planned but not yet available in RIDDL.
+
+**Directives** will allow preprocessor-style commands:
+
+```riddl
+#define COMPANY_NAME = "Acme Corp"
+```
+
+**Substitutions** will allow variable replacement:
+
+```riddl
+author Company is { name: $COMPANY_NAME }
+```
+
+These features may be added in future versions of RIDDL.
 
 
  

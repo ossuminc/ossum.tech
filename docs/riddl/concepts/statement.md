@@ -3,59 +3,157 @@ title: "Statement"
 draft: false
 ---
 
-A Statement is an action that can be taken in response to a message. Statements 
-form the body of an [on clause](onclause.md) which is what 
-[handlers](handlers.md] are composed of. There are many 
-kinds of statements, described in the table below.
+A Statement is an action that can be taken in response to a message. Statements
+form the body of an [on clause](onclause.md) which is what
+[handlers](handler.md) are composed of. Statements express the business logic
+of your system in a structured but abstract way.
 
-|     Name     | Description                                                  |
-|:------------:|:-------------------------------------------------------------|
-|  Arbitrary   | A textually described arbitrary statement                    |
-|     Ask      | Send a message to an entity, asynchronously process result   |
-|    Become    | Instructs an entity change to a new handler                  |
-|    Error     | Produce an error with a message                              |
-|   ForEach    | Invoke statements on each item of a multi-valued field       |
-|  IfThenElse  | Evaluate a condition and choose execute a statement set      |
-| FunctionCall | Call a function to get a result                              |
-|    Morph     | Morph the state of an entity to a new state                  |
-|   Publish    | Publish a message to a pipe                                  |
-|    Reply     | Provide the reply message to the entity that invoked a query |
-|    Return    | Return a value from a function                               |
-|     Set      | Set a field value                                            |
-|     Tell     | Send a message to an entity directly, do not wait for result |
+## Statement Types
+
+RIDDL provides the following statement types:
+
+| Statement | Description | Example |
+|-----------|-------------|---------|
+| `when` | Conditional logic with optional else | `when "condition" then { ... } end` |
+| `match` | Pattern matching for multiple cases | `match "status" { case "x" { ... } }` |
+| `send` | Send a message to an outlet or inlet | `send event X to outlet Events` |
+| `tell` | Send a message directly to a processor | `tell command X to entity Y` |
+| `set` | Assign a value to a field | `set field status to "Active"` |
+| `let` | Create a local variable binding | `let total = "price * quantity"` |
+| `prompt` | Natural language action description | `prompt "Calculate the total"` |
+| `error` | Produce an error with a message | `error "Invalid state"` |
+| `code` | Embed implementation code | `` ```scala ... ``` `` |
+
+### Entity-Specific Statements
+
+These statements are only valid within Entity handlers:
+
+| Statement | Description | Example |
+|-----------|-------------|---------|
+| `morph` | Change entity to a different state | `morph entity X to state Y with command Z` |
+| `become` | Switch entity to a different handler | `become entity X to handler Y` |
+
+## Statement Details
+
+### When Statement
+
+The `when` statement provides conditional logic:
+
+```riddl
+when "user is authenticated" then {
+  send event LoginSucceeded to outlet Events
+} else {
+  error "Authentication failed"
+} end
+```
+
+The `end` keyword is required. Conditions can be:
+
+- Literal strings: `when "condition description" then`
+- Identifier references: `when authorized then` (using a `let` binding)
+- Negated identifiers: `when !authorized then`
+
+### Match Statement
+
+Pattern matching for multiple conditions:
+
+```riddl
+match "orderStatus" {
+  case "pending" {
+    tell command ProcessOrder to entity OrderProcessor
+  }
+  case "shipped" {
+    send event OrderShipped to outlet Events
+  }
+  default {
+    error "Unknown order status"
+  }
+}
+```
+
+### Send vs Tell
+
+- **send**: Routes messages through outlets/inlets (streaming, pub/sub)
+- **tell**: Sends messages directly to a specific processor (point-to-point)
+
+```riddl
+// Send to an outlet (for streaming/events)
+send event ItemAdded to outlet CartEvents
+
+// Tell a specific entity (direct command)
+tell command ProcessPayment to entity PaymentService
+```
+
+### Prompt Statement
+
+Use `prompt` to describe complex business logic in natural language that will
+be implemented in target code:
+
+```riddl
+prompt "Calculate the total price including all applicable taxes, discounts,
+        and shipping based on the customer's location and membership tier"
+```
+
+### Code Statement
+
+Embed actual implementation code when necessary:
+
+```riddl
+```scala
+val total = items.map(_.price).sum * (1 - discountRate)
+```
+```
+
+Supported languages: `scala`, `java`, `python`, `mojo`
+
+### Morph and Become (Entity Only)
+
+- **morph**: Transitions an entity to a new state
+- **become**: Switches which handler processes messages
+
+```riddl
+// Transition to a new state
+morph entity Order to state Shipped with command ShipOrder
+
+// Switch to a different handler
+become entity Order to handler ShippedHandler
+```
 
 ## Level of Detail
 
-Statements are aimed at writing pseudocode in a structured but abstract
-way. RIDDL does not intend the system model to contain the code that will be
-used in its implementation. It also expects the reader to be intelligent and
-fill in the (obvious) gaps that are left missing. This leads to these objectives
-for writing an [onclause's](onclause.md):
+Statements express pseudocode in a structured but abstract way. RIDDL does not
+require the system model to contain implementation code. The objectives are:
 
-* Converting the specification to executable code should be done by a human or
-  a sufficiently capable AI/ML
-* The statements are designed to capture interactions between the definitions
-  of the model, and are specifically not Turing complete.
-* Statements should capture significant references to data and
-* There is no need to model computational expresses exhaustively when a simple
-  natural language statement will do.
+- Converting specifications to executable code should be done by humans or AI
+- Statements capture interactions between model definitions
+- Statements are intentionally **not** Turing complete
+- Natural language descriptions (via `prompt`) suffice for complex logic
 
 ## Applicability
 
-Not all statements may be used in every On Clause. It depends on the kind of
-definition the statement is attached to. Statements occur in the
-[onclause](onclause.md) of the
-[handlers](handler.md) of all the
-[vital](vital.md) definitions.
-Note that the `Become` and `Morph` statements are only applicable to
-statements in an Entity. The others are generally applicable.
+Not all statements can be used everywhere. Statement availability depends on
+the containing definition:
+
+| Context | Available Statements |
+|---------|---------------------|
+| All handlers | when, match, send, tell, set, let, prompt, error, code |
+| Entity handlers | All above + morph, become |
+| Functions | when, match, set, let, prompt, error, code |
+| Saga steps | send, tell, prompt, error |
 
 ## Occurs In
-* [On Clause](onclause.md)
 
+- [On Clause](onclause.md)
+- [Function](function.md) (body)
+- [Saga Step](sagastep.md)
 
 ## Contains
 
-Some statements contain conditionals, values and path identifiers to reference
-things in the system models. None of these are definitions. 
- 
+Statements may contain:
+
+- Conditionals (in `when` and `match`)
+- Literal values
+- Field references
+- Path identifiers to reference definitions
+
+None of these are definitions themselves.

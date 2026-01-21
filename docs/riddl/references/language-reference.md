@@ -155,32 +155,68 @@ RIDDL has a rich type system supporting both simple and complex data structures:
 
 ## Containment Rules
 
-RIDDL follows strict containment rules that define what elements can be defined within other elements:
+RIDDL follows strict containment rules that define what elements can be defined
+within other elements:
 
-1. **Domain** can contain:
-   - Authors (metadata)
-   - Types
-   - Contexts
-   - Nested Domains
-   - Users
-   - Epics
+### Domain
 
-2. **Context** can contain:
-   - Types
-   - Entities
-   - Repositories
-   - Sagas
-   - Streamlets
-   - Pages (UI components)
+A **Domain** can contain:
 
-3. **Entity** can contain:
-   - States
-   - Commands
-   - Events
-   - Functions
-   - Handlers
+- Types
+- Authors (metadata)
+- Contexts (bounded contexts)
+- Domains (nested subdomains)
+- Users (actors who interact with the system)
+- Epics (user stories with use cases)
+- Sagas (multi-step processes)
+- Imports (from other domains)
+- Includes (file inclusion)
 
-4. **Authors** contain only their metadata and cannot contain any other RIDDL definitions.
+### Context
+
+A **Context** (bounded context) can contain:
+
+- Types
+- Constants
+- Functions
+- Handlers (context-level API)
+- Entities
+- Repositories
+- Projectors (event projections for read models)
+- Sagas
+- Adaptors (message translation between contexts)
+- Streamlets (stream processing: source, sink, flow, etc.)
+- Connectors (linking inlets and outlets)
+- Groups (UI components, also called page, pane, dialog, etc.)
+- Includes
+
+### Entity
+
+An **Entity** can contain:
+
+- Types
+- Constants
+- Functions
+- Handlers (default message handling)
+- States (with their own handlers)
+- Invariants
+- Includes
+
+### Other Processors
+
+**Repository**, **Projector**, **Adaptor**, and **Streamlet** can contain:
+
+- Types
+- Constants
+- Functions
+- Handlers
+- Inlets and Outlets (for Streamlets)
+- Includes
+
+### Leaf Definitions
+
+**Authors**, **Users**, **Terms**, and **Constants** contain only their
+metadata and cannot contain other RIDDL definitions.
 
 ## Type System
 
