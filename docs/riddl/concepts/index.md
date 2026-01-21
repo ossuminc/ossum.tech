@@ -34,64 +34,70 @@ easier to comprehend, we've taken some short-cuts :
     * [Fields](field.md)
 
 ### Hierarchy
+
 With those clarifying simplifications, here's the hierarchy:
 
-1. [Root](root.md)
-  1. [Domain](domain.md)
-    1. [Type](type.md)
-    2. [Epic](epic.md)
-      1. [Case](case.md)
-        1. [Statement](statement.md)
-    3. [Context](context.md)
-      1. [Type](type.md)
-      2. [Group](element.md#group)
-        1. [Output](output.md)
-        2. [Input](input.md)
-      3. [Entity](entity.md)
-        1. [Type](type.md)
-        2. [Function](function.md)
-          1. [Statement](statement.md)
-        3. [State](state.md)
-          1. [Type](type.md)
-          2. [Field](field.md)
-          3. [Handler](handler.md)
-            1. [On Clause](onclause.md)
-              1. [Statement](statement.md)
-        4. [Invariant](invariant.md)
-          1. [Conditional](conditional.md)
-        5. [Handler](handler.md)
-          1. [On Clause](onclause.md)
-            1. [Statement](statement.md)
-      4. [Handler](handler.md)
-        1. [On Clause](onclause.md)
-          1. [Statement](statement.md)
-      5. [Projector](projector.md)
-        1. [Type](type.md)
-        2. [Field](field.md)
-        3. [Handler](handler.md)
-          1. [On Clause](onclause.md)
-            1. [Statement](statement.md)
-      6. [Saga](saga.md)
-        1. [Type](type.md)
-        2. [SagaStep](sagastep.md)
-          1. [Statement](statement.md)
-      7. [Adaptor](adaptor.md)
-        1. [Type](type.md)
-        2. [Handler](handler.md)
-          1. [On Clause](onclause.md)
-            1. [Statement](statement.md)
-      8. [Processor](processor.md)
-        1. [Type](type.md)
-        2. [Inlet](inlet.md) 
-        3. [Outlet](outlet.md)
-        4. [Statement](statement.md)
-      9. [Function](function.md)
-        2. [Statement](statement.md)
-      10. [Streamlet](streamlet.md)
-        1. [Type](type.md)
-        2. [Inlet](inlet.md)
-        3. [Outlet](outlet.md)
-        4. [Connector](connector.md)
+<div class="riddl-hierarchy" markdown>
+
+```
+                              ┌─────────────────────────────────────────────┐
+                              │                    Root                     │
+                              └──────────────────────┬──────────────────────┘
+                                                     │
+                              ┌──────────────────────┴──────────────────────┐
+                              │                   Domain                    │
+                              └──────────────────────┬──────────────────────┘
+                                                     │
+                 ┌───────────────────────────────────┼───────────────────────────────────┐
+                 │                                   │                                   │
+           ┌─────┴─────┐                       ┌─────┴─────┐                       ┌─────┴─────┐
+           │  Context  │                       │   Epic    │                       │   Type    │
+           └─────┬─────┘                       └─────┬─────┘                       └───────────┘
+                 │                                   │
+    ┌────────────┼────────────┐                ┌─────┴─────┐
+    │            │            │                │   Case    │
+┌───┴───┐  ┌─────┴─────┐  ┌───┴───┐            └─────┬─────┘
+│Entity │  │ Projector │  │ Saga  │                  │
+└───┬───┘  │ Adaptor   │  └───┬───┘            ┌─────┴─────┐
+    │      │ Processor │      │                │ Statement │
+┌───┴───┐  │ Streamlet │  ┌───┴───┐            └───────────┘
+│ State │  │ Function  │  │  Saga │
+└───┬───┘  │ Handler   │  │  Step │
+    │      │ Group     │  └───┬───┘
+┌───┴───┐  │ Type      │      │
+│Handler│  └───────────┘  ┌───┴───┐
+└───┬───┘                 │ Stmt  │
+    │                     └───────┘
+┌───┴────┐
+│OnClause│
+└───┬────┘
+    │
+┌───┴───┐
+│ Stmt  │
+└───────┘
+```
+
+</div>
+
+#### Detailed Containment Reference
+
+| Container | Can Contain |
+|-----------|-------------|
+| [**Root**](root.md) | [Domain](domain.md) |
+| [**Domain**](domain.md) | [Type](type.md), [Epic](epic.md), [Context](context.md) |
+| [**Epic**](epic.md) | [Case](case.md) → [Statement](statement.md) |
+| [**Context**](context.md) | [Type](type.md), [Entity](entity.md), [Projector](projector.md), [Saga](saga.md), [Adaptor](adaptor.md), [Processor](processor.md), [Function](function.md), [Streamlet](streamlet.md), [Handler](handler.md), [Group](element.md#group) |
+| [**Entity**](entity.md) | [Type](type.md), [State](state.md), [Function](function.md), [Handler](handler.md), [Invariant](invariant.md) |
+| [**State**](state.md) | [Type](type.md), [Field](field.md), [Handler](handler.md) |
+| [**Projector**](projector.md) | [Type](type.md), [Field](field.md), [Handler](handler.md) |
+| [**Saga**](saga.md) | [Type](type.md), [SagaStep](sagastep.md) → [Statement](statement.md) |
+| [**Adaptor**](adaptor.md) | [Type](type.md), [Handler](handler.md) |
+| [**Processor**](processor.md) | [Type](type.md), [Inlet](inlet.md), [Outlet](outlet.md), [Statement](statement.md) |
+| [**Streamlet**](streamlet.md) | [Type](type.md), [Inlet](inlet.md), [Outlet](outlet.md), [Connector](connector.md) |
+| [**Function**](function.md) | [Statement](statement.md) |
+| [**Handler**](handler.md) | [On Clause](onclause.md) → [Statement](statement.md) |
+| [**Group**](element.md#group) | [Input](input.md), [Output](output.md) |
+| [**Invariant**](invariant.md) | [Conditional](conditional.md) |
 
 ## Next
 When you're done exploring all the concepts, check out our 
