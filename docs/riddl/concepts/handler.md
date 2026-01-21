@@ -56,8 +56,12 @@ then the entity's processing for that message is null (message ignored).
 When an entity is in a specified state, it processes messages defined by 
 the handler within that state (see below).
 
-## Projection Handler
-Projections provide 
+## Projector Handler
+
+Projector handlers process events to build and maintain read-side views of
+data. They receive events from the event stream and update the projection's
+state accordingly. Projector handlers also respond to queries that read from
+the projected data.
 
 ## State Handler
 State handlers process messages while an entity is in that specific 

@@ -51,7 +51,8 @@ inlets are processed (transformed) and then put out to the outlets.
 ## Occurs In
 * [Contexts](domain.md)
 
-# Contains
+## Contains
+
 * [Inlets](inlet.md)
 * [Outlets](outlet.md)
 * [Handlers](handler.md)

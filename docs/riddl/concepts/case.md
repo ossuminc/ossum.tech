@@ -30,6 +30,7 @@ The following table shows the pairings recognized:
 * [Epic](epic.md)
 * [Use Case](./case.md)
 
-## Contains)
+## Contains
+
 * [Statements](statement.md)
 

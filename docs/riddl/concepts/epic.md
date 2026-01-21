@@ -25,7 +25,7 @@ which have these three ideas:
 
 A RIDDL Epic also provides a set of use cases that relate the story to
 other RIDDL components through the steps taken for each
-[`case`](case.md. Each case specifies a set of
+[case](case.md). Each case specifies a set of
 `interactions` that define and label the interactions between other RIDDL
 definitions such as
 [elements](element.md),
@@ -41,5 +41,6 @@ designed in RIDDL to support a detailed definition of a
 ## Occurs In
 * [Domains](domain.md)
 
-## Contains)
+## Contains
+
 * [Cases](case.md)

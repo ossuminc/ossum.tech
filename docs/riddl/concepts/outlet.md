@@ -5,9 +5,9 @@ draft: false
 
 An Outlet is a component of a 
 [Processor](processor.md) that specifies a named output through
-which data of a particular type streams out of the processor. When an Inlet is
-defined in an [Entity](entity.md), the entity acts only as
-a `source` processor, generating events.
+which data of a particular type streams out of the processor. When an Outlet is
+defined in an [Entity](entity.md), the entity acts as a `source` processor,
+generating events that flow out through the outlet.
 
 
 ## Occurs In

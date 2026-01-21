@@ -54,6 +54,7 @@ the names of the definitions that RIDDL permits inside a `context` definition, a
 shown in the list below. You can correctly think of a `context`s ubiquitous
 language as the interface to that knowledge domain. It is very analogous to
 an API (Application Programming Interface) as the interface to a program. The API
+defines the contract for how external systems interact with the bounded context.
 
 To further your understanding, watch this 
 [34-minute video](https://www.youtube.com/watch?v=am-HXycfalo) by

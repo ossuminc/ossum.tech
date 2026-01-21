@@ -16,8 +16,14 @@ User Interface elements[^1] as shown in the table below
 [^1]: See [Critical UI Elements of Remarkable Interfaces](https://www.peppersquare.com/blog/4-critical-ui-elements-of-remarkable-interfaces/) 
 
 ### Group
-TBD
 
+A Group organizes related UI elements together, similar to a panel or section
+in traditional user interfaces. Groups can contain other elements including
+nested groups, enabling hierarchical organization of the user interface.
+
+Groups have many aliases in RIDDL to accommodate different UI paradigms:
+`group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`, `row`,
+`stack`, `panel`, `form`, and `section`.
 
 | UI Element | RIDDL    | Description                                  |
 |------------|----------|----------------------------------------------|
@@ -29,9 +35,10 @@ TBD
 
 
 
-# Activate
-An Activate definition instructs the application to change context to a 
-different group of elements.
+## Activate
+
+An Activate definition instructs the application to change context to a
+different group of elements, enabling navigation within the application.
 
 ## Occurs In
 * [Context](context.md)
