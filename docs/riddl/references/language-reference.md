@@ -357,27 +357,70 @@ handler ProductCommandHandler is {
 
 ## Handlers
 
-Handlers process commands and emit events:
+Handlers define how processors respond to messages. They contain `on` clauses
+that match specific message types and execute statements.
+
+### On Clause Types
+
+| Clause | Purpose | Example |
+|--------|---------|---------|
+| `on command X` | Handle a specific command | `on command CreateOrder { ... }` |
+| `on event X` | Handle a specific event | `on event OrderCreated { ... }` |
+| `on query X` | Handle a query and provide reply | `on query GetOrder { ... }` |
+| `on init` | Execute when processor initializes | `on init { ... }` |
+| `on term` | Execute when processor terminates | `on term { ... }` |
+| `on other` | Handle any unmatched message | `on other { ... }` |
+
+### Basic Handler Example
 
 ```
 handler ProductCommandHandler is {
-  on command UpdatePrice is {
+  on command UpdatePrice {
     when "newPrice > 0" then {
-      morph entity Product to state ProductData with command UpdatePrice
-      tell event PriceUpdated to entity Product
-    } end
-    when "newPrice <= 0" then {
+      set field price to @UpdatePrice.newPrice
+      send event PriceUpdated to outlet Events
+    } else {
       error "Price must be greater than zero"
     } end
   }
+
+  on query GetProduct {
+    reply result ProductInfo with { product: @fields.data }
+  }
 } with {
   briefly as "Processes commands for product management"
-  described by {
-    | Handles commands related to product information and pricing management.
-    | Validates input data, updates product state, and emits relevant events.
+}
+```
+
+### Initialization and Termination
+
+Use `on init` and `on term` for lifecycle management:
+
+```
+handler EntityLifecycle is {
+  on init {
+    prompt "Initialize entity state and load any cached data"
+    set field status to "Active"
+  }
+
+  on term {
+    prompt "Clean up resources and persist final state"
+  }
+
+  on other {
+    error "Unexpected message received"
   }
 }
 ```
+
+### Handler Locations
+
+Handlers can be defined at multiple levels:
+
+- **Entity handlers**: Default message handling for the entity
+- **State handlers**: Message handling specific to a state
+- **Context handlers**: API-level handlers for the bounded context
+- **Processor handlers**: Handlers in Repository, Projector, Adaptor, etc.
 
 ## Statement Syntax
 
@@ -565,6 +608,217 @@ repository CartRepository is {
     | The CartRepository provides persistent storage for shopping cart data,
     | including the cart itself and all items within it.
   }
+}
+```
+
+## Adaptors
+
+Adaptors translate messages between bounded contexts. They handle the
+transformation needed when one context needs to communicate with another
+that uses different message formats or terminology.
+
+### Direction
+
+Adaptors specify a direction relative to a context:
+
+- `from context X`: Receives messages from context X, translates for local use
+- `to context X`: Sends messages to context X, translating from local format
+
+### Example
+
+```
+context OrderContext is {
+  adaptor PaymentIntegration from context PaymentContext is {
+    handler InboundPayments is {
+      on event PaymentContext.PaymentCompleted {
+        // Translate external payment event to local format
+        let orderId = "extract order ID from payment reference"
+        send event OrderPaymentReceived to outlet OrderEvents
+      }
+
+      on event PaymentContext.PaymentFailed {
+        send event OrderPaymentFailed to outlet OrderEvents
+      }
+    }
+  } with {
+    briefly as "Translates payment events for order processing"
+    described by {
+      | Receives payment-related events from the PaymentContext and
+      | translates them into events understood by the OrderContext.
+    }
+  }
+
+  adaptor ShippingIntegration to context ShippingContext is {
+    handler OutboundShipping is {
+      on command ShipOrder {
+        // Translate local command to shipping context format
+        tell command ShippingContext.CreateShipment to context ShippingContext
+      }
+    }
+  } with {
+    briefly as "Sends shipping requests to the shipping context"
+  }
+}
+```
+
+## Projectors
+
+Projectors transform and aggregate events into read models. They are key to
+implementing CQRS (Command Query Responsibility Segregation) patterns, where
+the write model (entities) is separate from the read model (projections).
+
+### Purpose
+
+- Project (transform) events from multiple sources into denormalized views
+- Aggregate data for efficient querying
+- Maintain materialized views updated by event streams
+- This is the write side of the read side of CQRS. 
+
+### Example
+
+```
+context ReportingContext is {
+  projector SalesDashboard is {
+    updates repository SalesData
+
+    handler SalesEventHandler is {
+      on event OrderContext.OrderCompleted {
+        prompt "Update daily sales totals with order amount"
+        prompt "Increment order count for the product category"
+      }
+
+      on event OrderContext.OrderRefunded {
+        prompt "Subtract refund amount from daily totals"
+        prompt "Update refund rate metrics"
+      }
+
+      on event ProductContext.ProductViewed {
+        prompt "Increment view count for conversion tracking"
+      }
+    }
+  } with {
+    briefly as "Projects order events to sales dashboard"
+    described by {
+      | Listens to order and product events across contexts and maintains
+      | an aggregated view of sales metrics for dashboard display.
+    }
+  }
+}
+```
+
+## Streamlets
+
+Streamlets process streaming data. They define components for building
+data pipelines with typed inputs (inlets) and outputs (outlets).
+
+### Streamlet Types
+
+| Type | Description | Inlets | Outlets |
+|------|-------------|--------|---------|
+| `source` | Produces data from external sources | 0 | 1+ |
+| `sink` | Consumes data to external destinations | 1+ | 0 |
+| `flow` | Transforms data passing through | 1 | 1 |
+| `merge` | Combines multiple streams into one | 2+ | 1 |
+| `split` | Divides one stream into multiple | 1 | 2+ |
+| `router` | Routes messages based on content | 1 | 2+ |
+| `void` | Discards messages (testing/debugging) | 1 | 0 |
+
+### Inlets and Outlets
+
+- **Inlet**: A typed input port that receives messages
+- **Outlet**: A typed output port that sends messages
+
+```
+context DataPipeline is {
+  source OrderEventSource is {
+    outlet OrderEvents is type OrderEvent
+  } with {
+    briefly as "Streams order events from the event store"
+  }
+
+  flow OrderEnricher is {
+    inlet RawOrders is type OrderEvent
+    outlet EnrichedOrders is type EnrichedOrderEvent
+
+    handler EnrichmentHandler is {
+      on event OrderEvent {
+        prompt "Look up customer details and product information"
+        prompt "Combine into enriched order event"
+        send event EnrichedOrderEvent to outlet EnrichedOrders
+      }
+    }
+  } with {
+    briefly as "Enriches order events with additional data"
+  }
+
+  sink AnalyticsSink is {
+    inlet AnalyticsEvents is type EnrichedOrderEvent
+
+    handler AnalyticsHandler is {
+      on event EnrichedOrderEvent {
+        prompt "Send event to analytics platform"
+      }
+    }
+  } with {
+    briefly as "Sends enriched events to analytics"
+  }
+}
+```
+
+## Connectors
+
+Connectors link outlets to inlets, defining how data flows between streamlets
+or between processors and streamlets.
+
+### Syntax
+
+```
+connector [name] is from outlet [source.outlet] to inlet [target.inlet]
+```
+
+### Example
+
+```
+context DataPipeline is {
+  // Streamlet definitions...
+
+  connector OrderFlow is
+    from outlet OrderEventSource.OrderEvents
+    to inlet OrderEnricher.RawOrders
+  with {
+    briefly as "Connects order source to enrichment"
+  }
+
+  connector AnalyticsFlow is
+    from outlet OrderEnricher.EnrichedOrders
+    to inlet AnalyticsSink.AnalyticsEvents
+  with {
+    briefly as "Connects enriched orders to analytics sink"
+  }
+}
+```
+
+### Pipeline Pattern
+
+Connectors enable building complete data pipelines:
+
+```
+context EventProcessing is {
+  source Events is { outlet Raw is type RawEvent }
+  flow Validate is {
+    inlet In is type RawEvent
+    outlet Out is type ValidatedEvent
+  }
+  flow Transform is {
+    inlet In is type ValidatedEvent
+    outlet Out is type TransformedEvent
+  }
+  sink Store is { inlet In is type TransformedEvent }
+
+  // Wire the pipeline
+  connector Step1 is from outlet Events.Raw to inlet Validate.In
+  connector Step2 is from outlet Validate.Out to inlet Transform.In
+  connector Step3 is from outlet Transform.Out to inlet Store.In
 }
 ```
 
