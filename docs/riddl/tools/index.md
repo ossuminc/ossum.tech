@@ -1,15 +1,39 @@
 # Tools
-There are several tools related to using RIDDL
+
+There are several tools for working with RIDDL models:
 
 ## [riddlc](riddlc/index.md)
-This is the compiler for RIDDL that allows you to parse and validate a RIDDL
-model as well as reformat it, get statistics, and other utilities. 
 
-## riddl-idea-plugin
-This is a plugin for IntelliJ IDEA 24.3 or later. It provides visual editing of
+The RIDDL compiler (`riddlc`) is the command-line tool for parsing, validating,
+and transforming RIDDL models. It can:
+
+- Validate syntax and semantics
+- Generate documentation websites
+- Produce architecture diagrams
+- Output analysis reports
+
+## [riddl-idea-plugin](riddl-idea-plugin/index.md)
+
+An IntelliJ IDEA plugin (2024.3+) that provides IDE support for editing RIDDL
+files, including syntax highlighting, validation, and navigation.
+
+## [riddl-mcp-server](riddl-mcp-server/index.md)
+
+An MCP (Model Context Protocol) server that provides AI assistants with RIDDL
+language intelligence, enabling AI-assisted model authoring.
 
 ## Synapify
-This is a workstation application allowing you to use AI to create models and
-to initiate other tools for working with RIDDL models. See the 
-[Synapify Section](../../synapify/index.md) for more details.
 
+A desktop application for visual RIDDL modeling with AI assistance. Synapify
+provides a graphical interface for creating and editing RIDDL models, with
+integrated AI support for generating definitions.
+
+See the [Synapify Section](../../synapify/index.md) for more details.
+
+## VS Code Extension
+
+A Visual Studio Code extension for RIDDL editing. Provides syntax highlighting
+and basic language support for VS Code users.
+
+See the [riddl-vscode repository](https://github.com/ossuminc/riddl-vscode)
+for installation instructions.
