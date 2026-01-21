@@ -7,6 +7,7 @@ This site provides documentation for technologies created at Ossum, Inc.
 
 THe sections at the top correspond to our products:
 
+* [OSS](oss/index.md)
 * [RIDDL](riddl/index.md)
 * [Synapify](synapify/index.md)
 * [Docify](docify/index.md)
