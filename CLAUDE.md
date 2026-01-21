@@ -144,23 +144,31 @@ See [Domain concepts](../concepts/domain.md) for more details.
 
 ---
 
-## Work In Progress Sections
+## Documentation Status
 
-The following sections are marked as incomplete or need attention:
+As of 2026-01-21, a comprehensive 6-phase documentation improvement was
+completed. The following major sections are now complete:
+
+### Completed Sections
+
+- **Introduction**: All pages complete including `why-is-riddl-needed.md`,
+  `what-is-riddl-based-on.md`, `what-conventions-does-riddl-use.md`
+- **Language Reference**: Complete with all processor types (Adaptors,
+  Projectors, Streamlets, Connectors) and handler documentation
+- **Tools**: Complete documentation for `riddlc`, `riddl-idea-plugin`,
+  and `riddl-mcp-server`
+- **Guides**: Complete guides for Authors, Developers, Domain Experts,
+  and Implementors
+- **Concepts**: All concept pages complete with proper links and content
+
+### Remaining Work
+
+Lower priority items not addressed in the improvement plan:
 
 | File | Issue |
 |------|-------|
-| `docs/riddl/guides/authors/index.md` | Work In Progress placeholder |
-| `docs/riddl/guides/developers/index.md` | Work In Progress placeholder |
-| `docs/riddl/introduction/why-is-riddl-needed.md` | Notes for future content TBD |
-| `docs/riddl/introduction/what-is-riddl-based-on.md` | TODO section incomplete |
-| `docs/riddl/guides/implementors/ways-to-use-riddl.md` | TBD section |
-| `docs/riddl/concepts/metadata.md` | Coming Soon placeholder |
-| `docs/riddl/concepts/conditional.md` | TBD sections |
-| `docs/riddl/concepts/element.md` | TBD section |
-| `docs/riddl/tools/riddl-idea-plugin/index.md` | TBD placeholder |
-| `docs/riddl/tools/riddl-mcp-server/index.md` | Empty file |
-| `docs/riddl/guides/domain-experts/duties.md` | Incomplete sections |
+| `docs/riddl/future-work/` | Roadmap items may need updates |
+| Type examples in language-reference | Could use more specialized type examples |
 
 ---
 

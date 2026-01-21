@@ -2,96 +2,124 @@
 
 ## Current Status
 
-The ossum.tech documentation site is functional but several sections are
-incomplete. The RIDDL language documentation is the most developed area,
-with comprehensive coverage of concepts and a detailed language reference.
-Several user guides and tool documentation pages remain as placeholders.
+The ossum.tech documentation site has undergone a comprehensive 6-phase
+improvement. All major sections are now complete with accurate, well-organized
+content. The site is ready for review and deployment.
+
+**7 commits pending push to origin/main.**
 
 ## Work Completed (Recent)
 
-- [x] Created CLAUDE.md for this repository - 2026-01-20
-- [x] Created NOTEBOOK.md to track pending work - 2026-01-20
-- [x] Audited all documentation for WIP markers - 2026-01-20
-- [x] Completed Author's Guide (`docs/riddl/guides/authors/index.md`) - 2026-01-20
-  - Comprehensive guide covering workflow, AI collaboration, best practices
-  - Includes common patterns: Command-Event, State Machine, Saga
-  - Covers validation and iteration process
+### 2026-01-21: Documentation Improvement Plan Execution
+
+Completed all 6 phases of the comprehensive documentation improvement:
+
+- [x] **Phase 1**: Fix critical documentation accuracy issues
+  - Updated `statement.md` with current statement types
+  - Fixed containment rules in language reference to match EBNF
+  - Corrected include directive syntax
+
+- [x] **Phase 2**: Add missing processor documentation
+  - Expanded Handlers section with all `on` clause types
+  - Added Adaptors, Projectors, Streamlets, Connectors to language reference
+
+- [x] **Phase 3**: Complete introduction section
+  - Rewrote `why-is-riddl-needed.md` (was TODO notes)
+  - Completed Jacobsen Use Cases 2.0 section
+
+- [x] **Phase 4**: Complete tools documentation
+  - Wrote comprehensive `riddlc/index.md`
+  - Wrote `riddl-idea-plugin/index.md` with features and troubleshooting
+  - Wrote `riddl-mcp-server/index.md` with setup, auth, API reference
+
+- [x] **Phase 5**: Complete guides
+  - Wrote full Developers Guide with architecture and contribution info
+  - Completed Domain Experts duties and relating-to-riddl guides
+  - Completed Implementors ways-to-use-riddl with SBT integration
+
+- [x] **Phase 6**: Fix concepts section issues
+  - Fixed broken links, heading levels, typos
+  - Completed metadata.md, conditional.md, streamlet.md, use-case.md
+  - Fixed incorrect "Occurs In" references
+
+### 2026-01-20: Initial Setup
+
+- [x] Created CLAUDE.md for this repository
+- [x] Created NOTEBOOK.md to track pending work
+- [x] Audited all documentation for WIP markers
+- [x] Completed Author's Guide (`docs/riddl/guides/authors/index.md`)
+- [x] Improved hierarchy diagram in `docs/riddl/concepts/index.md`
 
 ## In Progress
 
-None currently.
+None currently. All planned phases complete.
 
-## Pending Documentation Tasks
+## Pending Tasks
 
-### High Priority - User Guides
-
-| Task | File | Notes |
-|------|------|-------|
-| ~~Author's Guide~~ | ~~`guides/authors/index.md`~~ | **COMPLETED** 2026-01-20 |
-| Developer's Guide | `guides/developers/index.md` | Guide for RIDDL maintainers |
-| Domain Expert Duties | `guides/domain-experts/duties.md` | Several incomplete sections |
-
-### Medium Priority - Concepts
+### Lower Priority (Not in original plan)
 
 | Task | File | Notes |
 |------|------|-------|
-| Metadata concept | `concepts/metadata.md` | "Coming Soon" placeholder |
-| Conditional concept | `concepts/conditional.md` | Two TBD sections |
-| Element concept | `concepts/element.md` | TBD section at end |
-
-### Medium Priority - Introduction
-
-| Task | File | Notes |
-|------|------|-------|
-| Why RIDDL is needed | `introduction/why-is-riddl-needed.md` | Has notes, needs prose |
-| What RIDDL is based on | `introduction/what-is-riddl-based-on.md` | TODO section incomplete |
-
-### Lower Priority - Tools
-
-| Task | File | Notes |
-|------|------|-------|
-| RIDDL IDEA Plugin | `tools/riddl-idea-plugin/index.md` | TBD placeholder |
-| RIDDL MCP Server | `tools/riddl-mcp-server/index.md` | Empty file |
-| Implementor Ways to Use | `guides/implementors/ways-to-use-riddl.md` | TBD section |
+| Type examples | `references/language-reference.md` | Add more specialized type examples |
+| Future work review | `future-work/` | May need updates for current roadmap |
+| Verify link integrity | All files | Run `mkdocs build --strict` |
 
 ## Design Decisions Log
 
-| Decision | Rationale | Alternatives Considered | Date |
-|----------|-----------|-------------------------|------|
-| Use MkDocs Material | Industry standard, good search, responsive | Hugo, Docusaurus | Pre-existing |
-| Separate guides by role | Different audiences need different focus | Single comprehensive guide | Pre-existing |
-| AI context files in refs | Language ref designed for AI consumption | Inline AI hints | Pre-existing |
+| Decision | Rationale | Date |
+|----------|-----------|------|
+| 6-phase approach | Systematic improvement with commits after each phase | 2026-01-21 |
+| Statement rewrite | Old statement.md listed obsolete types from removed features | 2026-01-21 |
+| Processor docs in lang-ref | Language reference is authoritative; concepts link to it | 2026-01-21 |
+| Domain expert focus | Guides written for non-programmers working with AI | 2026-01-21 |
 
 ## Next Steps
 
-1. Complete the Author's Guide (in progress)
-2. Fill in Domain Expert Duties sections
-3. Document the RIDDL MCP Server
-4. Complete the Developer's Guide
-5. Fill in TBD sections in concepts
+1. Push 7 commits to origin/main
+2. Run `mkdocs build --strict` to verify all links
+3. Deploy to production with `mkdocs gh-deploy`
+4. Consider adding Quick Start tutorial (optional)
+
+## Files Modified in This Session
+
+### Introduction
+- `docs/riddl/introduction/why-is-riddl-needed.md` (rewritten)
+- `docs/riddl/introduction/what-is-riddl-based-on.md` (completed)
+- `docs/riddl/introduction/what-conventions-does-riddl-use.md` (fixed)
+
+### Language Reference
+- `docs/riddl/references/language-reference.md` (expanded significantly)
+
+### Tools
+- `docs/riddl/tools/index.md` (fixed)
+- `docs/riddl/tools/riddlc/index.md` (written)
+- `docs/riddl/tools/riddl-idea-plugin/index.md` (written)
+- `docs/riddl/tools/riddl-mcp-server/index.md` (written)
+
+### Guides
+- `docs/riddl/guides/developers/index.md` (written)
+- `docs/riddl/guides/domain-experts/duties.md` (completed)
+- `docs/riddl/guides/domain-experts/relating-to-riddl.md` (completed)
+- `docs/riddl/guides/implementors/ways-to-use-riddl.md` (completed)
+
+### Concepts
+- `docs/riddl/concepts/statement.md` (rewritten)
+- `docs/riddl/concepts/epic.md` (fixed)
+- `docs/riddl/concepts/case.md` (fixed)
+- `docs/riddl/concepts/field.md` (fixed)
+- `docs/riddl/concepts/processor.md` (fixed)
+- `docs/riddl/concepts/handler.md` (completed)
+- `docs/riddl/concepts/context.md` (completed)
+- `docs/riddl/concepts/outlet.md` (fixed)
+- `docs/riddl/concepts/value.md` (completed)
+- `docs/riddl/concepts/sagastep.md` (fixed)
+- `docs/riddl/concepts/element.md` (completed)
+- `docs/riddl/concepts/metadata.md` (written)
+- `docs/riddl/concepts/conditional.md` (completed)
+- `docs/riddl/concepts/streamlet.md` (written)
+- `docs/riddl/concepts/use-case.md` (expanded)
 
 ## Open Questions
 
-- Should the Author's Guide assume AI assistance is always available?
-- What level of RIDDL syntax detail belongs in guides vs. references?
 - Should there be a quick-start tutorial separate from the guides?
-
-## Content Strategy Notes
-
-### Author's Guide Direction
-
-The Author's Guide should focus on:
-1. **Workflow**: How to approach domain modeling with RIDDL
-2. **AI Collaboration**: Using the Ossum MCP Service effectively
-3. **Best Practices**: Naming conventions, organization, documentation
-4. **Common Patterns**: Typical entity, handler, saga structures
-5. **Validation**: Using riddlc to check models
-6. **Iteration**: Refining models based on feedback
-
-### Target Reader Profile
-
-- Domain expert with business knowledge
-- May not be a programmer
-- Will use AI assistance for syntax details
-- Needs to understand DDD concepts
-- Focus on "what to model" not "how to code"
+- Are there additional processor types that need documentation?
