@@ -7,9 +7,7 @@ weight: 30
 ---
 
 There are several ways to get riddl software on to your computer, depending 
-on how you want to work. 
-
-{{< toc >}}
+on how you want to work.
 
 ## Download
 This is the simplest way to get `riddlc`. It should run on Windows, Mac 
@@ -37,10 +35,33 @@ keep your local copy of `riddlc` up to date.
 
 ## Integrate With SBT
 
-TBD.
+For Scala projects, integrating RIDDL into your sbt build allows you to
+validate RIDDL specifications as part of your normal compile cycle. There
+are two approaches: using the SBT plugin (recommended) or invoking riddlc
+directly.
+
+The SBT plugin approach (described in the next section) is preferred because
+it integrates seamlessly with sbt's task system, automatically running
+validation before compilation.
+
+If you need more control, you can invoke riddlc directly from sbt using a
+custom task:
+
+```scala
+lazy val validateRiddl = taskKey[Unit]("Validate RIDDL specification")
+
+validateRiddl := {
+  import scala.sys.process._
+  val result = "riddlc validate src/main/riddl/model.riddl".!
+  if (result != 0) throw new RuntimeException("RIDDL validation failed")
+}
+
+(Compile / compile) := ((Compile / compile) dependsOn validateRiddl).value
+```
 
 ## RiddlSbtPlugin
-To use the sdt-plugin you must first have installed riddlc by one of the above 
+
+To use the sbt-plugin you must first have installed riddlc by one of the above
 methods. This approach allows you to run `riddlc` commands from a sbt based
 project. The command you configure will run first when you use the `compile`
 command in sbt. Follow these steps:
@@ -88,6 +109,21 @@ hugo {
 }
 validate {
     input-file = "ReactiveBBQ.riddl"
+}
 ```
 
+## Next Steps
 
+Once you have RIDDL integrated into your development workflow:
+
+1. **Validate early and often**: Run validation as part of your CI pipeline
+   to catch specification issues before they become implementation problems.
+
+2. **Generate documentation**: Use the `hugo` command to produce always-current
+   documentation for your team.
+
+3. **Explore code generation**: RIDDL's structured output can feed into code
+   generators for scaffolding implementations.
+
+See the [riddlc documentation](../../tools/riddlc/index.md) for the full
+command reference.
