@@ -122,7 +122,41 @@ More on that can be found [here](https://medium.com/nick-tune-tech-strategy-blog
 
 ## Jacobsen Use Cases 2.0
 
-TODO: write this section
+Ivar Jacobson, one of the founders of UML, developed
+[Use Case 2.0](https://www.ivarjacobson.com/publications/white-papers/use-case-20-e-book)
+as a modernized, lightweight approach to capturing system requirements.
+
+Key principles from Use Case 2.0 that influence RIDDL:
+
+- **Slices**: Use cases are "sliced" into smaller, implementable pieces that
+  deliver value incrementally. RIDDL's `case` definitions within an `epic`
+  support this incremental approach.
+
+- **Stories within Use Cases**: Use Case 2.0 bridges traditional use cases
+  with agile user stories. RIDDL combines both: epics contain the high-level
+  user goal while cases capture specific interaction flows.
+
+- **Test-Driven**: Use cases directly inform test scenarios. RIDDL's
+  structured cases can be translated into acceptance tests.
+
+- **Lightweight**: Use Case 2.0 emphasizes capturing just enough detail.
+  RIDDL follows this by allowing both detailed specifications and high-level
+  `???` placeholders during iterative refinement.
+
+Example of Use Case 2.0 concepts in RIDDL:
+
+```riddl
+epic Checkout is {
+  user Customer wants to "complete a purchase"
+  so that "they receive their ordered items"
+
+  // Each case is a "slice" of the use case
+  case EnterShippingInfo is { /* ... */ }
+  case SelectPaymentMethod is { /* ... */ }
+  case ReviewAndConfirm is { /* ... */ }
+  case ReceiveConfirmation is { /* ... */ }
+}
+```
 
 ## Agile User Stories
 Agile user stories are used to capture the requirements of various components
@@ -155,12 +189,12 @@ Gherkin scenarios follow a simple structural pattern, like this:
   * **WHEN** *\<an event occurs\>*
   * **THEN** *\<take an action\>*
 
-RIDDL uses this structure to define the processing that should occur when 
-defining how an event should be handled, when a function is invoked.
-Most of it is free-form natural language. Consequently, RIDDL is not a precise
-programming language. 
+RIDDL uses this structure to inform how handlers should process messages.
+While RIDDL's statements aren't as rigid as Gherkin's Given-When-Then format,
+the influence is clear: handlers respond to events (Given a condition, When
+an event occurs) and take actions (Then do something).
 
- 
-agile circles or considered BDD as a tool for testing, you have likely
-encountered Gherkin language. It follows the familiar, Given - When - Then
-format of capturing a user story. 
+If you've worked in agile circles or considered BDD as a tool for testing,
+you'll find RIDDL's approach familiar. The emphasis on behavior over
+implementation details, and the use of natural language to describe actions,
+draws directly from BDD's philosophy.
