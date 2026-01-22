@@ -1,26 +1,19 @@
 ---
 title: "Entity"
-draft: false
-resources:
-  - name: "entities"
-    src: "/images/entities.png"
-    title: "Entity Equivalence"
-    params:
-      credits: "[Lightbend](https://lightbend.com/)"
 ---
 
 An entity in RIDDL is the same as it is in DDD which defines it this way:
-{{% hint tip  %}}
-**Entity Definitions**
-> _An object primarily defined by its identity is called an Entity._
 
-and
+!!! hint 
+    `Entity Definition`
 
-> _Many objects are not fundamentally defined by their attributes, but_
-> _rather by a thread of **continuity** and **identity**._
-{{% /hint %}}
+    : _An object primarily defined by its identity is called an Entity._
+    _Many objects are not fundamentally defined by their attributes, but_
+    _rather by a thread of **continuity** and **identity**._
+
 
 There are three main aspects to this definition of entity:
+
 * Entities in the software implementation of the model are objects, 
   containing both state and function. They can both _be_ and _do_.  
   This means they can represent any physical object, a concept, etc. 
@@ -32,6 +25,7 @@ There are three main aspects to this definition of entity:
 An entity is the fundamental processor of work in a reactive system and in a
 RIDDL model. Entities are most often implemented in software using one of 
 these techniques:
+
 * using the user model where actors process messages and encapsulate state.
 * object-oriented programming which also encapsulate states and defines 
   functions to manipulate that state. 
@@ -56,18 +50,7 @@ Entities hold state, whether that state is persistent or not. However, for
 entities, the most important state value is the unique identifier for that entity.
 Consider this diagram:
 
-<div style="text-align: center">
-
-![Entity Equivalence](/images/entities.png "Entity Equivalence")
-
-</div>
-
-<!-- 
-The following puts out nothing with geekdoc 0.35.2, unfortunately :(
-
-{{< img name="entities" size="origin" lazy="false" >}}
-
--->
+![Entity Equivalence](../../assets/images/entities.png){align:center}
 
 Two instances of the same Entity may have different attribute values, but
 because both instances have the same identity value, they represent the same
@@ -141,18 +124,12 @@ log of change events
 
 ## Contains
 
-* [Authors](author.md) - define who the authors of the
-  entity are
+* [Authors](author.md) - define who the authors of the entity are
 * [Functions](function.md) - named definitions of processing
-* [Handler](handler.md) - how to handle messages sent to an
-  entity
-* [Includes](include.md) - inclusion of entity content from a 
-  file
-* [Invariants](invariant.md) - logical expressions that must
-  always hold true
-* [Options](option.md) - define translation options for the
-  entity
+* [Handler](handler.md) - how to handle messages sent to an entity
+* [Includes](include.md) - inclusion of entity content from a  file
+* [Invariants](invariant.md) - logical expressions that must always hold true
+* [Options](option.md) - define translation options for the entity
 * [State](state.md) - the data an entity holds
 * [Types](type.md) - the definition of a type of information
-* [Terms](term.md) - the definition of a term related to 
-  the entity
+* [Terms](term.md) - the definition of a term related to  the entity

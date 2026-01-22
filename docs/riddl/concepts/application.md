@@ -3,7 +3,9 @@ title: "Application"
 draft: false
 ---
 
-An application in RIDDL represents an interface portion of a system where an 
+An application in RIDDL is represented by a [Context](context.md) that has
+[Group](group.md)s in its definition. represents an interface 
+portion of a system where an 
 user (human or machine) initiates an action on the system. Applications 
 only define the net result of the interaction between the user and the 
 application. They are abstract on purpose. That is, there is nothing in RIDDL 
@@ -12,8 +14,9 @@ This gives free latitude to the user interface
 designer to manage the entire interaction between human and machine. 
 
 There are also no assumptions about the technology used for the 
-implementation of an application. RIDDL's notion of an application is general 
+implementation of an application. RIDDL's notion of an application is general
 and abstract, but they can be implemented as any of the following:
+
 * Mobile Application On Any Platform
 * Web Application
 * Native Operating System Application (graphical or command line)
@@ -31,12 +34,10 @@ Applications abstractly design a user interface by containing a set of
 to define the structure of a user interface. 
 
 ## Handlers
-Applications have message 
-[handlers](handler.md) like many other RIDDL definitions. 
-However, application handlers only receive their messages from 
-[actors](user.md), unlike other handlers. Typically, the 
-handling of messages in handlers will ultimately send further messages to 
-other components, like a [context](context.md) or
+Applications have message [handlers](handler.md) like many other RIDDL definitions. 
+However, application handlers only receive their messages from [actors](user.md), 
+unlike other handlers. Typically, the handling of messages in handlers will 
+ultimately send further messages to other components, like a [context](context.md) or
 [entity](entity.md)
 
 ## Occurs In

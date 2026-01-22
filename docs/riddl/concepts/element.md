@@ -1,7 +1,9 @@
 ---
-title: "Application Element"
+title: "Element"
 draft: "false"
 ---
+
+# Element
 
 *Elements* are the definitions that define the user interface for an
 [application](application.md). Every element is associated 

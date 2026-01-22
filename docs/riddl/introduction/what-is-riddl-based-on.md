@@ -6,6 +6,7 @@ weight: 30
 ---
 
 The RIDDL specification language borrows concepts from:
+
 * [Domain Driven Design (DDD)](https://en.wikipedia.org/wiki/Domain-driven_design)
 * [Reactive System Architecture (RSA)](https://www.reactivemanifesto.org/)
 * [C4 Model Of Software Architecture](https://c4model.com)
@@ -24,6 +25,7 @@ RIDDL aims to capture business concepts, system designs and architectural
 details in a way that is consumable by business professionals yet can also
 be directly translated into various technical and non-technical artifacts,
 including: 
+
 * a documentation web-site 
 * various architectural diagrams (context maps, sequence diagrams, and so on)
 * design input to code generators (e.g. Kalix, protobuffers)
@@ -68,10 +70,12 @@ that perform well and are generally available. If these conditions are not met,
 users tend to go elsewhere to get what they want. That, of course, is clearly
 unacceptable for any business endeavor. To maintain responsive to users, a 
 system must deal with various responsiveness challenges:
+
 * system or component failure (resiliency)
 * increasing work load (scalability)
 * high operational cost (efficiency)
 * slow responses (performance)
+
 A reactive system aims to be responsive in the face of all of these challenges.  
 
 Without going into too much detail here, among the key means of achieving 
@@ -85,7 +89,7 @@ To get more information on Reactive Architecture please refer to the excellent
 6 part course by Lightbend. You can find the first course in that series
 [here](https://academy.lightbend.com/courses/course-v1:lightbend+LRA-IntroToReactive+v1/about).
 
-{{< figure src="images/ReactiveArchitectureOverview.svg" >}}
+![Reactive Architecture Overview](../../assets/images/ReactiveArchitectureOverview.svg){ align=center, loading=lazy }
 
 ## Unified Modeling Language (UML)
 One of the key insights brought forward by UML is that it is far easier for 
@@ -184,6 +188,7 @@ in RIDDL. Even if you are not familiar with the Gherkin language, it is simple
 enough and intuitive enough to be grasped quickly. 
 
 Gherkin scenarios follow a simple structural pattern, like this:
+
 * **SCENARIO**: *\<scenario description\>*
   * **GIVEN** *\<a precondition\>*
   * **WHEN** *\<an event occurs\>*

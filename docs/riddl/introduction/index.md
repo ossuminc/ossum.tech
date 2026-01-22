@@ -16,5 +16,14 @@ In this section we will explore what RIDDL is, by answering these questions:
 * [Who Made Riddl Possible?](who-made-riddl-possible.md)
 * [How Can I Get Help?](how-can-i-get-help.md)
 
+* [What is riddl?](what-is-riddl.md)
+* [Why is riddl needed?](why-is-riddl-needed.md)
+* [What can riddl do?](what-can-riddl-do.md)
+* [Who can benefit from riddl?](who-can-benefit-from-riddl.md)
+* [What is riddl based on?](what-is-riddl-based-on.md)
+* [What conventions does riddl use?](what-conventions-does-riddl-use.md)
+* [Who made riddl possible?](who-made-riddl-possible.md)
+* [How can I get help?](how-can-i-get-help.md)
+
 Click on the above links to explore this section; or, go to the next recommended
 section: [Guides](../guides/index.md).
