@@ -2,15 +2,26 @@
 
 ## Current Status
 
-Open source release documentation is now complete. The site includes:
+Documentation site is complete and deployed. All major sections documented:
 
-- **OSS Section**: IntelliJ plugin and VS Code extension documentation
-- **MCP Section**: RIDDL MCP Server with installation guides for 5 AI tools
-- **Authoring Guide**: Common RIDDL writing best practices
+- **RIDDL**: Language reference, concepts, guides, tools
+- **OSS**: IDE extensions (IntelliJ, VS Code) with authoring guide
+- **MCP**: Installation guides for 6 AI tools
+- **Synapify**: Overview documentation (product in development)
 
-Ready for review and testing with `mkdocs serve`.
+All changes pushed to origin/main.
 
 ## Work Completed (Recent)
+
+### 2026-01-21: Synapify Documentation
+
+- [x] **Synapify Overview** (`docs/synapify/index.md`)
+  - Visual and textual editing modes
+  - Automatic diagram generation (context maps, entity diagrams, etc.)
+  - AI integration via MCP Server
+  - Model simulation capabilities
+  - Code generation (coming soon)
+  - Getting started guide and requirements
 
 ### 2026-01-21: Open Source Release Documentation
 
@@ -81,11 +92,10 @@ None currently.
 
 ## Pending Tasks
 
-### Before Deployment
+### Before Production
 
 | Task | Notes |
 |------|-------|
-| Run `mkdocs build --strict` | Verify all links work |
 | Replace `{{MCP_SERVER_URL}}` | When public URL is available |
 | Update release download links | When final releases are published |
 
@@ -101,41 +111,25 @@ None currently.
 
 | Decision | Rationale | Date |
 |----------|-----------|------|
-| Separate MCP section | MCP is distinct from IDE plugins; deserves own nav section | 2026-01-21 |
+| Synapify "Coming Soon" | Product in development; document planned features | 2026-01-21 |
+| Separate MCP section | MCP is distinct from IDE plugins; deserves own nav | 2026-01-21 |
 | Per-tool MCP guides | Each AI tool has unique config; separate pages clearer | 2026-01-21 |
 | Common authoring guide | Avoid duplication; same content for any IDE | 2026-01-21 |
 | URL placeholder | `{{MCP_SERVER_URL}}` allows easy find/replace later | 2026-01-21 |
-| 6-phase approach | Systematic improvement with commits after each phase | 2026-01-21 |
-| Statement rewrite | Old statement.md listed obsolete types | 2026-01-21 |
-| Processor docs in lang-ref | Language reference is authoritative | 2026-01-21 |
 
-## Next Steps
+## Commits This Session
 
-1. Review documentation with `mkdocs serve`
-2. Run `mkdocs build --strict` to verify links
-3. Push commits to origin/main
-4. Deploy to production with `mkdocs gh-deploy`
-5. Update `{{MCP_SERVER_URL}}` when public URL available
-
-## Files Created/Modified in This Session
-
-### OSS Documentation
-- `docs/OSS/index.md` (updated)
-- `docs/OSS/authoring-riddl.md` (new)
-- `docs/OSS/intellij-plugin/index.md` (rewritten)
-- `docs/OSS/vscode-extension/index.md` (rewritten)
-
-### MCP Documentation
-- `docs/MCP/index.md` (new)
-- `docs/MCP/claude-desktop.md` (new)
-- `docs/MCP/claude-code.md` (new)
-- `docs/MCP/gemini.md` (new)
-- `docs/MCP/vscode-copilot.md` (new)
-- `docs/MCP/intellij-ai.md` (new)
-- `docs/MCP/intellij-junie.md` (new)
+| Hash | Description |
+|------|-------------|
+| `74af346` | Add RIDDL images and update documentation structure |
+| `d22d2af` | Add RIDDL authoring guide for IDE users |
+| `d4bd9f2` | Complete IDE extension documentation for OSS release |
+| `c2a735d` | Add MCP section with AI tool integration guides |
+| `d5dc12c` | Update site index and OSS landing page |
+| `0d99dd1` | Update engineering notebook with OSS release work |
+| `4cb9e4a` | Add comprehensive Synapify documentation |
 
 ## Open Questions
 
 - What is the public URL for the RIDDL MCP Server?
-- Should there be a quick-start tutorial separate from the guides?
-- Are there additional AI tools that need MCP configuration guides?
+- When will Synapify be available for beta testing?

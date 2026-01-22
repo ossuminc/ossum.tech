@@ -21,9 +21,20 @@ ossum.tech/
 │   │   ├── references/      # Language reference and EBNF grammar
 │   │   ├── tools/           # Documentation for riddlc, IDE plugins, etc.
 │   │   └── future-work/     # Planned features and roadmap
-│   ├── synapify/            # Synapify desktop application docs
-│   ├── docify/              # Docify documentation
-│   ├── verify/              # Verify documentation
+│   ├── MCP/                 # RIDDL MCP Server documentation
+│   │   ├── index.md         # Overview, capabilities, tools
+│   │   ├── claude-desktop.md
+│   │   ├── claude-code.md
+│   │   ├── gemini.md
+│   │   ├── vscode-copilot.md
+│   │   ├── intellij-ai.md
+│   │   └── intellij-junie.md
+│   ├── OSS/                 # Open source tools documentation
+│   │   ├── index.md         # OSS landing page
+│   │   ├── authoring-riddl.md  # Common RIDDL authoring guide
+│   │   ├── intellij-plugin/ # IntelliJ IDEA plugin docs
+│   │   └── vscode-extension/# VS Code extension docs
+│   ├── synapify/            # Synapify visual editor docs (coming soon)
 │   └── about/               # Company info, privacy policy
 ├── overrides/               # MkDocs theme customizations
 ├── mkdocs.yml               # MkDocs configuration
@@ -80,6 +91,7 @@ The following Python Markdown extensions are enabled:
 - `pymdownx.superfences` - Fenced code blocks with syntax highlighting
 - `pymdownx.tabbed` - Tabbed content
 - `pymdownx.tasklist` - Checkbox lists
+- `pymdownx.keys` - Keyboard key styling (++ctrl+s++)
 - `attr_list` - HTML attributes on elements
 - `md_in_html` - Markdown inside HTML blocks
 
@@ -146,29 +158,25 @@ See [Domain concepts](../concepts/domain.md) for more details.
 
 ## Documentation Status
 
-As of 2026-01-21, a comprehensive 6-phase documentation improvement was
-completed. The following major sections are now complete:
+As of 2026-01-21, documentation is complete for all major sections:
 
 ### Completed Sections
 
-- **Introduction**: All pages complete including `why-is-riddl-needed.md`,
-  `what-is-riddl-based-on.md`, `what-conventions-does-riddl-use.md`
-- **Language Reference**: Complete with all processor types (Adaptors,
-  Projectors, Streamlets, Connectors) and handler documentation
-- **Tools**: Complete documentation for `riddlc`, `riddl-idea-plugin`,
-  and `riddl-mcp-server`
+- **Introduction**: All pages complete
+- **Language Reference**: Complete with all processor types and handlers
+- **Tools**: Complete documentation for `riddlc`, IDE plugins, MCP server
 - **Guides**: Complete guides for Authors, Developers, Domain Experts,
-  and Implementors
-- **Concepts**: All concept pages complete with proper links and content
+  Implementors
+- **Concepts**: All concept pages complete with proper links
+- **OSS**: IDE extension documentation with authoring guide
+- **MCP**: Installation guides for 6 AI tools (Claude, Gemini, Copilot, etc.)
+- **Synapify**: Overview documentation (product in development)
 
-### Remaining Work
+### Placeholders
 
-Lower priority items not addressed in the improvement plan:
-
-| File | Issue |
-|------|-------|
-| `docs/riddl/future-work/` | Roadmap items may need updates |
-| Type examples in language-reference | Could use more specialized type examples |
+| Placeholder | Location | Replace When |
+|-------------|----------|--------------|
+| `{{MCP_SERVER_URL}}` | All MCP guides | Public URL available |
 
 ---
 
