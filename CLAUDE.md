@@ -34,7 +34,11 @@ ossum.tech/
 │   │   ├── authoring-riddl.md  # Common RIDDL authoring guide
 │   │   ├── intellij-plugin/ # IntelliJ IDEA plugin docs
 │   │   └── vscode-extension/# VS Code extension docs
-│   ├── synapify/            # Synapify visual editor docs (coming soon)
+│   ├── synapify/            # Synapify visual editor docs
+│   │   ├── index.md         # Overview and getting started
+│   │   ├── user-interface.md # Four-panel UI documentation
+│   │   ├── simulation.md    # riddlsim integration (coming soon)
+│   │   └── generation.md    # riddl-gen integration (coming soon)
 │   └── about/               # Company info, privacy policy
 ├── overrides/               # MkDocs theme customizations
 ├── mkdocs.yml               # MkDocs configuration
@@ -158,7 +162,7 @@ See [Domain concepts](../concepts/domain.md) for more details.
 
 ## Documentation Status
 
-As of 2026-01-21, documentation is complete for all major sections:
+As of 2026-01-26, documentation is complete for all major sections:
 
 ### Completed Sections
 
@@ -170,7 +174,8 @@ As of 2026-01-21, documentation is complete for all major sections:
 - **Concepts**: All concept pages complete with proper links
 - **OSS**: IDE extension documentation with authoring guide
 - **MCP**: Installation guides for 6 AI tools (Claude, Gemini, Copilot, etc.)
-- **Synapify**: Overview documentation (product in development)
+- **Synapify**: Comprehensive user guide with UI, simulation, and generation
+  documentation (features marked "Coming Soon" where in development)
 
 ### Placeholders
 

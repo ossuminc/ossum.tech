@@ -13,6 +13,48 @@ All changes pushed to origin/main.
 
 ## Work Completed (Recent)
 
+### 2026-01-26: Synapify User Guide Expansion
+
+Comprehensive expansion of Synapify documentation based on product discussion:
+
+- [x] **Favicon Update**
+  - Downloaded favicon from www.ossuminc.com (32x32, 192x192, 180x180 sizes)
+  - Created template override (`overrides/main.html`) with proper link tags
+  - Updated mkdocs.yml to use new favicon
+
+- [x] **Synapify Index Rewrite** (`docs/synapify/index.md`)
+  - "The Solution Architect's Toolbench" tagline
+  - Sections targeting all four user types (Domain Experts, Authors,
+    Implementors, Developers)
+  - Core capabilities overview (visual editor, text editor, project
+    management, validation)
+  - Integrated services (simulation, generation, AI) with Coming Soon markers
+  - Subscription tiers outline (Individual, Team, Enterprise)
+
+- [x] **User Interface Guide** (`docs/synapify/user-interface.md`)
+  - Accurate four-panel layout documentation:
+    - Left: Model Tree (AST hierarchy navigation, hideable)
+    - Center top: Visual Editor (primary, always visible)
+    - Center bottom: Text Editor (Monaco, hideable)
+    - Right: Metadata & Info (with clause editing, statistics, hideable)
+  - Panel visibility controls and suggested layouts
+  - Keyboard shortcuts reference
+
+- [x] **Simulation Guide** (`docs/synapify/simulation.md`)
+  - How riddlsim integration works (HTTP requests, streaming results)
+  - Scenario structure and examples
+  - Running single scenarios and suites
+  - Understanding results and common issues
+  - Integration with development workflow
+
+- [x] **Code Generation Guide** (`docs/synapify/generation.md`)
+  - How riddl-gen integration works
+  - Documentation targets (AsciiDoc, Hugo)
+  - Code targets (Akka/Scala, Quarkus/Java planned)
+  - Structure mapping from RIDDL to generated artifacts
+  - Iterative development workflow
+  - Deep dive examples
+
 ### 2026-01-21: Synapify Documentation
 
 - [x] **Synapify Overview** (`docs/synapify/index.md`)
@@ -111,6 +153,10 @@ None currently.
 
 | Decision | Rationale | Date |
 |----------|-----------|------|
+| Synapify four-panel layout | Left=tree, center=visual+text, right=metadata; 3 hideable | 2026-01-26 |
+| Visual editor primary | Cannot be hidden; text editor secondary and synchronized | 2026-01-26 |
+| riddlsim via HTTP | Synapify sends model/scenarios, riddlsim streams results | 2026-01-26 |
+| riddl-gen separate service | Will be at gen.ossuminc.com; handles code generation | 2026-01-26 |
 | Synapify "Coming Soon" | Product in development; document planned features | 2026-01-21 |
 | Separate MCP section | MCP is distinct from IDE plugins; deserves own nav | 2026-01-21 |
 | Per-tool MCP guides | Each AI tool has unique config; separate pages clearer | 2026-01-21 |
@@ -121,13 +167,9 @@ None currently.
 
 | Hash | Description |
 |------|-------------|
-| `74af346` | Add RIDDL images and update documentation structure |
-| `d22d2af` | Add RIDDL authoring guide for IDE users |
-| `d4bd9f2` | Complete IDE extension documentation for OSS release |
-| `c2a735d` | Add MCP section with AI tool integration guides |
-| `d5dc12c` | Update site index and OSS landing page |
-| `0d99dd1` | Update engineering notebook with OSS release work |
-| `4cb9e4a` | Add comprehensive Synapify documentation |
+| `0922e1d` | Update favicon to match www.ossuminc.com |
+| `d6d7896` | Add multiple favicon sizes and proper link tags |
+| `1a6b6e2` | Add comprehensive Synapify user documentation |
 
 ## Open Questions
 
