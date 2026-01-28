@@ -5,15 +5,14 @@ draft: false
 weight: 10
 ---
 
-RIDDL gets its name from an acronym that stands for *Reactive Interface* for
-*Domain Definition Language*.
+RIDDL gets its name from an acronym: *Reactive Interface to Domain Definition
+Language*.
 
-RIDDL is specification language for the niche of large, distributed,
-reactive, concurrent systems such as required for modern internet-scale 
-applications or corporate back office infrastructure. 
+RIDDL is a specification language for large, distributed, reactive systems—the
+kind you need for modern internet-scale applications or corporate back-office
+infrastructure.
 
-RIDDL is an open source project that provides a variety of software libraries
-provided by [this GitHub repository](https://github.com/ossuminc/riddl). That repository also 
-provides a compiler for processing RIDDL specifications, `riddlc`. For more details, 
-please see the [tools section](../tools/riddlc/index.md).
+It's an open source project hosted on [GitHub](https://github.com/ossuminc/riddl),
+which provides the language specification, supporting libraries, and a compiler
+called `riddlc`. For more details, see the [tools section](../tools/riddlc/index.md).
 

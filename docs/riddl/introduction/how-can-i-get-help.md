@@ -13,7 +13,7 @@ for a production software project, sometimes things aren't quite right.
 Consequently, we are very eager to perfect it and your bug
 submission will help with that.
 
-Please submit your  via 
+Please submit your bug report via
 [GitHub at this location](https://github.com/ossuminc/riddl/issues/new). In 
 the comment area, please ensure you do the following:
 * Provide the release version that the `riddlc version` command puts out.
@@ -25,11 +25,12 @@ the comment area, please ensure you do the following:
 * Label your new issue with the "Bug" (red) label, so we are sure to 
   prioritize it.  
 
-## I Need RIDDL To Generate Something Else
-These kinds of requests are very important to us. We are very interested in 
-creating a set of useful RIDDL translators for many kinds of purposes. For 
-these kinds of feature request, please bypass GitHub and reach out directly 
-to [Reid Spencer](who-made-riddl-possible.md#reid-spencer at `reid@ossuminc.com` 
+## I'm Interested in Advanced Features
+Beyond validation, the RIDDL ecosystem includes advanced capabilities like code
+generation, documentation generation, and AI-assisted development—available
+soon through Synapify. If you're interested in features beyond what's planned,
+please reach out directly to
+[Reid Spencer](who-made-riddl-possible.md#reid-spencer) at `reid@ossuminc.com`. 
 
 ## I Want To Make A Feature Suggestion
 

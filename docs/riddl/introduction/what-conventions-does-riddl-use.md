@@ -1,5 +1,5 @@
 ---
-title: "What Conventions Does Riddl Use?"
+title: "What Conventions Does RIDDL Use?"
 date: 2022-02-25T10:07:32-07:00
 draft: false
 weight: 70
@@ -54,8 +54,8 @@ come up that must be flushed out at a later time.  Sometimes things get left
 undefined. That's okay! This operator can be used as the body of
 any definition.
 
-## Branchs
-Branchs are definitions that contain other, nested, definitions. Between the
+## Branches
+Branches are definitions that contain other, nested, definitions. Between the
 `{` and the `}` that define the boundaries of a definition, you may place other
 definitions. Such nested definitions are deemed to be **contained**.
 Not every definition is a container.
@@ -73,7 +73,7 @@ a domain definition is a recursively nested definition, as follows:
 ```riddl
 domain root is {
   domain branch is {
-    domain leaf { ??? }
+    domain leaf is { ??? }
   }
 }
 ```

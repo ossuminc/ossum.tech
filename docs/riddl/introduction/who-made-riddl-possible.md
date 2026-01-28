@@ -35,10 +35,10 @@ Creator of [hugo](https://github.com/gohugo/)
 ### [Daniel Terhorst-North](https://www.linkedin.com/in/danielterhorstnorth/) {#dan-north}
 Creator of [Gherkin](https://cucumber.io/docs/gherkin/)
 
-### [Edward F. Moore](https://en.wikipedia.org/wiki/Edward_F._Moore) ${#edward-moore}
+### [Edward F. Moore](https://en.wikipedia.org/wiki/Edward_F._Moore) {#edward-moore}
 Originator of the [Finite State Machine](https://en.wikipedia.org/wiki/Finite-state_machine)
 
-### [Eric Brewer](https://www.linkedin.com/in/eric-brewer-1031254/) {$eric-brewer}
+### [Eric Brewer](https://www.linkedin.com/in/eric-brewer-1031254/) {#eric-brewer}
 Originator of the [CAP Theorem](https://en.wikipedia.org/wiki/CAP_theorem)
 
 ### [Eric Evans](https://www.linkedin.com/in/ericevansddd/) {#eric-evans}
@@ -60,8 +60,8 @@ Creator of [eXtreme Programming](http://www.extremeprogramming.org/)
 Creator of [fastparse](https://www.lihaoyi.com/fastparse/) used to parse RIDDL.
 
 ### [Robert Kaussow](https://github.com/xoxys)
-Creator of the [Geekdoc theme](https://geekdoc.de) for 
-[Hugo](http://github. com/gohugo/)
+Creator of the [Geekdoc theme](https://geekdoc.de) for
+[Hugo](https://github.com/gohugoio/hugo)
 
 ### [Simon Brown](https://www.linkedin.com/in/simonbrownjersey/)
 Creator of the [C4 Model For Software Architecture](https://c4model.com/)

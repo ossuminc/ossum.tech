@@ -14,15 +14,13 @@ every stage of the development process and then through continuing
 maintenance and evolution of the system designed.
 
 Consequently, the people who can benefit from RIDDL are software development
-teams that want a precise and consistent way of specifying its evolving design
-as a guide to all stakeholders. RIDDL aims to support such teams with
+teams that want a precise and consistent way of specifying their evolving
+design as a guide to all stakeholders. RIDDL aims to support such teams with
 productivity increases by:
-* integrating with SBOM tools like Backstage
-* rapidly generating documentation with every change to keep the team on the 
-  same page
-* rapidly generating interface code for things like Smithy, Protocol Buffers,
-  and OpenAPI
-* providing the software context for use with a GPT-based code generator
-  to speed up development and refactoring. 
+
+* Keeping documentation in sync with the design—no more stale wikis
+* Providing structured context that AI tools can use to generate accurate code
+* Enabling iterative refinement from high-level concepts to detailed specs
+* Creating a single source of truth that all stakeholders can reference 
 
 

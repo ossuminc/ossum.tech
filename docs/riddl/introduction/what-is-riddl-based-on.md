@@ -21,24 +21,18 @@ The RIDDL specification language borrows concepts from:
 * [Saga Pattern](https://microservices.io/patterns/data/saga.html)
 * [Unified Modeling Language (UML)](https://en.wikipedia.org/wiki/Unified_Modeling_Language)
 
-RIDDL aims to capture business concepts, system designs and architectural 
-details in a way that is consumable by business professionals yet can also
-be directly translated into various technical and non-technical artifacts,
-including: 
+RIDDL aims to capture business concepts, system designs, and architectural
+details in a way that is consumable by business professionals yet structured
+enough to enable translation into various artifacts:
 
-* a documentation web-site 
-* various architectural diagrams (context maps, sequence diagrams, and so on)
-* design input to code generators (e.g. Kalix, protobuffers)
-* Kubernetes deployment descriptors
-* code scaffolding and templates that implement the design captured in the 
-  RIDDL specification 
-* and more; please see the 
-  [future projects section](../future-work/index.md)
+* Living documentation that stays in sync with the model
+* Architectural diagrams (context maps, sequence diagrams, state machines)
+* Code scaffolding and implementation templates
+* API specifications and deployment configurations
 
-Using these outputs, delivery teams are well-equipped to quickly begin
-the task of implementation. Regeneration of the model in subsequent 
-iterations of the design are accommodated and continue to provide value through
-the evolution of the design without interrupting the implementation.
+Because RIDDL captures both structure and intent, delivery teams can iterate
+on the design while tools generate appropriate outputs for each stage of
+development.
 
 ## Domain Driven Design (DDD)
 RIDDL is based on concepts from 
@@ -58,7 +52,7 @@ or Eric Evans' original tome [Domain Driven Design: Tackling Complexity in the H
 
 ## Reactive System Architecture (RSA)
 The [Reactive Manifesto](https://www.reactivemanifesto.org/) was authored in
-2014 by Jonas Bonér, David Farley, Roland Kunh, and Martin Thompson. As the
+2014 by Jonas Bonér, Dave Farley, Roland Kuhn, and Martin Thompson. As the
 computing landscape evolved and companies began to operate at "internet scale"
 it became evident that the old ways of constructing systems were not adequate.
 We needed an approach to system architecture back then that was fundamentally
@@ -68,8 +62,8 @@ The central thesis of reactive architectures is that the overriding objective
 in any system must be responsiveness. Users are conditioned to expect systems
 that perform well and are generally available. If these conditions are not met,
 users tend to go elsewhere to get what they want. That, of course, is clearly
-unacceptable for any business endeavor. To maintain responsive to users, a 
-system must deal with various responsiveness challenges:
+unacceptable for any business endeavor. To remain responsive to users, a
+system must address several challenges:
 
 * system or component failure (resiliency)
 * increasing work load (scalability)

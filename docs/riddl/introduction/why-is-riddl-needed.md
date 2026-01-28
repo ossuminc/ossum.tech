@@ -56,13 +56,19 @@ RIDDL uses natural language constructs that domain experts can understand:
 
 ```riddl
 domain OnlineRetail is {
-  user Customer wants to "browse products and make purchases"
+  user Customer is "a person who shops online"
 
   epic Shopping is {
+    user Customer wants to "browse and purchase products"
+      so that "I can get items delivered to my home"
+
     case AddToCart is {
-      user Customer "selects a product"
-      then entity Cart "adds the item"
-      then user Customer "sees updated cart"
+      user Customer wants to "add a product to my cart"
+        so that "I can purchase it later"
+
+      step for user Customer is "views a product they like"
+      step for user Customer is "clicks Add to Cart"
+      step for user Customer is "sees the updated cart total"
     }
   }
 }
@@ -79,14 +85,18 @@ Despite being readable, RIDDL has precise semantics:
 - Event flows and state transitions are explicit
 - The compiler catches inconsistencies
 
-### 3. Multi-Target Translation
+### 3. Designed for Translation
 
-A single RIDDL specification can generate:
+RIDDL specifications are structured to enable translation into multiple outputs:
 
-- **Documentation**: Websites, API docs, architecture diagrams
-- **Code Scaffolding**: Scala/Akka, Kalix, Kubernetes manifests
-- **Analysis**: Dependency graphs, complexity metrics
-- **Diagrams**: Context maps, sequence diagrams, state machines
+- **Documentation**: The specification itself serves as living documentation
+- **Code Generation**: The precise structure supports automated code scaffolding
+- **Analysis**: Definitions and relationships can be analyzed for complexity and
+  dependencies
+- **Visualization**: The model structure maps naturally to diagrams and charts
+
+Because RIDDL captures both structure and intent, translation tools can produce
+contextually appropriate outputs for different platforms and purposes.
 
 ### 4. AI-Ready
 
@@ -99,7 +109,7 @@ RIDDL was designed with AI code generation in mind:
 
 ```riddl
 handler OrderHandler is {
-  on command CreateOrder {
+  on command CreateOrder is {
     prompt "Validate inventory availability for all items"
     prompt "Calculate total including tax and shipping"
     prompt "Reserve inventory and create order record"
