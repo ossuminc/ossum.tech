@@ -538,7 +538,7 @@ riddlc validate mymodel.riddl
 riddlc --verbose validate mymodel.riddl
 ```
 
-Documentation generation will be available through [Synapify](../../../../synapify/index.md).
+Documentation generation will be available through [Synapify](../../../synapify/index.md).
 
 ### Common Validation Issues
 

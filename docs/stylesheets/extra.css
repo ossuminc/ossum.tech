@@ -7,3 +7,59 @@
 .md-tabs{
     background-color: #272740;
 }
+
+/* RIDDL Syntax Highlighting - Dark Theme */
+[data-md-color-scheme="slate"] .language-riddl {
+  /* Keywords - burnt orange */
+  .k, .kd, .kr, .kn { color: #fa8b61; }
+  /* Readability words - yellow */
+  .kp { color: #b3ae60; }
+  /* Predefined types - teal */
+  .nb { color: #19c4bf; }
+  /* Option values - green */
+  .no { color: #57d07c; }
+  /* Punctuation - teal */
+  .p { color: #0da19e; }
+  /* Comments - gray */
+  .c1, .cm { color: #808080; font-style: italic; }
+  /* Strings - bright green */
+  .s2, .s1 { color: #98c379; }
+  /* Markdown docs - dimmer green */
+  .sd { color: #629755; font-style: italic; }
+  /* String escapes - yellow */
+  .se { color: #e0be35; }
+  /* Identifiers - default light */
+  .n { color: #a9b7c6; }
+  /* Numbers - blue */
+  .mi, .mf { color: #6897bb; }
+  /* Errors - red */
+  .err { color: #c41919; }
+}
+
+/* RIDDL Syntax Highlighting - Light Theme */
+[data-md-color-scheme="default"] .language-riddl {
+  /* Keywords - burnt orange (darker for light bg) */
+  .k, .kd, .kr, .kn { color: #c75a20; }
+  /* Readability words - olive */
+  .kp { color: #7a7a30; }
+  /* Predefined types - teal */
+  .nb { color: #0d8a85; }
+  /* Option values - green */
+  .no { color: #2d8a4a; }
+  /* Punctuation - teal */
+  .p { color: #0a7a75; }
+  /* Comments - gray */
+  .c1, .cm { color: #707070; font-style: italic; }
+  /* Strings - green */
+  .s2, .s1 { color: #50873a; }
+  /* Markdown docs - dimmer green */
+  .sd { color: #3d6a30; font-style: italic; }
+  /* String escapes - olive */
+  .se { color: #9a8520; }
+  /* Identifiers - dark */
+  .n { color: #2b2b2b; }
+  /* Numbers - blue */
+  .mi, .mf { color: #4a6a9a; }
+  /* Errors - red */
+  .err { color: #a31515; }
+}

@@ -106,10 +106,10 @@ Once you have RIDDL integrated into your development workflow:
    to catch specification issues before they become implementation problems.
 
 2. **Generate documentation**: Documentation generation will be available
-   through [Synapify](../../../../synapify/index.md).
+   through [Synapify](../../../synapify/index.md).
 
 3. **Explore code generation**: Code generation from RIDDL models will also
-   be available through [Synapify](../../../../synapify/index.md).
+   be available through [Synapify](../../../synapify/index.md).
 
 See the [riddlc documentation](../../tools/riddlc/index.md) for the full
 command reference.

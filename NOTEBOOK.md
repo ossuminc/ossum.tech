@@ -212,9 +212,30 @@ Completed all 6 phases of the comprehensive documentation improvement:
 - [x] Completed Author's Guide
 - [x] Improved hierarchy diagram in concepts
 
+### 2026-01-28: RIDDL Pygments Lexer
+
+Created custom Pygments lexer for RIDDL syntax highlighting in MkDocs:
+
+- [x] **Created `riddl_lexer/` package** with proper Python packaging
+  - `lexer.py`: Full lexer implementation with all RIDDL token types
+  - `__init__.py`: Package exports
+  - `pyproject.toml`: Package configuration with Pygments entry point
+- [x] **Token categories implemented**:
+  - Definition keywords (domain, context, entity, etc.) → `Keyword.Declaration`
+  - Control keywords (if, then, send, etc.) → `Keyword`
+  - Import keywords (include, import) → `Keyword.Namespace`
+  - Readability words (is, of, by, etc.) → `Keyword.Pseudo`
+  - Predefined types (String, Integer, etc.) → `Name.Builtin`
+  - Option values (event-sourced, aggregate) → `Name.Constant`
+  - Comments (// and /* */) → `Comment`
+  - Strings and markdown docs → `String`
+- [x] **Tested with MkDocs** - all 20 RIDDL code blocks properly highlighted
+- [x] **Fixed broken Synapify links** in guides (wrong relative path depth)
+
 ## In Progress
 
-Editorial review complete. All sections reviewed and fixed. Ready to commit.
+Working through lower-priority tasks in order: type examples, quick-start
+tutorial, future work review, EBNF grammar validation, Synapify generation docs.
 
 ## Pending Tasks
 
@@ -225,15 +246,16 @@ Editorial review complete. All sections reviewed and fixed. Ready to commit.
 | Replace `{{MCP_SERVER_URL}}` | When public URL is available |
 | Update release download links | When final releases are published |
 
-### Lower Priority
+### Lower Priority (in progress order)
 
 | Task | File | Notes |
 |------|------|-------|
-| RIDDL Pygments lexer | New file | Custom syntax highlighting for code blocks |
+| ~~RIDDL Pygments lexer~~ | ~~`riddl_lexer/`~~ | ~~COMPLETED~~ |
 | Type examples | `references/language-reference.md` | Add specialized examples |
-| Future work review | `future-work/` | Update for current roadmap |
 | Quick-start tutorial | New file | Optional getting started guide |
+| Future work review | `future-work/` | Update for current roadmap |
 | EBNF grammar validation | `references/ebnf-grammar.md` | See details below |
+| Synapify generation docs | `synapify/generation.md` | Document using preserved config |
 
 #### Synapify Generation Configuration Documentation
 
@@ -254,25 +276,6 @@ hugo {
     edit-path = "/-/blob/main/src/riddl/ReactiveBBQ"
 }
 ```
-
-#### RIDDL Pygments Lexer Task
-
-Create a custom Pygments lexer for RIDDL syntax highlighting in MkDocs code
-blocks. Currently `riddl` fenced code blocks render without syntax coloring.
-
-**Implementation approach:**
-1. Create `riddl_lexer.py` with a `RiddlLexer` class extending `RegexLexer`
-2. Define token patterns for RIDDL keywords, types, strings, comments, etc.
-3. Register the lexer in `mkdocs.yml` or via a plugin
-4. Test with existing code examples in documentation
-
-**Key token categories:**
-- Keywords: `domain`, `context`, `entity`, `handler`, `type`, `command`,
-  `event`, `query`, `result`, `is`, `of`, `to`, `from`, `inlet`, `outlet`, etc.
-- Predefined types: `String`, `Number`, `Boolean`, `Date`, `Time`, `UUID`, etc.
-- Operators: `=`, `:`, `{`, `}`, `(`, `)`, `[`, `]`
-- Comments: `//` line comments, `/* */` block comments
-- Strings: quoted literals
 
 #### EBNF Grammar Validation Task
 

@@ -6,3 +6,5 @@
 /site/
 /.ai/
 .DS_Store
+*.egg-info/
+__pycache__/

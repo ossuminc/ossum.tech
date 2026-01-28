@@ -74,7 +74,7 @@ riddl/
 - Option handling
 - Output formatting
 
-**hugo** - Documentation generator (being migrated to [Synapify](../../../../synapify/index.md)):
+**hugo** - Documentation generator (being migrated to [Synapify](../../../synapify/index.md)):
 
 - Converts RIDDL models to Hugo-compatible markdown
 - Generates diagrams (Mermaid)
