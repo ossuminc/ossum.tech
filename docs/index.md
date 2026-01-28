@@ -1,7 +1,10 @@
 ---
-title: "Ossum!"
+title: "Ossum Technologies"
+description: >-
+  Documentation for RIDDL, a specification language for distributed reactive
+  systems. Explore tools, guides, and references for domain-driven design.
 ---
-# Welcome To Ossum Technology!
+# Welcome To Ossum Inc.'s Technology!
 
 This site provides documentation for technologies created at Ossum, Inc.
 

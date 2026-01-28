@@ -1,3 +1,9 @@
+---
+title: "Open Source Tools"
+description: >-
+  Free and open source tools for RIDDL development. IDE extensions for
+  IntelliJ and VS Code, authoring guides, and MCP server integration.
+---
 # Ossum Open Source Software
 
 Ossum Inc. provides open source tools for working with the RIDDL language.

@@ -5,10 +5,13 @@
 Documentation site is complete and deployed at https://ossum.tech. All major
 sections are documented with proper RIDDL syntax highlighting.
 
-**Recent completion (2026-01-28):**
-- RIDDL Pygments lexer with custom color scheme matching IDE tools
-- Comprehensive editorial review of all documentation sections
-- CI workflow updated to install lexer before building
+**Completed (2026-01-28):**
+
+- Strategic site improvements Phase 1 (quickstart, examples gallery, SEO,
+  edit links, PWA support, about page, playground placeholder)
+- RIDDL Pygments lexer with custom color scheme
+- Comprehensive editorial review
+- CI workflow with lexer installation
 
 ---
 
@@ -20,13 +23,35 @@ sections are documented with proper RIDDL syntax highlighting.
 |------|-------|
 | Replace `{{MCP_SERVER_URL}}` | When public URL is available |
 | Update release download links | When final releases are published |
+| Implement playground | Integrate Monaco + MCP server validation |
+
+### Deferred Strategic Improvements (Soon)
+
+| ID | Task | Priority | Notes |
+|----|------|----------|-------|
+| 1.3 | Product landing pages by role | Medium | CTO, Architect, Developer pages |
+| 1.4 | Comparison pages | Medium | RIDDL vs OpenAPI/AsyncAPI/UML |
+| 1.5 | Demo video | High | 3-5 min screen recording with voiceover |
+| 2.2 | Troubleshooting/FAQ | Medium | Seed from riddl-mcp-server idioms |
+| 2.3 | Changelog links | Low | Link to GitHub releases |
+| 2.4 | Learning paths | Medium | Beginner → Intermediate → Advanced |
+| 2.5 | Mermaid diagrams | Low | Enable in mkdocs.yml, add to concepts |
+| 3.3 | Social proof | Medium | Testimonials when available |
+| 3.4 | Newsletter signup | Low | Mailchimp/ConvertKit embed |
+| 4.1 | Community (Discord/GH) | Medium | GitHub Discussions or Discord |
+| 4.4 | Page feedback | Low | "Was this helpful?" buttons |
+| 5.2 | PDF export | Low | mkdocs-pdf plugin |
+| 5.3 | API documentation | Medium | OpenAPI spec for MCP server |
+| 6.2 | Pricing page | Medium | When Synapify pricing finalized |
+| 6.3 | Contact form | Low | Replace email link with form |
+
+**Note:** Blog/news (3.2) will be on www.ossuminc.com or LinkedIn, not here.
 
 ### Lower Priority
 
 | Task | File | Notes |
 |------|------|-------|
 | Type examples | `references/language-reference.md` | Add specialized examples |
-| Quick-start tutorial | New file | Optional getting started guide |
 | Future work review | `future-work/` | Update for current roadmap |
 | EBNF grammar validation | `references/ebnf-grammar.md` | See details below |
 | Synapify generation docs | `synapify/generation.md` | Use preserved config |

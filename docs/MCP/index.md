@@ -1,3 +1,9 @@
+---
+title: "RIDDL MCP Server"
+description: >-
+  Connect AI assistants to RIDDL via the Model Context Protocol. Enable
+  validation, analysis, and intelligent suggestions for domain modeling.
+---
 # RIDDL MCP Server
 
 The RIDDL MCP Server is a Model Context Protocol (MCP) server that enables

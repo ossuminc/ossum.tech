@@ -18,6 +18,8 @@ ossum.tech/
 │   │   ├── introduction/    # What is RIDDL, why it exists
 │   │   ├── concepts/        # RIDDL language concepts (domain, context, etc.)
 │   │   ├── guides/          # User guides by role (authors, domain experts, etc.)
+│   │   ├── examples/        # Model gallery linking to riddl-models repo
+│   │   ├── playground/      # Interactive RIDDL editor (coming soon)
 │   │   ├── references/      # Language reference and EBNF grammar
 │   │   ├── tools/           # Documentation for riddlc, IDE plugins, etc.
 │   │   └── future-work/     # Planned features and roadmap
@@ -96,12 +98,15 @@ dark and light themes.
 ### MkDocs Configuration
 
 The site uses MkDocs Material theme with these notable features:
-- Automatic light/dark mode
+- Automatic light/dark mode with visible toggle
 - Navigation tabs
 - Search with highlighting
 - Admonitions (info boxes, warnings, etc.)
 - Code highlighting via Pygments with custom RIDDL lexer
 - Custom CSS in `docs/stylesheets/`
+- **Edit links** - Each page links to GitHub for community contributions
+- **PWA/offline support** - Service worker caches pages for offline access
+- **SEO meta descriptions** - Key pages have frontmatter descriptions
 
 ### Markdown Extensions
 
@@ -286,6 +291,7 @@ This documentation site covers tools from other Ossum Inc. repositories:
 - **riddl-idea-plugin**: IntelliJ IDEA plugin for RIDDL
 - **riddl-vscode**: VS Code extension for RIDDL (source for lexer tokens)
 - **riddl-mcp-server**: MCP server for AI-assisted RIDDL modeling
+- **riddl-models**: Curated example models (linked from `docs/riddl/examples/`)
 
 Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 

@@ -1,5 +1,8 @@
 ---
 title: "What Is RIDDL?"
+description: >-
+  RIDDL (Reactive Interface to Domain Definition Language) is an open source
+  specification language for large, distributed, reactive systems.
 date: 2022-02-25T10:07:32-07:00
 draft: false
 weight: 10

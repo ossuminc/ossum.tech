@@ -1,8 +1,14 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: Ossum Technologies
 site_url: https://ossum.tech/
+site_description: >-
+  Documentation for RIDDL - a specification language for large, distributed,
+  reactive systems. Learn to model internet-scale applications with DDD patterns.
+repo_url: https://github.com/ossuminc/ossum.tech
+repo_name: ossuminc/ossum.tech
+edit_uri: edit/main/docs/
 copyright: >
-  Copyright &copy; 2019-2025 Ossum Inc. -
+  Copyright &copy; 2019-2026 Ossum Inc. -
   <a href="#__consent">Change cookie settings</a>
 theme:
   name: material
@@ -14,6 +20,7 @@ theme:
     code: Roboto Mono
   features:
     - announce.dismiss
+    - content.action.edit
     - content.tooltips
     - header.autohide
     - navigation.footer
@@ -128,3 +135,7 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
+
+plugins:
+  - search
+  - offline

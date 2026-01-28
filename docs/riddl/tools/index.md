@@ -2,6 +2,12 @@
 
 There are several tools for working with RIDDL models:
 
+## [Playground](../playground/index.md) :material-new-box:{ .bounce }
+
+Try RIDDL in your browser without installing anything. The playground provides
+a Monaco-based editor with real-time validation—perfect for learning and
+experimentation. *(Coming soon)*
+
 ## [riddlc](riddlc/index.md)
 
 The RIDDL compiler (`riddlc`) is the command-line tool for parsing and

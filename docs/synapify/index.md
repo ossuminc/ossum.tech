@@ -1,3 +1,9 @@
+---
+title: "Synapify"
+description: >-
+  Synapify is a professional desktop application for designing distributed
+  reactive systems using RIDDL. Visual modeling, validation, and AI assistance.
+---
 # Synapify
 
 **The Solution Architect's Toolbench**
