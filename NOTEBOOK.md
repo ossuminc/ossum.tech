@@ -21,11 +21,12 @@ sections are documented with proper RIDDL syntax highlighting.
 
 ### Before Production
 
-| Task | Notes |
-|------|-------|
-| Update release download links | When final releases are published |
-| Implement playground | Integrate Monaco + MCP server validation |
-| Remove "Coming Soon" warnings | When MCP server goes live (~early 2026) |
+| Task                           | Notes                                                          |
+|--------------------------------|----------------------------------------------------------------|
+| Update release download links  | When final releases are published                              |
+| Implement playground           | Integrate Monaco + MCP server validation                       |
+| Remove "Coming Soon" warnings  | When MCP server goes live (~early 2026)                        |
+| Single source for EBNF Grammar | Depend on riddl-language which contains the EBNF as a resource |
 
 ### Deferred Strategic Improvements (Soon)
 
