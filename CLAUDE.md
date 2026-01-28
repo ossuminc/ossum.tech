@@ -242,3 +242,87 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 | Build site | `mkdocs build` |
 | Check links | `mkdocs build --strict` |
 | Deploy | `mkdocs gh-deploy` |
+
+---
+
+## Editorial Guidelines (Session Learnings)
+
+These guidelines were established during documentation review sessions:
+
+### Tooling Separation
+
+**Important**: The RIDDL ecosystem has a clear separation of concerns:
+
+- **`riddlc`** (open source): Syntax and semantic validation only. It reads
+  RIDDL files, checks them, and reports errors. No code generation.
+- **Synapify** (commercial): Provides advanced features including code
+  generation, documentation generation, and AI-assisted development. These
+  features are available via subscription.
+
+When documenting capabilities, do NOT claim that `riddlc` generates code,
+diagrams, Kubernetes manifests, etc. Those capabilities exist in Synapify.
+Avoid mentioning "riddl-gen" directly—it's an internal service name. Just
+refer to Synapify's generation features.
+
+### Outdated Technology References
+
+Remove or generalize references to specific generation targets that are no
+longer accurate:
+
+- ~~Kalix~~ (no longer a target)
+- ~~Kubernetes deployment descriptors~~ (not in OSS tooling)
+- ~~Akka code generation~~ (not in OSS tooling)
+- ~~Protocol Buffers / Smithy / OpenAPI generation~~ (not in OSS tooling)
+
+Instead, describe RIDDL's *capability* to enable such translation without
+claiming specific tool support.
+
+### Hugo Remnants
+
+This site migrated from Hugo to MkDocs Material. Remove any Hugo shortcodes:
+
+- `{{< toc-tree >}}` — doesn't work in MkDocs
+- `{{< icon "..." >}}` — use Font Awesome syntax or remove
+- Any other `{{< ... >}}` patterns
+
+### Capitalization
+
+Always use **RIDDL** (all caps) in prose. It's an acronym. Not "Riddl" or
+"riddl" except in code/filenames where lowercase is conventional.
+
+### RIDDL Syntax in Examples
+
+Code examples must match the EBNF grammar. Common issues to avoid:
+
+1. **Missing `is` keyword**: Most definitions require it.
+   - Wrong: `on command Foo { ... }`
+   - Right: `on command Foo is { ... }`
+
+2. **User stories require both parts**:
+   - Right: `user Customer wants to "do X" so that "Y happens"`
+
+3. **Epics and use cases start with user stories**:
+   ```riddl
+   epic Shopping is {
+     user Customer wants to "..." so that "..."
+     case AddToCart is { ... }
+   }
+   ```
+
+4. **Step interactions use specific syntax**:
+   - `step for user Customer is "does something"`
+   - `step send command X from user Y to entity Z`
+   - `step show output X to user Y`
+
+### Tone and Style
+
+- Light, accessible, occasionally jovial
+- Technical precision without being dry
+- Explain concepts before showing syntax
+- Use em-dashes for asides—they read more naturally
+- Prefer active voice
+
+### Known Authors (Correct Spellings)
+
+For the Reactive Manifesto: Jonas Bonér, **Dave** Farley (not David),
+Roland **Kuhn** (not Kunh), Martin Thompson.

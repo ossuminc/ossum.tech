@@ -35,15 +35,15 @@ might devise a domain hierarchy like this:
 ## Occurs In
 
 * [Root](root.md)
-* [Domains](domain.md) {{< icon "rotate-left - domains
-  can be nested in a super-domain.
+* [Domains](domain.md) :fontawesome-regular-rotate-left: — domains
+  can be nested in a super-domain
 
 ## Contains
 
 Within a domain, you can define these things:
 
 * [Actors](user.md) - someone or thing that uses the domain
-* [Applications](application.md) - an user interface  
+* [Applications](application.md) - a user interface  
 * [Authors](author.md) - who defined the domain
 * [Contexts](context.md) - a precisely defined bounded context within the domain
 * [Domains](domain.md) :fontawesome-regular-rotate-left: - domains 

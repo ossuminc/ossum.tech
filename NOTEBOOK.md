@@ -13,6 +13,36 @@ All changes pushed to origin/main.
 
 ## Work Completed (Recent)
 
+### 2026-01-27: Documentation Editorial Review
+
+Grammar, style, spelling, and accuracy review of documentation:
+
+- [x] **Introduction Section** (9 files, committed)
+  - Fixed duplicate navigation list in index.md
+  - Standardized RIDDL capitalization throughout
+  - Updated what-can-riddl-do.md to reflect riddlc as validator only
+  - Fixed invalid RIDDL syntax in code examples (why-is-riddl-needed.md)
+  - Removed outdated technology references (Kalix, Kubernetes, etc.)
+  - Fixed typos: Branchs→Branches, Kuberenetes→Kubernetes, Roland Kunh→Kuhn
+  - Fixed broken anchor syntax and URLs
+  - Fixed missing words and broken markdown links
+
+- [x] **CLAUDE.md Updates**
+  - Added Editorial Guidelines section with session learnings
+  - Documented tooling separation (riddlc vs Synapify)
+  - Added guidance on outdated technology references
+  - Added Hugo remnant removal guidance
+  - Documented RIDDL syntax validation rules for examples
+
+- [ ] **Concepts Section** (in progress, 3 files uncommitted)
+  - Fixed Hugo shortcode in index.md
+  - Fixed icon syntax and grammar in domain.md
+  - Fixed apostrophe and punctuation in context.md
+
+**Pending for next session:**
+- entity.md: "user model" → "actor model", "Erik" → "Eric" Brewer, typos
+- Continue through remaining ~85 concept and other files
+
 ### 2026-01-26: Synapify User Guide Expansion
 
 Comprehensive expansion of Synapify documentation based on product discussion:
@@ -130,7 +160,12 @@ Completed all 6 phases of the comprehensive documentation improvement:
 
 ## In Progress
 
-None currently.
+### Documentation Editorial Review
+- Reviewing all docs/ markdown files for grammar, style, accuracy
+- Validating RIDDL syntax examples against EBNF grammar
+- Removing outdated technology references
+- Ensuring consistent tone (light, accessible, technically precise)
+- **Next**: Continue with concepts section (entity.md and beyond)
 
 ## Pending Tasks
 

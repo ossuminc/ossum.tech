@@ -51,15 +51,15 @@ on the same page.
 
 When modelling a system with RIDDL, the *ubiquitous language* boils down to
 the names of the definitions that RIDDL permits inside a `context` definition, as
-shown in the list below. You can correctly think of a `context`s ubiquitous
+shown in the list below. You can correctly think of a `context`'s ubiquitous
 language as the interface to that knowledge domain. It is very analogous to
 an API (Application Programming Interface) as the interface to a program. The API
 defines the contract for how external systems interact with the bounded context.
 
-To further your understanding, watch this 
+To further your understanding, watch this
 [34-minute video](https://www.youtube.com/watch?v=am-HXycfalo) by
-[Eric Evans](../introduction/who-made-riddl-possible.md#eric-evans) 
-from DDD Europe 2020 conference
+[Eric Evans](../introduction/who-made-riddl-possible.md#eric-evans)
+from DDD Europe 2020 conference.
 
 
 ## Occurs In

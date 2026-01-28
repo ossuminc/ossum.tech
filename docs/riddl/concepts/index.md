@@ -105,4 +105,5 @@ When you're done exploring all the concepts, check out our
 
 ## Full Index
 
-{{< toc-tree >}}
+The pages in this section cover each RIDDL concept in detail. Use the
+navigation menu to explore individual concepts.
