@@ -28,7 +28,7 @@ with RIDDL domain models.
 | Field | Value |
 |-------|-------|
 | **Name** | `riddl` |
-| **URL** | `{{MCP_SERVER_URL}}/mcp/v1` |
+| **URL** | `https://mcp.ossuminc.com/mcp/v1` |
 | **API Key Header** | `X-API-KEY` |
 | **API Key** | `your-api-key` |
 
@@ -42,7 +42,7 @@ If your version requires file-based configuration:
 {
   "mcpServers": {
     "riddl": {
-      "url": "{{MCP_SERVER_URL}}/mcp/v1",
+      "url": "https://mcp.ossuminc.com/mcp/v1",
       "headers": {
         "X-API-KEY": "your-api-key"
       }
@@ -51,9 +51,10 @@ If your version requires file-based configuration:
 }
 ```
 
-!!! warning "Replace Placeholders"
-    - Replace `{{MCP_SERVER_URL}}` with the actual server URL when available
-    - Replace `your-api-key` with your actual API key
+!!! warning "Server Coming Soon"
+    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
+    For now, use a [local server](#using-a-local-server) for development.
+    Replace `your-api-key` with your actual API key.
 
 ### Using a Local Server
 

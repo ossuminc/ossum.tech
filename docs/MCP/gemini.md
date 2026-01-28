@@ -28,7 +28,7 @@ Edit your settings file to add the RIDDL server under `mcpServers`:
 {
   "mcpServers": {
     "riddl": {
-      "url": "{{MCP_SERVER_URL}}/mcp/v1",
+      "url": "https://mcp.ossuminc.com/mcp/v1",
       "headers": {
         "X-API-KEY": "your-api-key"
       }
@@ -37,9 +37,10 @@ Edit your settings file to add the RIDDL server under `mcpServers`:
 }
 ```
 
-!!! warning "Replace Placeholders"
-    - Replace `{{MCP_SERVER_URL}}` with the actual server URL when available
-    - Replace `your-api-key` with your actual API key
+!!! warning "Server Coming Soon"
+    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
+    For now, use a [local server](#using-a-local-server) for development.
+    Replace `your-api-key` with your actual API key.
 
 ### Using Environment Variables
 
@@ -61,7 +62,7 @@ Gemini CLI supports environment variable substitution in configuration:
 Then set environment variables:
 
 ```bash
-export RIDDL_MCP_URL="{{MCP_SERVER_URL}}"
+export RIDDL_MCP_URL="https://mcp.ossuminc.com"
 export RIDDL_API_KEY="your-api-key"
 ```
 
@@ -132,7 +133,7 @@ You can include or exclude specific RIDDL tools:
 {
   "mcpServers": {
     "riddl": {
-      "url": "{{MCP_SERVER_URL}}/mcp/v1",
+      "url": "https://mcp.ossuminc.com/mcp/v1",
       "headers": {
         "X-API-KEY": "your-api-key"
       },
@@ -152,7 +153,7 @@ Or exclude tools you don't need:
 {
   "mcpServers": {
     "riddl": {
-      "url": "{{MCP_SERVER_URL}}/mcp/v1",
+      "url": "https://mcp.ossuminc.com/mcp/v1",
       "headers": {
         "X-API-KEY": "your-api-key"
       },
@@ -215,7 +216,7 @@ The debug output shows:
 
 ### Server Not Connecting
 
-- Test the server: `curl {{MCP_SERVER_URL}}/health`
+- Test the server: `curl https://mcp.ossuminc.com/health`
 - Verify JSON syntax in settings file
 - Check URL doesn't have trailing slashes
 - Enable debug mode for detailed logs

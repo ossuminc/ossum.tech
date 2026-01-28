@@ -29,7 +29,7 @@ Add the MCP server configuration to your `settings.json`:
 {
   "github.copilot.chat.mcpServers": {
     "riddl": {
-      "url": "{{MCP_SERVER_URL}}/mcp/v1",
+      "url": "https://mcp.ossuminc.com/mcp/v1",
       "headers": {
         "X-API-KEY": "your-api-key"
       }
@@ -38,9 +38,10 @@ Add the MCP server configuration to your `settings.json`:
 }
 ```
 
-!!! warning "Replace Placeholders"
-    - Replace `{{MCP_SERVER_URL}}` with the actual server URL when available
-    - Replace `your-api-key` with your actual API key
+!!! warning "Server Coming Soon"
+    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
+    For now, use a [local server](#using-a-local-server) for development.
+    Replace `your-api-key` with your actual API key.
 
 ### Workspace-Level Configuration
 
@@ -51,7 +52,7 @@ in your workspace:
 {
   "github.copilot.chat.mcpServers": {
     "riddl": {
-      "url": "{{MCP_SERVER_URL}}/mcp/v1",
+      "url": "https://mcp.ossuminc.com/mcp/v1",
       "headers": {
         "X-API-KEY": "your-api-key"
       }
@@ -165,7 +166,7 @@ Use Copilot Chat participants for different contexts:
 
 ### Connection Errors
 
-- Test the server: `curl {{MCP_SERVER_URL}}/health`
+- Test the server: `curl https://mcp.ossuminc.com/health`
 - Verify URL doesn't have trailing slashes
 - Check API key is correct
 

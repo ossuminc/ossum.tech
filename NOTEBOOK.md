@@ -7,6 +7,8 @@ sections are documented with proper RIDDL syntax highlighting.
 
 **Completed (2026-01-28):**
 
+- MCP Server URL updated to `https://mcp.ossuminc.com/mcp/v1/` in all guides
+- Added GitHub Copilot CLI integration guide (`docs/MCP/github-copilot.md`)
 - Strategic site improvements Phase 1 (quickstart, examples gallery, SEO,
   edit links, PWA support, about page, playground placeholder)
 - RIDDL Pygments lexer with custom color scheme
@@ -21,9 +23,9 @@ sections are documented with proper RIDDL syntax highlighting.
 
 | Task | Notes |
 |------|-------|
-| Replace `{{MCP_SERVER_URL}}` | When public URL is available |
 | Update release download links | When final releases are published |
 | Implement playground | Integrate Monaco + MCP server validation |
+| Remove "Coming Soon" warnings | When MCP server goes live (~early 2026) |
 
 ### Deferred Strategic Improvements (Soon)
 
@@ -112,7 +114,9 @@ hugo {
 
 ---
 
-## Open Questions
+## Resolved Questions
 
-- What is the public URL for the RIDDL MCP Server?
-- When will Synapify be available for beta testing?
+| Question | Answer | Date |
+|----------|--------|------|
+| MCP Server public URL | `https://mcp.ossuminc.com/mcp/v1/` | 2026-01-28 |
+| Synapify beta availability | March 1, 2026 | 2026-01-28 |

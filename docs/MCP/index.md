@@ -56,7 +56,8 @@ platform:
 - [Claude Desktop](./claude-desktop.md) - Anthropic's desktop application
 - [Claude Code](./claude-code.md) - Anthropic's CLI tool for developers
 - [Gemini CLI](./gemini.md) - Google's Gemini command-line interface
-- [VS Code with Copilot](./vscode-copilot.md) - GitHub Copilot integration
+- [GitHub Copilot CLI](./github-copilot.md) - GitHub Copilot command-line tool
+- [VS Code with Copilot](./vscode-copilot.md) - GitHub Copilot in VS Code
 - [IntelliJ AI Assistant](./intellij-ai.md) - JetBrains AI integration
 - [IntelliJ Junie](./intellij-junie.md) - JetBrains Junie agent
 
@@ -64,11 +65,15 @@ platform:
 
 ## Server URL
 
-!!! warning "URL Placeholder"
-    The public server URL is not yet available. Replace `{{MCP_SERVER_URL}}`
-    in the configuration examples with the actual URL when provided.
+The hosted MCP server will be available at:
 
-    For local development, use: `http://localhost:8080`
+```
+https://mcp.ossuminc.com/mcp/v1/
+```
+
+!!! warning "Coming Soon"
+    The hosted server at `mcp.ossuminc.com` will be available in early 2026.
+    For local development, use: `http://localhost:8080/mcp/v1/`
 
 ---
 

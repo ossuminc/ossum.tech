@@ -309,10 +309,11 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 ---
 
-## Placeholders
+## Pending Updates
 
-These placeholders exist in the documentation and need replacement:
+These items need updating when conditions are met:
 
-| Placeholder | Location | Replace When |
-|-------------|----------|--------------|
-| `{{MCP_SERVER_URL}}` | All MCP guides | Public URL available |
+| Item | Location | Update When |
+|------|----------|-------------|
+| "Coming Soon" warnings | All MCP guides | MCP server goes live (~early 2026) |
+| Download links | Tool pages | Final releases published |
