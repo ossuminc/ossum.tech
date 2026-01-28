@@ -171,7 +171,7 @@ Define domain-specific types:
 type OrderId is Id(Order)
 
 // Enumeration
-type OrderStatus is one of { Pending, Confirmed, Shipped, Delivered, Cancelled }
+type OrderStatus is any of { Pending, Confirmed, Shipped, Delivered, Cancelled }
 
 // Aggregation (record)
 type Address is {
@@ -182,8 +182,8 @@ type Address is {
   country: String
 }
 
-// Alternation (union)
-type PaymentMethod is one of {
+// Enumeration
+type PaymentMethod is any of {
   CreditCard, DebitCard, BankTransfer, DigitalWallet
 }
 ```

@@ -13,9 +13,9 @@ are creating.
 A *type* defines the shape of some information. There are many kinds of type
 definitions allowed, so we have grouped them into categories:
 
-{{< toc >}}
+[TOC]
 
-## Predefined Types {#prefdefined}
+## Predefined Types {#predefined}
 RIDDL supports several predefined types that just "exist" because they are:
 * applicable to nearly all fields of study or knowledge domains
 * fundamental in nature, covering the [SI base units](https://en.wikipedia.org/wiki/SI_base_unit)
@@ -68,18 +68,18 @@ definition in RIDDL.
 
 ### Enumeration
 An enumeration defines a type that may take the value of one identifier from a
-closed set of constant identifiers using the `any` keyword and the set of
-identifiers enclosed in square brackets, like this:
-```
-type Color = any of [Red, Orange, Yellow, Green, Blue, Indigo, Violet]
+closed set of constant identifiers using the `any of` keywords and the set of
+identifiers enclosed in curly braces, like this:
+```riddl
+type Color = any of { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
 ```
 
 ### Alternation
 A type can be defined as any one type chosen from a set of other type names
-using the `select` keyword followed by type names separated by `|`, like this:
+using the `one of` keywords followed by type names in curly braces, like this:
 
-```
-type References = select String | URL
+```riddl
+type References = one of { String, URL }
 ```
 
 There must be at least two types in an alternation.

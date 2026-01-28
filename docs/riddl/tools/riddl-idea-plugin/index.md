@@ -7,7 +7,7 @@ including syntax highlighting, validation, code completion, and navigation.
 ## Requirements
 
 - IntelliJ IDEA 2024.3 or later (Community or Ultimate)
-- JDK 21 or later
+- JDK 25 or later
 
 ## Installation
 

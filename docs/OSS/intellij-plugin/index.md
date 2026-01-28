@@ -34,7 +34,7 @@ Marketplace:
 ### Requirements
 
 - IntelliJ IDEA 2024.1 or later (Community or Ultimate Edition)
-- JDK 21 or later
+- JDK 25 or later
 
 ---
 

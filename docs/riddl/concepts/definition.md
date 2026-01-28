@@ -20,8 +20,7 @@ All definitions have some common attributes:
   the documentation output and the glossary.
 * _description_: A block of
   [Markdown](https://www.markdownguide.org/getting-started/) that
-  fully describes the definition. All the facilities provided by the  
-  [hugo-geekdoc](https://geekdocs.de/) template for hugo are supported.
+  fully describes the definition.
 
 These attributes merely provide supplemental information about the
 definition but are not part of the definition.

@@ -27,10 +27,10 @@ are requests for retrieval of some information. The handler should define
 how the processing of that query should proceed and yield a 
 [Result message](message.md#result).
 
-[Command messages](message.md#query) sent to the 
-repository are updates to the repository. The handler should define how the 
+[Command messages](message.md#command) sent to the
+repository are updates to the repository. The handler should define how the
 update works and may optionally yield an
-[Event message](message.md#result) but generally that is 
+[Event message](message.md#event) but generally that is
 handled at a higher level of abstraction. 
 
 ## Occurs In

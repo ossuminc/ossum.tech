@@ -13,6 +13,69 @@ All changes pushed to origin/main.
 
 ## Work Completed (Recent)
 
+### 2026-01-28: Documentation Editorial Review (Continued)
+
+Comprehensive editorial review of all documentation sections:
+
+- [x] **Concepts Section** (all files reviewed and fixed)
+  - adaptor.md: Added missing "from", fixed link spacing
+  - application.md: Complete rewrite - clarified applications are contexts with groups
+  - case.md: Fixed "too"→"to" typo
+  - connector.md: Removed unimplemented Subscriptions section
+  - constant.md: Simplified to reference vital.md
+  - definition.md: Removed outdated Hugo reference
+  - description.md: Removed Hugo formatter reference
+  - element.md: Fixed "Occurs In" and self-reference issues
+  - entity.md: Fixed actor→user model, Eric Brewer, event-sourced hyphenation
+  - epic.md: Fixed "an user"→"a user" (3 instances)
+  - function.md: Fixed wrong handler link
+  - group.md: Fixed broken Hugo icon shortcode
+  - handler.md: Fixed Projection→Projector
+  - interaction.md: Fixed "an Use Case"→"a Use Case"
+  - message.md: Removed duplicate application line, fixed principal→principle,
+    Projections→Projectors
+  - onclause.md: Fixed receipient→recipient, whenthe→when the
+  - option.md: Fixed link spacing, added missing period
+  - output.md: Fixed "an user"→"a user"
+  - processor.md: Complete rewrite explaining abstract concept and concrete types
+  - projector.md: Fixed projections→projectors
+  - repository.md: Fixed wrong anchor links (#query→#command, #result→#event)
+  - sagastep.md: Fixed examples→clauses
+  - type.md: Fixed Hugo TOC shortcode, RIDDL syntax (any of/one of)
+  - user.md: Changed Actor→User per Use Cases 2.0 terminology
+  - vital.md: Fixed truncation, removed Applications, added Streamlets
+
+- [x] **Guides Section** (all files reviewed and fixed)
+  - authors/index.md: Fixed event-sourced hyphenation, updated doc generation
+    to reference Synapify
+  - developers/index.md: Updated JDK 21→25, Scala 3.6.x→3.3.x LTS, noted hugo
+    migration to Synapify, fixed sbt stage→sbt riddlc/stage
+  - domain-experts/duties.md: Fixed "context or"→"context of"
+  - domain-experts/index.md: Replaced Hugo toc-tree shortcode
+  - domain-experts/relating-to-riddl.md: Fixed Riddl→RIDDL in title
+  - implementors/index.md: Replaced Hugo toc-tree shortcode
+  - implementors/ways-to-use-riddl.md: Fixed sbt stage commands, updated HOCON
+    example for validate-only, removed hugo references, added Synapify links
+
+- [x] **Tools Section** (all files reviewed and fixed)
+  - index.md: Updated riddlc description to validation-only, added Synapify link
+  - riddlc/index.md: Fixed sbt stage, removed hugo command sections, updated
+    HOCON config to use common section, added Synapify links
+  - riddl-idea-plugin/index.md: Updated JDK 21→25
+  - riddl-mcp-server/index.md: Clean, no issues
+
+- [x] **OSS Section** (all files reviewed and fixed)
+  - authoring-riddl.md: Fixed "one of"→"any of" for enumerations (2 instances)
+  - intellij-plugin/index.md: Updated JDK 21→25
+  - vscode-extension/index.md: Clean, no issues
+  - index.md: Clean, no issues
+
+- [x] **MCP Section** (all files reviewed)
+  - All files clean, no issues found
+
+- [x] **References Section** (reviewed)
+  - index.md: Clean, no issues
+
 ### 2026-01-27: Documentation Editorial Review
 
 Grammar, style, spelling, and accuracy review of documentation:
@@ -33,15 +96,6 @@ Grammar, style, spelling, and accuracy review of documentation:
   - Added guidance on outdated technology references
   - Added Hugo remnant removal guidance
   - Documented RIDDL syntax validation rules for examples
-
-- [ ] **Concepts Section** (in progress, 3 files uncommitted)
-  - Fixed Hugo shortcode in index.md
-  - Fixed icon syntax and grammar in domain.md
-  - Fixed apostrophe and punctuation in context.md
-
-**Pending for next session:**
-- entity.md: "user model" → "actor model", "Erik" → "Eric" Brewer, typos
-- Continue through remaining ~85 concept and other files
 
 ### 2026-01-26: Synapify User Guide Expansion
 
@@ -160,12 +214,7 @@ Completed all 6 phases of the comprehensive documentation improvement:
 
 ## In Progress
 
-### Documentation Editorial Review
-- Reviewing all docs/ markdown files for grammar, style, accuracy
-- Validating RIDDL syntax examples against EBNF grammar
-- Removing outdated technology references
-- Ensuring consistent tone (light, accessible, technically precise)
-- **Next**: Continue with concepts section (entity.md and beyond)
+Editorial review complete. All sections reviewed and fixed. Ready to commit.
 
 ## Pending Tasks
 
@@ -180,9 +229,69 @@ Completed all 6 phases of the comprehensive documentation improvement:
 
 | Task | File | Notes |
 |------|------|-------|
+| RIDDL Pygments lexer | New file | Custom syntax highlighting for code blocks |
 | Type examples | `references/language-reference.md` | Add specialized examples |
 | Future work review | `future-work/` | Update for current roadmap |
 | Quick-start tutorial | New file | Optional getting started guide |
+| EBNF grammar validation | `references/ebnf-grammar.md` | See details below |
+
+#### Synapify Generation Configuration Documentation
+
+When documenting Synapify's documentation/code generation features, use this
+HOCON configuration example as a starting point (preserved from riddlc hugo):
+
+```hocon
+hugo {
+    input-file = "ReactiveBBQ.riddl"
+    output-dir = "target/hugo/ReactiveBBQ"
+    project-name = "Reactive BBQ"
+    site-title = "Reactive BBQ Generated Specification"
+    site-description = "Generated specification for the Reactive BBQ application"
+    site-logo-path = "images/RBBQ.png"
+    erase-output = true
+    base-url = "https://bbq.riddl.tech"
+    source-url = "https://github.com/ossuminc/riddl"
+    edit-path = "/-/blob/main/src/riddl/ReactiveBBQ"
+}
+```
+
+#### RIDDL Pygments Lexer Task
+
+Create a custom Pygments lexer for RIDDL syntax highlighting in MkDocs code
+blocks. Currently `riddl` fenced code blocks render without syntax coloring.
+
+**Implementation approach:**
+1. Create `riddl_lexer.py` with a `RiddlLexer` class extending `RegexLexer`
+2. Define token patterns for RIDDL keywords, types, strings, comments, etc.
+3. Register the lexer in `mkdocs.yml` or via a plugin
+4. Test with existing code examples in documentation
+
+**Key token categories:**
+- Keywords: `domain`, `context`, `entity`, `handler`, `type`, `command`,
+  `event`, `query`, `result`, `is`, `of`, `to`, `from`, `inlet`, `outlet`, etc.
+- Predefined types: `String`, `Number`, `Boolean`, `Date`, `Time`, `UUID`, etc.
+- Operators: `=`, `:`, `{`, `}`, `(`, `)`, `[`, `]`
+- Comments: `//` line comments, `/* */` block comments
+- Strings: quoted literals
+
+#### EBNF Grammar Validation Task
+
+The EBNF grammar (`docs/riddl/references/ebnf-grammar.md`) is derived from the
+official fastparse grammar in the riddl module and is intended for AI tools to
+quickly understand RIDDL syntax. It must accurately reflect the rules accepted
+by the fastparse parser.
+
+**Known discrepancies found during editorial review:**
+- Missing `=` as alternative to `is` in type definitions
+- Missing `:` as alternative to `is` in field definitions (Scala-style syntax)
+
+**Validation approach:**
+1. Create a functional parser from the EBNF grammar
+2. Run it against all example RIDDL sources in the test suite
+3. Compare results with the fastparse parser
+4. Revise EBNF until there are no discrepancies
+
+This ensures the EBNF remains a reliable reference for AI-assisted RIDDL work.
 
 ## Design Decisions Log
 

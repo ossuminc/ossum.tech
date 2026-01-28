@@ -9,8 +9,8 @@ systems, see the [Author's Guide](../authors/index.md) or
 
 To work on RIDDL development, you'll need:
 
-- **JDK 21 or later** (Temurin recommended)
-- **Scala 3.6.x** (managed by sbt)
+- **JDK 25 or later** (Temurin recommended)
+- **Scala 3.3.x LTS** (managed by sbt)
 - **sbt 1.10+** (Scala Build Tool)
 - **Git** for version control
 
@@ -33,7 +33,7 @@ sbt compile
 sbt test
 
 # Build riddlc executable
-sbt stage
+sbt riddlc/stage
 ```
 
 The staged executable will be at `riddlc/target/universal/stage/bin/riddlc`.
@@ -74,7 +74,7 @@ riddl/
 - Option handling
 - Output formatting
 
-**hugo** - Documentation generator:
+**hugo** - Documentation generator (being migrated to [Synapify](../../../../synapify/index.md)):
 
 - Converts RIDDL models to Hugo-compatible markdown
 - Generates diagrams (Mermaid)

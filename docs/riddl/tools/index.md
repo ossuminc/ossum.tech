@@ -4,13 +4,14 @@ There are several tools for working with RIDDL models:
 
 ## [riddlc](riddlc/index.md)
 
-The RIDDL compiler (`riddlc`) is the command-line tool for parsing, validating,
-and transforming RIDDL models. It can:
+The RIDDL compiler (`riddlc`) is the command-line tool for parsing and
+validating RIDDL models. It can:
 
 - Validate syntax and semantics
-- Generate documentation websites
-- Produce architecture diagrams
 - Output analysis reports
+
+Documentation and diagram generation will be available through
+[Synapify](../../synapify/index.md).
 
 ## [riddl-idea-plugin](riddl-idea-plugin/index.md)
 

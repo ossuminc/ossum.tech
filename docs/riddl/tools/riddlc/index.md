@@ -21,8 +21,7 @@ cd riddl
 
 # Build the compiler
 sbt compile
-cd riddlc
-sbt stage
+sbt riddlc/stage
 
 # Add to PATH (adjust for your shell)
 export PATH="$PATH:$(pwd)/target/universal/stage/bin"
@@ -50,10 +49,9 @@ riddlc version
 
 # Validate a RIDDL file
 riddlc validate mymodel.riddl
-
-# Generate documentation
-riddlc hugo -i mymodel.riddl -o docs/
 ```
+
+Documentation generation will be available through [Synapify](../../../synapify/index.md).
 
 ## Commands
 
@@ -68,27 +66,6 @@ riddlc validate mymodel.riddl
 Options:
 - `-v, --verbose`: Show detailed validation messages
 - `-w, --warnings`: Treat warnings as errors
-
-### hugo
-
-Generates a Hugo documentation website from a RIDDL specification.
-
-```bash
-riddlc hugo -i mymodel.riddl -o output/
-```
-
-Options:
-- `-i, --input`: Input RIDDL file (required)
-- `-o, --output`: Output directory (required)
-- `--theme`: Hugo theme to use
-- `--base-url`: Base URL for the generated site
-
-The generated site includes:
-- Domain and context documentation
-- Entity and repository pages
-- Glossary of terms
-- Architecture diagrams (Mermaid)
-- Message catalogs
 
 ### info
 
@@ -113,14 +90,11 @@ riddlc version
 You can create a `riddlc.conf` file to set default options:
 
 ```hocon
-riddlc {
+common {
   verbose = false
-  warnings-as-errors = false
-
-  hugo {
-    theme = "docsy"
-    base-url = "https://docs.example.com"
-  }
+  show-warnings = true
+  show-missing-warnings = false
+  show-style-warnings = false
 }
 ```
 
@@ -138,18 +112,6 @@ Run validation frequently while authoring:
 ```bash
 # Validate and show all messages
 riddlc validate -v mymodel.riddl
-```
-
-### Generate Documentation
-
-Generate a documentation site for review:
-
-```bash
-# Generate Hugo site
-riddlc hugo -i mymodel.riddl -o site/
-
-# Serve locally (requires Hugo installed)
-cd site && hugo server
 ```
 
 ### CI/CD Integration

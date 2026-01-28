@@ -148,7 +148,7 @@ a single business concept.
 context Catalog is {
   entity Product is {
     option aggregate
-    option event sourced
+    option event-sourced
 
     // Commands - requests to change state
     command CreateProduct is {
@@ -536,10 +536,9 @@ riddlc validate mymodel.riddl
 
 # Verbose output for debugging
 riddlc --verbose validate mymodel.riddl
-
-# Generate documentation
-riddlc hugo -i mymodel.riddl -o docs/
 ```
+
+Documentation generation will be available through [Synapify](../../../../synapify/index.md).
 
 ### Common Validation Issues
 

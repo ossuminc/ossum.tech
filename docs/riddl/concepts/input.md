@@ -3,10 +3,10 @@ title: "Input"
 draft: "false"
 ---
 
-An Input is the abstract notion of some information provided to an 
-application by its user (an [user](user.md). To make this more
-tangible, inputs could be implemented as any of the following:
-* the submission of a typical htML form a user could fill in,
+An Input is the abstract notion of some information provided to an
+application by its [user](user.md). To make this more tangible, inputs could
+be implemented as any of the following:
+* the submission of a typical HTML form a user could fill in,
 * the tap of a button on a mobile device,
 * the selection of items from a list on a native application, 
 * a voice response providing information via any
@@ -21,9 +21,9 @@ The nature of the implementation for an input is up to the UI Designer.
 RIDDL's concept of it is based on the net result: the data type received by
 the application. 
 
-An input is a named component of an [application](application.md) 
-that receives data of a specific [type](type.md) from an  
-[user](user.md) (user) of the application. Each input can define 
+An input is a named component of an [application](application.md)
+that receives data of a specific [type](type.md) from a
+[user](user.md) of the application. Each input can define 
 data [types](type.md) and declares a 
 [command message](message.md#command) as the data received
 by the application's input.

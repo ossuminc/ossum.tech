@@ -3,22 +3,21 @@ title: "Epics"
 draft: false
 ---
 
-An epic in RIDDL is a definition that defines a large user story with a set 
-of use cases.  This is the same 
-concept as the idea 
+An epic in RIDDL is a definition that defines a large user story with a set
+of use cases. This is the same concept as the idea 
 [Kent Beck](../introduction/who-made-riddl-possible.md#kent-beck) 
 [introduced in 1997](https://en.wikipedia.org/wiki/User_story#History). In 
 RIDDL, a story gets a little more involved than the 
 [usual formulations](https://en.wikipedia.org/wiki/User_story#Common_templates) 
 of a user story:
-> As an _{user}_, I would like _{capability}_, so that _{benefit}_
+> As a _{user}_, I would like _{capability}_, so that _{benefit}_
 
 or
- 
-> In order to receive _{benefit}_, as an _{user}_, I can _{capability}_
+
+> In order to receive _{benefit}_, as a _{user}_, I can _{capability}_
 
 which have these three ideas:
-* An `user` that provides the role played by the narrator of the story
+* A `user` that provides the role played by the narrator of the story
 * A `capability` that provides the capability used by the narrator
 * A `benefit` that provides the reason why the narrator wants to 
   use the `capability`

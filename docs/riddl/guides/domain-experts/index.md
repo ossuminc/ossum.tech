@@ -32,4 +32,8 @@ and availability, the means used to monitor and maintain systems and processes,
 and so on. Domain experts will need to understand the reasons for these changes 
 and be able to evangelize them as they interact with their peers.
 
-{{< toc-tree >}}
+## In This Section
+
+* [Duties of a Domain Expert](duties.md) — Responsibilities and contributions
+* [Relating to RIDDL](relating-to-riddl.md) — How RIDDL concepts map to your
+  domain knowledge

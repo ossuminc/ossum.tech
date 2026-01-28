@@ -80,28 +80,16 @@ connecting two pipes together. Producers provide the data, consumers consume
 the data. Sometimes we call producers *sources* because they originate the data.
 Sometimes we call consumers *sinks* because they terminate the data.
 
-{{< mermaid align="left" >}}
+```mermaid
 graph LR;
 Producers --> P{{Pipe}} --> Consumers
 Source --> P1{{Pipe 1}} --> Flow --> P2{{Pipe 2}} --> Sink
-{{< /mermaid >}}
+```
 
 Pipes may have multiple publishers (writers of data to the pipe) and multiple
 consumers (readers of data from the pipe). In fact, because of the
 _partitioned consumption_ principle, there can be multiple groups of consumers,
 each group getting each data item from the pipe.
-
-## Subscriptions
-
-{{< hint type=warning icon=gdoc_dangerous title="Not Implemented" >}}
-This feature is not implemented as of 0.16.1
-{{< /hint >}}
-
-When a pipe has multiple consumers, they are organized into subscriptions. 
-Each subscription gets every datum the pipe carries. Consumers attach to a
-subscription and there is generally one consumer per partition of the 
-subscription. Sometimes subscriptions are known as *consumer groups* as is the
-case for Kafka.
 
 ## Occurs In
 

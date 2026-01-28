@@ -23,27 +23,29 @@ There are three main aspects to this definition of entity:
   through their useful lifespan, to destruction.
 
 An entity is the fundamental processor of work in a reactive system and in a
-RIDDL model. Entities are most often implemented in software using one of 
+RIDDL model. Entities are most often implemented in software using one of
 these techniques:
 
-* using the user model where actors process messages and encapsulate state.
-* object-oriented programming which also encapsulate states and defines 
-  functions to manipulate that state. 
-* functional programming where a collection of functions process messages or 
-  function calls using exclusive access to some data and a queue of messages;
-  this simulates the user model.  
+* The **actor model**, where actors process messages and encapsulate state
+* **Object-oriented programming**, which also encapsulates state and defines
+  functions to manipulate that state
+* **Functional programming**, where a collection of functions process messages
+  or function calls using exclusive access to some data and a queue of messages;
+  this simulates the actor model  
 
 ## Identity
-Entities have a unique immutable persistent identifier, much like people have 
-names except our personal names are not unique. The unique identifier is 
-used to locate the entity in a computing system and for other computing 
-purposes. These immutable and unique identifiers convey equivalence. That 
-is when two values of an identifier are the same, then by definition, they
-must refer to the same entity.  Changing the state of the entity does not 
-break this equivalence. [Type `Id`](type.md#parameterized), 
-which provides the means to reference the entity in its context or between
-contexts. An Entity's immutable identity conveys equivalence. Individual pieces
-of data of an entity can change their values (mutable).
+Entities have a unique immutable persistent identifier, much like people have
+names except our personal names are not unique. The unique identifier is
+used to locate the entity in a computing system and for other computing
+purposes. These immutable and unique identifiers convey equivalence. That
+is, when two values of an identifier are the same, then by definition, they
+must refer to the same entity. Changing the state of the entity does not
+break this equivalence.
+
+RIDDL provides [Type `Id`](type.md#parameterized) for this purpose, giving you
+a way to reference an entity within its context or across contexts. While an
+entity's identity is immutable, the individual pieces of data it holds can
+change their values (mutable).
 
 ## Equality
 Entities hold state, whether that state is persistent or not. However, for
@@ -60,19 +62,20 @@ you compare "John Smith" with "Jane Smith", they are not the same entity, even
 if all their other attributes are the same.
 
 ## Options
-Entities can have various optional characteristics as shown in the sections 
-below
+Entities can have various optional characteristics as shown in the sections
+below. These options are typically used by generators (code, documentation,
+API, etc.) to make implementation decisions.
 
 ### technology
-*Arguments*: Multiple, a list of the names of technologies intended to be 
-used in the implementation.
-*Implication*: This does not impact the behavior of the entity except in the 
-differences provided by various implementation technologies. 
+* *Arguments*: Multiple, a list of the names of technologies intended to be
+  used in the implementation.
+* *Implication*: This does not impact the behavior of the entity except in the
+  differences provided by various implementation technologies.
 
-### event sourced
-*Arguments*: None
-*Implication*: The entity should use event sourcing to store its state as a 
-log of change events
+### event-sourced
+* *Arguments*: None
+* *Implication*: The entity should use event sourcing to store its state as a
+  log of change events.
 
 ### value
 * *Arguments*: None
@@ -92,14 +95,14 @@ log of change events
 
 ### consistent
 * *Arguments*: None
-* *Implication*: The entity's implementation should favor consistency over  
-  availability in [Erik Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
+* *Implication*: The entity's implementation should favor consistency over
+  availability in [Eric Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
   [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem).
 
 ### available
 * *Arguments*: None
-* *Implication*: The entity's implementation should favor availability over 
-  consistence in [Erik Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
+* *Implication*: The entity's implementation should favor availability over
+  consistency in [Eric Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
   [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). 
 
 ### finite state machine
@@ -126,10 +129,10 @@ log of change events
 
 * [Authors](author.md) - define who the authors of the entity are
 * [Functions](function.md) - named definitions of processing
-* [Handler](handler.md) - how to handle messages sent to an entity
-* [Includes](include.md) - inclusion of entity content from a  file
+* [Handlers](handler.md) - how to handle messages sent to an entity
+* [Includes](include.md) - inclusion of entity content from a file
 * [Invariants](invariant.md) - logical expressions that must always hold true
 * [Options](option.md) - define translation options for the entity
-* [State](state.md) - the data an entity holds
+* [States](state.md) - the data an entity holds
 * [Types](type.md) - the definition of a type of information
-* [Terms](term.md) - the definition of a term related to  the entity
+* [Terms](term.md) - the definition of a term related to the entity

@@ -22,9 +22,9 @@ The following table shows the pairings recognized:
 | subscribe |  any  |  pipe   | Subscribe to a pipe                         |
 |   saga    |  any  |  saga   | Initiate a saga                             |
 |  select   | user | element | Select an item from application element     |
-|  provide  | user | element | Provide input data too application          |
+|  provide  | user | element | Provide input data to application           |
 |  present  | user | element | Cause an application to present info        |
- 
+
 
 ## Occurs In
 * [Epic](epic.md)

@@ -39,4 +39,7 @@ availability of technical talent, strategic partners, and so on are all
 extremely important and may conflict with the choices of the implementation
 team and sound reactive architecture.
 
-{{< toc-tree >}}
+## In This Section
+
+* [Ways to Use RIDDL](ways-to-use-riddl.md) — Different approaches for working
+  with RIDDL specifications

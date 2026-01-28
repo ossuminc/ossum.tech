@@ -43,9 +43,9 @@ An Activate definition instructs the application to change context to a
 different group of elements, enabling navigation within the application.
 
 ## Occurs In
-* [Context](context.md)
+* [Group](group.md)
 
 ## Contains
-* [Elements](element.md)
+* [Group](group.md) :fontawesome-regular-rotate-left:
 * [Handlers](handler.md)
 

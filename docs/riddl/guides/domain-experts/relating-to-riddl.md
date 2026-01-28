@@ -1,5 +1,5 @@
 ---
-title: "Relating To Riddl -- Domain Expert's Guide"
+title: "Relating To RIDDL -- Domain Expert's Guide"
 description: "How a domain expert should think of RIDDL"
 date: 2022-08-06T10:50:32-07:00
 draft: false

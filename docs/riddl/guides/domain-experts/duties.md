@@ -5,7 +5,7 @@ draft: false
 weight: 20
 ---
 
-The duties of the domain expert in the context or making a system specification with
+The duties of the domain expert in the context of making a system specification with
 RIDDL are to, simply, provide their expertise. Although helpful, it is not necessary
 to understand all the details of RIDDL in order to collaborate with 
 [authors](../authors/index.md) and [implementors](../implementors/index.md)

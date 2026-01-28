@@ -10,15 +10,14 @@ a special case of an [aggregate type](type.md#aggregation)
 and the _lingua franca_ of many RIDDL definitions. They define the API for
 all the [processors](./processor.md):
 * [`adaptor`s](adaptor.md)
-* [`application`s](adaptor.md)
 * [`context`s](context.md)
 * [`entity`s](entity.md)
 * [`processor`s](processor.md)
 * [`projector`s](projector.md)
 * and [`repository`s](repository.md)
 
-* That is, these are the fundamental building blocks of a
-[message-driven system](https://developer.lightbend.com/docs/akka-platform-guide/concepts/message-driven-event-driven.html)
+These are the fundamental building blocks of a
+[message-driven system](https://developer.lightbend.com/docs/akka-platform-guide/concepts/message-driven-event-driven.html).
 
 ## Differences Between Kinds of Messages
 RIDDL follows
@@ -29,7 +28,7 @@ which states, in the context of object-oriented programming in Eiffel that:
 > that returns data to the caller, but not both. In other words, asking a
 > question should not change the answer.[^1]
 
-Consequently, RIDDL adheres to this principal and employs the notion in message
+Consequently, RIDDL adheres to this principle and employs the notion in message
 definitions since RIDDL is message-oriented not object-oriented. However, 
 RIDDL also includes message types for the responses from commands and 
 queries, events and results, respectively. The following subsections provide 
@@ -106,8 +105,8 @@ even more specific.
 |  Query  |   Intent to Read Projection State   |
 | Result  | Result Of Reading Projection State  |
 
-#### How Messages Are Handled By Projections
-|  Kind   | In Regard To Handling By Projection |
+#### How Messages Are Handled By Projectors
+|  Kind   | In Regard To Handling By Projector  |
 |:-------:|:-----------------------------------:|
 | Command |  Intent To Update Projection State  |
 |  Event  | The Projection's State Was Modified |

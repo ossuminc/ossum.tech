@@ -9,7 +9,7 @@ components in a model. Handlers do that by specifying what should be done
 whenever a [message](message.md) of a particular type is
 received by its parent definition. Handlers are composed as a set of
 [on clauses](onclause.md) that connect a
-[message](message.md) with a set of  
+[message](message.md) with a set of
 [statements](statement.md). The statements provide the business 
 logic that should be executed upon receipt of the message. Because that business 
 logic can send and publish further messages to other components, a 
@@ -26,7 +26,7 @@ definition, as shown in this table:
 | Context     | Implements API of the stateless context                          |
 | Entity      | Handler to use on new entity before any morph action             |
 | Processor   | Provide ETL logic for moving inputs to outputs                   |
-| Projection  | Handle updates and queries on the projection                     |
+| Projector   | Handle updates and queries on the projection                     |
 | Repository  | Handle updates and queries on the repository                     |
 | State       | Handle messages while entity is in that state                    |
 
@@ -34,7 +34,7 @@ The types of definition in which Handlers occur are known as the
 "active" definitions. More details are provided in the sections below. 
 
 ## Adaptor Handlers
-Adaptor handlers provide the translation of messages from 
+Adaptor handlers provide the translation of messages from one
 [context](context.md) to another.
 
 ## Application Handlers
