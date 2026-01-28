@@ -22,27 +22,18 @@ ossum.tech/
 │   │   ├── tools/           # Documentation for riddlc, IDE plugins, etc.
 │   │   └── future-work/     # Planned features and roadmap
 │   ├── MCP/                 # RIDDL MCP Server documentation
-│   │   ├── index.md         # Overview, capabilities, tools
-│   │   ├── claude-desktop.md
-│   │   ├── claude-code.md
-│   │   ├── gemini.md
-│   │   ├── vscode-copilot.md
-│   │   ├── intellij-ai.md
-│   │   └── intellij-junie.md
 │   ├── OSS/                 # Open source tools documentation
-│   │   ├── index.md         # OSS landing page
-│   │   ├── authoring-riddl.md  # Common RIDDL authoring guide
-│   │   ├── intellij-plugin/ # IntelliJ IDEA plugin docs
-│   │   └── vscode-extension/# VS Code extension docs
 │   ├── synapify/            # Synapify visual editor docs
-│   │   ├── index.md         # Overview and getting started
-│   │   ├── user-interface.md # Four-panel UI documentation
-│   │   ├── simulation.md    # riddlsim integration (coming soon)
-│   │   └── generation.md    # riddl-gen integration (coming soon)
+│   ├── stylesheets/         # Custom CSS (includes RIDDL syntax colors)
 │   └── about/               # Company info, privacy policy
+├── riddl_lexer/             # Custom Pygments lexer for RIDDL syntax highlighting
+│   ├── __init__.py          # Package exports
+│   ├── lexer.py             # Token definitions and regex patterns
+│   └── style.py             # Color scheme matching IDE tools
 ├── overrides/               # MkDocs theme customizations
 ├── mkdocs.yml               # MkDocs configuration
-└── build.sbt                # SBT build for any Scala-based generation
+├── pyproject.toml           # Python package config for riddl_lexer
+└── .github/workflows/       # CI/CD (publishes to GitHub Pages)
 ```
 
 ### Key Documentation Files
@@ -65,17 +56,42 @@ When working on RIDDL-related tasks, these files are essential context:
 ### Local Development
 
 ```bash
+# Install the RIDDL lexer for syntax highlighting
+pip install -e .
+
 # Serve locally with hot reload
 mkdocs serve
 
 # Build static site
 mkdocs build
 
-# Deploy to GitHub Pages (if configured)
+# Deploy to GitHub Pages
 mkdocs gh-deploy
 ```
 
 The site will be available at `http://localhost:8000` when serving locally.
+
+### RIDDL Syntax Highlighting
+
+The `riddl_lexer/` package provides custom Pygments syntax highlighting for
+RIDDL code blocks. It's automatically installed in CI via `pip install -e .`
+before building.
+
+**Token categories and colors (dark theme):**
+
+| Token Type | Color | Examples |
+|------------|-------|----------|
+| Keywords | Burnt orange `#fa8b61` | `domain`, `context`, `entity`, `handler` |
+| Readability | Yellow `#b3ae60` | `is`, `of`, `to`, `with`, `by` |
+| Predefined types | Teal `#19c4bf` | `String`, `Integer`, `UUID`, `Timestamp` |
+| Option values | Green `#57d07c` | `event-sourced`, `aggregate` |
+| Punctuation | Teal `#0da19e` | `{`, `}`, `(`, `)`, `,`, `:` |
+| Comments | Gray `#808080` | `// comment`, `/* block */` |
+| Strings | Bright green `#98c379` | `"quoted text"` |
+| Markdown docs | Dim green `#629755` | `\|## Heading` |
+
+CSS overrides in `docs/stylesheets/extra.css` apply these colors to both
+dark and light themes.
 
 ### MkDocs Configuration
 
@@ -84,8 +100,8 @@ The site uses MkDocs Material theme with these notable features:
 - Navigation tabs
 - Search with highlighting
 - Admonitions (info boxes, warnings, etc.)
-- Code highlighting with line numbers
-- Custom CSS in `overrides/`
+- Code highlighting via Pygments with custom RIDDL lexer
+- Custom CSS in `docs/stylesheets/`
 
 ### Markdown Extensions
 
@@ -131,24 +147,21 @@ Use MkDocs Material admonitions for callouts:
 
 !!! tip "Pro Tip"
     Helpful tip here.
-
-!!! note "Work In Progress"
-    This section is under development.
 ```
 
 ### Code Examples
 
-Use fenced code blocks with language hints:
+Use fenced code blocks with the `riddl` language hint:
 
-```markdown
+````markdown
 ```riddl
-domain Example {
-  context MyContext {
+domain Example is {
+  context MyContext is {
     // Context contents
   }
 }
 ```
-```
+````
 
 ### Cross-References
 
@@ -160,28 +173,72 @@ See [Domain concepts](../concepts/domain.md) for more details.
 
 ---
 
-## Documentation Status
+## Editorial Guidelines
 
-As of 2026-01-26, documentation is complete for all major sections:
+These guidelines were established during documentation review sessions:
 
-### Completed Sections
+### Tooling Separation
 
-- **Introduction**: All pages complete
-- **Language Reference**: Complete with all processor types and handlers
-- **Tools**: Complete documentation for `riddlc`, IDE plugins, MCP server
-- **Guides**: Complete guides for Authors, Developers, Domain Experts,
-  Implementors
-- **Concepts**: All concept pages complete with proper links
-- **OSS**: IDE extension documentation with authoring guide
-- **MCP**: Installation guides for 6 AI tools (Claude, Gemini, Copilot, etc.)
-- **Synapify**: Comprehensive user guide with UI, simulation, and generation
-  documentation (features marked "Coming Soon" where in development)
+**Important**: The RIDDL ecosystem has a clear separation of concerns:
 
-### Placeholders
+- **`riddlc`** (open source): Syntax and semantic validation only. It reads
+  RIDDL files, checks them, and reports errors. No code generation.
+- **Synapify** (commercial): Provides advanced features including code
+  generation, documentation generation, and AI-assisted development. These
+  features are available via subscription.
 
-| Placeholder | Location | Replace When |
-|-------------|----------|--------------|
-| `{{MCP_SERVER_URL}}` | All MCP guides | Public URL available |
+When documenting capabilities, do NOT claim that `riddlc` generates code,
+diagrams, Kubernetes manifests, etc. Those capabilities exist in Synapify.
+
+### Outdated Technology References
+
+Remove or generalize references to specific generation targets that are no
+longer accurate:
+
+- ~~Kalix~~ (no longer a target)
+- ~~Kubernetes deployment descriptors~~ (not in OSS tooling)
+- ~~Akka code generation~~ (not in OSS tooling)
+
+Instead, describe RIDDL's *capability* to enable such translation without
+claiming specific tool support.
+
+### Hugo Remnants
+
+This site migrated from Hugo to MkDocs Material. Remove any Hugo shortcodes:
+
+- `{{< toc-tree >}}` — doesn't work in MkDocs
+- `{{< icon "..." >}}` — use Font Awesome syntax or remove
+- Any other `{{< ... >}}` patterns
+
+### Capitalization
+
+Always use **RIDDL** (all caps) in prose. It's an acronym. Not "Riddl" or
+"riddl" except in code/filenames where lowercase is conventional.
+
+### RIDDL Syntax in Examples
+
+Code examples must match the EBNF grammar. Common issues to avoid:
+
+1. **Enumerations vs Alternations**:
+   - `any of { A, B, C }` — enumeration of constants
+   - `one of { TypeA, TypeB }` — alternation of types
+
+2. **User terminology**: Use "User" not "Actor" (per Use Cases 2.0)
+
+3. **Hyphenation**: `event-sourced` (hyphenated as compound modifier)
+
+4. **Version requirements**:
+   - JDK 25 (current LTS)
+   - Scala 3.3.x (current LTS)
+   - `sbt riddlc/stage` (not `sbt stage`)
+
+### Tone and Style
+
+- Light, accessible, occasionally jovial
+- Technical precision without being dry
+- Explain concepts before showing syntax
+- Use em-dashes for asides—they read more naturally
+- Prefer active voice
 
 ---
 
@@ -227,7 +284,7 @@ This documentation site covers tools from other Ossum Inc. repositories:
 - **riddl**: The RIDDL compiler (`riddlc`) and language implementation
 - **synapify**: Desktop application for visual RIDDL editing
 - **riddl-idea-plugin**: IntelliJ IDEA plugin for RIDDL
-- **riddl-vscode**: VS Code extension for RIDDL
+- **riddl-vscode**: VS Code extension for RIDDL (source for lexer tokens)
 - **riddl-mcp-server**: MCP server for AI-assisted RIDDL modeling
 
 Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
@@ -238,6 +295,7 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 | Task | Command |
 |------|---------|
+| Install lexer | `pip install -e .` |
 | Start dev server | `mkdocs serve` |
 | Build site | `mkdocs build` |
 | Check links | `mkdocs build --strict` |
@@ -245,84 +303,10 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 ---
 
-## Editorial Guidelines (Session Learnings)
+## Placeholders
 
-These guidelines were established during documentation review sessions:
+These placeholders exist in the documentation and need replacement:
 
-### Tooling Separation
-
-**Important**: The RIDDL ecosystem has a clear separation of concerns:
-
-- **`riddlc`** (open source): Syntax and semantic validation only. It reads
-  RIDDL files, checks them, and reports errors. No code generation.
-- **Synapify** (commercial): Provides advanced features including code
-  generation, documentation generation, and AI-assisted development. These
-  features are available via subscription.
-
-When documenting capabilities, do NOT claim that `riddlc` generates code,
-diagrams, Kubernetes manifests, etc. Those capabilities exist in Synapify.
-Avoid mentioning "riddl-gen" directly—it's an internal service name. Just
-refer to Synapify's generation features.
-
-### Outdated Technology References
-
-Remove or generalize references to specific generation targets that are no
-longer accurate:
-
-- ~~Kalix~~ (no longer a target)
-- ~~Kubernetes deployment descriptors~~ (not in OSS tooling)
-- ~~Akka code generation~~ (not in OSS tooling)
-- ~~Protocol Buffers / Smithy / OpenAPI generation~~ (not in OSS tooling)
-
-Instead, describe RIDDL's *capability* to enable such translation without
-claiming specific tool support.
-
-### Hugo Remnants
-
-This site migrated from Hugo to MkDocs Material. Remove any Hugo shortcodes:
-
-- `{{< toc-tree >}}` — doesn't work in MkDocs
-- `{{< icon "..." >}}` — use Font Awesome syntax or remove
-- Any other `{{< ... >}}` patterns
-
-### Capitalization
-
-Always use **RIDDL** (all caps) in prose. It's an acronym. Not "Riddl" or
-"riddl" except in code/filenames where lowercase is conventional.
-
-### RIDDL Syntax in Examples
-
-Code examples must match the EBNF grammar. Common issues to avoid:
-
-1. **Missing `is` keyword**: Most definitions require it.
-   - Wrong: `on command Foo { ... }`
-   - Right: `on command Foo is { ... }`
-
-2. **User stories require both parts**:
-   - Right: `user Customer wants to "do X" so that "Y happens"`
-
-3. **Epics and use cases start with user stories**:
-   ```riddl
-   epic Shopping is {
-     user Customer wants to "..." so that "..."
-     case AddToCart is { ... }
-   }
-   ```
-
-4. **Step interactions use specific syntax**:
-   - `step for user Customer is "does something"`
-   - `step send command X from user Y to entity Z`
-   - `step show output X to user Y`
-
-### Tone and Style
-
-- Light, accessible, occasionally jovial
-- Technical precision without being dry
-- Explain concepts before showing syntax
-- Use em-dashes for asides—they read more naturally
-- Prefer active voice
-
-### Known Authors (Correct Spellings)
-
-For the Reactive Manifesto: Jonas Bonér, **Dave** Farley (not David),
-Roland **Kuhn** (not Kunh), Martin Thompson.
+| Placeholder | Location | Replace When |
+|-------------|----------|--------------|
+| `{{MCP_SERVER_URL}}` | All MCP guides | Public URL available |
