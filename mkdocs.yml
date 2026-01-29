@@ -139,3 +139,119 @@ markdown_extensions:
 plugins:
   - search
   - offline
+
+nav:
+  - Home: index.md
+  - RIDDL:
+    - riddl/index.md
+    - Quickstart: riddl/quickstart.md
+    - Introduction:
+      - riddl/introduction/index.md
+      - What is RIDDL?: riddl/introduction/what-is-riddl.md
+      - Why is RIDDL Needed?: riddl/introduction/why-is-riddl-needed.md
+      - What Can RIDDL Do?: riddl/introduction/what-can-riddl-do.md
+      - What is RIDDL Based On?: riddl/introduction/what-is-riddl-based-on.md
+      - What Conventions Does RIDDL Use?: riddl/introduction/what-conventions-does-riddl-use.md
+      - Who Can Benefit from RIDDL?: riddl/introduction/who-can-benefit-from-riddl.md
+      - Who Made RIDDL Possible?: riddl/introduction/who-made-riddl-possible.md
+      - How Can I Get Help?: riddl/introduction/how-can-i-get-help.md
+    - Concepts:
+      - riddl/concepts/index.md
+      - Root: riddl/concepts/root.md
+      - Domain: riddl/concepts/domain.md
+      - Context: riddl/concepts/context.md
+      - Entity: riddl/concepts/entity.md
+      - Repository: riddl/concepts/repository.md
+      - Projector: riddl/concepts/projector.md
+      - Saga: riddl/concepts/saga.md
+      - Saga Step: riddl/concepts/sagastep.md
+      - Streamlet: riddl/concepts/streamlet.md
+      - Adaptor: riddl/concepts/adaptor.md
+      - Application: riddl/concepts/application.md
+      - Epic: riddl/concepts/epic.md
+      - Use Case: riddl/concepts/use-case.md
+      - User: riddl/concepts/user.md
+      - Interaction: riddl/concepts/interaction.md
+      - Handler: riddl/concepts/handler.md
+      - On Clause: riddl/concepts/onclause.md
+      - Function: riddl/concepts/function.md
+      - Type: riddl/concepts/type.md
+      - Field: riddl/concepts/field.md
+      - State: riddl/concepts/state.md
+      - Constant: riddl/concepts/constant.md
+      - Invariant: riddl/concepts/invariant.md
+      - Message: riddl/concepts/message.md
+      - Inlet: riddl/concepts/inlet.md
+      - Outlet: riddl/concepts/outlet.md
+      - Connector: riddl/concepts/connector.md
+      - Group: riddl/concepts/group.md
+      - Input: riddl/concepts/input.md
+      - Output: riddl/concepts/output.md
+      - Case: riddl/concepts/case.md
+      - Conditional: riddl/concepts/conditional.md
+      - Statement: riddl/concepts/statement.md
+      - Include: riddl/concepts/include.md
+      - Author: riddl/concepts/author.md
+      - Term: riddl/concepts/term.md
+      - Comment: riddl/concepts/comment.md
+      - Description: riddl/concepts/description.md
+      - Metadata: riddl/concepts/metadata.md
+      - Option: riddl/concepts/option.md
+      - Element: riddl/concepts/element.md
+      - Definition: riddl/concepts/definition.md
+      - Value: riddl/concepts/value.md
+      - Vital: riddl/concepts/vital.md
+      - Processor: riddl/concepts/processor.md
+    - Guides:
+      - riddl/guides/index.md
+      - For Authors: riddl/guides/authors/index.md
+      - For Domain Experts:
+        - riddl/guides/domain-experts/index.md
+        - Duties: riddl/guides/domain-experts/duties.md
+        - Relating to RIDDL: riddl/guides/domain-experts/relating-to-riddl.md
+      - For Implementors:
+        - riddl/guides/implementors/index.md
+        - Ways to Use RIDDL: riddl/guides/implementors/ways-to-use-riddl.md
+      - For Developers: riddl/guides/developers/index.md
+    - Examples: riddl/examples/index.md
+    - Playground: riddl/playground/index.md
+    - References:
+      - riddl/references/index.md
+      - Language Reference: riddl/references/language-reference.md
+      - EBNF Grammar: riddl/references/ebnf-grammar.md
+    - Tools:
+      - riddl/tools/index.md
+      - riddlc: riddl/tools/riddlc/index.md
+      - MCP Server: riddl/tools/riddl-mcp-server/index.md
+      - IntelliJ Plugin: riddl/tools/riddl-idea-plugin/index.md
+    - Future Work:
+      - riddl/future-work/index.md
+      - Akka: riddl/future-work/akka.md
+      - Kalix: riddl/future-work/kalix.md
+      - OpenAPI: riddl/future-work/openapi.md
+      - Diagrams: riddl/future-work/diagrams.md
+      - Analyses: riddl/future-work/analyses.md
+      - BAST: riddl/future-work/bast.md
+      - Others: riddl/future-work/others.md
+  - Synapify:
+    - synapify/index.md
+    - User Interface: synapify/user-interface.md
+    - Generation: synapify/generation.md
+    - Simulation: synapify/simulation.md
+  - MCP:
+    - MCP/index.md
+    - Claude Desktop: MCP/claude-desktop.md
+    - Claude Code: MCP/claude-code.md
+    - GitHub Copilot CLI: MCP/github-copilot.md
+    - VS Code Copilot: MCP/vscode-copilot.md
+    - Gemini: MCP/gemini.md
+    - IntelliJ AI Assistant: MCP/intellij-ai.md
+    - IntelliJ Junie: MCP/intellij-junie.md
+  - IDE Support:
+    - OSS/index.md
+    - IntelliJ IDEA Plugin: OSS/intellij-plugin/index.md
+    - VS Code Extension: OSS/vscode-extension/index.md
+    - Authoring RIDDL: OSS/authoring-riddl.md
+  - About:
+    - about/index.md
+    - Privacy Policy: about/privacy-policy.md

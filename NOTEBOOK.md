@@ -7,6 +7,11 @@ sections are documented with proper RIDDL syntax highlighting.
 
 **Completed (2026-01-28):**
 
+- Navigation reordered: RIDDL → Synapify → MCP → IDE Support → About
+- Renamed "OSS" section to "IDE Support" in navigation
+- EBNF grammar single-sourced from riddl-language jar (auto-extracts on
+  `sbt update`)
+- Header logo size increased
 - MCP Server URL updated to `https://mcp.ossuminc.com/mcp/v1/` in all guides
 - Added GitHub Copilot CLI integration guide (`docs/MCP/github-copilot.md`)
 - Strategic site improvements Phase 1 (quickstart, examples gallery, SEO,
@@ -14,6 +19,7 @@ sections are documented with proper RIDDL syntax highlighting.
 - RIDDL Pygments lexer with custom color scheme
 - Comprehensive editorial review
 - CI workflow with lexer installation
+- Updated sbt-ossuminc to 1.2.4
 
 ---
 
@@ -21,12 +27,11 @@ sections are documented with proper RIDDL syntax highlighting.
 
 ### Before Production
 
-| Task                           | Notes                                                          |
-|--------------------------------|----------------------------------------------------------------|
-| Update release download links  | When final releases are published                              |
-| Implement playground           | Integrate Monaco + MCP server validation                       |
-| Remove "Coming Soon" warnings  | When MCP server goes live (~early 2026)                        |
-| Single source for EBNF Grammar | Depend on riddl-language which contains the EBNF as a resource |
+| Task                           | Notes                                      |
+|--------------------------------|--------------------------------------------|
+| Update release download links  | When final releases are published          |
+| Implement playground           | Integrate Monaco + MCP server validation   |
+| Remove "Coming Soon" warnings  | When MCP server goes live (~early 2026)    |
 
 ### Deferred Strategic Improvements (Soon)
 
@@ -56,28 +61,22 @@ sections are documented with proper RIDDL syntax highlighting.
 |------|------|-------|
 | Type examples | `references/language-reference.md` | Add specialized examples |
 | Future work review | `future-work/` | Update for current roadmap |
-| EBNF grammar validation | `references/ebnf-grammar.md` | See details below |
 | Synapify generation docs | `synapify/generation.md` | Use preserved config |
 
 ---
 
 ## Task Details
 
-### EBNF Grammar Validation
+### EBNF Grammar Single-Sourcing
 
-The EBNF grammar (`docs/riddl/references/ebnf-grammar.md`) is derived from the
-official fastparse grammar in the riddl module. It must accurately reflect the
-rules accepted by the parser.
+The EBNF grammar is now automatically extracted from the `riddl-language` jar:
 
-**Known discrepancies found during editorial review:**
-- Missing `=` as alternative to `is` in type definitions
-- Missing `:` as alternative to `is` in field definitions (Scala-style syntax)
+- **Source**: `riddl/grammar/ebnf-grammar.ebnf` resource in riddl-language jar
+- **Target**: `docs/riddl/references/ebnf-grammar.ebnf`
+- **Trigger**: Runs automatically on `sbt update`
+- **Logic**: Only extracts if jar version is newer than local copy
 
-**Validation approach:**
-1. Create a functional parser from the EBNF grammar
-2. Run it against all example RIDDL sources in the test suite
-3. Compare results with the fastparse parser
-4. Revise EBNF until there are no discrepancies
+To manually extract: `sbt extractEbnf`
 
 ### Synapify Generation Configuration
 
@@ -105,13 +104,15 @@ hugo {
 
 | Decision | Rationale | Date |
 |----------|-----------|------|
+| EBNF single-sourced from jar | Keeps docs in sync with compiler grammar | 2026-01-28 |
+| Nav order: RIDDL first | Primary product should be most prominent | 2026-01-28 |
+| OSS renamed to IDE Support | Clearer purpose for visitors | 2026-01-28 |
 | RIDDL lexer colors from IDE tools | Consistency across VS Code, IntelliJ, docs | 2026-01-28 |
 | Lexer installed via pip in CI | Ensures syntax highlighting works in deployment | 2026-01-28 |
 | CSS overrides for dark/light | MkDocs Material uses CSS, not Pygments styles | 2026-01-28 |
 | Synapify four-panel layout | Left=tree, center=visual+text, right=metadata | 2026-01-26 |
 | riddlc validation-only | Code generation moved to Synapify | 2026-01-27 |
 | Separate MCP section | MCP distinct from IDE plugins; deserves own nav | 2026-01-21 |
-| URL placeholder pattern | `{{MCP_SERVER_URL}}` allows easy find/replace | 2026-01-21 |
 
 ---
 

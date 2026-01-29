@@ -1,13 +1,13 @@
 ---
-title: "Open Source Tools"
+title: "IDE Support"
 description: >-
-  Free and open source tools for RIDDL development. IDE extensions for
-  IntelliJ and VS Code, authoring guides, and MCP server integration.
+  IDE extensions for RIDDL development. Plugins for IntelliJ IDEA and
+  VS Code with syntax highlighting, validation, and code completion.
 ---
-# Ossum Open Source Software
+# IDE Support for RIDDL
 
-Ossum Inc. provides open source tools for working with the RIDDL language.
-All software is free to use under the Apache License 2.0.
+Ossum Inc. provides IDE extensions for working with the RIDDL language.
+All tools are free and open source under the Apache License 2.0.
 
 ## IDE Extensions
 

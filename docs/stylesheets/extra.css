@@ -8,6 +8,13 @@
     background-color: #272740;
 }
 
+/* Larger logo in header */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+    height: 2rem;
+    width: auto;
+}
+
 /* RIDDL Syntax Highlighting - Dark Theme */
 [data-md-color-scheme="slate"] .language-riddl {
   /* Keywords - burnt orange */
