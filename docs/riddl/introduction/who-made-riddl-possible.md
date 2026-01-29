@@ -8,21 +8,26 @@ weight: 50
 ## Originator
 
 ### [Reid Spencer](https://www.linkedin.com/in/reidspencer) {#reid-spencer}
-* Deeply experienced system architect, software developer and entrepreneur. 
+* Deeply experienced system architect, software developer, and entrepreneur. 
 * Initiated RIDDL in 2019 and started committing changes to the repository 
   at the end of 2021
-* Founder of Reactific Software LLC which was bought by
-  [Ossum Inc.](https://ossum.biz/) in 2022 which he also founded.
+* Founder of Reactific Software LLC, which was bought by
+  [Ossum Inc.](https://ossum.biz/) in 2022, which he also founded.
 
 ## Contributors
 
 ### [James Lovell](https://www.linkedin.com/in/jamestlovell/) {#james-lovell}
-The original enthusiast, co-conspirator, shaper and user of the language, etc. 
+The original enthusiast, co-conspirator, shaper, and user of the language, etc. 
 RIDDL wouldn't be where it is today without James' contributions. 
 
 ### [Kevin D'Vincenzo](https://www.linkedin.com/in/kevindivincenzo/) {#kevin-dvincenzo}
 An early implementor of a `hugo` translator that inspired much of the current 
 implementation. 
+
+$$$ [James F. SPencer](https://www.linkedin.com/in/jfspencer/) {#james-f-spencer}
+The originator's son, who provided foundational work on Synapify; it wouldn't exist
+without him because of his deep UI/UX knowledge and know-how. His original 
+architecture (Electron, Rete, Scala.js) is still in place and doing the job well.
 
 ## Foundational Work
 
