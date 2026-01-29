@@ -24,7 +24,7 @@ RIDDL wouldn't be where it is today without James' contributions.
 An early implementor of a `hugo` translator that inspired much of the current 
 implementation. 
 
-$$$ [James F. SPencer](https://www.linkedin.com/in/jfspencer/) {#james-f-spencer}
+### [James F. Spencer](https://www.linkedin.com/in/jfspencer/) {#james-f-spencer}
 The originator's son, who provided foundational work on Synapify; it wouldn't exist
 without him because of his deep UI/UX knowledge and know-how. His original 
 architecture (Electron, Rete, Scala.js) is still in place and doing the job well.
