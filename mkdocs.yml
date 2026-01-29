@@ -145,6 +145,28 @@ nav:
   - RIDDL:
     - riddl/index.md
     - Quickstart: riddl/quickstart.md
+    - Tutorials:
+      - riddl/tutorials/index.md
+      - Getting Started: riddl/tutorials/basics.md
+      - Reactive BBQ Case Study:
+        - riddl/tutorials/rbbq/index.md
+        - Scenario: riddl/tutorials/rbbq/scenario.md
+        - Domain Model: riddl/tutorials/rbbq/reactive-bbq.md
+        - Subdomains:
+          - Restaurant: riddl/tutorials/rbbq/restaurant/index.md
+          - BackOffice: riddl/tutorials/rbbq/backoffice/index.md
+          - Corporate: riddl/tutorials/rbbq/corporate/index.md
+        - Personas:
+          - riddl/tutorials/rbbq/personas/index.md
+          - CEO: riddl/tutorials/rbbq/personas/ceo.md
+          - Head Chef: riddl/tutorials/rbbq/personas/head-chef.md
+          - Host: riddl/tutorials/rbbq/personas/host.md
+          - Server: riddl/tutorials/rbbq/personas/server.md
+          - Bartender: riddl/tutorials/rbbq/personas/bartender.md
+          - Chef: riddl/tutorials/rbbq/personas/chef.md
+          - Cook: riddl/tutorials/rbbq/personas/cook.md
+          - Delivery Driver: riddl/tutorials/rbbq/personas/delivery-driver.md
+          - Online Customer: riddl/tutorials/rbbq/personas/online-customer.md
     - Introduction:
       - riddl/introduction/index.md
       - What is RIDDL?: riddl/introduction/what-is-riddl.md
@@ -204,7 +226,13 @@ nav:
       - Processor: riddl/concepts/processor.md
     - Guides:
       - riddl/guides/index.md
-      - For Authors: riddl/guides/authors/index.md
+      - For Authors:
+        - riddl/guides/authors/index.md
+        - Design Guide:
+          - riddl/guides/authors/design/index.md
+          - Bounded Contexts: riddl/guides/authors/design/contexts.md
+          - Command-Event Patterns: riddl/guides/authors/design/command-event-patterns.md
+          - UI Modeling: riddl/guides/authors/design/ui-modeling.md
       - For Domain Experts:
         - riddl/guides/domain-experts/index.md
         - Duties: riddl/guides/domain-experts/duties.md
@@ -212,7 +240,10 @@ nav:
       - For Implementors:
         - riddl/guides/implementors/index.md
         - Ways to Use RIDDL: riddl/guides/implementors/ways-to-use-riddl.md
-      - For Developers: riddl/guides/developers/index.md
+      - For Developers:
+        - riddl/guides/developers/index.md
+        - Design Principles: riddl/guides/developers/principles.md
+        - Releasing: riddl/guides/developers/releasing.md
     - Examples: riddl/examples/index.md
     - Playground: riddl/playground/index.md
     - References:
@@ -221,7 +252,14 @@ nav:
       - EBNF Grammar: riddl/references/ebnf-grammar.md
     - Tools:
       - riddl/tools/index.md
-      - riddlc: riddl/tools/riddlc/index.md
+      - riddlc:
+        - riddl/tools/riddlc/index.md
+        - Installation: riddl/tools/riddlc/installation.md
+        - Command Reference: riddl/tools/riddlc/command-reference.md
+        - Configuration: riddl/tools/riddlc/configuration.md
+        - Compilation: riddl/tools/riddlc/compilation.md
+        - GitHub Actions: riddl/tools/riddlc/github-actions.md
+      - sbt-riddl: riddl/tools/sbt-riddl/index.md
       - MCP Server: riddl/tools/riddl-mcp-server/index.md
       - IntelliJ Plugin: riddl/tools/riddl-idea-plugin/index.md
     - Future Work:
