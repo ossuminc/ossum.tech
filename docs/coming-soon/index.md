@@ -75,12 +75,16 @@ documentation, and integration artifacts.
 
 The generation architecture is designed for extensibility. Custom generators can
 be implemented to target additional platforms, frameworks, or output formats.
-If you need a specific kind of generation, email us at mailto:support@ossuminc.com
+
+### Suggest a Generator
+
+Have an idea for a new generator? We'd love to hear it!
+
+[**:material-lightbulb-on: Submit Your Idea**](https://docs.google.com/forms/d/e/1FAIpQLSclhKBpyj3kzXAmv7isxUOaqarX4U7__I7lYSx6NT5HvWkF3A/viewform?usp=sf_link){ .md-button .md-button--primary }
 
 ---
 
-!!! NOTE: Timeline
-
-These features are being developed iteratively. Generators will be released
-as they reach production quality.  For the latest status, see the 
-[Synapify documentation](../synapify/index.md). 
+!!! note "Timeline"
+    These features are being developed iteratively. Generators will be released
+    as they reach production quality. For the latest status, see the
+    [Synapify documentation](../synapify/index.md).
