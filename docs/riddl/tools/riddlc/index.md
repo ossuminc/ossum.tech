@@ -1,146 +1,125 @@
-# RIDDLC - The RIDDL Compiler
+---
+title: "riddlc - The RIDDL Compiler"
+description: "Command-line compiler for parsing and validating RIDDL specifications"
+---
+
+# riddlc - The RIDDL Compiler
 
 `riddlc` is the command-line compiler for RIDDL. It parses, validates, and
-transforms RIDDL specifications into various outputs.
+transforms RIDDL specifications.
 
-## Installation
-
-### Using Homebrew (macOS/Linux)
+## Quick Start
 
 ```bash
-# Coming soon
-brew install riddlc
-```
+# Validate a RIDDL file
+riddlc validate mymodel.riddl
 
-### Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/ossuminc/riddl.git
-cd riddl
-
-# Build the compiler
-sbt compile
-sbt riddlc/stage
-
-# Add to PATH (adjust for your shell)
-export PATH="$PATH:$(pwd)/target/universal/stage/bin"
-```
-
-### Using SBT Plugin
-
-Add to your `project/plugins.sbt`:
-
-```scala
-addSbtPlugin("com.ossuminc" % "sbt-riddl" % "latest.version")
-```
-
-See the [Implementor's Guide](../../guides/implementors/ways-to-use-riddl.md)
-for detailed SBT integration instructions.
-
-## Basic Usage
-
-```bash
 # Show help
 riddlc help
 
 # Show version
 riddlc version
-
-# Validate a RIDDL file
-riddlc validate mymodel.riddl
 ```
 
-Documentation generation will be available through [Synapify](../../../synapify/index.md).
+## Key Features
 
-## Commands
+- **Syntax validation** - Verify RIDDL files are syntactically correct
+- **Semantic validation** - Check references, types, and containment rules
+- **BAST serialization** - Convert to binary format for faster loading
+- **Style checking** - Optional warnings for convention violations
+- **Reformatting** - Standardize RIDDL source layout
 
-### validate
+!!! info "Documentation Generation"
+    Hugo documentation generation and diagram generation have been moved to
+    the [riddl-gen](https://github.com/ossuminc/riddl-gen) repository.
+    Use [Synapify](../../../synapify/index.md) for integrated documentation
+    generation with AI assistance.
 
-Parses and validates a RIDDL specification without producing output.
+## Documentation
+
+| Section | Description |
+|---------|-------------|
+| [Installation](installation.md) | Download or build from source |
+| [Command Reference](command-reference.md) | Full command and option documentation |
+| [Configuration](configuration.md) | Using HOCON configuration files |
+| [Compilation](compilation.md) | Understanding the compilation process |
+| [GitHub Actions](github-actions.md) | CI/CD integration |
+
+## Example Usage
+
+### Basic Validation
 
 ```bash
 riddlc validate mymodel.riddl
 ```
 
-Options:
-- `-v, --verbose`: Show detailed validation messages
-- `-w, --warnings`: Treat warnings as errors
+### Verbose Output with Timing
 
-### info
+```bash
+riddlc validate --verbose --show-times mymodel.riddl
+```
 
-Displays build information about riddlc.
+### Using Configuration File
+
+```bash
+riddlc from riddl.conf validate
+```
+
+### Generate BAST for Faster Loading
+
+```bash
+riddlc bastify mymodel.riddl
+```
+
+## Common Workflows
+
+### Development Cycle
+
+1. Edit RIDDL source files
+2. Run `riddlc validate` to check for errors
+3. Fix any issues reported
+4. Repeat
+
+### CI/CD Pipeline
+
+```yaml
+- name: Validate RIDDL
+  run: riddlc validate --warnings-are-fatal src/main/riddl/model.riddl
+```
+
+### Using with sbt
+
+See [sbt-riddl](../sbt-riddl/index.md) for sbt integration.
+
+## Getting Help
+
+```bash
+# General help
+riddlc help
+
+# Help for specific command
+riddlc help validate
+```
+
+## Build Information
+
+Check your installed version:
 
 ```bash
 riddlc info
 ```
 
-### version
+Output:
 
-Displays the riddlc version number.
-
-```bash
-riddlc version
 ```
-
-## Configuration
-
-### riddlc.conf
-
-You can create a `riddlc.conf` file to set default options:
-
-```hocon
-common {
-  verbose = false
-  show-warnings = true
-  show-missing-warnings = false
-  show-style-warnings = false
-}
-```
-
-### Environment Variables
-
-- `RIDDL_HOME`: Directory containing riddlc configuration
-- `RIDDL_OPTIONS`: Default command-line options
-
-## Common Workflows
-
-### Validate During Development
-
-Run validation frequently while authoring:
-
-```bash
-# Validate and show all messages
-riddlc validate -v mymodel.riddl
-```
-
-### CI/CD Integration
-
-Add validation to your CI pipeline:
-
-```yaml
-# GitHub Actions example
-- name: Validate RIDDL Model
-  run: riddlc validate --warnings src/main/riddl/model.riddl
-```
-
-## Error Messages
-
-### Common Errors
-
-| Error | Cause | Solution |
-|-------|-------|----------|
-| "Undefined reference" | Reference to undefined definition | Define the referenced item |
-| "Duplicate definition" | Same name used twice in scope | Rename one definition |
-| "Invalid containment" | Definition in wrong container | Check hierarchy rules |
-| "Syntax error" | Invalid RIDDL syntax | Check syntax near line number |
-
-### Verbose Output
-
-Use `-v` to get detailed diagnostic information:
-
-```bash
-riddlc validate -v mymodel.riddl
+[info] About riddlc:
+[info]            name: riddlc
+[info]         version: 1.1.2
+[info]   documentation: https://riddl.tech
+[info]       copyright: © 2019-2026 Ossum Inc.
+[info]        licenses: Apache License, Version 2.0
+[info]    organization: Ossum Inc.
+[info]   scala version: 3.3.7
 ```
 
 ## Resources
