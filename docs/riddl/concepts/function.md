@@ -16,4 +16,4 @@ for something once.
 ## Contains
 * [Fields](field.md)
 * [Statements](statement.md)
-* [Functions](function.md) :fontawesome-regular-rotate-left:
+* [Functions](function.md) :material-recycle:

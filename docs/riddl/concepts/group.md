@@ -23,7 +23,7 @@ their overall UI design theme.
 * [Group](group.md)
 
 ## Contains
-* [Group](group.md) :fontawesome-regular-rotate-left:
+* [Group](group.md) :material-recycle:
 * [Type](type.md)
 * [Input](input.md)
 * [Output](output.md)

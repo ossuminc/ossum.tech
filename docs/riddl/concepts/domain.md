@@ -35,7 +35,7 @@ might devise a domain hierarchy like this:
 ## Occurs In
 
 * [Root](root.md)
-* [Domains](domain.md) :fontawesome-regular-rotate-left: — domains
+* [Domains](domain.md) :material-recycle: — domains
   can be nested in a super-domain
 
 ## Contains
@@ -46,7 +46,7 @@ Within a domain, you can define these things:
 * [Applications](application.md) - a user interface  
 * [Authors](author.md) - who defined the domain
 * [Contexts](context.md) - a precisely defined bounded context within the domain
-* [Domains](domain.md) :fontawesome-regular-rotate-left: - domains 
+* [Domains](domain.md) :material-recycle: - domains
   can have nested domains (subdomains)
 * [Epics](epic.md) - a story about external entities
   interacting with the domain

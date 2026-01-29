@@ -46,6 +46,6 @@ different group of elements, enabling navigation within the application.
 * [Group](group.md)
 
 ## Contains
-* [Group](group.md) :fontawesome-regular-rotate-left:
+* [Group](group.md) :material-recycle:
 * [Handlers](handler.md)
 

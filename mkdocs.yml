@@ -262,15 +262,6 @@ nav:
       - sbt-riddl: riddl/tools/sbt-riddl/index.md
       - MCP Server: riddl/tools/riddl-mcp-server/index.md
       - IntelliJ Plugin: riddl/tools/riddl-idea-plugin/index.md
-    - Future Work:
-      - riddl/future-work/index.md
-      - Akka: riddl/future-work/akka.md
-      - Kalix: riddl/future-work/kalix.md
-      - OpenAPI: riddl/future-work/openapi.md
-      - Diagrams: riddl/future-work/diagrams.md
-      - Analyses: riddl/future-work/analyses.md
-      - BAST: riddl/future-work/bast.md
-      - Others: riddl/future-work/others.md
   - Synapify:
     - synapify/index.md
     - User Interface: synapify/user-interface.md
@@ -290,6 +281,7 @@ nav:
     - IntelliJ IDEA Plugin: OSS/intellij-plugin/index.md
     - VS Code Extension: OSS/vscode-extension/index.md
     - Authoring RIDDL: OSS/authoring-riddl.md
+  - Coming Soon: coming-soon/index.md
   - About:
     - about/index.md
     - Privacy Policy: about/privacy-policy.md

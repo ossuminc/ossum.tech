@@ -5,6 +5,25 @@
 Documentation site is complete and deployed at https://ossum.tech. All major
 sections are documented with proper RIDDL syntax highlighting.
 
+**Completed (2026-01-29):**
+
+- Reorganized "Future Work" into top-level "Coming Soon" section
+  - Created consolidated `docs/coming-soon/index.md` with Simulation and
+    Generation sections
+  - Removed old `docs/riddl/future-work/` directory (8 files)
+  - Generation section includes targets from riddl-gen NOTEBOOK.md
+- Fixed broken fontawesome icons (`:fontawesome-regular-rotate-left:`) with
+  Material Design icons (`:material-recycle:`) in concept pages
+- Migrated RIDDL documentation from riddl.tech (Hugo) to ossum.tech (MkDocs)
+- Created migration script: `scripts/migrate-hugo.py`
+- Added Tutorials section with complete RBBQ case study (18 files)
+- Expanded Tools/riddlc with installation, commands, configuration, etc.
+- Added sbt-riddl plugin documentation
+- Added Design Guide (contexts, command-event patterns, UI modeling)
+- Added Developer Guide (principles, releasing)
+- Updated mkdocs.yml navigation for all new sections
+- Verified build with `mkdocs build --strict`
+
 **Completed (2026-01-28):**
 
 - Navigation reordered: RIDDL → Synapify → MCP → IDE Support → About
@@ -60,7 +79,6 @@ sections are documented with proper RIDDL syntax highlighting.
 | Task | File | Notes |
 |------|------|-------|
 | Type examples | `references/language-reference.md` | Add specialized examples |
-| Future work review | `future-work/` | Update for current roadmap |
 | Synapify generation docs | `synapify/generation.md` | Use preserved config |
 
 ---
