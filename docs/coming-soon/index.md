@@ -3,7 +3,7 @@ title: "Coming Soon"
 description: "Upcoming features for the RIDDL ecosystem"
 ---
 
-# Coming Soon
+# :material-creation: Coming Soon
 
 This page outlines upcoming capabilities for the RIDDL ecosystem. These
 features are under active development and will be available through
