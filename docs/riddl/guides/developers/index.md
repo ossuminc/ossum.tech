@@ -48,7 +48,6 @@ riddl/
 ├── passes/            # Compiler passes (parsing, validation, etc.)
 ├── commands/          # riddlc command implementations
 ├── riddlc/            # Command-line interface
-├── hugo/              # Hugo documentation generator
 ├── testkit/           # Testing utilities
 └── project/           # sbt build configuration
 ```
@@ -74,11 +73,10 @@ riddl/
 - Option handling
 - Output formatting
 
-**hugo** - Documentation generator (being migrated to [Synapify](../../../synapify/index.md)):
-
-- Converts RIDDL models to Hugo-compatible markdown
-- Generates diagrams (Mermaid)
-- Produces glossaries and indexes
+!!! note "Code Generation"
+    Code and documentation generation is available through
+    [Synapify](../../../synapify/index.md). The `riddlc` compiler focuses
+    on parsing and validation.
 
 ## Development Workflow
 
@@ -139,10 +137,6 @@ Source Text
       ▼
 ┌────────────┐
 │ Validation │  → Errors/Warnings
-└─────┬──────┘
-      ▼
-┌────────────┐
-│ Translation│  → Output (Hugo, etc.)
 └────────────┘
 ```
 
@@ -186,9 +180,7 @@ The parser is organized by language construct:
 
 3. **Add validation** in the validation pass
 
-4. **Add translation** in output generators (Hugo, etc.)
-
-5. **Write tests** covering parsing, validation, and output
+4. **Write tests** covering parsing and validation
 
 ### Adding a New Pass
 
@@ -272,7 +264,7 @@ Follow conventional commit style:
 feat: add new statement type for async operations
 
 Add AsyncStatement to support asynchronous message handling.
-Includes parser, validation, and Hugo output support.
+Includes parser and validation support.
 
 Co-Authored-By: Your Name <email>
 ```

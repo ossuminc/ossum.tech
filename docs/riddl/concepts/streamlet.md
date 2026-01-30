@@ -129,6 +129,21 @@ context DataPipeline is {
 - **Monitoring**: Collect and process metrics
 - **Notifications**: Route alerts to appropriate channels
 
+## When to Use Streamlets vs. Entities
+
+| Use Case | Streamlet | Entity |
+|----------|-----------|--------|
+| **Stateless transformation** | Yes | No |
+| **Long-lived business state** | No | Yes |
+| **High-throughput data flow** | Yes | Maybe |
+| **Complex business rules with state** | No | Yes |
+| **Data enrichment/filtering** | Yes | No |
+| **Order processing with lifecycle** | No | Yes |
+
+**Rule of thumb**: If you need to remember something between messages, use an
+Entity. If you're transforming or routing messages without persistent state,
+use a Streamlet.
+
 ## Occurs In
 
 * [Contexts](context.md)

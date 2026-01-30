@@ -87,7 +87,7 @@ location in the hierarchy and quickly navigate to parent containers.
 
 ### Adding Definitions
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     Full drag-and-drop editing from a palette is under development.
 
 ---

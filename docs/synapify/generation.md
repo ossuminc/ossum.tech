@@ -1,6 +1,6 @@
 # Code Generation Guide
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     Code generation integration is under active development. This guide
     describes the planned capabilities.
 

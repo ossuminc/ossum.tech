@@ -140,7 +140,7 @@ design and validation.
 
 ### Model Simulation
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     Simulation integration is under development.
 
 Connect to [riddlsim](https://github.com/ossuminc/riddlsim) to validate your
@@ -156,7 +156,7 @@ the model evolves.
 
 ### Code Generation
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     Code generation integration is under development.
 
 Connect to riddl-gen to transform your validated models into implementation
@@ -192,7 +192,7 @@ the MCP server to enable these capabilities.
 Synapify is available for macOS, Windows, and Linux. Download the installer
 for your platform:
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     Installers will be available when Synapify reaches public release.
 
 ### System Requirements
@@ -221,7 +221,7 @@ on working with Synapify's editors and panels.
 
 ## Subscription Tiers
 
-!!! note "Pricing Coming Soon"
+!!! warning "Pricing Coming Soon"
     Subscription details will be announced closer to public release.
 
 ### Individual

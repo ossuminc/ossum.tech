@@ -41,6 +41,59 @@ Outbound adaptors provide an adaptation that occurs from the
 [Context](context.md) containing the adaptor to the
 [Context](context.md) referenced in the adaptor.
 
+## Syntax
+
+```riddl
+context Orders is {
+  adaptor PaymentAdapter from context Payments is {
+    |Translates payment-related messages between Orders and Payments contexts.
+
+    handler InboundPayments is {
+      on event Payments.PaymentCompleted {
+        tell entity Order to MarkAsPaid
+      }
+      on event Payments.PaymentFailed {
+        tell entity Order to HandlePaymentFailure
+      }
+    }
+  }
+
+  adaptor InventoryAdapter to context Inventory is {
+    |Translates inventory requests from Orders to Inventory context.
+
+    handler OutboundInventory is {
+      on command ReserveItems {
+        tell context Inventory to Inventory.ReserveStock
+      }
+    }
+  }
+}
+```
+
+## When to Use Adaptors
+
+Use an adaptor when:
+
+- **Contexts have different vocabularies**: The same concept has different
+  names or structures in each context
+- **You need to protect domain integrity**: Prevent external concepts from
+  leaking into your bounded context
+- **Contexts evolve independently**: Changes in one context shouldn't force
+  changes in another
+- **Integration with external systems**: Translate between your domain model
+  and external APIs
+
+**Example scenario**: Your Orders context tracks "line items" while the
+Inventory context uses "stock reservations". An adaptor translates between
+these models so neither context needs to know about the other's terminology.
+
+## Adaptor vs. Direct References
+
+| Approach | When to Use |
+|----------|-------------|
+| **Adaptor** | Contexts have different models, need translation |
+| **Direct reference** | Contexts share the same model, tightly coupled by design |
+
 ## Occurs In
 * [Contexts](context.md)
 

@@ -1,6 +1,6 @@
 # Simulation Guide
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     Simulation integration is under active development. This guide describes
     the planned capabilities.
 
@@ -76,7 +76,7 @@ Scenario: Add item to empty cart
 
 ### Scenario Editor
 
-!!! note "Coming Soon"
+!!! warning "Coming Soon"
     The graphical scenario editor is under development.
 
 Synapify will provide a visual editor for creating simulation scenarios:

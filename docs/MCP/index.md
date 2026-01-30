@@ -102,29 +102,7 @@ Authorization: Bearer your-api-key
 
 !!! note "Obtaining an API Key"
     Contact support@ossuminc.com to request an API key for the hosted
-    service
-
----
-
-## Running Your Own Server
-
-For development or private deployments, you can run the MCP server locally.
-
-### Prerequisites
-
-- Docker or Podman
-
-### Quick Start with Docker
-
-!!! warning TBD
-
-### Configuration Options
-
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `HTTP_HOST` | `0.0.0.0` | Bind address |
-| `HTTP_PORT` | `8080` | Listen port |
-| `API_KEYS` | `reid` | Comma-separated valid API keys |
+    service.
 
 ---
 

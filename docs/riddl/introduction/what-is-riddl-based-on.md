@@ -43,12 +43,29 @@ develop a system specification that is familiar and comprehensible by business
 and technical leaders alike.
 
 For best comprehension of the RIDDL language, it is best to be familiar with
-DDD concepts. For a four-minute overview 
-[watch this video](https://elearn.domainlanguage.com/). 
-For a more in depth understanding we recommend reading Vaughn Vernon's more 
+DDD concepts. For a four-minute overview
+[watch this video](https://elearn.domainlanguage.com/).
+For a more in depth understanding we recommend reading Vaughn Vernon's more
 concise book
 [Domain Driven Design Distilled](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420/),
-or Eric Evans' original tome [Domain Driven Design: Tackling Complexity in the Heart of Software](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/)
+or Eric Evans' original tome [Domain Driven Design: Tackling Complexity in the Heart of Software](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/).
+
+### Key DDD Terms Used in RIDDL
+
+| DDD Term | RIDDL Equivalent | Description |
+|----------|------------------|-------------|
+| **Bounded Context** | `context` | A boundary within which a particular model and ubiquitous language apply |
+| **Entity** | `entity` | An object with a unique identity that persists over time |
+| **Value Object** | `type` | An immutable object defined by its attributes, not identity |
+| **Aggregate** | `entity` (with `aggregate` option) | A cluster of entities and value objects with a single root |
+| **Domain Event** | `event` | A record of something significant that happened in the domain |
+| **Command** | `command` | A request for the system to perform an action |
+| **Repository** | `repository` | Abstraction for storing and retrieving aggregates |
+| **Anti-Corruption Layer** | `adaptor` | Translation layer between bounded contexts |
+| **Ubiquitous Language** | `term` definitions | Shared vocabulary used by team and code |
+
+For a comprehensive DDD glossary, see the excellent
+[DDD Glossary at archi-lab.io](https://www.archi-lab.io/infopages/ddd/ddd-glossary.html).
 
 ## Reactive System Architecture (RSA)
 The [Reactive Manifesto](https://www.reactivemanifesto.org/) was authored in

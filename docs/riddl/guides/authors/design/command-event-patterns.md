@@ -17,6 +17,21 @@ requires careful design.
 
 For background on messages, see the [Message concept](../../../concepts/message.md).
 
+## Type Cardinality Notation
+
+RIDDL uses suffixes to indicate how many values a field can hold:
+
+| Suffix | Meaning | Example | Description |
+|--------|---------|---------|-------------|
+| *(none)* | Exactly one | `name: String` | Required, single value |
+| `?` | Zero or one | `nickname: String?` | Optional field |
+| `*` | Zero or more | `tags: Tag*` | Optional list (may be empty) |
+| `+` | One or more | `contacts: Contact+` | Required list (at least one) |
+
+These suffixes appear throughout the examples below. Understanding them is
+essential for designing message types that accurately represent your domain
+constraints.
+
 ## Example Entity
 
 Throughout this guide, we'll use this Organization entity:
