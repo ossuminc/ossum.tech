@@ -14,6 +14,9 @@ sections are documented with proper RIDDL syntax highlighting.
   - Generation section includes targets from riddl-gen NOTEBOOK.md
 - Fixed broken fontawesome icons (`:fontawesome-regular-rotate-left:`) with
   Material Design icons (`:material-recycle:`) in concept pages
+- Added generator suggestion form link (Google Form) to Coming Soon page
+- Added sparkle icon (`:material-creation:`) to Coming Soon page title
+- Fixed snippets base_path config for EBNF grammar inclusion
 - Migrated RIDDL documentation from riddl.tech (Hugo) to ossum.tech (MkDocs)
 - Created migration script: `scripts/migrate-hugo.py`
 - Added Tutorials section with complete RBBQ case study (18 files)
