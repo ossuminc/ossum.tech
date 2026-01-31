@@ -17,6 +17,15 @@ sections are documented with proper RIDDL syntax highlighting.
 - Added generator suggestion form link (Google Form) to Coming Soon page
 - Added sparkle icon (`:material-creation:`) to Coming Soon page title
 - Fixed snippets base_path config for EBNF grammar inclusion
+- Documentation audit and fixes:
+  - Removed Docker section from MCP/index.md (not open source)
+  - Expanded stub concept pages with full content: interaction, comment,
+    include, sagastep, term, user
+  - Added syntax examples and "when to use" guidance to adaptor and streamlet
+  - Updated developer guide: removed Hugo refs, noted generation via Synapify
+  - Added DDD glossary with key terms mapping + link to archi-lab.io glossary
+  - Added type cardinality notation (`*`, `+`, `?`) to command-event patterns
+  - Standardized all "Coming Soon" admonitions to use warning type
 - Migrated RIDDL documentation from riddl.tech (Hugo) to ossum.tech (MkDocs)
 - Created migration script: `scripts/migrate-hugo.py`
 - Added Tutorials section with complete RBBQ case study (18 files)
@@ -132,7 +141,8 @@ hugo {
 | Lexer installed via pip in CI | Ensures syntax highlighting works in deployment | 2026-01-28 |
 | CSS overrides for dark/light | MkDocs Material uses CSS, not Pygments styles | 2026-01-28 |
 | Synapify four-panel layout | Left=tree, center=visual+text, right=metadata | 2026-01-26 |
-| riddlc validation-only | Code generation moved to Synapify | 2026-01-27 |
+| riddlc validation-only | Code generation available via Synapify | 2026-01-27 |
+| Don't mention riddl-gen | Closed source; say generation is "via Synapify" | 2026-01-30 |
 | Separate MCP section | MCP distinct from IDE plugins; deserves own nav | 2026-01-21 |
 
 ---
