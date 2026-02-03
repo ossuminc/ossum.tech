@@ -30,6 +30,21 @@ The easiest way to get started is to download a pre-built release:
     Not all releases include pre-built assets. If no asset is available for
     your desired version, you'll need to build from source.
 
+## Homebrew (macOS)
+
+On macOS, the easiest installation method is via Homebrew:
+
+```bash
+brew install ossuminc/tap/riddlc
+```
+
+This installs the latest release and manages updates automatically. To upgrade
+later:
+
+```bash
+brew upgrade riddlc
+```
+
 ## Build from Source
 
 Building from source requires JDK 25 and sbt.
@@ -106,14 +121,19 @@ riddlc info
 You should see output like:
 
 ```
-[info] About riddlc:
-[info]            name: riddlc
-[info]         version: 1.1.2
-[info]   documentation: https://riddl.tech
-[info]       copyright: © 2019-2026 Ossum Inc.
-[info]        licenses: Apache License, Version 2.0
-[info]    organization: Ossum Inc.
-[info]   scala version: 3.3.7
+[info] About RIDDL:
+[info]            name: utils
+[info]         version: 1.2.1
+[info]   documentation: https://github.com/ossuminc/riddl
+[info]       copyright: © 2019-2026 Ossum, Inc.
+[info]        built at: 2026-02-01 23:24:51.835-0500
+[info]        licenses: Apache-2.0
+[info]    organization: Ossum, Inc.
+[info]   scala version: 3.7.4
+[info]     sbt version: 1.12.0
+[info]        jvm name: OpenJDK 64-Bit Server VM
+[info]     jvm version: 21.0.10
+[info]   operating sys: Mac OS X
 ```
 
 ## Next Steps
