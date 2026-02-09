@@ -249,6 +249,7 @@ nav:
     - Playground: riddl/playground/index.md
     - References:
       - riddl/references/index.md
+      - Cheat Sheet: riddl/references/cheat-sheet.md
       - Language Reference: riddl/references/language-reference.md
       - EBNF Grammar: riddl/references/ebnf-grammar.md
     - Tools:
