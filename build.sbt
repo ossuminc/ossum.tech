@@ -21,7 +21,7 @@ lazy val root = Root(
   With.Scala3
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
-  libraryDependencies += "com.ossuminc" %% "riddl-language" % "1.1.2+",
+  libraryDependencies += "com.ossuminc" %% "riddl-language" % "1.7.0",
 
   // Define the extractEbnf task - automatically triggers update via dependencyClasspath
   extractEbnf := ExtractEbnf(
