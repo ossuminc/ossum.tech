@@ -269,19 +269,23 @@ domain OnlineShop is {
 
 ## Validate Your Model
 
-Use the RIDDL compiler to check for errors:
+Use the RIDDL compiler to check your model for errors.
+
+**Install riddlc (macOS):**
 
 ```bash
-# Install riddlc (requires JDK 25)
-git clone https://github.com/ossuminc/riddl.git
-cd riddl
-sbt riddlc/stage
-
-# Validate your model
-./riddlc/target/universal/stage/bin/riddlc validate shop.riddl
+brew install ossuminc/tap/riddlc
 ```
 
-Or use an IDE with RIDDL support:
+For other platforms, see the [installation guide](tools/riddlc/installation.md).
+
+**Validate your model:**
+
+```bash
+riddlc validate shop.riddl
+```
+
+You can also get real-time validation in your editor with RIDDL IDE support:
 
 - [VS Code Extension](../OSS/vscode-extension/index.md)
 - [IntelliJ Plugin](../OSS/intellij-plugin/index.md)
