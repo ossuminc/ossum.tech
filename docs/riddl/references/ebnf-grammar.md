@@ -7,5 +7,5 @@ automatically extracted from the `riddl-language` library and kept in sync
 with the reference grammar written in Scala/fastparse form.
 
 ```ebnf
---8<-- "riddl/references/ebnf-grammar.ebnf"
+--8<-- "riddl/references/riddl-grammar.ebnf"
 ```

@@ -9,8 +9,7 @@ lazy val developers: List[Developer] = List(
   )
 )
 
-// Task to extract EBNF grammar from riddl-language jar
-lazy val extractEbnf = taskKey[File]("Extract EBNF grammar from riddl-language jar if newer")
+lazy val extractGrammar = taskKey[Unit]("Extract RIDDL grammar via Grammar API")
 
 lazy val root = Root(
   ghRepoName = "ossum-tech",
@@ -18,26 +17,28 @@ lazy val root = Root(
   startYr = 2025,
   devs = developers
 ).configure(
-  With.Scala3
+  With.Scala3.configure(version = Some("3.7.4"))
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
   libraryDependencies += "com.ossuminc" %% "riddl-language" % "1.7.0",
 
-  // Define the extractEbnf task - automatically triggers update via dependencyClasspath
-  extractEbnf := ExtractEbnf(
-    baseDirectory.value,
-    (Compile / dependencyClasspath).value.files,
-    streams.value.log
-  ),
-
-  // Automatically extract EBNF after update resolves dependencies
-  update := {
-    val updateReport = update.value
-    ExtractEbnf.fromUpdateReport(
+  // Extract RIDDL grammar by compiling and running ExtractGrammar
+  extractGrammar := {
+    (Compile / compile).value
+    val log = streams.value.log
+    val cp = (Runtime / fullClasspathAsJars).value
+      .map(_.data.getAbsolutePath)
+      .mkString(java.io.File.pathSeparator)
+    val target = baseDirectory.value / "docs" / "riddl" / "references" / "riddl-grammar.ebnf"
+    val script = baseDirectory.value / "tools" / "extract-grammar.sh"
+    log.info("Extracting RIDDL grammar...")
+    val exitCode = scala.sys.process.Process(
+      Seq("bash", script.getAbsolutePath, target.getAbsolutePath),
       baseDirectory.value,
-      updateReport,
-      streams.value.log
-    )
-    updateReport
+      "CLASSPATH" -> cp
+    ).!
+    if (exitCode != 0) {
+      throw new MessageOnlyException("Grammar extraction failed")
+    }
   }
 )
