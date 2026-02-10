@@ -220,6 +220,25 @@ This site migrated from Hugo to MkDocs Material. Remove any Hugo shortcodes:
 Always use **RIDDL** (all caps) in prose. It's an acronym. Not "Riddl" or
 "riddl" except in code/filenames where lowercase is conventional.
 
+### Metadata vs Body Definitions
+
+RIDDL has a critical distinction between **body definitions**
+(inside `{ }`) and **metadata** (in `with { }` after the body):
+
+- **Body**: types, handlers, entities, states, functions, etc.
+- **Metadata**: term, option, author_ref (`by author`), briefly,
+  described by, attachment
+
+**Author definitions** (not references) only occur in Module and
+Domain bodies. All other definitions use `by author Name` in
+their `with { }` block to reference an author.
+
+**Option syntax** requires `is`: `option is event-sourced`,
+`option is technology("Kafka")`.
+
+**Term syntax**: `term SKU is { |Stock Keeping Unit... }` — not
+`term "SKU" is described by "..."`.
+
 ### RIDDL Syntax in Examples
 
 Code examples must match the EBNF grammar. Common issues to avoid:
@@ -230,7 +249,8 @@ Code examples must match the EBNF grammar. Common issues to avoid:
 
 2. **User terminology**: Use "User" not "Actor" (per Use Cases 2.0)
 
-3. **Hyphenation**: `event-sourced` (hyphenated as compound modifier)
+3. **Hyphenation**: `event-sourced` (hyphenated as compound
+   modifier)
 
 4. **Version requirements**:
    - JDK 25 (current LTS)

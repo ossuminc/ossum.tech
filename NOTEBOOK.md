@@ -2,8 +2,23 @@
 
 ## Current Status
 
-Documentation site is complete and deployed at https://ossum.tech. All major
-sections are documented with proper RIDDL syntax highlighting.
+Documentation site is complete and deployed at https://ossum.tech.
+All major sections are documented with proper RIDDL syntax
+highlighting.
+
+**Completed (2026-02-09):**
+
+- Fixed metadata vs body definition confusion across 10 files
+  - Rewrote metadata.md, author.md, term.md, option.md to show
+    correct `with { }` placement and syntax
+  - Removed incorrect Contains entries (Authors, Options, Terms)
+    from context.md, entity.md, projector.md, adaptor.md
+  - Removed Options and Terms from domain.md Contains (kept
+    Authors — correct per grammar)
+  - Updated cheat-sheet.md containment table to distinguish body
+    definitions from metadata, fixed "Lives in" entries for Term,
+    Option, and Author
+  - All examples now match EBNF grammar
 
 **Completed (2026-01-29):**
 
