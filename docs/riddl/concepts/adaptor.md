@@ -98,6 +98,4 @@ these models so neither context needs to know about the other's terminology.
 * [Contexts](context.md)
 
 ## Contains
-* [Authors](author.md)
 * [Handlers](handler.md)
-* [Terms](term.md)

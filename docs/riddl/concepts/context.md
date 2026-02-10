@@ -67,7 +67,6 @@ from DDD Europe 2020 conference.
 
 ## Contains
 * [Adaptors](adaptor.md)
-* [Authors](author.md)
 * [Entities](entity.md)
 * [Functions](function.md)
 * [Handlers](handler.md)
@@ -75,5 +74,4 @@ from DDD Europe 2020 conference.
 * [Processors](processor.md)
 * [Projectors](projector.md)
 * [Sagas](saga.md)
-* [Terms](term.md)
 * [Types](type.md)

@@ -127,12 +127,10 @@ API, etc.) to make implementation decisions.
 
 ## Contains
 
-* [Authors](author.md) - define who the authors of the entity are
 * [Functions](function.md) - named definitions of processing
 * [Handlers](handler.md) - how to handle messages sent to an entity
 * [Includes](include.md) - inclusion of entity content from a file
-* [Invariants](invariant.md) - logical expressions that must always hold true
-* [Options](option.md) - define translation options for the entity
+* [Invariants](invariant.md) - logical expressions that must always
+  hold true
 * [States](state.md) - the data an entity holds
 * [Types](type.md) - the definition of a type of information
-* [Terms](term.md) - the definition of a term related to the entity

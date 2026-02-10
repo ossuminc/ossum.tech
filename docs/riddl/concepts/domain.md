@@ -43,18 +43,16 @@ might devise a domain hierarchy like this:
 Within a domain, you can define these things:
 
 * [Actors](user.md) - someone or thing that uses the domain
-* [Applications](application.md) - a user interface  
+* [Applications](application.md) - a user interface
 * [Authors](author.md) - who defined the domain
-* [Contexts](context.md) - a precisely defined bounded context within the domain
+* [Contexts](context.md) - a precisely defined bounded context
+  within the domain
 * [Domains](domain.md) :material-recycle: - domains
   can have nested domains (subdomains)
 * [Epics](epic.md) - a story about external entities
   interacting with the domain
 * [Includes](include.md) - inclusion of entity content from a
   file
-* [Options](option.md) - optional declarations about a 
-  definition
-* [Terms](term.md) - definition of a term relevant to the
-  domain
 * [Types](type.md) - information definitions used throughout
   the domain
+

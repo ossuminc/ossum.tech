@@ -23,9 +23,6 @@ data. Typically persistent entities are the system of record.
 * [Contexts](context.md)
 
 ## Contains
-* [Authors](author.md)
 * [Fields](field.md)
 * [Handlers](handler.md)
 * [Includes](include.md)
-* [Options](option.md)
-* [Terms](term.md)
