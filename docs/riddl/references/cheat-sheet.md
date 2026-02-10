@@ -74,16 +74,16 @@ Root
 └── Module (for organizing large roots)
 ```
 
-| Level | What it can contain |
-|---|---|
-| **Root** | Domain, Module, Author |
-| **Domain** | Context, User, Epic, Saga, Type, Author, Include |
-| **Context** | Entity, Repository, Projector, Saga, Adaptor, Streamlet, Connector, Group, Handler, Function, Type, Constant, Include |
-| **Entity** | State, Handler, Function, Type, Constant, Invariant, Include |
-| **Repository / Projector / Adaptor** | Handler, Function, Type, Constant, Include |
-| **Streamlet** | Inlet, Outlet, Handler, Function, Type, Constant, Include |
-| **Epic** | Use Case |
-| **Saga** | Saga Step |
+| Level | Body definitions | Metadata (`with { }`) |
+|---|---|---|
+| **Root** | Domain, Module, Author | briefly, described by |
+| **Domain** | Context, User, Epic, Saga, Type, Author, Include | term, option, by author, briefly, described by, attachment |
+| **Context** | Entity, Repository, Projector, Saga, Adaptor, Streamlet, Connector, Group, Handler, Function, Type, Constant, Include | term, option, by author, briefly, described by, attachment |
+| **Entity** | State, Handler, Function, Type, Constant, Invariant, Include | term, option, by author, briefly, described by, attachment |
+| **Repository / Projector / Adaptor** | Handler, Function, Type, Constant, Include | term, option, by author, briefly, described by, attachment |
+| **Streamlet** | Inlet, Outlet, Handler, Function, Type, Constant, Include | term, option, by author, briefly, described by, attachment |
+| **Epic** | Use Case | term, option, by author, briefly, described by, attachment |
+| **Saga** | Saga Step | term, option, by author, briefly, described by, attachment |
 
 ---
 
@@ -110,6 +110,8 @@ contexts, types, users, and epics.
 
 **Lives in**: Root or another Domain.
 **Contains**: Context, User, Epic, Saga, Type, Author, Include.
+Metadata (in `with { }`): term, option, by author, briefly,
+described by, attachment.
 
 **Key details**:
 
@@ -137,8 +139,9 @@ own data models and message contracts. Contexts are also how you model
 applications (by adding Groups).
 
 **Lives in**: Domain.
-**Contains**: Entity, Repository, Projector, Saga, Adaptor, Streamlet,
-Connector, Group, Handler, Function, Type, Constant, Include.
+**Contains**: Entity, Repository, Projector, Saga, Adaptor,
+Streamlet, Connector, Group, Handler, Function, Type, Constant,
+Include.
 
 **Key details**:
 
@@ -159,7 +162,8 @@ mutable state and business rules (e.g., Order, Customer, Account).
 
 **Lives in**: Context.
 **Contains**: State, Handler, Function, Type, Constant, Invariant,
-Include.
+Include. *(Note: options like `event-sourced` and `aggregate` go
+in the `with { }` metadata block, not in the body.)*
 
 **Key details**:
 
@@ -685,12 +689,16 @@ without affecting core semantics.
 
 ### Author
 
-**Purpose**: Attribution metadata—who created or maintains a definition.
+**Purpose**: Attribution metadata—who created or maintains a
+definition.
 
-**When to use**: At the domain level to identify the model author(s).
-Authorship is inherited by all contained definitions.
+**When to use**: At the domain level to identify the model
+author(s). Reference them from any definition's `with { }` block
+using `by author Name`.
 
-**Lives in**: Root, Domain.
+**Defined in**: Module, Domain (body definitions only).
+**Referenced in**: Any definition's `with { }` metadata block via
+`by author Name`.
 **Contains**: `name`, `email` fields only.
 
 **Syntax**: `author Name is { name is "..." email is "..." }`
@@ -699,35 +707,36 @@ Authorship is inherited by all contained definitions.
 
 ### Term
 
-**Purpose**: A glossary entry—defines domain-specific terminology within
-the model itself.
+**Purpose**: A glossary entry—defines domain-specific terminology
+within the model itself.
 
-**When to use**: When your domain uses jargon that readers (human or AI)
-might not know.
+**When to use**: When your domain uses jargon that readers (human
+or AI) might not know.
 
-**Lives in**: Any vital definition.
-**Contains**: A description string.
+**Lives in**: Metadata blocks (`with { }`) on any definition.
+**Contains**: A doc block (description).
 
-**Syntax**: `term "SKU" is described by "Stock Keeping Unit"`
+**Syntax**: `term SKU is { |Stock Keeping Unit... }`
 
 > *[For more details →](../concepts/term.md)*
 
 ### Option
 
-**Purpose**: An instruction to translators about how a definition should
-be implemented or interpreted.
+**Purpose**: An instruction to translators about how a definition
+should be implemented or interpreted.
 
 **When to use**: To annotate definitions with technology hints,
 behavioral flags, or classification metadata.
 
-**Lives in**: Any vital definition.
+**Lives in**: Metadata blocks (`with { }`) on any vital definition.
 
 **Key details**:
 
-- `technology("Kafka")` — implementation hint
-- `kind("core")` — classification
-- Boolean if no arguments: `option event-sourced`
-- Entity options: `event-sourced`, `aggregate`, `transient`, `available`
+- `option is technology("Kafka")` — implementation hint
+- `option is kind("core")` — classification
+- Boolean if no arguments: `option is event-sourced`
+- Entity options: `event-sourced`, `aggregate`, `transient`,
+  `available`
 - Context options: `service`, `gateway`, `package`
 
 > *[For more details →](../concepts/option.md)*
@@ -811,7 +820,8 @@ directly instantiated in RIDDL models:
 - **[Definition](../concepts/definition.md)** — The base concept:
   anything with a name and optional metadata.
 - **[Vital](../concepts/vital.md)** — A definition that supports
-  options, terms, authors, includes, and descriptions. All processors,
+  metadata (options, terms, author references, descriptions, and
+  attachments in `with { }` blocks), plus includes. All processors,
   Domain, and Context are vital.
 - **[Processor](../concepts/processor.md)** — The abstract parent of
   Context, Entity, Repository, Projector, Saga, Adaptor, and Streamlet.
