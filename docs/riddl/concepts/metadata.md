@@ -3,32 +3,48 @@ title: "Metadata"
 draft: false
 ---
 
-Metadata in RIDDL provides supplementary information about definitions that
-doesn't affect the core semantics but aids documentation, organization, and
-tooling.
+Metadata in RIDDL provides supplementary information about
+definitions—documentation, terminology, attribution, and
+implementation hints—without affecting core semantics. All metadata
+lives in a `with { }` block that follows the definition's closing
+brace.
 
-## Common Metadata
+## Placement
 
-All definitions support these metadata elements:
-
-### Brief Description
-
-A short, one-line description using `briefly`:
+Metadata appears **after** a definition's body, not inside it:
 
 ```riddl
-entity Customer is {
-  briefly "A person or organization that purchases products"
-  // ...
+context OrderManagement is {
+  // body definitions go here (entities, types, handlers, etc.)
+  ???
+} with {
+  // metadata goes here
+  briefly "Manages the order lifecycle"
+  term Fulfillment is {
+    |The complete process of receiving, processing, and
+    |delivering an order to the customer.
+  }
+  option is technology("Kafka")
 }
 ```
 
-### Extended Description
+## Brief Description
 
-Longer documentation using `described by` (or `described as`, `explained by`,
-`explained as`):
+A short, one-line summary using `briefly`:
 
 ```riddl
-entity Customer is {
+entity Customer is { ??? } with {
+  briefly "A person or organization that purchases products"
+}
+```
+
+## Extended Description
+
+Longer documentation using `described by` (or `described as`,
+`explained by`, `explained as`):
+
+```riddl
+entity Customer is { ??? } with {
   described by {
     |Customers are the primary actors in our e-commerce system.
     |They can browse products, place orders, and manage their
@@ -37,52 +53,116 @@ entity Customer is {
 }
 ```
 
-The `|` prefix indicates lines of documentation text (Markdown format).
+The `|` prefix indicates lines of documentation text in Markdown
+format.
 
-### Terms
+## Terms
 
-Domain-specific terminology with definitions:
+Domain-specific terminology defined as glossary entries. The syntax
+is `term` *identifier* `is` *doc_block*:
 
 ```riddl
 domain ECommerce is {
-  term "SKU" is described by "Stock Keeping Unit - unique product identifier"
-  term "Cart" is described by "Temporary collection of items before checkout"
+  context Catalog is {
+    ???
+  } with {
+    term Listing is {
+      |A product's presence in the catalog, including its
+      |description, images, pricing, and availability.
+    }
+  }
+} with {
+  term SKU is {
+    |Stock Keeping Unit—a unique identifier for a specific
+    |product variant, including size, color, and other
+    |attributes.
+  }
 }
-```
-
-### Authors
-
-Attribution for definitions:
-
-```riddl
-author Reid is {
-  name "Reid Spencer"
-  email "reid@example.com"
-}
-
-domain MyDomain by author Reid is { ... }
 ```
 
 ## Options
 
-Options modify the behavior of definitions. Common options include:
-
-- `technology("x")`: Implementation technology hints
-- `kind("x")`: Classification of the definition
-- `css("x")`: Styling hints for documentation
-- `faicon("x")`: Font Awesome icon for documentation
+Options are instructions to translators about how a definition
+should be implemented or interpreted. The syntax is `option is`
+*option_name* with optional string arguments:
 
 ```riddl
-context OrderManagement is {
-  option technology("Akka")
-  option kind("core")
-  // ...
+entity Order is {
+  ???
+} with {
+  option is event-sourced
+  option is aggregate
+  option is technology("Akka")
+  option is kind("core")
+}
+```
+
+See [Options](option.md) for the full list of available options
+per definition type.
+
+## Author Definitions vs. Author References
+
+RIDDL distinguishes between **author definitions** and **author
+references**. They serve different purposes and appear in different
+places.
+
+### Author Definitions (Body)
+
+Author definitions declare who created or maintains a model. They
+can **only** appear in the body of a **Module** or **Domain**—not
+in contexts, entities, or other definitions:
+
+```riddl
+domain ECommerce is {
+  author Reid is {
+    name is "Reid Spencer"
+    email is "reid@ossum.com"
+  }
+
+  context Catalog is { ??? }
+}
+```
+
+See [Author](author.md) for full details.
+
+### Author References (Metadata)
+
+Author references use `by author` to associate an existing author
+definition with any definition's metadata:
+
+```riddl
+domain ECommerce is {
+  author Reid is {
+    name is "Reid Spencer"
+    email is "reid@ossum.com"
+  }
+
+  context Catalog is {
+    ???
+  } with {
+    by author Reid
+  }
+}
+```
+
+## Attachments
+
+Attachments associate external files (diagrams, spreadsheets,
+images) with a definition:
+
+```riddl
+entity Order is {
+  ???
+} with {
+  attachment StateChart is "diagrams/order-states.png"
+    as "image/png"
 }
 ```
 
 ## Occurs In
 
-Metadata can appear in any definition, including:
+Metadata (`with { }` blocks) can appear on any definition,
+including:
 
 * [Domains](domain.md)
 * [Contexts](context.md)
@@ -92,8 +172,12 @@ Metadata can appear in any definition, including:
 
 ## Contains
 
-Metadata does not contain other definitions; it contains:
+Metadata blocks contain:
 
-* Literal strings (descriptions, term definitions)
-* Options with parameters
-* Author references
+* Brief descriptions (`briefly`)
+* Extended descriptions (`described by`)
+* [Terms](term.md) — glossary entries
+* [Options](option.md) — translator instructions
+* Author references (`by author`)
+* Attachments
+* Comments
