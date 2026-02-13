@@ -6,6 +6,29 @@ Documentation site is complete and deployed at https://ossum.tech.
 All major sections are documented with proper RIDDL syntax
 highlighting.
 
+**Completed (2026-02-13):**
+
+- Rectified Reactive BBQ tutorial with verbatim riddl-models source
+  - Replaced all fabricated RIDDL snippets with actual code from
+    `riddl-models/hospitality/food-service/reactive-bbq/`
+  - Created 14 new per-context pages:
+    - Restaurant: front-of-house, kitchen, bar, online-ordering,
+      delivery, loyalty
+    - BackOffice: scheduling, inventory, reporting
+    - Corporate: menu-management, supply-chain, marketing
+    - Cross-cutting: external-contexts, patterns
+  - Rewrote 5 existing pages: index, reactive-bbq, restaurant/index,
+    backoffice/index, corporate/index
+  - Updated mkdocs.yml nav with hierarchical context sub-pages
+  - All GitHub links updated from riddl-examples to riddl-models
+  - Each context page follows consistent structure: Purpose,
+    Interview Connection, Types, Entity, Repository, Projector,
+    Adaptors, Design Decisions, Source
+  - Patterns page covers 7 cross-cutting RIDDL patterns with
+    real code and links to where each appears
+  - Build verified with `mkdocs build --strict` (no broken links)
+  - 20 files changed, 3,860 lines added (commit 95e751a)
+
 **Completed (2026-02-09):**
 
 - Fixed metadata vs body definition confusion across 10 files

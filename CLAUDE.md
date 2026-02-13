@@ -46,6 +46,31 @@ When working on RIDDL-related tasks, these files are essential context:
 - **Language Reference**: `docs/riddl/references/language-reference.md`
 - **Concepts Index**: `docs/riddl/concepts/index.md`
 
+### Reactive BBQ Tutorial Structure
+
+The tutorial at `docs/riddl/tutorials/rbbq/` is a comprehensive
+case study with 30 pages based on the actual RIDDL model in
+`riddl-models/hospitality/food-service/reactive-bbq/`. All RIDDL
+code blocks are verbatim from the model source.
+
+```
+rbbq/
+├── index.md              # Landing page
+├── scenario.md           # Business challenge
+├── reactive-bbq.md       # Top-level domain model
+├── patterns.md           # 7 cross-cutting patterns
+├── external-contexts.md  # 6 third-party integrations
+├── restaurant/           # 6 context pages + index
+├── backoffice/           # 3 context pages + index
+├── corporate/            # 3 context pages + index
+└── personas/             # 9 persona interviews + index
+```
+
+Each context page follows a consistent structure: Purpose,
+Interview Connection, Types, Entity, Repository, Projector
+(if applicable), Adaptors, Design Decisions, Source links.
+The source links point to `riddl-models` (not `riddl-examples`).
+
 ---
 
 ## Build and Development
