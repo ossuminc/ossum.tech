@@ -1,88 +1,103 @@
 ---
-title: "Restaurant Subdomain"
-description: "Core restaurant operations in the Reactive BBQ domain model"
+title: "Restaurant Domain"
+description: "Core restaurant operations in the Reactive BBQ model"
 ---
 
-# Restaurant Subdomain
+# Restaurant Domain
 
-The Restaurant subdomain handles the core operations that occur within each
-Reactive BBQ location. This is where customers interact with the restaurant
-through the front-of-house staff and where food is prepared in the kitchen.
+The Restaurant domain covers all in-restaurant and customer-facing
+operations. It is the largest of the three domains, containing six
+bounded contexts and two external system integrations.
 
-## Bounded Contexts
+## Domain Definition
 
-Based on the [personnel interviews](../scenario.md), we identify several
-bounded contexts within the Restaurant subdomain:
-
-### Front of House
-
-Handles customer-facing operations:
-
-- **Reservations** - Taking and managing table reservations
-- **Seating** - Tracking table availability and seating guests
-- **Ordering** - Taking food and drink orders at tables
-- **Payment** - Processing bills and collecting payments
-
-Key entities:
-- `Table` - Physical table with capacity and status
-- `Reservation` - Booking with time, party size, preferences
-- `Order` - Collection of items for a table
-- `Bill` - Itemized charges for an order
-
-### Kitchen
-
-Handles food preparation:
-
-- **Order Queue** - Tracking orders to be prepared
-- **Station Management** - Assigning cooks to stations
-- **Quality Control** - Chef approval before serving
-
-Key entities:
-- `Ticket` - Kitchen's view of an order to prepare
-- `Station` - Prep station (grill, fryer, salad, etc.)
-- `MenuItem` - Recipe and preparation instructions
-
-### Bar
-
-Handles drink service:
-
-- **Drink Orders** - Preparing drinks for tables and bar customers
-- **Bar Tabs** - Tracking charges for bar customers
-- **Inventory** - Managing bar stock
-
-## Communication Patterns
-
-The Restaurant subdomain uses event-driven communication:
+The Restaurant domain includes its contexts via RIDDL's `include`
+mechanism, keeping each context in its own file for maintainability:
 
 ```riddl
-context FrontOfHouse is {
-  entity Order is {
-    handler OrderHandler is {
-      on command PlaceOrder {
-        // Emit event for kitchen
-        send event OrderPlaced to Kitchen.OrderQueue
-      }
-    }
+domain Restaurant is {
+
+  author OssumInc is {
+    name is "Ossum Inc."
+    email is "info@ossuminc.com"
+  } with {
+    briefly "Author"
+    described by "Ossum Inc."
+  }
+
+  include "FrontOfHouseContext.riddl"
+  include "KitchenContext.riddl"
+  include "BarContext.riddl"
+  include "OnlineOrderingContext.riddl"
+  include "DeliveryContext.riddl"
+  include "LoyaltyContext.riddl"
+  include "external-contexts.riddl"
+
+} with {
+  briefly "Restaurant operations domain"
+  described by {
+    | Covers all in-restaurant and customer-facing operations
+    | including front-of-house, kitchen, bar, online ordering,
+    | delivery, and loyalty program.
   }
 }
 ```
 
-When a server places an order, an `OrderPlaced` event is sent to the Kitchen
-context, which adds it to the preparation queue. This decoupling means the
-front-of-house doesn't block waiting for the kitchen.
+## Bounded Contexts
+
+| Context | Purpose | Entities | Details |
+|---------|---------|----------|---------|
+| [Front of House](front-of-house.md) | Reservations, table orders, billing | Reservation, TableOrder | Projector: ReservationBoard |
+| [Kitchen](kitchen.md) | Ticket queue, station assignment, QC | KitchenTicket | Projector: KitchenDisplay |
+| [Bar](bar.md) | Drink orders with push notifications | DrinkOrder | Solves melting-ice problem |
+| [Online Ordering](online-ordering.md) | Menu browsing, cart, checkout | OnlineOrder | Decoupled from delivery |
+| [Delivery](delivery.md) | Driver dispatch, GPS tracking | DeliveryOrder | Offline resilient |
+| [Loyalty](loyalty.md) | Points accrual and redemption | LoyaltyAccount | Incremental rollout |
+
+Plus two [external contexts](../external-contexts.md):
+**PaymentGateway** and **NotificationService**.
+
+## Cross-Context Communication
+
+The contexts communicate through adaptors, not direct calls. This
+diagram shows the message flow:
+
+```
+FrontOfHouse ──ToKitchen──► Kitchen ◄──FromOnlineOrdering── OnlineOrdering
+     │                                                           │
+     ├──ToBar──────────► Bar                                     ├──ToKitchen──► Kitchen
+     │                                                           │
+     ├──ToLoyalty──────► Loyalty ◄──FromPayment (dine-in)        ├──ToDelivery─► Delivery
+     │                          ◄──FromOnlinePayment (online)    │
+     └─────────────────────────────────────────────────────      └──ToLoyalty──► Loyalty
+```
+
+Key patterns:
+
+- **Outbound adaptors** (`to`) route messages from one context to
+  another — e.g., `FrontOfHouse.ToKitchen` sends food items to
+  the Kitchen context
+- **Inbound adaptors** (`from`) receive and transform messages
+  from another context — e.g., `Kitchen.FromFrontOfHouse`
+  converts submitted orders into kitchen tickets
+- **Multiple sources** — Kitchen receives tickets from both
+  FrontOfHouse (dine-in) and OnlineOrdering (online), each
+  through its own adaptor
 
 ## Challenges Addressed
 
-This design addresses issues from the interviews:
+Based on the [personnel interviews](../scenario.md):
 
-| Challenge | Solution |
-|-----------|----------|
-| Slow order entry | Async event-driven, no blocking |
-| Terminal contention | Servers can use mobile devices |
-| System failures | Event sourcing enables recovery |
-| Kitchen order loss | Persistent event log |
+| Persona | Challenge | Context Solution |
+|---------|-----------|-----------------|
+| [Host](../personas/host.md) | Unresponsive reservations | FrontOfHouse with event sourcing |
+| [Server](../personas/server.md) | Terminal contention | Async event-driven ordering |
+| [Chef](../personas/chef.md) | Lost orders on crash | Kitchen with persistent tickets |
+| [Cook](../personas/cook.md) | Illegible handwritten tickets | KitchenDisplay projector |
+| [Bartender](../personas/bartender.md) | Drinks sit and ice melts | Bar push notifications |
+| [Delivery Driver](../personas/delivery-driver.md) | App drops connectivity | Delivery offline resilience |
+| [Online Customer](../personas/online-customer.md) | Website unreliable | OnlineOrdering isolation |
 
-## Source Code
+## Source
 
-See the Restaurant subdomain implementation:
-[restaurant/domain.riddl](https://github.com/ossuminc/riddl-examples/tree/main/src/riddl/ReactiveBBQ/restaurant)
+[`restaurant/domain.riddl`](https://github.com/ossuminc/riddl-models/tree/main/hospitality/food-service/reactive-bbq/restaurant)

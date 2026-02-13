@@ -153,10 +153,26 @@ nav:
         - riddl/tutorials/rbbq/index.md
         - Scenario: riddl/tutorials/rbbq/scenario.md
         - Domain Model: riddl/tutorials/rbbq/reactive-bbq.md
-        - Subdomains:
-          - Restaurant: riddl/tutorials/rbbq/restaurant/index.md
-          - BackOffice: riddl/tutorials/rbbq/backoffice/index.md
-          - Corporate: riddl/tutorials/rbbq/corporate/index.md
+        - Restaurant:
+          - riddl/tutorials/rbbq/restaurant/index.md
+          - Front of House: riddl/tutorials/rbbq/restaurant/front-of-house.md
+          - Kitchen: riddl/tutorials/rbbq/restaurant/kitchen.md
+          - Bar: riddl/tutorials/rbbq/restaurant/bar.md
+          - Online Ordering: riddl/tutorials/rbbq/restaurant/online-ordering.md
+          - Delivery: riddl/tutorials/rbbq/restaurant/delivery.md
+          - Loyalty: riddl/tutorials/rbbq/restaurant/loyalty.md
+        - BackOffice:
+          - riddl/tutorials/rbbq/backoffice/index.md
+          - Scheduling: riddl/tutorials/rbbq/backoffice/scheduling.md
+          - Inventory: riddl/tutorials/rbbq/backoffice/inventory.md
+          - Reporting: riddl/tutorials/rbbq/backoffice/reporting.md
+        - Corporate:
+          - riddl/tutorials/rbbq/corporate/index.md
+          - Menu Management: riddl/tutorials/rbbq/corporate/menu-management.md
+          - Supply Chain: riddl/tutorials/rbbq/corporate/supply-chain.md
+          - Marketing: riddl/tutorials/rbbq/corporate/marketing.md
+        - External Systems: riddl/tutorials/rbbq/external-contexts.md
+        - Patterns: riddl/tutorials/rbbq/patterns.md
         - Personas:
           - riddl/tutorials/rbbq/personas/index.md
           - CEO: riddl/tutorials/rbbq/personas/ceo.md

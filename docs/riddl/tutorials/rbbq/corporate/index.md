@@ -1,82 +1,102 @@
 ---
-title: "Corporate Subdomain"
-description: "Corporate headquarters operations in the Reactive BBQ domain model"
+title: "Corporate Domain"
+description: "Corporate headquarters operations in the Reactive BBQ model"
 ---
 
-# Corporate Subdomain
+# Corporate Domain
 
-The Corporate subdomain handles operations that span all restaurant locations
-and are managed from the corporate headquarters.
+The Corporate domain handles operations that span all 500+
+restaurant locations and are managed from headquarters. It contains
+three bounded contexts and two external system integrations.
 
-## Bounded Contexts
-
-### Menu Management
-
-Centralized menu control as described by the [Head Chef](../personas/head-chef.md):
-
-- **Recipe Development** - Creating and testing new dishes
-- **Menu Updates** - Monthly menu changes
-- **Pricing** - Setting prices across locations
-
-Key entities:
-- `Recipe` - Ingredients, preparation, and presentation
-- `MenuItem` - Menu item with description and price
-- `MenuRelease` - Scheduled menu update
-
-### Supply Chain
-
-Manages ingredient sourcing and distribution:
-
-- **Vendor Management** - Approved supplier relationships
-- **Bulk Ordering** - Centralized purchasing
-- **Distribution** - Shipping to restaurants
-
-Key entities:
-- `Vendor` - Approved supplier with contracts
-- `BulkOrder` - Large-scale purchase order
-- `Shipment` - Delivery to restaurant locations
-
-### Marketing
-
-Coordinates brand and promotional activities:
-
-- **Menu Photography** - Professional food images
-- **Promotions** - Special offers and campaigns
-- **Loyalty Program** - Customer rewards (planned feature)
-
-## Integration Patterns
-
-Corporate communicates with restaurants through message-based integration:
+## Domain Definition
 
 ```riddl
-context MenuManagement is {
-  entity Menu is {
-    handler MenuHandler is {
-      on command PublishMenu {
-        // Broadcast to all restaurant locations
-        send event MenuPublished to all Restaurant.Kitchen
-      }
-    }
+domain Corporate is {
+
+  author OssumInc is {
+    name is "Ossum Inc."
+    email is "info@ossuminc.com"
+  } with {
+    briefly "Author"
+    described by "Ossum Inc."
+  }
+
+  user CorporateHeadChef is "Head Chef managing recipes and menus" with {
+    briefly "Corporate Head Chef"
+    described by "Develops recipes and coordinates monthly menu updates."
+  }
+
+  user ProcurementManager is "Manager handling vendor relationships" with {
+    briefly "Procurement Manager"
+    described by "Manages bulk ordering and supply chain operations."
+  }
+
+  user MarketingManager is "Manager running promotions and campaigns" with {
+    briefly "Marketing Manager"
+    described by "Creates and manages marketing campaigns."
+  }
+
+  include "MenuManagementContext.riddl"
+  include "SupplyChainContext.riddl"
+  include "MarketingContext.riddl"
+  include "external-contexts.riddl"
+
+} with {
+  briefly "Corporate operations domain"
+  described by {
+    | Covers corporate-level functions including menu
+    | management with atomic distribution to all locations,
+    | supply chain and vendor management, and marketing
+    | campaigns and promotions.
   }
 }
 ```
 
-The menu update process uses a publish/subscribe pattern so that:
-- All locations receive updates simultaneously
-- Individual locations can't be in inconsistent states
-- Updates are atomic - either applied completely or not at all
+The Corporate domain defines its own `user` personas:
+CorporateHeadChef, ProcurementManager, and MarketingManager.
 
-## Challenges Addressed
+## Bounded Contexts
 
-From the [CEO interview](../personas/ceo.md):
+| Context | Purpose | Entities | Details |
+|---------|---------|----------|---------|
+| [Menu Management](menu-management.md) | Recipes, pricing, releases | MenuItem, MenuRelease | Atomic distribution |
+| [Supply Chain](supply-chain.md) | Vendor ordering | PurchaseOrder | Bulk procurement |
+| [Marketing](marketing.md) | Campaigns, promotions | Campaign | Multi-channel |
 
-| Challenge | Solution |
-|-----------|----------|
-| Menu coordination | Event-driven distribution |
-| Loyalty program risk | Isolated context, incremental rollout |
-| Electronic menu feasibility | Same menu data, different presentations |
+Plus two [external contexts](../external-contexts.md):
+**PrintingService** and **PhotographyService**.
 
-## Source Code
+## Cross-Domain Integration
 
-See the Corporate subdomain implementation:
-[corporate/domain.riddl](https://github.com/ossuminc/riddl-examples/tree/main/src/riddl/ReactiveBBQ/corporate)
+The Corporate domain publishes to the Restaurant domain:
+
+- **MenuManagement → Restaurants** — The `ToRestaurants` adaptor
+  distributes published menu releases atomically to all
+  restaurant locations. This solves the Head Chef's monthly
+  coordination bottleneck.
+
+The Corporate domain also coordinates with BackOffice:
+
+- **SupplyChain ↔ Inventory** — Purchase orders from Corporate
+  supply chain result in stock receipts at individual restaurant
+  inventory contexts.
+
+## Design Decisions
+
+**Why atomic menu distribution?** From the
+[Head Chef interview](../personas/head-chef.md): monthly menu
+updates required coordinating with printers, the website team,
+and 500+ locations. The `MenuRelease` entity models this as an
+atomic operation — menu changes are bundled into a release,
+finalized, and published simultaneously to all locations.
+
+**Why separate Marketing?** Marketing campaigns operate on
+different timelines and with different stakeholders than menu
+management. Keeping them separate means the marketing team
+can create, schedule, and launch campaigns without touching
+the menu management workflow.
+
+## Source
+
+[`corporate/domain.riddl`](https://github.com/ossuminc/riddl-models/tree/main/hospitality/food-service/reactive-bbq/corporate)
