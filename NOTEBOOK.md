@@ -6,6 +6,19 @@ Documentation site is complete and deployed at https://ossum.tech.
 All major sections are documented with proper RIDDL syntax
 highlighting.
 
+**Completed (2026-02-14):**
+
+- Added Standard Highlighting reference page
+  (`docs/riddl/references/standard-highlighting.md`)
+  - Documents the 11 `Token` enum types from the RIDDL compiler
+  - Dark and light theme color tables with hex codes and swatches
+  - Implementation notes for each platform (IntelliJ, VS Code,
+    Synapify/ossum.ai Monaco, Pygments/MkDocs)
+  - Design principles and guidance for new tool implementors
+  - Colors sourced from Pygments lexer (`riddl_lexer/style.py`)
+    and CSS overrides (`extra.css`) as canonical reference
+  - Updated references index and mkdocs.yml nav
+
 **Completed (2026-02-13):**
 
 - Rectified Reactive BBQ tutorial with verbatim riddl-models source

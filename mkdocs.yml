@@ -266,6 +266,7 @@ nav:
     - References:
       - riddl/references/index.md
       - Cheat Sheet: riddl/references/cheat-sheet.md
+      - Standard Highlighting: riddl/references/standard-highlighting.md
       - Language Reference: riddl/references/language-reference.md
       - EBNF Grammar: riddl/references/ebnf-grammar.md
     - Tools:

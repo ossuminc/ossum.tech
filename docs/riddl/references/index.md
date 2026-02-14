@@ -7,6 +7,9 @@ user community. The current set of references are:
 * [Cheat Sheet](cheat-sheet.md) - a dense, scannable reference for
   every RIDDL definition type—what it means, when to use it, and
   where it lives.
+* [Standard Highlighting](standard-highlighting.md) - the standard
+  token types and color scheme used for RIDDL syntax highlighting
+  across all editors and documentation tools.
 * [Language Reference](language-reference.md) - a detailed description
   of the structure and allowed syntax of RIDDL models.
 * [EBNF Grammar](ebnf-grammar.md) - a formal EBNF grammar for the
