@@ -9,3 +9,8 @@
 *.egg-info/
 __pycache__/
 /task/
+
+# Claude Code transient files
+.claude/*
+!.claude/skills/
+!.claude/skills/**

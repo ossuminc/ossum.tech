@@ -20,7 +20,7 @@ lazy val root = Root(
   With.Scala3.configure(version = Some("3.7.4"))
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
-  libraryDependencies += "com.ossuminc" %% "riddl-language" % "1.7.0",
+  libraryDependencies += "com.ossuminc" %% "riddl-language" % "1.12.3",
 
   // Extract RIDDL grammar by compiling and running ExtractGrammar
   extractGrammar := {
