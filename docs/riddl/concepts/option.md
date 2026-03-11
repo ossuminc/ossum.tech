@@ -30,9 +30,49 @@ adapted from a similar idea in
 [Simon Brown's](https://www.linkedin.com/in/simonbrownjersey/)
 [C4 Model For Software Architecture](https://c4model.com/#Notation).
 
-Other options are specific to the kind of vital definition. See the
-vital definition's page for details on the options they take.
+Other options are specific to the kind of vital definition.
 Non-vital definitions do not allow options.
+
+## Known Options By Definition
+
+| Definition | Supported Options |
+|------------|-------------------|
+| [Adaptor](adaptor.md) | `css`, `faicon`, `kind`, `technology` |
+| [Application](application.md) | `css`, `faicon`, `kind`, `technology` |
+| [Connector](connector.md) | `kind`, `persistent`, `technology` |
+| [Context](context.md) | `css`, `faicon`, `gateway`, `kind`, `namespace`, `package`, `service`, `technology`, `wrapper` |
+| [Domain](domain.md) | `css`, `external`, `faicon`, `kind`, `namespace`, `package`, `technology` |
+| [Entity](entity.md) | `aggregate`, `available`, `consistent`, `css`, `event-sourced`, `faicon`, `finite-state-machine`, `kind`, `message-queue`, `technology`, `transient`, `value` |
+| [Epic](epic.md) | `css`, `faicon`, `kind`, `sync`, `technology` |
+| [Projector](projector.md) | `css`, `faicon`, `kind`, `technology` |
+| [Repository](repository.md) | `css`, `faicon`, `kind`, `technology` |
+| [Saga](saga.md) | `css`, `faicon`, `kind`, `parallel`, `sequential`, `technology` |
+| [Streamlet](streamlet.md) | `css`, `kind`, `technology` |
+
+### Common Options
+
+These options are available on most definitions:
+
+- **`technology`** — Names the implementation technologies,
+  adapted from
+  [Simon Brown's](https://www.linkedin.com/in/simonbrownjersey/)
+  [C4 Model](https://c4model.com/#Notation). Takes string
+  arguments: `option is technology("Kafka")`
+- **`kind`** — A semantic categorization of the definition.
+  Takes a string argument: `option is kind("device")`
+- **`css`** — A CSS class name for visual rendering
+- **`faicon`** — A Font Awesome icon name for visual rendering
+
+### Notable Definition-Specific Options
+
+- **Entity**: `event-sourced`, `value`, `aggregate`,
+  `transient`, `consistent`, `available`,
+  `finite-state-machine`, `message-queue`
+- **Context**: `gateway`, `service`, `wrapper`
+- **Domain**: `external`
+- **Connector**: `persistent`
+- **Saga**: `parallel`, `sequential`
+- **Epic**: `sync`
 
 ## Occurs In
 
