@@ -452,35 +452,45 @@ Entities can morph between states to model lifecycles:
 
 ```riddl
 entity Order is {
-  state Pending is {
+  record PendingData is { orderId is OrderId }
+  record PaidData is { orderId is OrderId, paidAt is TimeStamp }
+  record ShippedData is { orderId is OrderId, shippedAt is TimeStamp }
+  record CancelledData is { orderId is OrderId }
+
+  state Pending of PendingData is {
     handler PendingHandler is {
       on command ConfirmPayment {
         morph entity Order to state Paid
+          with command ConfirmPayment
         send event PaymentConfirmed to outlet Events
       }
       on command Cancel {
         morph entity Order to state Cancelled
+          with command Cancel
         send event OrderCancelled to outlet Events
       }
     }
   }
 
-  state Paid is {
+  state Paid of PaidData is {
     handler PaidHandler is {
       on command Ship {
         morph entity Order to state Shipped
+          with command Ship
         send event OrderShipped to outlet Events
       }
     }
   }
 
-  state Shipped is {
+  state Shipped of ShippedData is {
     // Final state - no transitions out
   }
 
-  state Cancelled is {
+  state Cancelled of CancelledData is {
     // Final state - no transitions out
   }
+} with {
+  option is finite state machine
 }
 ```
 

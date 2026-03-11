@@ -263,25 +263,43 @@ metadata and cannot contain other RIDDL definitions.
 
 ## Entities and States
 
-Entities are stateful objects with explicit states:
+Entities are stateful objects with explicit states. Each state
+references a type that defines its data structure, and can
+optionally contain handlers that define behavior while the
+entity is in that state:
 
 ```
 entity Product is {
-  state ProductData of ProductRecord with {
-    briefly as "Product state containing all product information"
-    described by {
-      | Contains the complete product information including identification,
-      | pricing, and inventory information.
+  state ProductData of ProductRecord is {
+    handler ProductHandler is {
+      on command UpdatePrice {
+        set field ProductRecord.price to "field price of
+          command UpdatePrice"
+        send event PriceUpdated to
+          outlet ProductEvents.Products
+      }
     }
+  } with {
+    briefly as "Product state with update handling"
   }
-  
-  // Commands, events, handlers
+
+  // Commands, events, types
 } with {
   briefly as "Represents a purchasable item"
   described by {
     | The Product entity represents items that can be purchased.
     | It contains all product attributes and responds to commands.
   }
+}
+```
+
+States can also be defined without a body when handlers are
+defined at the entity level instead:
+
+```
+entity SimpleProduct is {
+  state ProductData of ProductRecord
+  handler ProductHandler is { ??? }
 }
 ```
 
@@ -296,8 +314,47 @@ type ProductRecord is {
 } with {
   briefly as "Record type containing product data"
   described by {
-    | Defines the structure of product data including identification and pricing.
+    | Defines the structure of product data including
+    | identification and pricing.
   }
+}
+```
+
+When an entity has multiple states with their own handlers,
+it models a finite state machine—each state responds to
+messages differently, and the `morph` statement transitions
+between states:
+
+```
+entity Order is {
+  state PendingOrder of PendingOrderData is {
+    handler PendingHandler is {
+      on command ConfirmOrder {
+        morph entity Order to state Order.ActiveOrder
+          with command ConfirmOrder
+      }
+    }
+  }
+  state ActiveOrder of ActiveOrderData is {
+    handler ActiveHandler is {
+      on command ShipOrder {
+        morph entity Order to state Order.ShippedOrder
+          with command ShipOrder
+      }
+      on command CancelOrder {
+        morph entity Order to state Order.CancelledOrder
+          with command CancelOrder
+      }
+    }
+  }
+  state ShippedOrder of ShippedOrderData is {
+    handler ShippedHandler is { ??? }
+  }
+  state CancelledOrder of CancelledOrderData is {
+    handler CancelledHandler is { ??? }
+  }
+} with {
+  option is finite state machine
 }
 ```
 

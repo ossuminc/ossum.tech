@@ -64,9 +64,23 @@ state accordingly. Projector handlers also respond to queries that read from
 the projected data.
 
 ## State Handler
-State handlers process messages while an entity is in that specific 
-state, presumably with the intent of updating that state by generating 
-events from commands.
+State handlers process messages while an entity is in that
+specific state. They are defined inside a state's body,
+enabling each state to respond to messages differently—the
+foundation for modeling state machines in RIDDL. When an
+entity transitions to a new state via a `morph` statement,
+the new state's handlers become active.
+
+```riddl
+state ActiveOrder of ActiveOrderData is {
+  handler ActiveOrderHandler is {
+    on command ShipOrder {
+      morph entity Order to state Order.ShippedOrder
+        with command ShipOrder
+    }
+  }
+}
+```
 
 ## Occurs In
 * [Adaptors](adaptor.md)
