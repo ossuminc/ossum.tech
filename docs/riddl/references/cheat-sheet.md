@@ -310,9 +310,20 @@ messages, states, and parameters in RIDDL.
 - **Alternation** (union): `type X is one of { T1, T2, T3 }`
 - **Enumeration**: `type X is any of { A, B, C }`
 - **Collection**: `many T`, `set of T`, `mapping from K to V`, `T?`
-- **Pattern**: `Pattern("regex")`
-- **Predefined**: `String`, `Integer`, `Boolean`, `UUID`, `Date`,
-  `DateTime`, `Duration`, `URL`, `Currency`, `Decimal`, etc.
+- **Simple predefined types** — use the name alone, no parameters:
+  `Abstract`, `Nothing`, `Boolean`, `Current`, `Date`, `DateTime`,
+  `Duration`, `Length`, `Luminosity`, `Mass`, `Mole`, `Number`,
+  `String`, `Temperature`, `Time`, `TimeStamp`, `UUID`
+- **Parameterized predefined types** — **require parenthesized
+  arguments**; using these without parameters is invalid:
+    - `String(min, max, enc)` — constrained string
+    - `Id(entity)` — unique identifier for an entity type
+    - `URL(scheme)` — URL with a specific scheme
+    - `Range(min, max)` — bounded integer range
+    - `LatLong(lat, long)` — geographic coordinates
+    - `Currency(country-code)` — monetary amount
+      (e.g., `Currency(USD)`)
+    - `Pattern(regex)` — string matching a regular expression
 
 > *[For more details →](../concepts/type.md)*
 
