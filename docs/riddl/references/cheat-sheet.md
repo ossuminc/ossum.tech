@@ -34,6 +34,8 @@ the [Language Reference](language-reference.md).
 | Define a request, response, or notification | [Message](#message) |
 | React to incoming messages | [Handler](#handler) / [On Clause](#on-clause) |
 | Create a reusable computation | [Function](#function) |
+| Assert a precondition in a handler | [`require` statement](#concrete-statements) |
+| Reply to a query | [`reply` statement](#concrete-statements) |
 | Split a model across files | [Include](#include) |
 
 ---
@@ -148,7 +150,7 @@ Include.
 - Maps to a DDD Bounded Context
 - Context-level handlers act as the context's external API
 - Adding Groups makes the context an Application (UI model)
-- Options: `service`, `gateway`, `package`
+- Options: `service`, `gateway`, `package`, `external`
 
 > *[For more details →](../concepts/context.md)*
 
@@ -169,7 +171,8 @@ in the `with { }` metadata block, not in the body.)*
 
 - Entities have one or more named States, each backed by a record type
 - Supports `morph` (change state) and `become` (change handler)
-- Options: `event-sourced`, `aggregate`, `transient`, `available`
+- Options: `event-sourced`, `aggregate`, `transient`, `available`,
+  `auto-id` (auto-assign ULID at instantiation)
 - The primary unit of consistency in a reactive system
 
 > *[For more details →](../concepts/entity.md)*
@@ -309,6 +312,7 @@ messages, states, and parameters in RIDDL.
 - **Aggregation** (record): `type X is { field1: T1, field2: T2 }`
 - **Alternation** (union): `type X is one of { T1, T2, T3 }`
 - **Enumeration**: `type X is any of { A, B, C }`
+- **Aggregate use cases**: `graph`, `table`
 - **Collection**: `many T`, `set of T`, `mapping from K to V`, `T?`
 - **Simple predefined types** — use the name alone, no parameters:
   `Abstract`, `Nothing`, `Boolean`, `Current`, `Date`, `DateTime`,
@@ -448,7 +452,7 @@ type.
 |---|---|
 | `on command X` | A specific command message |
 | `on event X` | A specific event message |
-| `on query X` | A specific query message |
+| `on query X` | A specific query message (use `reply` to send result) |
 | `on init` | Processor initialization |
 | `on term` | Processor termination |
 | `on other` | Any unmatched message (catch-all) |
@@ -495,19 +499,27 @@ interactions between definitions, not full implementations.
 |---|---|---|
 | `send` | `send event X to outlet Y` | Route a message through an outlet or inlet (pub/sub, streaming). |
 | `tell` | `tell command X to entity Y` | Send a message directly to a specific processor (point-to-point). |
+| `reply` | `reply result ProductInfo` | Send a result back to a query sender without knowing their identity. Use in query handlers. |
 
 #### Data
 
 | Statement | Syntax | Description |
 |---|---|---|
-| `set` | `set field status to "Active"` | Assign a value to a state field. |
-| `let` | `let total = "price * qty"` | Create a local variable binding. |
+| `set` | `set field status to "Active"` | Assign a value to a state field. Also accepts a state ref: `set state X to "value"`. |
+| `let` | `let total = "price * qty"` | Create a local variable binding. Optional type annotation: `let total: Decimal = "price * qty"`. |
+
+#### Preconditions
+
+| Statement | Syntax | Description |
+|---|---|---|
+| `require` | `require "amount > 0"` | Assert a precondition as a literal string. |
+| `require` | `require invariant BalanceNonNegative` | Assert a precondition by referencing a named invariant. |
 
 #### Description / Implementation
 
 | Statement | Syntax | Description |
 |---|---|---|
-| `prompt` | `prompt "Calculate the total"` | Natural-language action description for implementation. |
+| `prompt` / `do` | `prompt "Calculate the total"` | Natural-language action description for implementation. `do` is an alias: `do "Calculate the total"`. |
 | `error` | `error "Invalid state"` | Produce a named error. |
 | `code` | `` ```scala ... ``` `` | Embed implementation code (scala, java, python, mojo). |
 
@@ -522,10 +534,10 @@ interactions between definitions, not full implementations.
 
 | Context | Available Statements |
 |---|---|
-| All handlers | when, match, send, tell, set, let, prompt, error, code |
+| All handlers | when, match, send, tell, reply, require, set, let, prompt/do, error, code |
 | Entity handlers | All above + morph, become |
-| Functions | when, match, set, let, prompt, error, code |
-| Saga steps | send, tell, prompt, error |
+| Functions | when, match, require, set, let, prompt/do, error, code |
+| Saga steps | send, tell, prompt/do, error |
 
 > *[For more details →](../concepts/statement.md)*
 
@@ -747,8 +759,8 @@ behavioral flags, or classification metadata.
 - `option is kind("core")` — classification
 - Boolean if no arguments: `option is event-sourced`
 - Entity options: `event-sourced`, `aggregate`, `transient`,
-  `available`
-- Context options: `service`, `gateway`, `package`
+  `available`, `auto-id`
+- Context options: `service`, `gateway`, `package`, `external`
 
 > *[For more details →](../concepts/option.md)*
 
@@ -820,6 +832,25 @@ cannot be expressed in Markdown descriptions.
 **Lives in**: Any vital definition.
 
 **Syntax**: `attachment Name is "path/to/file" as "mime/type"`
+
+---
+
+## Validation Severity Levels
+
+| Severity | Kind | Meaning |
+|:---:|---|---|
+| 0 | Info | Informational note |
+| 1 | StyleWarning | Naming/style convention issue |
+| 2 | MissingWarning | Missing optional content |
+| 3 | UsageWarning | Unused or unreferenced definition |
+| 4 | **CompletenessWarning** | Valid but incomplete for implementation |
+| 5 | Warning | Likely mistake or problematic pattern |
+| 6 | Error | Invalid — prevents compilation |
+| 7 | SevereError | Fatal — halts processing |
+
+Severity ≥ 4 is **actionable**. CompletenessWarnings (new in 1.19.0)
+flag models that validate but lack detail for code generation.
+Toggle with `-c` / `--show-completeness-warnings`.
 
 ---
 

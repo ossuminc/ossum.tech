@@ -114,6 +114,10 @@ RIDDL has a rich type system supporting both simple and complex data structures:
 - **Alternation**: `one of { TypeA, TypeB, TypeC }` - Union/sum types
 - **Enumeration**: `any of { Value1, Value2, Value3 }` - Enumerated values
 
+**Aggregate Use Cases:**
+- **Graph**: `graph` — models graph-structured data
+- **Table**: `table` — models tabular data
+
 **Collection Types:**
 - **Sequence**: `sequence of Type` or `many Type`
 - **Set**: `set of Type`
@@ -261,6 +265,24 @@ metadata and cannot contain other RIDDL definitions.
   items is many Item
   ```
 
+!!! warning "Type Validation"
+    **Errors:**
+
+    - Defining a type whose name exactly matches a predefined type name
+      (e.g., `type Currency is Decimal(10,2)`) — this shadows the built-in
+      type and is not allowed
+
+    **Style Warnings:**
+
+    - Defining a type whose name is a case-variant of a predefined type
+      (e.g., `type timestamp is TimeStamp`)
+
+    **Completeness Warnings:**
+
+    - Command types with no fields (excluding `???` placeholders)
+    - Event types not produced by any handler
+    - Query types without corresponding result types (and vice versa)
+
 ## Entities and States
 
 Entities are stateful objects with explicit states. Each state
@@ -319,6 +341,36 @@ type ProductRecord is {
   }
 }
 ```
+
+!!! warning "Entity Validation"
+    The following conditions produce validation messages:
+
+    **Errors:**
+
+    - Defining a type whose name exactly matches a predefined type
+      (e.g., `type Currency is Decimal(10,2)`) — shadows the built-in
+
+    **Warnings:**
+
+    - Entity Id type defined inside entity body instead of containing
+      context (move it to the context level)
+    - Entity Id type defined at domain level or beyond (scope too broad)
+    - Entity Id type not defined at all
+
+    **Completeness Warnings:**
+
+    - States without an `on init` clause
+    - `on init` without a `set` statement
+    - Command handlers that don't `send` an event
+    - Query handlers that don't `reply` or `send` a result
+    - Entities without any `on query` clause
+    - Entities without an outlet streamlet for publishing events
+    - Entities with no handlers at all
+    - FSM entities (2+ states) without `morph` or `become` statements
+    - Empty handlers (no statements or only `???`)
+    - Handlers with only `prompt` statements (no `tell`, `send`,
+      `morph`, `set`, etc.)
+    - Empty `on other` clauses (silently discards messages)
 
 When an entity has multiple states with their own handlers,
 it models a finite state machine—each state responds to
@@ -442,7 +494,7 @@ handler ProductCommandHandler is {
   }
 
   on query GetProduct {
-    reply result ProductInfo with { product: @fields.data }
+    reply result ProductInfo
   }
 } with {
   briefly as "Processes commands for product management"
@@ -495,15 +547,17 @@ tell command ProcessPayment to entity PaymentService
 ```
 
 ### Set Statement
-Assigns values to fields:
+Assigns values to fields or transitions to a named state:
 ```
 set field status to "Active"
+set state ActiveOrder to "initial values"
 ```
 
 ### Let Statement
-Creates a local variable binding:
+Creates a local variable binding, with an optional type annotation:
 ```
 let totalPrice = "subtotal + tax + shipping"
+let discount: Decimal = "totalPrice * 0.1"
 ```
 
 ### When Statement
@@ -558,10 +612,44 @@ match "orderStatus" {
 }
 ```
 
-### Prompt Statement
+### Reply Statement
+Sends a result back in response to a query, without the handler
+needing to know the sender's identity:
+```
+reply result ProductInfo
+```
+
+Use `reply` in query handlers. It satisfies the completeness check
+that query handlers must send a result.
+
+!!! warning "Validation"
+    Query handlers that do not contain a `reply` or `send` of a result
+    will produce a **CompletenessWarning**.
+
+### Require Statement
+Asserts a precondition that must hold before proceeding:
+```
+require "amount > 0"
+```
+
+You can also reference a named invariant:
+```
+require invariant BalanceNonNegative
+```
+
+!!! warning "Validation"
+    Invariants defined in an entity but never referenced by any
+    `require invariant` statement produce a **UsageWarning**.
+
+### Prompt Statement (alias: `do`)
 Describes an action in natural language for implementation:
 ```
 prompt "Calculate the total price including all applicable taxes and discounts"
+```
+
+The `do` keyword is an alias for `prompt`:
+```
+do "Calculate the total price including all applicable taxes and discounts"
 ```
 
 This is useful for describing complex business logic that will be implemented
@@ -635,6 +723,11 @@ saga CheckoutProcess is {
   }
 }
 ```
+
+!!! warning "Saga Validation"
+    **Completeness Warnings:**
+
+    - Saga step do-statements must contain `tell command`
 
 ## Repositories
 
@@ -763,6 +856,13 @@ context ReportingContext is {
 }
 ```
 
+!!! warning "Projector Validation"
+    **Completeness Warnings:**
+
+    - Projectors not referencing any repository
+    - Projector handlers not `tell`ing to a repository
+    - Declared repository references never used in `tell`
+
 ## Streamlets
 
 Streamlets process streaming data. They define components for building
@@ -821,6 +921,22 @@ context DataPipeline is {
   }
 }
 ```
+
+!!! warning "Streamlet Validation"
+    **Completeness Warnings:**
+
+    - Isolated streamlets not connected to any connector
+    - Sources without a downstream path to a sink
+    - Sinks without an upstream path from a source
+    - Unattached inlets and outlets
+    - Flow/Split/Router handlers that don't send to outlets
+    - Source streamlets without `on init` or `on other`
+    - Streamlet handlers that receive but don't `tell` to entities
+
+!!! warning "Context Validation"
+    **Completeness Warnings:**
+
+    - Contexts with entities but no Sink streamlet for incoming messages
 
 ## Connectors
 
@@ -999,6 +1115,32 @@ entity Product is {
 }
 ```
 
+## Validation Message Severity
+
+RIDDL's validator produces messages at the following severity levels
+(from lowest to highest):
+
+| Severity | Kind | Description |
+|:---:|---|---|
+| 0 | Info | Informational notes |
+| 1 | StyleWarning | Naming and style conventions |
+| 2 | MissingWarning | Missing optional content |
+| 3 | UsageWarning | Unused definitions or unreferenced declarations |
+| 4 | **CompletenessWarning** | Model is valid but incomplete for implementation |
+| 5 | Warning | Likely mistakes or problematic patterns |
+| 6 | Error | Invalid constructs that prevent compilation |
+| 7 | SevereError | Fatal errors that halt processing |
+
+**CompletenessWarning** (severity 4) was introduced in RIDDL 1.19.0. These
+warnings identify models that parse and validate correctly but are missing
+details needed for a complete, implementable specification. They can be
+toggled with the `-c` / `--show-completeness-warnings` CLI flag (default:
+`true`).
+
+Messages at severity 4 (CompletenessWarning) and above are considered
+**actionable** — they should be addressed before considering a model ready
+for translation or code generation.
+
 ## Best Practices
 
 1. **Include Metadata**: Add descriptions to all definitions with `with` clauses after their closing braces
@@ -1114,6 +1256,7 @@ From the formal grammar analysis, several important syntax points deserve specia
    - `prompt` replaces bare quoted strings for describing implementation logic
 
 8. **Removed Statements**: The following statements have been removed from the language:
-   - `if`, `foreach`, `call`, `stop`, `focus`, `reply`, `return`, `read`, `write`
+   - `if`, `foreach`, `call`, `stop`, `focus`, `return`, `read`, `write`
    - Use `when` for conditionals, `match` for pattern matching, and `prompt` for implementation descriptions
+   - Note: `reply` was restored in 1.20.0 with new semantics (see Statement Syntax)
 

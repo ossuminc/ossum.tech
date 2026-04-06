@@ -65,7 +65,7 @@ entity_body = entity_definitions | "???" ;
 entity_definitions = {entity_content}+ ;
 entity_content = processor_definition_contents | state | entity_include ;
 state = "state" identifier ("of" | is) type_ref [state_body] [with_metadata] ;
-state_body = is "{" (state_content+ | "???") "}" ;
+state_body = is "{" ({state_content}+ | "???") "}" ;
 state_content = handler | comment ;
 entity_include = "include" literal_string ;
 
@@ -97,7 +97,7 @@ real_predef_types = "Current" | "Length" | "Luminosity" | "Mass" | "Mole" | "Num
 time_predef_types = "Duration" | "DateTime" | "Date" | "TimeStamp" | "Time" ;
 zoned_predef_types = ("ZonedDate" | "ZonedDateTime") "(" [zone] ")" ;
 other_predef_types = "Abstract" | "Location" | "Nothing" | "UUID" | "UserId" ;
-zone = /[A-Za-z0-9:.+-]*/ ;
+zone = /[A-Z0-9:.+-]{2,}/ ;
 
 (* Type Expressions *)
 pattern_type = "Pattern" "(" {literal_string} ")" ;
@@ -190,8 +190,8 @@ message_origins = inlet_ref | processor_ref | user_ref | epic_ref ;
 (* Statements *)
 (* Core statements available in all contexts *)
 statement = when_statement | match_statement | send_statement | tell_statement |
-    the_set_statement | let_statement | prompt_statement | code_statement |
-    error_statement | morph_statement | become_statement | comment ;
+    reply_statement | the_set_statement | let_statement | prompt_statement | code_statement |
+    error_statement | require_statement | morph_statement | become_statement | comment ;
 
 (* Control flow *)
 when_statement = "when" literal_string "then" pseudo_code_block ["else" pseudo_code_block] "end" ;
@@ -201,16 +201,19 @@ match_case = "case" literal_string "{" {statement} "}" ;
 (* Message operations *)
 send_statement = "send" message_ref "to" (outlet_ref | inlet_ref) ;
 tell_statement = "tell" message_ref "to" processor_ref ;
+reply_statement = "reply" message_ref ;
 
 (* Variable operations *)
-the_set_statement = "set" field_ref "to" literal_string ;
-let_statement = "let" identifier "=" literal_string ;
+the_set_statement = "set" (field_ref | state_ref) "to" literal_string ;
+let_statement = "let" identifier [":" type_ref] "=" literal_string ;
 
 (* General statements *)
-prompt_statement = "prompt" literal_string ;
+prompt_statement = ("prompt" | "do") literal_string ;
 code_statement = "```" ("scala" | "java" | "python" | "mojo") code_contents "```" ;
 code_contents = {any_char_except_triple_backtick} ;
 error_statement = "error" literal_string ;
+require_statement = "require" (literal_string | invariant_ref) ;
+invariant_ref = "invariant" path_identifier ;
 
 (* Entity state transitions *)
 morph_statement = "morph" entity_ref "to" state_ref "with" message_ref ;
