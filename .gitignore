@@ -10,6 +10,9 @@
 __pycache__/
 /task/
 
+tools/.bsp/
+tools/.scala-build/
+
 # Claude Code transient files
 .claude/*
 !.claude/skills/
