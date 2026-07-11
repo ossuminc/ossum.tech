@@ -19,6 +19,14 @@ validating RIDDL models. It can:
 Documentation and diagram generation will be available through
 [Synapify](../../synapify/index.md).
 
+## [riddlg](riddlg/index.md)
+
+The RIDDL generator (`riddlg`) is a locally-run native binary that
+validates RIDDL models and generates from them — documentation (AsciiDoc,
+MkDocs), API specifications (Smithy, gRPC, OpenAPI), and (Pro) Quarkus
+code. It can also generate RIDDL models from natural-language descriptions
+using a local AI model — nothing leaves your machine.
+
 ## [riddl-idea-plugin](riddl-idea-plugin/index.md)
 
 An IntelliJ IDEA plugin (2024.3+) that provides IDE support for editing RIDDL

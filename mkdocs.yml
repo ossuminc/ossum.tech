@@ -278,6 +278,11 @@ nav:
         - Configuration: riddl/tools/riddlc/configuration.md
         - Compilation: riddl/tools/riddlc/compilation.md
         - GitHub Actions: riddl/tools/riddlc/github-actions.md
+      - riddlg:
+        - riddl/tools/riddlg/index.md
+        - Installation: riddl/tools/riddlg/installation.md
+        - Command Reference: riddl/tools/riddlg/command-reference.md
+        - AI Models: riddl/tools/riddlg/models.md
       - sbt-riddl: riddl/tools/sbt-riddl/index.md
       - MCP Server: riddl/tools/riddl-mcp-server/index.md
       - IntelliJ Plugin: riddl/tools/riddl-idea-plugin/index.md

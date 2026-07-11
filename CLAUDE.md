@@ -213,12 +213,21 @@ These guidelines were established during documentation review sessions:
 
 - **`riddlc`** (open source): Syntax and semantic validation only. It reads
   RIDDL files, checks them, and reports errors. No code generation.
+- **`riddlg`** (proprietary, freemium): The local generation CLI from the
+  `riddl-generator` repo. Validates RIDDL and generates docs (AsciiDoc,
+  MkDocs), API specs (Smithy, gRPC, OpenAPI), AI-generated RIDDL from
+  natural language, and (Pro) Quarkus code. Docs:
+  `docs/riddl/tools/riddlg/`.
 - **Synapify** (commercial): Provides advanced features including code
-  generation, documentation generation, and AI-assisted development. These
-  features are available via subscription.
+  generation, documentation generation, and AI-assisted development
+  (it drives `riddlg serve` for generation). These features are available
+  via subscription.
 
 When documenting capabilities, do NOT claim that `riddlc` generates code,
-diagrams, Kubernetes manifests, etc. Those capabilities exist in Synapify.
+diagrams, Kubernetes manifests, etc. Those capabilities belong to `riddlg`
+and Synapify. Note: `riddl-gen` (the deprecated generator repo behind
+gen.ossuminc.com) is a DIFFERENT project from `riddl-generator`/`riddlg` —
+don't conflate them.
 
 ### Outdated Technology References
 
