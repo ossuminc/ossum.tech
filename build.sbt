@@ -17,8 +17,8 @@ lazy val root = Root(
   startYr = 2025,
   devs = developers
 ).configure(
-  With.Scala3.configure(version = Some("3.7.4")),
-  With.Riddl.library(version = "1.20.0", nonJVMDependency = false)
+  With.Scala3.configure(version = Some("3.8.4")),
+  With.Riddl.library(version = "1.29.0", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
