@@ -7,16 +7,17 @@ description: "Generate RIDDL models, documentation, API specs, and code — loca
 
 `riddlg` is a single locally-run native binary that generates things from — and
 into — RIDDL. It validates RIDDL models, generates documentation and API
-specifications from them, generates RIDDL models *from natural-language
-descriptions* using a local AI model, and (with a Pro license) generates
-runnable code. Everything runs on your machine: the AI inference happens
+specifications from them, and generates RIDDL models *from natural-language
+descriptions* using a local AI model, provides a RIDDL-based MCP server, 
+and (with a Pro license) generates runnable code. 
+Everything runs on your machine: the AI inference happens
 in-process via [llama.cpp](https://github.com/ggml-org/llama.cpp), so your
 models and descriptions never leave your computer.
 
-## Quick Start
+## Quick Start (MacOS Apple Silicon)
 
 ```bash
-# Install (macOS Apple Silicon or Linux x86_64)
+# Install (macOS Apple Silicon)
 brew install ossuminc/tap/riddlg
 
 # Verify the install and check GPU detection
@@ -68,7 +69,7 @@ license (set `OSSUM_GEN_LICENSE` or place a license token at
 | [Command Reference](command-reference.md) | Every command and option, with examples |
 | [AI Models](models.md) | The default model, downloading alternatives, and sizing for your hardware |
 
-## How riddlg Relates to Other Tools
+## How `riddlg` Relates to Other Tools
 
 - [`riddlc`](../riddlc/index.md) is the open-source compiler: validation
   only. `riddlg` includes the same validation and adds generation.
