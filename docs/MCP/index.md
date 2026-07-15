@@ -7,8 +7,13 @@ description: >-
 # RIDDL MCP Server
 
 !!! warning "MCP Server Has Moved!"
-    The hosted server at `mcp.ossuminc.com` will soon be shut down. You
-    can run it locally with the [riddlg](https://ossum.tech/riddl/tools/riddlg/index.html) tool and its mcp subcommand. 
+    The hosted server at `mcp.ossuminc.com` will soon be shut down. Its tools
+    now ship in the [riddlg](../riddl/tools/riddlg/index.md) binary and run
+    locally — `riddlg mcp` for stdio clients, or `POST /mcp` while
+    [`riddlg serve`](../riddl/tools/riddlg/server-api.md#post-mcp) is running.
+    The tool names and result shapes are unchanged, so existing clients keep
+    working; see [MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for the full
+    catalog.
 
 The RIDDL MCP Server is a Model Context Protocol (MCP) server that enables
 AI assistants to reason about and generate RIDDL models. It provides

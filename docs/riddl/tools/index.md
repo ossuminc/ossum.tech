@@ -25,7 +25,9 @@ The RIDDL generator (`riddlg`) is a locally-run native binary that
 validates RIDDL models and generates from them — documentation (AsciiDoc,
 MkDocs), API specifications (Smithy, gRPC, OpenAPI), and (Pro) Quarkus
 code. It can also generate RIDDL models from natural-language descriptions
-using a local AI model — nothing leaves your machine.
+using a local AI model, so nothing need leave your machine — or, with a Pro
+subscription, using your own API key for a cloud provider. It doubles as a
+[RIDDL MCP server](riddlg/mcp-tools.md) for AI assistants.
 
 ## [riddl-idea-plugin](riddl-idea-plugin/index.md)
 

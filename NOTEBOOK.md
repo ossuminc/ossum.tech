@@ -17,6 +17,37 @@ Documentation site is complete and deployed at https://ossum.tech.
 All major sections are documented with proper RIDDL syntax
 highlighting.
 
+**Completed (2026-07-15):**
+
+- Documented riddlg 0.4.0 — riddl-generator PRs #1 (multi-provider
+  BYOK + Keycloak Pro entitlement) and #2 (Synapify serve tasks).
+  Details were read from the riddl-generator **source**, not its
+  README, which is stale (see Open Questions).
+  - `index.md` — the "nothing leaves your computer" claim is now
+    conditional (cloud providers are opt-in and Pro). Replaced the
+    **removed** offline license mechanism (`OSSUM_GEN_LICENSE`,
+    `~/.ossum-gen/license`) with the Keycloak device flow
+    (`riddlg login` / `whoami` / `logout`, 7-day offline grace).
+  - New `ai-providers.md` — five provider types (llama, anthropic,
+    gemini, openai, responses), BYOK profiles, the `riddlg ai`
+    family, key precedence (env > keychain > file), OS-keychain
+    storage, redaction, `--provider` / `--stream`.
+  - New `configuration.md` — config file precedence, the full
+    baked-in HOCON (incl. `model.gpu-layers`, the real `model.url`
+    default, the `riddlg.ai` block), and the env var table.
+  - New `server-api.md` — every `riddlg serve` route, incl.
+    `POST /mcp`, `POST /ai/messages`, `GET /model/status`, the
+    202-while-downloading contract, per-request provider override.
+  - New `mcp-tools.md` — all 13 MCP tools (2 pre-existing + the 11
+    derivation tools ported from the hosted server) and the
+    6-pattern catalog.
+  - Updated `command-reference.md` (`ai`, `login`/`logout`/`whoami`,
+    `--provider`, `--stream`, exit codes), `models.md`
+    (auto-download is now the default path; `OSSUM_GEN_MODEL_FILE`
+    is read only by `fetch-default-model.sh`, not by riddlg),
+    `installation.md` (0.4.0; GPU is only needed for the local
+    model), `docs/riddl/tools/index.md`, `docs/MCP/index.md`.
+
 **Completed (2026-02-14):**
 
 - Added Standard Highlighting reference page
@@ -125,6 +156,36 @@ highlighting.
 | Update release download links  | When final releases are published          |
 | Implement playground           | Integrate Monaco + MCP server validation   |
 | Remove "Coming Soon" warnings  | When MCP server goes live (~early 2026)    |
+
+#### riddlg distribution: how to verify (learned 2026-07-15)
+
+`installation.md` documents **0.4.0** — the first release containing
+`riddlg ai` / `riddlg login`, i.e. every feature the riddlg docs
+describe. Pinning it to an older release would document commands the
+binary does not have.
+
+riddl-generator is a **private** repo, so GitHub release assets are
+**not** publicly downloadable. The public channel is the GCS bucket
+`synapify-releases/riddlg/<version>/`. A tagged GitHub release does
+**not** imply a usable download — check GCS, not `gh release`:
+
+```bash
+curl -s https://storage.googleapis.com/synapify-releases/riddlg/latest.json
+curl -s "https://storage.googleapis.com/storage/v1/b/synapify-releases/o?prefix=riddlg/0.4.0&fields=items(name)"
+```
+
+All six 0.4.0 artifacts (Darwin-arm64, Linux-x86_64, -cuda, -vulkan,
+deb, rpm), `latest.json`, and the Homebrew formula were verified at
+0.4.0 before this commit.
+
+Two historical traps worth remembering:
+
+- The **0.3.1** release workflow failed, so 0.3.1 was tagged and had
+  GitHub assets but never mirrored to GCS — it was never installable.
+- **cuda and vulkan tarballs were documented but never published**
+  until 0.4.0 (0.3.0 mirrored only Darwin-arm64, Linux-x86_64, deb,
+  rpm), so those links 404'd for the whole 0.3.0 era. 0.4.0 is the
+  first release where every documented variant actually exists.
 
 ### Deferred Strategic Improvements (Soon)
 

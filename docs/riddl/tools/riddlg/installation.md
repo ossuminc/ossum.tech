@@ -12,11 +12,18 @@ is nothing else to install.
 ## Hardware Requirements
 
 The AI commands (`gen riddl`, `gen code --fill`, and the AI features of
-`serve`/`mcp`) run a large language model locally and **require a GPU**.
-Without one, riddlg refuses to run AI commands (pass `--allow-cpu` to
-override, but CPU inference is impractically slow). Everything else —
-`validate`, `gen docs`, `gen api`, plain `gen code` — runs fine on any
-machine.
+`serve`/`mcp`) run a large language model and **require a GPU when using the
+local model** — which is the default. Without one, riddlg refuses to run them
+(pass `--allow-cpu` to override, but CPU inference is impractically slow).
+Everything else — `validate`, `gen docs`, `gen api`, plain `gen code` — runs
+fine on any machine.
+
+!!! tip "No GPU? Use a cloud provider instead"
+    With a [Pro subscription](index.md#free-and-pro) you can point riddlg at
+    Anthropic, Gemini, OpenAI, or any OpenAI-compatible service using your own
+    API key. That path needs **no GPU and no model download** — the hardware
+    guidance below applies only to the local model. See
+    [AI Providers](ai-providers.md).
 
 !!! tip "Recommended: Apple Silicon M5 Pro with 64 GB"
     For the best results, we recommend an **Apple Silicon Mac with an M5 Pro
@@ -31,7 +38,7 @@ machine.
 | Apple Silicon, 16–32 GB | Use a [smaller model](models.md#choosing-a-model-for-your-hardware) |
 | Linux + NVIDIA GPU | Use the `cuda` build; ~24 GB+ VRAM for the default model, smaller models below that |
 | Linux + AMD/Intel GPU | Use the `vulkan` build with a model sized to your VRAM |
-| No GPU | Non-AI commands only (or `--allow-cpu` if you are very patient) |
+| No GPU | Non-AI commands, or a [cloud provider](ai-providers.md) (Pro); `--allow-cpu` if you are very patient |
 
 ## Homebrew
 
@@ -54,15 +61,15 @@ brew upgrade riddlg
 
 ## Direct Download
 
-Release archives are published for each version. Replace `0.3.0` with the
+Release archives are published for each version. Replace `0.4.0` with the
 version you want:
 
 === "macOS (Apple Silicon)"
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.3.0/riddlg-0.3.0-Darwin-arm64.tar.gz
-    tar -xzf riddlg-0.3.0-Darwin-arm64.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.3.0-Darwin-arm64/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Darwin-arm64.tar.gz
+    tar -xzf riddlg-0.4.0-Darwin-arm64.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Darwin-arm64/bin"
     ```
 
     GPU acceleration uses Metal and works out of the box.
@@ -74,9 +81,9 @@ version you want:
     the NVIDIA driver installed.
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.3.0/riddlg-0.3.0-Linux-x86_64-cuda.tar.gz
-    tar -xzf riddlg-0.3.0-Linux-x86_64-cuda.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.3.0-Linux-x86_64-cuda/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Linux-x86_64-cuda.tar.gz
+    tar -xzf riddlg-0.4.0-Linux-x86_64-cuda.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Linux-x86_64-cuda/bin"
     ```
 
 === "Linux (AMD / Intel / other GPU)"
@@ -85,9 +92,9 @@ version you want:
     and NVIDIA alike).
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.3.0/riddlg-0.3.0-Linux-x86_64-vulkan.tar.gz
-    tar -xzf riddlg-0.3.0-Linux-x86_64-vulkan.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.3.0-Linux-x86_64-vulkan/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Linux-x86_64-vulkan.tar.gz
+    tar -xzf riddlg-0.4.0-Linux-x86_64-vulkan.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Linux-x86_64-vulkan/bin"
     ```
 
 === "Linux (CPU only)"
@@ -95,9 +102,9 @@ version you want:
     For servers or machines without a GPU (non-AI commands, or CI use):
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.3.0/riddlg-0.3.0-Linux-x86_64.tar.gz
-    tar -xzf riddlg-0.3.0-Linux-x86_64.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.3.0-Linux-x86_64/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Linux-x86_64.tar.gz
+    tar -xzf riddlg-0.4.0-Linux-x86_64.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Linux-x86_64/bin"
     ```
 
 For a permanent installation, add the `export PATH=...` line to your shell
@@ -112,15 +119,15 @@ CPU-only builds are also packaged for apt and yum/dnf. They install under
 === "Debian / Ubuntu"
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.3.0/riddlg_0.3.0_amd64.deb
-    sudo dpkg -i riddlg_0.3.0_amd64.deb
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg_0.4.0_amd64.deb
+    sudo dpkg -i riddlg_0.4.0_amd64.deb
     ```
 
 === "RHEL / Fedora"
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.3.0/riddlg-0.3.0-1.x86_64.rpm
-    sudo rpm -i riddlg-0.3.0-1.x86_64.rpm
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-1.x86_64.rpm
+    sudo rpm -i riddlg-0.4.0-1.x86_64.rpm
     ```
 
 ## Verify Installation
@@ -129,7 +136,7 @@ CPU-only builds are also packaged for apt and yum/dnf. They install under
 riddlg version
 ```
 
-should print the installed version (e.g. `0.3.0`), and
+should print the installed version (e.g. `0.4.0`), and
 
 ```bash
 riddlg info
@@ -137,9 +144,22 @@ riddlg info
 
 prints build metadata plus the compute devices llama.cpp can see. On an
 Apple Silicon Mac you should see your Metal GPU listed; on Linux, your CUDA
-or Vulkan device. If it warns that no GPU was detected, the AI commands
-will refuse to run — check that you installed the variant matching your
-hardware.
+or Vulkan device. If it warns that no GPU was detected, the AI commands will
+refuse to run on the local model — check that you installed the variant
+matching your hardware, or use a [cloud provider](ai-providers.md) instead.
+
+## Signing In (Pro)
+
+Quarkus code generation and cloud AI providers require a
+[Pro subscription](index.md#free-and-pro) — the same one as Synapify. Nothing
+to install; just sign in:
+
+```bash
+riddlg login    # prints a URL and a code; approve in your browser
+riddlg whoami   # confirm the tier
+```
+
+Everything else works without an account.
 
 !!! note "There is no build-from-source option"
     Unlike `riddlc`, riddlg is proprietary (closed-source) software, so
@@ -149,5 +169,8 @@ hardware.
 ## Next Steps
 
 - [Command Reference](command-reference.md) - Learn the available commands
+- [AI Providers](ai-providers.md) - Use the local model, or bring your own key
+  for a cloud service
 - [AI Models](models.md) - Download the default model ahead of time, or
   pick one sized for your hardware
+- [Configuration](configuration.md) - Every setting and environment variable
