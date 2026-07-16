@@ -12,66 +12,47 @@ with RIDDL domain models.
 
 ## Prerequisites
 
-- IntelliJ IDEA 2024.2 or later with Junie support
+- IntelliJ IDEA with Junie support (MCP requires a recent version)
 - Junie enabled in your JetBrains account
-- API key for the RIDDL MCP Server (contact support@ossuminc.com)
+- `riddlg` installed and on your `PATH`
+  (see [Installation](../riddl/tools/riddlg/installation.md)):
+  ```bash
+  brew install ossuminc/tap/riddlg
+  ```
 
 ## Configuration
+
+Junie launches MCP servers as local processes (stdio transport).
 
 ### Settings UI Method
 
 1. Open **Settings** (++cmd+comma++ or ++ctrl+alt+s++)
-2. Navigate to **Tools** > **Junie**
-3. Find the **MCP Servers** or **External Tools** section
-4. Click **Add Server** and enter:
+2. Navigate to **Tools** > **Junie** > **MCP** (or **Model Context Protocol**)
+3. Click **Add Server** and configure:
 
-| Field | Value |
-|-------|-------|
-| **Name** | `riddl` |
-| **URL** | `https://mcp.ossuminc.com/mcp/v1` |
-| **API Key Header** | `X-API-KEY` |
-| **API Key** | `your-api-key` |
+   | Field | Value |
+   |-------|-------|
+   | **Name** | `riddl` |
+   | **Command** | `riddlg` |
+   | **Arguments** | `mcp` |
 
-### Configuration File Method
+### JSON Method
 
-If your version requires file-based configuration:
-
-**Location**: `~/.config/JetBrains/IntelliJIdea2024.x/junie/mcp-servers.json`
+Where Junie accepts a JSON server definition, use the standard stdio form:
 
 ```json
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      }
+      "command": "riddlg",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-!!! warning "Server Coming Soon"
-    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
-    For now, use a [local server](#using-a-local-server) for development.
-    Replace `your-api-key` with your actual API key.
-
-### Using a Local Server
-
-For development with a locally running server:
-
-```json
-{
-  "mcpServers": {
-    "riddl": {
-      "url": "http://localhost:8080/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-local-api-key"
-      }
-    }
-  }
-}
-```
+No URL and no API key are involved. If `riddlg` isn't on the system `PATH`,
+use its absolute path as the command.
 
 ## Restart IntelliJ
 
@@ -79,7 +60,7 @@ After configuration:
 
 1. Close IntelliJ IDEA
 2. Relaunch IntelliJ IDEA
-3. Open Junie to verify RIDDL tools are available
+3. Open Junie to verify the RIDDL tools are available
 
 ## Junie Capabilities with RIDDL
 
@@ -95,145 +76,35 @@ Junie can autonomously:
 
 ### Example Autonomous Tasks
 
-#### "Validate and fix my RIDDL model"
+**"Validate and fix my RIDDL model"** — Junie scans all `.riddl` files, runs
+validation, fixes resolvable errors, and reports issues needing a human
+decision.
 
-Junie will:
-
-1. Scan all `.riddl` files in the project
-2. Run validation on each file
-3. Identify and fix resolvable errors
-4. Report issues requiring human decision
-
-#### "Create a complete order management context"
-
-Junie will:
-
-1. Understand your existing domain structure
-2. Generate entities, commands, events, and handlers
-3. Ensure proper references between definitions
-4. Validate the generated code
-
-#### "Make this model simulation-ready"
-
-Junie will:
-
-1. Run `check-simulability` on your model
-2. Identify missing handlers and state definitions
-3. Add placeholder implementations
-4. Re-validate until simulation-ready
+**"Make this model simulation-ready"** — Junie runs `check-simulability`,
+identifies missing handlers and state definitions, adds placeholders, and
+re-validates until the model is simulation-ready.
 
 ## Usage Examples
 
 ### Project-Wide Validation
 
-Open Junie and ask:
-
 > Validate all RIDDL files in this project and create a report of any issues
 
 ### Generate from Requirements
 
-> Create RIDDL definitions for a subscription management system with:
-> - Monthly and annual plans
-> - Automatic renewal
-> - Cancellation handling
-> - Usage tracking
+> Create RIDDL definitions for a subscription management system with monthly
+> and annual plans, automatic renewal, cancellation handling, and usage
+> tracking
 
 ### Refactoring
 
 > Move the Payment entity from the Orders context to a new Payments
 > context, updating all references
 
-### Documentation
-
-> Add brief descriptions to all entities and types that are missing
-> documentation
-
 ### Error Resolution
 
 > The validation shows 15 undefined reference errors. Fix them by
 > adding the missing type definitions
-
-## Junie + RIDDL4IDEA
-
-For the best experience, use both:
-
-### RIDDL4IDEA Plugin
-
-- Real-time syntax highlighting
-- Inline validation as you type
-- Clickable error navigation
-- Manual validation control
-
-### Junie with RIDDL MCP
-
-- Autonomous multi-file operations
-- Natural language task execution
-- Intelligent code generation
-- Batch error fixing
-
-### Workflow Example
-
-1. **Write code** - RIDDL4IDEA shows instant feedback
-2. **Hit a complex issue** - Ask Junie for help
-3. **Need new features** - Describe to Junie in natural language
-4. **Review changes** - Junie shows diffs before applying
-5. **Validate** - Both tools confirm correctness
-
-## Advanced Usage
-
-### Custom Prompts
-
-Create reusable prompts for common RIDDL tasks:
-
-```
-# .junie/prompts/validate-model.md
-
-Validate all RIDDL files in the project using the MCP server.
-For each error:
-1. Explain what's wrong
-2. Suggest a fix
-3. Apply the fix if it's unambiguous
-4. Ask for confirmation on ambiguous fixes
-```
-
-### Integration with Tests
-
-> After generating RIDDL code, validate it and check if it would pass
-> simulation. Report any issues that would prevent simulation.
-
-### Continuous Improvement
-
-> Review my RIDDL model and suggest improvements for:
-> - Better naming conventions
-> - Missing error handling
-> - Incomplete handlers
-> - Documentation gaps
-
-## Troubleshooting
-
-### Junie Not Available
-
-- Verify Junie is enabled in your JetBrains account
-- Check IntelliJ version supports Junie
-- Update to latest IntelliJ version
-
-### MCP Tools Not Working
-
-- Restart IntelliJ after configuration
-- Check Junie logs: **View** > **Tool Windows** > **Junie** > **Logs**
-- Verify network connectivity to MCP server
-
-### Tasks Timing Out
-
-- Large projects may need longer timeouts
-- Consider running validation on subsets of files
-- Check server response times
-
-### Unexpected Changes
-
-- Always review Junie's proposed changes before applying
-- Use version control to track and revert if needed
-- Start with smaller tasks to build confidence
 
 ## Best Practices
 
@@ -242,6 +113,35 @@ For each error:
 3. **Use version control**: Commit before running autonomous tasks
 4. **Provide context**: Include relevant requirements in your prompts
 5. **Iterate**: Break large tasks into smaller, verifiable steps
+
+## Troubleshooting
+
+### Junie Not Available
+
+- Verify Junie is enabled in your JetBrains account
+- Update to a version with MCP support
+
+### MCP Tools Not Working
+
+- Restart IntelliJ after configuration
+- Verify `riddlg mcp` starts from a terminal (it waits on stdin)
+- If `riddlg` isn't found, use its absolute path as the command
+- Check Junie logs: **View** > **Tool Windows** > **Junie** > **Logs**
+
+## Available RIDDL Tools
+
+| Tool | Use For |
+|------|---------|
+| `riddl_validate` | Check RIDDL source for errors |
+| `riddl_outline` | Summarize a model's definitions |
+| `validate-partial` | Check incomplete models |
+| `check-completeness` | Find missing elements |
+| `check-simulability` | Verify simulation readiness |
+| `map-domain-to-riddl` | Convert descriptions to RIDDL |
+| `explain-error` | Understand validation errors |
+| `suggest-next` | Get recommendations |
+
+See [MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for the full catalog of 13.
 
 ---
 

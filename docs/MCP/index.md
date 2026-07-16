@@ -6,19 +6,21 @@ description: >-
 ---
 # RIDDL MCP Server
 
-!!! warning "MCP Server Has Moved!"
-    The hosted server at `mcp.ossuminc.com` will soon be shut down. Its tools
-    now ship in the [riddlg](../riddl/tools/riddlg/index.md) binary and run
-    locally — `riddlg mcp` for stdio clients, or `POST /mcp` while
+!!! info "The MCP server now runs locally in riddlg"
+    The RIDDL MCP tools ship inside the
+    [riddlg](../riddl/tools/riddlg/index.md) binary and run **on your
+    machine** — `riddlg mcp` for stdio clients, or `POST /mcp` while
     [`riddlg serve`](../riddl/tools/riddlg/server-api.md#post-mcp) is running.
-    The tool names and result shapes are unchanged, so existing clients keep
-    working; see [MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for the full
-    catalog.
+    No account, no API key, and your models never leave your computer. The
+    previously planned hosted server at `mcp.ossuminc.com` has been retired in
+    favor of this local-first approach; the tool names and result shapes are
+    unchanged, so existing clients keep working after you point them at the
+    local server.
 
-The RIDDL MCP Server is a Model Context Protocol (MCP) server that enables
-AI assistants to reason about and generate RIDDL models. It provides
-validation, analysis, and suggestion tools that AI tools can use to help
-you build better domain models.
+The RIDDL MCP Server is a Model Context Protocol (MCP) server that lets AI
+assistants reason about and generate RIDDL models. It provides validation,
+analysis, and suggestion tools that AI tools can use to help you build better
+domain models.
 
 ## What is MCP?
 
@@ -26,36 +28,54 @@ The Model Context Protocol (MCP) is an open standard that allows AI
 assistants to connect to external tools and data sources. When you connect
 the RIDDL MCP Server to your AI assistant, it gains the ability to:
 
-- **Validate** RIDDL source code for syntax and semantic errors
+- **Validate** RIDDL source for syntax and semantic errors
 - **Analyze** model completeness and suggest missing elements
 - **Explain** error messages and provide fix recommendations
-- **Check** if models are ready for simulation
-- **Map** natural language domain descriptions to RIDDL structures
+- **Check** whether a model is ready for simulation
+- **Map** natural-language domain descriptions to RIDDL structures
+- **Expand** built-in modeling patterns into RIDDL
 
-## Capabilities
+## Running the Server
 
-### Available Tools
+First, install riddlg (see [Installation](../riddl/tools/riddlg/installation.md)):
+
+```bash
+brew install ossuminc/tap/riddlg
+```
+
+The MCP tools are then available over two transports — pick whichever your
+assistant supports:
+
+| Transport | Command | How the client connects |
+|-----------|---------|-------------------------|
+| **stdio** | `riddlg mcp` | The client launches the process; configure `command: riddlg`, `args: ["mcp"]` |
+| **HTTP** | `riddlg serve` | The client POSTs to `http://127.0.0.1:8910/mcp` (Streamable HTTP) |
+
+Neither transport needs an API key. The two expose the identical tool set;
+see [Server API](../riddl/tools/riddlg/server-api.md#post-mcp) for the HTTP
+session and status-code details.
+
+## Available Tools
+
+Thirteen tools are exposed; see
+[MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for arguments and return
+shapes.
 
 | Tool | Description |
 |------|-------------|
-| `validate-text` | Validate RIDDL source code from text |
-| `validate-url` | Validate RIDDL from a URL (GitHub, web) |
-| `validate-partial` | Validate incomplete models (ignore undefined refs) |
-| `check-completeness` | Find missing elements with suggestions |
-| `check-simulability` | Verify model can run in riddlsim |
-| `map-domain-to-riddl` | Extract RIDDL structure from natural language |
-| `explain-error` | Get detailed explanations for validation errors |
-| `suggest-next` | Get recommendations for what to add next |
-
-### Available Resources
-
-| Resource | Description |
-|----------|-------------|
-| `riddl://grammar/ebnf` | Complete EBNF grammar for RIDDL |
-| `riddl://grammar/guide` | Full language reference guide |
-| `riddl://patterns/catalog` | Reusable RIDDL patterns and examples |
-
----
+| `riddl_validate` | Validate RIDDL source; report parse/validation errors and warnings |
+| `riddl_outline` | Outline the named definitions (domains, contexts, entities, types) |
+| `check-completeness` | Find gaps: empty handlers, unresolved references, placeholders |
+| `suggest-next` | Suggest the next definitions to add, prioritized |
+| `map-domain-to-riddl` | Extract RIDDL structure from a natural-language description |
+| `validate-partial` | Validate an in-progress fragment, ignoring references to the unwritten rest |
+| `check-simulability` | Report whether (and why not) a model can be simulated |
+| `explain-error` | Explain a RIDDL diagnostic in plain language, with a likely fix |
+| `generate-test-cases` | Generate Given/When/Then scenarios for the model's entities |
+| `expand-pattern` | Expand a named modeling pattern into RIDDL |
+| `get-template` | Return a built-in RIDDL template |
+| `list-patterns` | List the available modeling patterns |
+| `list-templates` | List the built-in templates |
 
 ## Installation Guides
 
@@ -70,60 +90,10 @@ platform:
 - [IntelliJ AI Assistant](./intellij-ai.md) - JetBrains AI integration
 - [IntelliJ Junie](./intellij-junie.md) - JetBrains Junie agent
 
----
-
-## Server URL
-
-The hosted MCP server will be available at:
-
-```
-https://mcp.ossuminc.com/mcp/v1/
-```
-
-!!! warning "Coming Soon"
-    The hosted server at `mcp.ossuminc.com` will be available in early 2026.
-    For local development, use: `http://localhost:8080/mcp/v1/`
-
----
-
-## Authentication
-
-All requests to the MCP server require an API key. Three methods are
-supported:
-
-### Header Authentication (Recommended)
-
-```
-X-API-KEY: your-api-key
-```
-
-### Query Parameter
-
-```
-?api_key=your-api-key
-```
-
-### Bearer Token
-
-```
-Authorization: Bearer your-api-key
-```
-
-!!! note "Obtaining an API Key"
-    Contact support@ossuminc.com to request an API key for the hosted
-    service.
-
----
-
 ## Protocol Details
 
-The server uses JSON-RPC 2.0 over HTTP:
-
-- **Endpoint**: `POST /mcp/v1`
-- **Content-Type**: `application/json`
-- **Protocol Version**: `2025-11-25`
-
-### Example Request
+The stdio server speaks JSON-RPC 2.0 on stdin/stdout; the HTTP server accepts
+one JSON-RPC message per `POST /mcp`. Example `tools/call` request:
 
 ```json
 {
@@ -131,15 +101,15 @@ The server uses JSON-RPC 2.0 over HTTP:
   "id": 1,
   "method": "tools/call",
   "params": {
-    "name": "validate-text",
+    "name": "riddl_validate",
     "arguments": {
-      "content": "domain Example is { }"
+      "source": "domain Example is { ??? }"
     }
   }
 }
 ```
 
-### Example Response
+Example response:
 
 ```json
 {
@@ -147,25 +117,20 @@ The server uses JSON-RPC 2.0 over HTTP:
   "id": 1,
   "result": {
     "content": [
-      {
-        "type": "text",
-        "text": "Validation successful: 0 errors, 1 warning"
-      }
-    ]
+      { "type": "text", "text": "Validation successful: 0 errors, 1 warning" }
+    ],
+    "isError": false
   }
 }
 ```
-
----
 
 ## Support
 
 - **Bug Reports**: [GitHub Issues](https://github.com/ossuminc/riddl-mcp-server/issues)
 - **Questions**: support@ossuminc.com
-- **Contributing**: [GitHub Repository](https://github.com/ossuminc/riddl-mcp-server)
-
----
 
 ## License
 
-Apache License 2.0
+The MCP tools are part of `riddlg`, which is proprietary software with a free
+tier. See [Free and Pro](../riddl/tools/riddlg/index.md#free-and-pro) — all
+MCP tools are free.

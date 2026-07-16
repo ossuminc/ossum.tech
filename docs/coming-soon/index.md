@@ -5,9 +5,11 @@ description: "Upcoming features for the RIDDL ecosystem"
 
 # :material-creation: Coming Soon
 
-This page outlines upcoming capabilities for the RIDDL ecosystem. These
-features are under active development and will be available through
-[Synapify](../synapify/index.md) and related tooling.
+This page outlines capabilities across the RIDDL ecosystem — some already
+shipping in the [`riddlg`](../riddl/tools/riddlg/index.md) tool, others still
+under active development and coming through
+[Synapify](../synapify/index.md) and related tooling. Each entry below is
+marked with its status.
 
 ---
 
@@ -37,32 +39,39 @@ Synapify, see the [Synapify Simulation Guide](../synapify/simulation.md).
 
 ## Generation
 
-The RIDDL ecosystem will support code and artifact generation from validated
-models. Generation transforms your domain model into runnable infrastructure,
-documentation, and integration artifacts.
+The RIDDL ecosystem generates code and artifacts from validated models,
+transforming your domain model into documentation, API specifications, and
+runnable infrastructure.
+
+!!! tip "Documentation and API specs are available today"
+    Documentation (AsciiDoc, MkDocs) and API specifications (Smithy, gRPC,
+    OpenAPI) already generate from your model with the
+    [`riddlg`](../riddl/tools/riddlg/index.md) tool. The tables below mark
+    what ships now versus what is still on the roadmap.
 
 ### Documentation Generators
 
-| Target | Description |
-|--------|-------------|
-| **Hugo** | Static documentation site with navigation, diagrams, and cross-references. Currently available. |
-| **AsciiDoc** | Technical documentation in AsciiDoc format for integration with enterprise documentation systems. |
-| **Diagrams** | Mermaid-based visualizations including context maps, data flow, sequence diagrams, and entity relationships. |
+| Target | Status | Description |
+|--------|--------|-------------|
+| **AsciiDoc** | Available (`riddlg gen docs`) | Technical documentation in AsciiDoc format for enterprise documentation systems. |
+| **MkDocs** | Available (`riddlg gen docs -f mkdocs`) | A Material for MkDocs site with navigation, Mermaid diagrams, and cross-references. |
+| **Hugo** | Coming Q3 2026 | A Hugo static-site build of your model's documentation. |
+| **Diagrams** | Available (within MkDocs output) | Mermaid-based context maps, data flow, sequence diagrams, and entity relationships. |
 
 ### API & Schema Generators
 
-| Target      | Description                                                                                                 |
-|-------------|-------------------------------------------------------------------------------------------------------------|
-| **OpenAPI** | OpenAPI (Swagger) specifications documenting REST APIs implied by Applications and their endpoints.         |
-| **gRPC**    | Google's efficient serialization format protobuf enables gRPC services and cross-language interoperability. |
-| **Smithy**  | AWS Interface Definition Language for defining services that integrate with AWS infrastructure.             |
+| Target      | Status | Description                                                                                                 |
+|-------------|--------|-------------------------------------------------------------------------------------------------------------|
+| **Smithy**  | Available (`riddlg gen api`) | AWS Interface Definition Language for defining services that integrate with AWS infrastructure.             |
+| **gRPC**    | Available (`riddlg gen api -f grpc`) | Protobuf definitions enabling gRPC services and cross-language interoperability. |
+| **OpenAPI** | Available (`riddlg gen api -f openapi`) | OpenAPI (Swagger) specifications documenting the REST APIs implied by Applications and their endpoints.         |
 
 ### Runtime Code Generators
 
-| Target      | Description                                                                                                                                                                                                  |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Akka**    | Complete Scala/Akka project including actors, protobuffers, sbt build files, and runtime dependencies. Generates infrastructure code while leaving business logic to developers or have AI do the whole job. |
-| **Quarkus** | Complete Java/Quarkus project using many Quarkus ecosystem features for reactive distributed systems.                                                                                                        |
+| Target      | Status | Description                                                                                                                         |
+|-------------|--------|-----------------------------------------------------------------------------------------------------------------------------------|
+| **Quarkus** | Available (Pro, `riddlg gen code`) | A Java/Quarkus project — JPA entities, records, and services — with optional AI-filled, compile-verified handler bodies (`--fill`). |
+| **Other runtimes** | Roadmap | RIDDL's model carries enough structure to target additional runtimes and frameworks; more will follow as they reach production quality. |
 
 ### Integration Generators
 

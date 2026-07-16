@@ -6,11 +6,16 @@ Server for AI-assisted domain modeling.
 ## Prerequisites
 
 - Claude Desktop application installed
-- API key for the RIDDL MCP Server (contact support@ossuminc.com)
+- `riddlg` installed and on your `PATH`
+  (see [Installation](../riddl/tools/riddlg/installation.md)):
+  ```bash
+  brew install ossuminc/tap/riddlg
+  ```
 
 ## Configuration
 
-Claude Desktop uses a JSON configuration file to define MCP servers.
+Claude Desktop launches MCP servers as local processes (stdio transport) via
+a JSON configuration file.
 
 ### Configuration File Location
 
@@ -28,19 +33,15 @@ Edit your configuration file to add the RIDDL server:
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      }
+      "command": "riddlg",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-!!! warning "Server Coming Soon"
-    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
-    For now, use a [local server](#using-a-local-server) for development.
-    Replace `your-api-key` with your actual API key.
+That's the whole setup — no URL, no API key. Claude Desktop starts
+`riddlg mcp` for you when it launches.
 
 ### Complete Example
 
@@ -50,10 +51,8 @@ If you have other MCP servers configured, add RIDDL alongside them:
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      }
+      "command": "riddlg",
+      "args": ["mcp"]
     },
     "filesystem": {
       "command": "npx",
@@ -63,22 +62,10 @@ If you have other MCP servers configured, add RIDDL alongside them:
 }
 ```
 
-### Using a Local Server
-
-For development with a locally running server:
-
-```json
-{
-  "mcpServers": {
-    "riddl": {
-      "url": "http://localhost:8080/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-local-api-key"
-      }
-    }
-  }
-}
-```
+!!! note "`riddlg` must be found on PATH"
+    Claude Desktop does not run your shell profile, so if `riddlg` isn't on
+    the system `PATH` it may not be found. Use the absolute path (e.g.
+    `/opt/homebrew/bin/riddlg`) as the `command` if the tools don't appear.
 
 ## Restart Claude Desktop
 
@@ -90,14 +77,14 @@ After modifying the configuration:
 
 ## Verify Connection
 
-Ask Claude to verify the connection:
+Ask Claude to validate some RIDDL:
 
 > "Can you validate this RIDDL code for me?"
 > ```riddl
-> domain Example is { }
+> domain Example is { ??? }
 > ```
 
-Claude should use the `validate-text` tool and return validation results.
+Claude should use the `riddl_validate` tool and return validation results.
 
 ## Usage Examples
 
@@ -107,7 +94,7 @@ Claude should use the `validate-text` tool and return validation results.
 > ```riddl
 > domain OrderManagement is {
 >   context Orders is {
->     entity Order is { }
+>     entity Order is { ??? }
 >   }
 > }
 > ```
@@ -133,39 +120,39 @@ Claude should use the `validate-text` tool and return validation results.
 > "I got this error: 'Undefined reference to type CustomerID'. What does
 > this mean and how do I fix it?"
 
-## Troubleshooting
+## Available RIDDL Tools
 
-### Server Not Connecting
+Once connected, Claude can use all of the RIDDL MCP tools — for example:
 
-- Verify the URL is correct and accessible
-- Check that your API key is valid
-- Ensure the server is running (test with `curl https://mcp.ossuminc.com/health`)
-
-### Tools Not Appearing
-
-- Restart Claude Desktop after configuration changes
-- Check for JSON syntax errors in the configuration file
-- Verify the `mcpServers` key is at the top level of the JSON
-
-### Authentication Errors
-
-- Verify your API key is correctly entered
-- Check for extra spaces or quotes around the key
-- Contact support@ossuminc.com if issues persist
-
-## Available RIDDL Tools in Claude
-
-Once connected, Claude can use these tools:
-
-| Tool | Ask Claude To... |
+| Tool | Ask Claude to... |
 |------|-----------------|
-| `validate-text` | "Validate this RIDDL code" |
+| `riddl_validate` | "Validate this RIDDL code" |
+| `riddl_outline` | "Outline the definitions in this model" |
 | `validate-partial` | "Check this incomplete model" |
 | `check-completeness` | "What's missing from this model?" |
 | `check-simulability` | "Can this model be simulated?" |
 | `map-domain-to-riddl` | "Convert this description to RIDDL" |
 | `explain-error` | "Explain this error message" |
 | `suggest-next` | "What should I add next?" |
+
+See [MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for the full catalog of 13.
+
+## Troubleshooting
+
+### Tools Not Appearing
+
+- Restart Claude Desktop after configuration changes
+- Check for JSON syntax errors in the configuration file
+- Verify `riddlg` runs from a terminal: `riddlg mcp` should start and wait
+  for input (press ++ctrl+c++ to exit)
+- If `riddlg` isn't found, use its absolute path as the `command`
+
+### Verifying riddlg Itself
+
+```bash
+riddlg version
+riddlg validate model.riddl
+```
 
 ---
 

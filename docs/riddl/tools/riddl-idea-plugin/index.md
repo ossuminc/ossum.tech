@@ -122,8 +122,10 @@ in the tool window bar.
 
 ## MCP Integration
 
-The plugin can connect to the [riddl-mcp-server](../riddl-mcp-server/index.md)
-for AI-assisted model generation. When configured:
+The plugin can connect to the
+[RIDDL MCP server](../riddl-mcp-server/index.md), which now runs locally as
+part of [`riddlg`](../riddlg/index.md), for AI-assisted model generation.
+When configured:
 
 - Get AI suggestions for completing definitions
 - Generate handler implementations from descriptions
@@ -131,10 +133,11 @@ for AI-assisted model generation. When configured:
 
 ### Configuring MCP
 
-1. Go to **Settings** → **Tools** → **RIDDL**
-2. Enter your MCP server URL (e.g., `http://localhost:8080`)
-3. Enter your API key
-4. Click **Test Connection** to verify
+Install `riddlg` (`brew install ossuminc/tap/riddlg`), then either point an
+[MCP-capable IDE assistant](../../../MCP/intellij-ai.md) at `riddlg mcp`, or
+run `riddlg serve` and connect to `http://127.0.0.1:8910/mcp`. No API key is
+required — the server runs on your machine. See
+[MCP Tools](../riddlg/mcp-tools.md) for the available tools.
 
 ## Settings
 

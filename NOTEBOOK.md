@@ -17,6 +17,39 @@ Documentation site is complete and deployed at https://ossum.tech.
 All major sections are documented with proper RIDDL syntax
 highlighting.
 
+**Completed (2026-07-16):**
+
+- Backlog sweep + accuracy fixes (Tier 1 + CI gate). Scoured CLAUDE.md,
+  NOTEBOOK.md, and the whole tree (docs, code, nav, links, CI) for pending
+  work; the full inventory is in the plan file. Site health is excellent
+  (148 nav ↔ 148 files, 754 links resolve, no orphans, no code TODOs). Fixed
+  the pages reality had overtaken:
+  - **MCP section rewrite** — the hosted `mcp.ossuminc.com` server (planned
+    "early 2026", now retired) was still documented across
+    `docs/MCP/index.md` + 8 client pages, plus the standalone
+    `docs/riddl/tools/riddl-mcp-server/index.md` (Docker/REST/API-key) and
+    the idea-plugin MCP section. All rewritten to local `riddlg mcp` (stdio)
+    / `riddlg serve` (`POST /mcp`, port 8910), no API key, with the real 13
+    tool names replacing the fictional `validate-text`/`validate-url`.
+  - `coming-soon/index.md` — Hugo generation was marked "Currently
+    available" (it was dropped from riddlg); reframed to mark what ships
+    today via riddlg (AsciiDoc/MkDocs docs, Smithy/gRPC/OpenAPI specs,
+    Quarkus code) vs roadmap; dropped the Akka target per editorial policy.
+  - `CLAUDE.md` — structure diagram referenced the deleted `future-work/`
+    dir (now `coming-soon/`); Pending Updates table refreshed.
+  - `NOTEBOOK.md` — grammar-extraction facts corrected against `build.sbt`:
+    task is `extractGrammar` (not `extractEbnf`), target is
+    `riddl-grammar.ebnf` (not `ebnf-grammar.ebnf`), and it is **manual**
+    (not wired to `sbt update`).
+  - Env-var prefix verified `RIDDLG_*` throughout (linter had already fixed
+    `models.md`/`configuration.md`; only the historical `OSSUM_GEN_LICENSE`
+    removed-license note remains, correctly).
+  - **CI**: added a `mkdocs build --strict` gate before deploy (was missing
+    despite the notebook claiming strict verification), pinned
+    `mkdocs-material>=9.5,<10` (Material 10 / MkDocs 2.0 are breaking) and
+    Python to 3.12; removed the empty, referenced `docs/javascripts/extra.js`.
+  - Verified with `mkdocs build --strict` (exit 0, no warnings).
+
 **Completed (2026-07-15):**
 
 - Documented riddlg 0.4.0 — riddl-generator PRs #1 (multi-provider
@@ -153,9 +186,18 @@ highlighting.
 
 | Task                           | Notes                                      |
 |--------------------------------|--------------------------------------------|
-| Update release download links  | When final releases are published          |
-| Implement playground           | Integrate Monaco + MCP server validation   |
-| Remove "Coming Soon" warnings  | When MCP server goes live (~early 2026)    |
+| Implement playground           | Monaco + riddlg validation; currently a placeholder page in nav |
+| Update non-riddlg download links | riddlc / vscode / idea-plugin tool pages, when their final releases publish |
+| Update Synapify "Coming Soon"  | simulation, code-gen, installers, pricing — when Synapify reaches public release |
+| Re-scope playground MCP refs   | `docs/riddl/playground/index.md` still shows `/mcp/v1` + `validate-text` in its planned-architecture diagram; fix when the playground is built |
+
+**Resolved 2026-07-16:** "Remove Coming Soon warnings when the MCP server
+goes live" — reality inverted the expectation. The hosted `mcp.ossuminc.com`
+server was **retired**, not launched; MCP now ships in `riddlg`. All MCP
+guides (`docs/MCP/*`, `docs/riddl/tools/riddl-mcp-server/index.md`, the
+idea-plugin MCP section) were rewritten to configure local `riddlg mcp` /
+`riddlg serve` with the real 13 tools and no API key. riddlg download links
+resolved at 0.4.0 (verified live on GCS).
 
 #### riddlg distribution: how to verify (learned 2026-07-15)
 
@@ -222,14 +264,17 @@ Two historical traps worth remembering:
 
 ### EBNF Grammar Single-Sourcing
 
-The EBNF grammar is now automatically extracted from the `riddl-language` jar:
+The EBNF grammar is extracted from the `riddl-language` library (pinned to
+`1.29.0` in `build.sbt`) via the Grammar API:
 
-- **Source**: `riddl/grammar/ebnf-grammar.ebnf` resource in riddl-language jar
-- **Target**: `docs/riddl/references/ebnf-grammar.ebnf`
-- **Trigger**: Runs automatically on `sbt update`
-- **Logic**: Only extracts if jar version is newer than local copy
-
-To manually extract: `sbt extractEbnf`
+- **Task**: `sbt extractGrammar` (a manual `taskKey` in `build.sbt:12,26`;
+  it compiles the project and runs `tools/extract-grammar.sh`)
+- **Target**: `docs/riddl/references/riddl-grammar.ebnf` (`build.sbt:32`),
+  which `docs/riddl/references/ebnf-grammar.md` snippet-includes
+- **Trigger**: **Manual** — it is *not* wired to `sbt update`; run it
+  explicitly when bumping the riddl-language version
+- **Note**: `riddl-grammar.ebnf` is checked in, so it can go stale relative
+  to a newer riddl-language release until `extractGrammar` is re-run
 
 ### Synapify Generation Configuration
 

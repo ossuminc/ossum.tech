@@ -5,12 +5,17 @@ MCP Server for AI-assisted domain modeling.
 
 ## Prerequisites
 
-- Gemini CLI installed (`npm install -g @anthropic-ai/gemini-cli` or via Google)
-- API key for the RIDDL MCP Server (contact support@ossuminc.com)
+- Gemini CLI installed (via Google)
+- `riddlg` installed and on your `PATH`
+  (see [Installation](../riddl/tools/riddlg/installation.md)):
+  ```bash
+  brew install ossuminc/tap/riddlg
+  ```
 
 ## Configuration
 
-Gemini CLI uses a JSON settings file for MCP server configuration.
+Gemini CLI uses a JSON settings file for MCP server configuration and can
+launch a local server over stdio.
 
 ### Configuration File Location
 
@@ -28,56 +33,30 @@ Edit your settings file to add the RIDDL server under `mcpServers`:
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      }
+      "command": "riddlg",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-!!! warning "Server Coming Soon"
-    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
-    For now, use a [local server](#using-a-local-server) for development.
-    Replace `your-api-key` with your actual API key.
+No URL and no API key — Gemini CLI runs `riddlg mcp` for you.
 
-### Using Environment Variables
+### Using the HTTP Transport Instead
 
-Gemini CLI supports environment variable substitution in configuration:
-
-```json
-{
-  "mcpServers": {
-    "riddl": {
-      "url": "${RIDDL_MCP_URL}/mcp/v1",
-      "headers": {
-        "X-API-KEY": "${RIDDL_API_KEY}"
-      }
-    }
-  }
-}
-```
-
-Then set environment variables:
+If you prefer a long-running server (or want to share one), start
+[`riddlg serve`](../riddl/tools/riddlg/server-api.md#post-mcp) and point
+Gemini at its HTTP endpoint:
 
 ```bash
-export RIDDL_MCP_URL="https://mcp.ossuminc.com"
-export RIDDL_API_KEY="your-api-key"
+riddlg serve            # listens on 127.0.0.1:8910
 ```
-
-### Using a Local Server
-
-For development with a locally running server:
 
 ```json
 {
   "mcpServers": {
     "riddl": {
-      "url": "http://localhost:8080/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-local-api-key"
-      }
+      "httpUrl": "http://127.0.0.1:8910/mcp"
     }
   }
 }
@@ -95,10 +74,10 @@ Then ask:
 
 > Can you validate this RIDDL code?
 > ```riddl
-> domain Example is { }
+> domain Example is { ??? }
 > ```
 
-Gemini should use the `validate-text` tool and return results.
+Gemini should use the `riddl_validate` tool and return results.
 
 ## Usage Examples
 
@@ -133,12 +112,10 @@ You can include or exclude specific RIDDL tools:
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      },
+      "command": "riddlg",
+      "args": ["mcp"],
       "includeTools": [
-        "validate-text",
+        "riddl_validate",
         "check-completeness",
         "explain-error"
       ]
@@ -153,10 +130,8 @@ Or exclude tools you don't need:
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      },
+      "command": "riddlg",
+      "args": ["mcp"],
       "excludeTools": [
         "check-simulability"
       ]
@@ -169,31 +144,7 @@ Or exclude tools you don't need:
     If both `includeTools` and `excludeTools` are specified, `excludeTools`
     takes precedence.
 
-### Trust Mode
-
-For development environments where you trust the server completely:
-
-```json
-{
-  "mcpServers": {
-    "riddl": {
-      "url": "http://localhost:8080/mcp/v1",
-      "headers": {
-        "X-API-KEY": "dev-key"
-      },
-      "trust": true
-    }
-  }
-}
-```
-
-!!! danger "Security Warning"
-    The `trust` option bypasses confirmation dialogs. Only use this for
-    servers you completely control in development environments.
-
 ## Debugging
-
-### Enable Debug Mode
 
 Run Gemini CLI with verbose output:
 
@@ -201,50 +152,29 @@ Run Gemini CLI with verbose output:
 gemini --debug
 ```
 
-In interactive mode, press ++f12++ to open the debug console.
-
-### Check MCP Connection
-
-The debug output shows:
-
-- MCP server connection attempts
-- Tool discovery results
-- Request/response details
-- Any error messages
+The debug output shows MCP server startup, tool discovery, and any error
+messages.
 
 ## Troubleshooting
 
 ### Server Not Connecting
 
-- Test the server: `curl https://mcp.ossuminc.com/health`
-- Verify JSON syntax in settings file
-- Check URL doesn't have trailing slashes
+- Verify `riddlg mcp` starts from a terminal (it waits on stdin)
+- Check JSON syntax in the settings file
+- If `riddlg` isn't found, use its absolute path as `command`
 - Enable debug mode for detailed logs
-
-### Authentication Errors
-
-- Verify API key is correct
-- Check for environment variable resolution issues
-- Try hardcoding the key temporarily to isolate the issue
 
 ### Tools Not Available
 
 - Restart Gemini CLI after configuration changes
 - Check that `includeTools` doesn't filter out needed tools
-- Verify server is returning tool list correctly
-
-### Slow Responses
-
-- Large RIDDL models may take longer to validate
-- Check network latency to server
-- Consider using a local server for development
 
 ## Available RIDDL Tools
 
 | Tool | Use Case |
 |------|----------|
-| `validate-text` | Check RIDDL source for errors |
-| `validate-url` | Validate RIDDL from URLs |
+| `riddl_validate` | Check RIDDL source for errors |
+| `riddl_outline` | Summarize a model's definitions |
 | `validate-partial` | Check incomplete models |
 | `check-completeness` | Find missing elements |
 | `check-simulability` | Verify simulation readiness |
@@ -252,10 +182,11 @@ The debug output shows:
 | `explain-error` | Understand validation errors |
 | `suggest-next` | Get recommendations |
 
+See [MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for the full catalog of 13.
+
 ## Resources
 
-- [Gemini CLI Documentation](https://google-gemini.github.io/gemini-cli/docs/tools/mcp-server.html)
-- [MCP Server Integration Guide](https://geminicli.com/docs/tools/mcp-server/)
+- [Gemini CLI MCP Documentation](https://google-gemini.github.io/gemini-cli/docs/tools/mcp-server.html)
 
 ---
 

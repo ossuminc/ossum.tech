@@ -6,79 +6,45 @@ use the RIDDL MCP Server for AI-assisted domain modeling.
 ## Prerequisites
 
 - Claude Code CLI installed (`npm install -g @anthropic-ai/claude-code`)
-- API key for the RIDDL MCP Server (contact support@ossuminc.com)
+- `riddlg` installed and on your `PATH`
+  (see [Installation](../riddl/tools/riddlg/installation.md)):
+  ```bash
+  brew install ossuminc/tap/riddlg
+  ```
 
 ## Configuration
 
-Claude Code uses a JSON settings file for MCP server configuration.
+The quickest way is the `claude mcp` command, which registers `riddlg mcp`
+as a stdio server:
 
-### Configuration File Location
-
-| Platform | Path |
-|----------|------|
-| **macOS** | `~/.claude/settings.json` |
-| **Windows** | `%USERPROFILE%\.claude\settings.json` |
-| **Linux** | `~/.claude/settings.json` |
-
-### Adding the RIDDL MCP Server
-
-Edit your settings file to add the RIDDL server under `mcpServers`:
-
-```json
-{
-  "mcpServers": {
-    "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      }
-    }
-  }
-}
+```bash
+claude mcp add riddl -- riddlg mcp
 ```
 
-!!! warning "Server Coming Soon"
-    The hosted MCP server at `mcp.ossuminc.com` will be available in early 2026.
-    For now, use a [local server](#using-a-local-server) for development.
-    Replace `your-api-key` with your actual API key.
+To make it available in every project, add `--scope user`:
+
+```bash
+claude mcp add --scope user riddl -- riddlg mcp
+```
 
 ### Project-Level Configuration
 
-You can also configure the RIDDL MCP server for a specific project by
-creating a `.claude/settings.json` file in your project root:
+To share the server with everyone who checks out a project, add a `.mcp.json`
+file at the project root:
 
 ```json
 {
   "mcpServers": {
     "riddl": {
-      "url": "https://mcp.ossuminc.com/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-api-key"
-      }
+      "command": "riddlg",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-Project-level settings merge with user-level settings, with project
-settings taking precedence.
-
-### Using a Local Server
-
-For development with a locally running server:
-
-```json
-{
-  "mcpServers": {
-    "riddl": {
-      "url": "http://localhost:8080/mcp/v1",
-      "headers": {
-        "X-API-KEY": "your-local-api-key"
-      }
-    }
-  }
-}
-```
+Claude Code picks this up automatically when you run it in that directory. No
+URL and no API key are involved — Claude Code launches `riddlg mcp` for you.
 
 ## Verify Connection
 
@@ -90,9 +56,10 @@ claude
 
 Then in the session:
 
-> "Can you validate this RIDDL: `domain Test is { }`"
+> "Can you validate this RIDDL: `domain Test is { ??? }`"
 
-Claude should use the `validate-text` tool and return results.
+Claude should use the `riddl_validate` tool and return results. You can also
+list configured servers with `claude mcp list`.
 
 ## Usage Examples
 
@@ -117,7 +84,7 @@ you refine it.
 > "I'm getting validation errors in my RIDDL file. Can you explain them
 > and suggest fixes?"
 
-Claude will use `validate-text` and `explain-error` to help you resolve
+Claude will use `riddl_validate` and `explain-error` to help you resolve
 issues.
 
 ### Checking Model Quality
@@ -127,56 +94,12 @@ issues.
 Claude will use `check-completeness` and `check-simulability` to analyze
 your model.
 
-## Workflow Integration
-
-### With Git Repositories
-
-Claude Code works well with RIDDL projects under version control:
-
-```bash
-cd my-riddl-project
-claude
-```
-
-> "Review all the .riddl files in this project and create a summary of
-> the domain model"
-
-### Continuous Validation
-
-As you edit RIDDL files, ask Claude to validate your changes:
-
-> "I just updated src/contexts/orders.riddl - can you validate it?"
-
-### Documentation Generation
-
-> "Generate documentation for the entity definitions in this model"
-
-## Troubleshooting
-
-### Server Not Connecting
-
-- Test the server directly: `curl https://mcp.ossuminc.com/health`
-- Verify JSON syntax in settings file
-- Check that the URL doesn't have trailing slashes
-
-### Authentication Errors
-
-- Verify API key is correct
-- Check for accidental whitespace in the key
-- Ensure headers are properly formatted in JSON
-
-### Tools Not Available
-
-- Restart Claude Code after configuration changes
-- Check the MCP server logs for connection attempts
-- Verify the `mcpServers` object exists in settings
-
 ## Available RIDDL Tools
 
 | Tool | Use Case |
 |------|----------|
-| `validate-text` | Check RIDDL source for errors |
-| `validate-url` | Validate RIDDL from GitHub URLs |
+| `riddl_validate` | Check RIDDL source for errors |
+| `riddl_outline` | Summarize a model's definitions |
 | `validate-partial` | Check incomplete/in-progress models |
 | `check-completeness` | Find missing elements |
 | `check-simulability` | Verify simulation readiness |
@@ -184,16 +107,30 @@ As you edit RIDDL files, ask Claude to validate your changes:
 | `explain-error` | Understand validation errors |
 | `suggest-next` | Get recommendations for next steps |
 
+See [MCP Tools](../riddl/tools/riddlg/mcp-tools.md) for the full catalog of 13.
+
+## Troubleshooting
+
+### Server Not Connecting
+
+- Run `claude mcp list` to confirm `riddl` is registered
+- Verify `riddlg mcp` starts from a terminal (it waits on stdin; ++ctrl+c++
+  to exit)
+- If `riddlg` isn't found, register it by absolute path:
+  `claude mcp add riddl -- /opt/homebrew/bin/riddlg mcp`
+
+### Tools Not Available
+
+- Restart Claude Code after configuration changes
+- Check `riddlg version` runs successfully
+
 ## Tips for Effective Use
 
 1. **Be specific**: Instead of "validate my code", say "validate the
    Order entity in src/orders.riddl"
-
 2. **Provide context**: Share relevant parts of your model when asking
    questions
-
 3. **Iterate**: Use `suggest-next` to build models incrementally
-
 4. **Learn from errors**: Ask Claude to explain any validation errors
    you encounter
 

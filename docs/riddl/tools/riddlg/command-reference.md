@@ -40,7 +40,7 @@ Generate documentation from a RIDDL model:
 
 | Option | Description |
 |--------|-------------|
-| `-f, --format <value>` | Output format: `asciidoc` (default) or `mkdocs` |
+| `-f, --format <value>` | Output format: `asciidoc` (default), `mkdocs`, or `hugo` (coming Q3 2026) |
 | `-o, --out <value>` | Output directory (default: `.`) |
 
 ```bash
@@ -49,7 +49,14 @@ riddlg gen docs model.riddl -o docs/
 
 # A complete MkDocs site (with Mermaid diagrams) into site/
 riddlg gen docs model.riddl -f mkdocs -o site/
+
+# A Hugo static site (coming Q3 2026)
+riddlg gen docs model.riddl -f hugo -o site/
 ```
+
+!!! note "Hugo output is coming Q3 2026"
+    The `hugo` format is on the [roadmap](../../../coming-soon/index.md#generation)
+    and not yet available. `asciidoc` and `mkdocs` work today.
 
 ### gen api
 

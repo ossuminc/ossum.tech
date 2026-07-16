@@ -21,11 +21,11 @@ ossum.tech/
 │   │   ├── examples/        # Model gallery linking to riddl-models repo
 │   │   ├── playground/      # Interactive RIDDL editor (coming soon)
 │   │   ├── references/      # Language reference and EBNF grammar
-│   │   ├── tools/           # Documentation for riddlc, IDE plugins, etc.
-│   │   └── future-work/     # Planned features and roadmap
-│   ├── MCP/                 # RIDDL MCP Server documentation
+│   │   └── tools/           # Documentation for riddlc, riddlg, IDE plugins
+│   ├── MCP/                 # RIDDL MCP Server documentation (now via riddlg)
 │   ├── OSS/                 # Open source tools documentation
 │   ├── synapify/            # Synapify visual editor docs
+│   ├── coming-soon/         # Roadmap: simulation and generation targets
 │   ├── stylesheets/         # Custom CSS (includes RIDDL syntax colors)
 │   └── about/               # Company info, privacy policy
 ├── riddl_lexer/             # Custom Pygments lexer for RIDDL syntax highlighting
@@ -369,5 +369,10 @@ These items need updating when conditions are met:
 
 | Item | Location | Update When |
 |------|----------|-------------|
-| "Coming Soon" warnings | All MCP guides | MCP server goes live (~early 2026) |
-| Download links | Tool pages | Final releases published |
+| Synapify "Coming Soon" warnings | `docs/synapify/*` | Synapify features (simulation, code-gen, installers, pricing) reach public release |
+| Playground | `docs/riddl/playground/` | Build the Monaco + riddlg editor, or re-scope |
+| Non-riddlg download links | riddlc / vscode / idea-plugin tool pages | Their final releases are published |
+
+**Resolved (2026-07-16):** The hosted `mcp.ossuminc.com` server was retired
+in favor of local `riddlg`; all MCP guides now point at `riddlg mcp` /
+`riddlg serve`. riddlg download links point at 0.4.0 (verified live on GCS).

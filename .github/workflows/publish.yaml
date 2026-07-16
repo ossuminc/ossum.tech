@@ -16,7 +16,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: '3.12'
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
       - uses: actions/cache@v4
         with:
@@ -24,6 +24,9 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      - run: pip install mkdocs-material
+      # Pinned below 10.x: Material 10 / MkDocs 2.0 are backward-incompatible.
+      - run: pip install "mkdocs-material>=9.5,<10"
       - run: pip install -e .
+      # Fail the build on broken links, missing nav targets, or bad includes.
+      - run: mkdocs build --strict
       - run: mkdocs gh-deploy --force
