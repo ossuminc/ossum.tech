@@ -84,22 +84,22 @@ riddlg {
 
 | Variable | Overrides |
 |----------|-----------|
-| `OSSUM_GEN_MODELS_DIR` | The models directory (default `~/.ossum-ai/models`) |
-| `OSSUM_GEN_MODEL_URL` | The auto-download URL |
-| `OSSUM_GEN_MODEL_SHA256` | Expected SHA-256 of the download (optional integrity check) |
-| `OSSUM_GEN_GPU_LAYERS` | Layers offloaded to the GPU (`99` = all, `0` = force CPU) |
+| `RIDDLG_MODELS_DIR` | The models directory (default `~/.ossum-ai/models`) |
+| `RIDDLG_MODEL_URL` | The auto-download URL |
+| `RIDDLG_MODEL_SHA256` | Expected SHA-256 of the download (optional integrity check) |
+| `RIDDLG_GPU_LAYERS` | Layers offloaded to the GPU (`99` = all, `0` = force CPU) |
 
 !!! note "The model filename has no environment variable"
     Set `riddlg.model.default-name` in the config file to change which
-    filename riddlg looks for. `OSSUM_GEN_MODEL_FILE` is read only by
+    filename riddlg looks for. `RIDDLG_MODEL_FILE` is read only by
     `fetch-default-model.sh`, not by riddlg itself — setting it changes what
     the script downloads without changing what riddlg loads. See
     [Configuration](configuration.md) for the full list.
 
 ```bash
 # Download and use the 14B model as your default
-export OSSUM_GEN_MODEL_URL=https://huggingface.co/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/qwen2.5-coder-14b-instruct-q4_k_m.gguf
-export OSSUM_GEN_MODEL_FILE=qwen2.5-coder-14b-instruct-q4_k_m.gguf   # for the script
+export RIDDLG_MODEL_URL=https://huggingface.co/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/qwen2.5-coder-14b-instruct-q4_k_m.gguf
+export RIDDLG_MODEL_FILE=qwen2.5-coder-14b-instruct-q4_k_m.gguf   # for the script
 fetch-default-model.sh
 riddlg gen riddl "a ticketing system" -o tickets.riddl \
   --model ~/.ossum-ai/models/qwen2.5-coder-14b-instruct-q4_k_m.gguf
@@ -135,7 +135,7 @@ The generation pipeline has a few tunables (in `~/.riddlg/config.conf` under
 | Setting | Default | Purpose |
 |---------|---------|---------|
 | `n-ctx` | 16384 | llama.cpp context window |
-| `max-tokens` | 6144 | Generation cap per request (also `OSSUM_GEN_MAX_TOKENS`) |
+| `max-tokens` | 6144 | Generation cap per request (also `RIDDLG_MAX_TOKENS`) |
 | `max-retries` | 2 | Validation retry attempts |
 | `budget` | 6 | Compositional descent iterations |
 | `compositional-threshold` | 240 | Auto-select compositional mode for briefs longer than this (characters) |
@@ -145,7 +145,7 @@ Setting it to `0` forces CPU inference — useful in CI, where an emulated GPU
 can be slower than the CPU.
 
 There is also an optional `riddlg.embed.model` setting
-(`OSSUM_GEN_EMBED_MODEL`) — a small embedding GGUF used by the fidelity
+(`RIDDLG_EMBED_MODEL`) — a small embedding GGUF used by the fidelity
 benchmark's semantic checks. Most users never need it.
 
 See [Configuration](configuration.md) for every setting.

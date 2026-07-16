@@ -22,7 +22,7 @@ API keys are redacted in that output.
 Settings resolve in this order, **highest precedence first**:
 
 1. **CLI flags** — override everything, at the call site
-2. **`OSSUM_GEN_*` environment variables** — one setting each
+2. **`RIDDLG_*` environment variables** — one setting each
 3. **Config files** — see below
 4. **Baked-in defaults**
 
@@ -149,23 +149,23 @@ Each variable overrides one config key (env beats file, file beats default):
 |----------|-----------|-------|
 | `RIDDLG_CONFIG` | *the config file path* | Read from **and** written to by `riddlg ai` |
 | `RIDDLG_AI_PROVIDER` | `riddlg.ai.provider` | The active profile name |
-| `OSSUM_GEN_MODELS_DIR` | `riddlg.model.dir` | |
-| `OSSUM_GEN_MODEL_URL` | `riddlg.model.url` | |
-| `OSSUM_GEN_MODEL_SHA256` | `riddlg.model.sha256` | |
-| `OSSUM_GEN_GPU_LAYERS` | `riddlg.model.gpu-layers` | `0` forces CPU inference |
-| `OSSUM_GEN_EMBED_MODEL` | `riddlg.embed.model` | |
-| `OSSUM_GEN_HOST` | `riddlg.server.host` | |
-| `OSSUM_GEN_PORT` | `riddlg.server.port` | |
-| `OSSUM_GEN_MAX_TOKENS` | `riddlg.generation.max-tokens` | |
-| `OSSUM_GEN_ALLOW_CPU` | `riddlg.allow-cpu` | **Exactly `1`** means true |
+| `RIDDLG_MODELS_DIR` | `riddlg.model.dir` | |
+| `RIDDLG_MODEL_URL` | `riddlg.model.url` | |
+| `RIDDLG_MODEL_SHA256` | `riddlg.model.sha256` | |
+| `RIDDLG_GPU_LAYERS` | `riddlg.model.gpu-layers` | `0` forces CPU inference |
+| `RIDDLG_EMBED_MODEL` | `riddlg.embed.model` | |
+| `RIDDLG_HOST` | `riddlg.server.host` | |
+| `RIDDLG_PORT` | `riddlg.server.port` | |
+| `RIDDLG_MAX_TOKENS` | `riddlg.generation.max-tokens` | |
+| `RIDDLG_ALLOW_CPU` | `riddlg.allow-cpu` | **Exactly `1`** means true |
 
 API keys have their own variables — see
-[AI Providers](ai-providers.md#precedence). They are not `OSSUM_GEN_*`
+[AI Providers](ai-providers.md#precedence). They are not `RIDDLG_*`
 overrides; they take precedence over the config file entirely:
 `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `OPENAI_API_KEY`.
 
 !!! note "Values that must be numbers"
-    `OSSUM_GEN_PORT`, `OSSUM_GEN_GPU_LAYERS`, and `OSSUM_GEN_MAX_TOKENS` are
+    `RIDDLG_PORT`, `RIDDLG_GPU_LAYERS`, and `RIDDLG_MAX_TOKENS` are
     parsed as integers. A non-numeric value is ignored silently and the config
     value is used instead.
 
@@ -193,9 +193,9 @@ riddlg {
 Run the local model on CPU in CI, with a short generation cap:
 
 ```bash
-export OSSUM_GEN_GPU_LAYERS=0
-export OSSUM_GEN_MAX_TOKENS=128
-export OSSUM_GEN_ALLOW_CPU=1
+export RIDDLG_GPU_LAYERS=0
+export RIDDLG_MAX_TOKENS=128
+export RIDDLG_ALLOW_CPU=1
 ```
 
 ## See Also

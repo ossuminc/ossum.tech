@@ -43,7 +43,7 @@ highlighting.
     6-pattern catalog.
   - Updated `command-reference.md` (`ai`, `login`/`logout`/`whoami`,
     `--provider`, `--stream`, exit codes), `models.md`
-    (auto-download is now the default path; `OSSUM_GEN_MODEL_FILE`
+    (auto-download is now the default path; `RIDDLG_MODEL_FILE`
     is read only by `fetch-default-model.sh`, not by riddlg),
     `installation.md` (0.4.0; GPU is only needed for the local
     model), `docs/riddl/tools/index.md`, `docs/MCP/index.md`.
