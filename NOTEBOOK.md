@@ -37,11 +37,27 @@ highlighting.
   - `coming-soon/index.md` generation tables rebuilt — Hugo moved from roadmap
     to available; AsyncAPI/JSON Schema/SQL/DBML added; new Catalog Generators
     table for Backstage + EventCatalog.
-  - Verified with `mkdocs build --strict` **plus** `validation.anchors: warn`
-    (temporarily enabled, then reverted) — zero broken links, zero broken
-    anchors. Note: strict mode alone does **not** check anchors; the repo has
-    no `validation:` block, so anchor checking must be enabled ad hoc.
+  - Verified with `mkdocs build --strict` — zero broken links, zero broken
+    anchors.
   - No local mkdocs on this machine — used a venv in the session scratchpad.
+
+- **Anchor validation is now permanent.** `mkdocs build --strict` promotes
+  warnings to errors but does **not** check heading anchors by default, so a
+  link to `page.md#renamed-heading` built clean and 404'd in the browser.
+  Added a `validation.links` block to `mkdocs.yml` (`anchors: warn`,
+  `not_found: warn`, `unrecognized_links: warn`). Proved it works by injecting
+  a link to a non-existent anchor and confirming the build aborts. The whole
+  site passes, so there was no pre-existing anchor rot.
+
+- **`gh` is not authenticated on this machine** — no `~/.config/gh/hosts.yml`,
+  no keychain entry. `GITHUB_TOKEN` in the environment is the only credential,
+  so the ossuminc `CLAUDE.md` advice to `unset GITHUB_TOKEN` before `gh`
+  commands **breaks `gh` here** rather than helping. Either run
+  `gh auth login` once, or don't unset it in this repo.
+
+- **`main` has PR-required branch protection**, which contradicts the ossuminc
+  convention of committing directly to `main`. Pushes succeed via admin
+  bypass but log `Bypassed rule violations`. Worth reconciling.
 
 **Completed (2026-07-16):**
 
