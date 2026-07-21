@@ -279,11 +279,13 @@ nav:
         - riddl/tools/riddlg/index.md
         - Installation: riddl/tools/riddlg/installation.md
         - Command Reference: riddl/tools/riddlg/command-reference.md
+        - Generators: riddl/tools/riddlg/generators.md
         - AI Providers: riddl/tools/riddlg/ai-providers.md
         - AI Models: riddl/tools/riddlg/models.md
         - Configuration: riddl/tools/riddlg/configuration.md
         - Server API: riddl/tools/riddlg/server-api.md
         - MCP Tools: riddl/tools/riddlg/mcp-tools.md
+        - Release Notes: riddl/tools/riddlg/release-notes.md
       - sbt-riddl: riddl/tools/sbt-riddl/index.md
       - MCP Server: riddl/tools/riddl-mcp-server/index.md
       - IntelliJ Plugin: riddl/tools/riddl-idea-plugin/index.md

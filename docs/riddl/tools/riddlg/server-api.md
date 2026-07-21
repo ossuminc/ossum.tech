@@ -29,8 +29,13 @@ per request on [`/generate/riddl`](#post-generateriddl).
 |--------|------|------|---------|
 | `GET` | [`/health`](#get-health) | Free | Liveness check |
 | `GET` | [`/model/status`](#get-modelstatus) | Free | Local model presence / download progress |
-| `POST` | [`/generate/docs`](#post-generatedocs-and-generateapi) | Free | AsciiDoc or MkDocs from RIDDL |
-| `POST` | [`/generate/api`](#post-generatedocs-and-generateapi) | Free | Smithy, gRPC, or OpenAPI from RIDDL |
+| `POST` | [`/generate/docs`](#the-generate-endpoints) | Free | Documentation in six formats |
+| `POST` | [`/generate/api`](#the-generate-endpoints) | Free | Smithy, gRPC, OpenAPI, JSON Schema, or AsyncAPI |
+| `POST` | [`/generate/sql`](#the-generate-endpoints) | Free | SQL DDL |
+| `POST` | [`/generate/dbml`](#the-generate-endpoints) | Free | A DBML logical schema |
+| `POST` | [`/generate/backstage`](#the-generate-endpoints) | Free | A Backstage software catalog |
+| `POST` | [`/generate/catalog`](#the-generate-endpoints) | Free | An EventCatalog site |
+| `POST` | [`/generate/confluence`](#the-generate-endpoints) | **Pro** | Confluence storage-format pages |
 | `POST` | [`/generate/riddl`](#post-generateriddl) | Free\* | RIDDL from a description (AI) |
 | `POST` | [`/generate/code`](#post-generatecode-pro) | **Pro** | Quarkus code from RIDDL |
 | `POST` | [`/ai/messages`](#post-aimessages) | Free\* | One chat turn, Anthropic Messages shape |
@@ -73,9 +78,10 @@ being fetched. Synapify uses this to draw a progress banner.
     When the active profile is a cloud one, no local model is needed and this
     endpoint reports `absent`. That is not an error condition.
 
-### POST /generate/docs and /generate/api
+### The `/generate` endpoints
 
-Both take the same request shape:
+Every file-producing generator shares one request and one response shape. See
+[Generators](generators.md) for what each one actually emits.
 
 ```json
 {"riddl": "domain Shop is { ??? }", "format": "mkdocs"}
@@ -84,7 +90,7 @@ Both take the same request shape:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `riddl` | yes | RIDDL source text |
-| `format` | *see below* | `/generate/docs`: `asciidoc` or `mkdocs`. `/generate/api`: `smithy`, `grpc`, or `openapi` |
+| `format` | *per endpoint* | Format, or the endpoint's single parameter — see the table below |
 
 Response `200` returns the generated files in memory — nothing is written to
 disk, and `path` is relative to your chosen output root:
@@ -94,11 +100,34 @@ disk, and `path` is relative to your chosen output root:
 ```
 
 `400` for invalid JSON, RIDDL parse/validation errors, or an unsupported
-format.
+format. `402` when the requested output is Pro and you lack entitlement.
+
+**What `format` means on each endpoint:**
+
+| Endpoint | `format` carries | Accepted values |
+|----------|------------------|-----------------|
+| `/generate/docs` | Output format | `asciidoc`, `mkdocs`, `hugo-book`, `hugo-geekdoc`, `hugo`; `docbook` and `dita` need **Pro** |
+| `/generate/api` | Output format | `smithy`, `grpc`, `openapi`, `json-schema`, `asyncapi` |
+| `/generate/sql` | Fallback **dialect** | `postgres`, `mysql`, `ansi`, `oracle`, `sqlserver` |
+| `/generate/backstage` | Fallback **owner** | Any team name |
+| `/generate/confluence` | **Space key** | Any Confluence space key |
+| `/generate/dbml` | *unused* | — |
+| `/generate/catalog` | *unused* | — |
+| `/generate/code` | *unused* | Quarkus is the only target |
+
+`/generate/api` also accepts `protocol` (default `kafka`), which the AsyncAPI
+generator uses.
 
 !!! warning "`format` is effectively required on `/generate/api`"
     It defaults to `asciidoc`, which `/generate/api` does not accept — omitting
     it returns `400 {"error":"unsupported format: asciidoc"}`.
+
+!!! note "`asciidoc` is a reserved value on the parameter-carrying endpoints"
+    Because `format` defaults to `asciidoc`, `/generate/sql`,
+    `/generate/backstage`, and `/generate/confluence` treat that exact string
+    as "not supplied" and fall back to the model's own options. A Backstage
+    owner or Confluence space literally named `asciidoc` cannot be set over
+    HTTP — use the model option instead.
 
 ### POST /generate/riddl
 
@@ -156,9 +185,11 @@ never returns `202`.
 
 ### POST /generate/code (Pro)
 
-Same request and response shape as `/generate/docs`, but emits a Quarkus
-project; returned files carry format `java`. The `format` field is ignored —
-Quarkus is the only target. Returns `402` without a Pro subscription.
+Same request and response shape as [the other `/generate` endpoints](#the-generate-endpoints),
+but emits a Quarkus project; returned files carry format `java`. The `format`
+field is ignored — Quarkus is the only target. Returns `402` without a Pro
+subscription. Note that the server route generates the skeleton only; the
+AI-filled variant is `riddlg gen code --fill` on the CLI.
 
 ### POST /ai/messages
 
@@ -183,6 +214,7 @@ configuration, never in the request.
 | `system` | no | System prompt string |
 | `max_tokens` | no | Capped at the profile's `max-tokens` |
 | `tools` | no | Anthropic tool definitions — **Anthropic profiles only** |
+| `stream` | no | `true` for an SSE response — see [Streaming](#streaming) |
 
 Response `200`:
 
@@ -209,6 +241,32 @@ Exactly those four fields are returned; upstream `id` and `usage` are dropped.
 The agentic loop stays on your side: tool definitions go in, `tool_use` blocks
 come back, you execute them (over [`/mcp`](#post-mcp), typically) and return
 `tool_result` blocks on the next turn.
+
+#### Streaming
+
+Send `"stream": true` and the response is `text/event-stream` in Anthropic's
+event shape, whatever provider is behind it:
+
+```
+message_start → content_block_start → content_block_delta … → content_block_stop
+              → message_delta → message_stop
+```
+
+- **Anthropic profiles** forward the upstream Messages SSE **verbatim**, so you
+  get full fidelity including `tool_use` blocks.
+- **Every other provider** gets an equivalent synthesized sequence, with text
+  arriving as `{"type": "text_delta", "text": "..."}` deltas.
+
+That means one client code path regardless of provider. Errors that occur
+mid-stream arrive as an `error` event rather than an HTTP status, since the
+`200` has already been sent; failures detected *before* the stream opens still
+use the status codes below.
+
+!!! note "Frames are emitted after generation, not during it"
+    The provider interface is synchronous, so riddlg produces the answer and
+    then emits the event frames. The event shapes are byte-identical to true
+    streaming and clients need no special handling — but you should not expect
+    the first token to arrive noticeably sooner than the last.
 
 | Status | When |
 |--------|------|
@@ -261,10 +319,13 @@ A few behaviors are worth knowing before you integrate:
 3. **`402` message text varies by route.** Rely on the status code and the
    `error` field, not the wording.
 4. `/ws/echo` reflects frames verbatim. It is a connectivity test, not a
-   generation protocol; there is no streaming endpoint.
+   generation protocol. For streaming, use
+   [`/ai/messages` with `"stream": true`](#streaming) — it is the only
+   streaming endpoint.
 
 ## See Also
 
+- [Generators](generators.md) — what each `/generate` endpoint produces
 - [MCP Tools](mcp-tools.md) — the tool catalog behind `/mcp`
 - [AI Providers](ai-providers.md) — configuring what the server generates with
 - [Configuration](configuration.md) — `riddlg.server.host` / `port`

@@ -43,20 +43,24 @@ The RIDDL ecosystem generates code and artifacts from validated models,
 transforming your domain model into documentation, API specifications, and
 runnable infrastructure.
 
-!!! tip "Documentation and API specs are available today"
-    Documentation (AsciiDoc, MkDocs) and API specifications (Smithy, gRPC,
-    OpenAPI) already generate from your model with the
-    [`riddlg`](../riddl/tools/riddlg/index.md) tool. The tables below mark
-    what ships now versus what is still on the roadmap.
+!!! tip "Most generation is available today"
+    Documentation, API specifications, schemas, and software catalogs already
+    generate from your model with the
+    [`riddlg`](../riddl/tools/riddlg/index.md) tool — see
+    [Generators](../riddl/tools/riddlg/generators.md) for the full catalog. The
+    tables below mark what ships now versus what is still on the roadmap.
 
 ### Documentation Generators
 
 | Target | Status | Description |
 |--------|--------|-------------|
-| **AsciiDoc** | Available (`riddlg gen docs`) | Technical documentation in AsciiDoc format for enterprise documentation systems. |
+| **AsciiDoc** | Available (`riddlg gen docs`) | Technical documentation in AsciiDoc, with a Maven build that produces an HTML site and a PDF book. |
 | **MkDocs** | Available (`riddlg gen docs -f mkdocs`) | A Material for MkDocs site with navigation, Mermaid diagrams, and cross-references. |
-| **Hugo** | Coming Q3 2026 | A Hugo static-site build of your model's documentation. |
-| **Diagrams** | Available (within MkDocs output) | Mermaid-based context maps, data flow, sequence diagrams, and entity relationships. |
+| **Hugo** | Available (`riddlg gen docs -f hugo`) | A Hugo static site, in either the `hugo-book` or `hugo-geekdoc` theme. |
+| **DocBook** | Available (Pro, `riddlg gen docs -f docbook`) | A single-file DocBook 5.0 book for structured-authoring toolchains. |
+| **DITA** | Available (Pro, `riddlg gen docs -f dita`) | DITA topics with a ditamap, for DITA Open Toolkit and friends. |
+| **Confluence** | Available (Pro, `riddlg gen confluence`) | Confluence storage-format pages plus a REST importer script. |
+| **Diagrams** | Available (within every doc format) | Mermaid-based context maps, data flow, sequence diagrams, and entity relationships. |
 
 ### API & Schema Generators
 
@@ -65,6 +69,17 @@ runnable infrastructure.
 | **Smithy**  | Available (`riddlg gen api`) | AWS Interface Definition Language for defining services that integrate with AWS infrastructure.             |
 | **gRPC**    | Available (`riddlg gen api -f grpc`) | Protobuf definitions enabling gRPC services and cross-language interoperability. |
 | **OpenAPI** | Available (`riddlg gen api -f openapi`) | OpenAPI (Swagger) specifications documenting the REST APIs implied by Applications and their endpoints.         |
+| **AsyncAPI** | Available (`riddlg gen api -f asyncapi`) | AsyncAPI 3.0 specifications for the event-driven surface — channels, operations, and request/reply. |
+| **JSON Schema** | Available (`riddlg gen api -f json-schema`) | Standalone JSON Schema 2020-12 documents for enforcing message contracts. |
+| **SQL DDL** | Available (`riddlg gen sql`) | Normalized DDL from entities and repositories, in Postgres, MySQL, ANSI, Oracle, or SQL Server dialects. |
+| **DBML** | Available (`riddlg gen dbml`) | A dialect-free logical schema for visualization in dbdiagram.io. |
+
+### Catalog Generators
+
+| Target | Status | Description |
+|--------|--------|-------------|
+| **Backstage** | Available (`riddlg gen backstage`) | A Backstage software catalog mapping domains to systems, components, resources, and APIs, with ownership. |
+| **EventCatalog** | Available (`riddlg gen catalog`) | An EventCatalog site of domains, services, and messages, with per-message JSON schemas. |
 
 ### Runtime Code Generators
 

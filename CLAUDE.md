@@ -375,4 +375,17 @@ These items need updating when conditions are met:
 
 **Resolved (2026-07-16):** The hosted `mcp.ossuminc.com` server was retired
 in favor of local `riddlg`; all MCP guides now point at `riddlg mcp` /
-`riddlg serve`. riddlg download links point at 0.4.0 (verified live on GCS).
+`riddlg serve`.
+
+**Resolved (2026-07-21):** riddlg docs brought current to **0.6.0** (download
+links verified live on GCS via `latest.json`). Added
+`docs/riddl/tools/riddlg/generators.md` (the full output catalog) and
+`release-notes.md` (0.2.0 → 0.6.0). Hugo doc generation **shipped** in 0.5.0 —
+`coming-soon/index.md` no longer lists it as roadmap.
+
+!!! note "Keeping riddlg docs current"
+    `riddlg` releases roughly weekly. When a new tag lands in
+    `../riddl-generator`, update `release-notes.md`, the version strings in
+    `installation.md`, and `generators.md` if the output surface changed. The
+    Pro tier is currently **four** features (Codegen, CloudAi, ConfluenceGen,
+    ProDocs) — `license/.../Entitlements.scala` is the source of truth.

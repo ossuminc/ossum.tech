@@ -61,15 +61,21 @@ brew upgrade riddlg
 
 ## Direct Download
 
-Release archives are published for each version. Replace `0.4.0` with the
-version you want:
+Release archives are published for each version. The examples below use
+**0.6.0**, the current release — replace it if you want a different one, and
+see [Release Notes](release-notes.md) for what each version contains.
+
+!!! tip "Resolving the current version programmatically"
+    `https://storage.googleapis.com/synapify-releases/riddlg/latest.json`
+    names the current version and lists its artifacts, so scripts don't need
+    to hard-code a version.
 
 === "macOS (Apple Silicon)"
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Darwin-arm64.tar.gz
-    tar -xzf riddlg-0.4.0-Darwin-arm64.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Darwin-arm64/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Darwin-arm64.tar.gz
+    tar -xzf riddlg-0.6.0-Darwin-arm64.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.6.0-Darwin-arm64/bin"
     ```
 
     GPU acceleration uses Metal and works out of the box.
@@ -81,9 +87,9 @@ version you want:
     the NVIDIA driver installed.
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Linux-x86_64-cuda.tar.gz
-    tar -xzf riddlg-0.4.0-Linux-x86_64-cuda.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Linux-x86_64-cuda/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Linux-x86_64-cuda.tar.gz
+    tar -xzf riddlg-0.6.0-Linux-x86_64-cuda.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.6.0-Linux-x86_64-cuda/bin"
     ```
 
 === "Linux (AMD / Intel / other GPU)"
@@ -92,9 +98,9 @@ version you want:
     and NVIDIA alike).
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Linux-x86_64-vulkan.tar.gz
-    tar -xzf riddlg-0.4.0-Linux-x86_64-vulkan.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Linux-x86_64-vulkan/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Linux-x86_64-vulkan.tar.gz
+    tar -xzf riddlg-0.6.0-Linux-x86_64-vulkan.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.6.0-Linux-x86_64-vulkan/bin"
     ```
 
 === "Linux (CPU only)"
@@ -102,9 +108,9 @@ version you want:
     For servers or machines without a GPU (non-AI commands, or CI use):
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-Linux-x86_64.tar.gz
-    tar -xzf riddlg-0.4.0-Linux-x86_64.tar.gz
-    export PATH="$PATH:$(pwd)/riddlg-0.4.0-Linux-x86_64/bin"
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Linux-x86_64.tar.gz
+    tar -xzf riddlg-0.6.0-Linux-x86_64.tar.gz
+    export PATH="$PATH:$(pwd)/riddlg-0.6.0-Linux-x86_64/bin"
     ```
 
 For a permanent installation, add the `export PATH=...` line to your shell
@@ -119,15 +125,15 @@ CPU-only builds are also packaged for apt and yum/dnf. They install under
 === "Debian / Ubuntu"
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg_0.4.0_amd64.deb
-    sudo dpkg -i riddlg_0.4.0_amd64.deb
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg_0.6.0_amd64.deb
+    sudo dpkg -i riddlg_0.6.0_amd64.deb
     ```
 
 === "RHEL / Fedora"
 
     ```bash
-    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.4.0/riddlg-0.4.0-1.x86_64.rpm
-    sudo rpm -i riddlg-0.4.0-1.x86_64.rpm
+    curl -fLO https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-1.x86_64.rpm
+    sudo rpm -i riddlg-0.6.0-1.x86_64.rpm
     ```
 
 ## Verify Installation
@@ -136,7 +142,7 @@ CPU-only builds are also packaged for apt and yum/dnf. They install under
 riddlg version
 ```
 
-should print the installed version (e.g. `0.4.0`), and
+should print the installed version (e.g. `0.6.0`), and
 
 ```bash
 riddlg info
@@ -150,7 +156,8 @@ matching your hardware, or use a [cloud provider](ai-providers.md) instead.
 
 ## Signing In (Pro)
 
-Quarkus code generation and cloud AI providers require a
+Quarkus code generation, cloud AI providers, Confluence generation, and
+DocBook/DITA documentation require a
 [Pro subscription](index.md#free-and-pro) — the same one as Synapify. Nothing
 to install; just sign in:
 
@@ -169,6 +176,7 @@ Everything else works without an account.
 ## Next Steps
 
 - [Command Reference](command-reference.md) - Learn the available commands
+- [Generators](generators.md) - Everything riddlg can generate from a model
 - [AI Providers](ai-providers.md) - Use the local model, or bring your own key
   for a cloud service
 - [AI Models](models.md) - Download the default model ahead of time, or

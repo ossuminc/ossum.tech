@@ -12,7 +12,7 @@ text.
 | Command | Purpose |
 |---------|---------|
 | [`validate`](#validate) | Parse and validate a RIDDL file |
-| [`gen`](#gen) | Generate docs, API specs, RIDDL, or code |
+| [`gen`](#gen) | Generate docs, API specs, schemas, catalogs, RIDDL, or code |
 | [`ai`](#ai) | Manage AI provider profiles |
 | [`serve`](#serve) | Run the local HTTP service |
 | [`mcp`](#mcp) | Run the MCP stdio server |
@@ -32,7 +32,22 @@ validation errors.
 
 ## gen
 
-The `gen` command has four subcommands: `docs`, `api`, `riddl`, and `code`.
+The `gen` command has nine subcommands:
+
+| Subcommand | Produces | Tier |
+|------------|----------|------|
+| [`gen docs`](#gen-docs) | Documentation in six formats | Free / **Pro** |
+| [`gen api`](#gen-api) | API specifications in five formats | Free |
+| [`gen sql`](#gen-sql) | SQL DDL in five dialects | Free |
+| [`gen dbml`](#gen-dbml) | A DBML logical schema | Free |
+| [`gen backstage`](#gen-backstage) | A Backstage software catalog | Free |
+| [`gen catalog`](#gen-catalog) | An EventCatalog site | Free |
+| [`gen confluence`](#gen-confluence-pro) | Confluence pages and an importer | **Pro** |
+| [`gen riddl`](#gen-riddl) | RIDDL from a description (AI) | Free |
+| [`gen code`](#gen-code-pro) | A Quarkus project | **Pro** |
+
+[Generators](generators.md) describes what each output actually contains and
+which model options it reads; this page is the flag reference.
 
 ### gen docs
 
@@ -40,23 +55,25 @@ Generate documentation from a RIDDL model:
 
 | Option | Description |
 |--------|-------------|
-| `-f, --format <value>` | Output format: `asciidoc` (default), `mkdocs`, or `hugo` (coming Q3 2026) |
+| `-f, --format <value>` | `asciidoc` (default), `mkdocs`, `hugo-book`, `hugo-geekdoc` (`hugo` is an alias), `docbook` (**Pro**), `dita` (**Pro**) |
 | `-o, --out <value>` | Output directory (default: `.`) |
 
 ```bash
-# AsciiDoc documentation into docs/
+# AsciiDoc documentation into docs/ — also builds to HTML and PDF
 riddlg gen docs model.riddl -o docs/
 
 # A complete MkDocs site (with Mermaid diagrams) into site/
 riddlg gen docs model.riddl -f mkdocs -o site/
 
-# A Hugo static site (coming Q3 2026)
+# A Hugo site using the geekdoc theme
 riddlg gen docs model.riddl -f hugo -o site/
+
+# DocBook for a structured-authoring toolchain (Pro)
+riddlg gen docs model.riddl -f docbook -o docbook/
 ```
 
-!!! note "Hugo output is coming Q3 2026"
-    The `hugo` format is on the [roadmap](../../../coming-soon/index.md#generation)
-    and not yet available. `asciidoc` and `mkdocs` work today.
+All formats render from the same document model, so they carry identical
+content — see [Documentation](generators.md#documentation).
 
 ### gen api
 
@@ -64,7 +81,8 @@ Generate API specifications from a RIDDL model:
 
 | Option | Description |
 |--------|-------------|
-| `-f, --format <value>` | Output format: `smithy` (default), `grpc`, or `openapi` |
+| `-f, --format <value>` | `smithy` (default), `grpc`, `openapi`, `json-schema`, `asyncapi` |
+| `--protocol <value>` | Transport protocol for `asyncapi` (default: `kafka`) |
 | `-o, --out <value>` | Output directory (default: `.`) |
 
 ```bash
@@ -76,7 +94,89 @@ riddlg gen api model.riddl -f openapi -o api/
 
 # gRPC / protobuf definitions
 riddlg gen api model.riddl -f grpc -o api/
+
+# Standalone JSON Schema for contract validation
+riddlg gen api model.riddl -f json-schema -o schemas/
+
+# AsyncAPI 3.0 for the event-driven surface
+riddlg gen api model.riddl -f asyncapi --protocol kafka -o api/
 ```
+
+### gen sql
+
+Generate normalized SQL DDL from entities and repositories, one file per table
+source:
+
+| Option | Description |
+|--------|-------------|
+| `--dialect <value>` | `postgres` (default), `mysql`, `ansi`, `oracle`, `sqlserver` |
+| `-o, --out <value>` | Output directory (default: `.`) |
+
+```bash
+riddlg gen sql model.riddl -o sql/ --dialect postgres
+```
+
+A model's own `option sql_dialect(...)` takes precedence over `--dialect`; see
+[SQL DDL](generators.md#sql-ddl) for the dialect aliases and why.
+
+### gen dbml
+
+Generate a [DBML](https://dbml.dbdiagram.io/) logical schema — paste it into
+dbdiagram.io for an ER diagram:
+
+| Option | Description |
+|--------|-------------|
+| `-o, --out <value>` | Output directory (default: `.`) |
+
+```bash
+riddlg gen dbml model.riddl -o dbml/
+```
+
+### gen backstage
+
+Generate a [Backstage](https://backstage.io/) software catalog:
+
+| Option | Description |
+|--------|-------------|
+| `--owner <value>` | Default owning team when the model doesn't declare one |
+| `-o, --out <value>` | Output directory (default: `.`) |
+
+```bash
+riddlg gen backstage model.riddl -o catalog/ --owner platform-team
+```
+
+Ownership resolves from `option backstage_owner`, then `--owner`, then the
+definition's `by author`, then `unassigned`.
+
+### gen catalog
+
+Generate an [EventCatalog](https://www.eventcatalog.dev/) site — domains,
+services, and messages with per-message schemas:
+
+| Option | Description |
+|--------|-------------|
+| `-o, --out <value>` | Output directory (default: `.`) |
+
+```bash
+riddlg gen catalog model.riddl -o catalog/
+```
+
+### gen confluence (Pro)
+
+Generate Confluence storage-format pages plus a `publish.sh` REST importer.
+Requires a [Pro subscription](index.md#free-and-pro).
+
+| Option | Description |
+|--------|-------------|
+| `--space <value>` | Confluence space key |
+| `-o, --out <value>` | Output directory (default: `.`) |
+
+```bash
+riddlg gen confluence model.riddl -o conf/ --space DOCS
+```
+
+Without `--space` or `option confluence_space(...)`, the generated
+`publish.sh` reads `$SPACE_KEY` at publish time.
 
 ### gen riddl
 

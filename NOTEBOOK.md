@@ -17,6 +17,32 @@ Documentation site is complete and deployed at https://ossum.tech.
 All major sections are documented with proper RIDDL syntax
 highlighting.
 
+**Completed (2026-07-21):**
+
+- **riddlg docs brought current to 0.6.0** (were pinned at 0.4.0; 0.5.0 and
+  0.6.0 had shipped). Facts sourced from `../riddl-generator` at tag `0.6.0`,
+  not from the release blog post alone.
+  - **New** `docs/riddl/tools/riddlg/generators.md` — catalog of every output
+    format, what each contains, Free/Pro, and the model options each reads
+    (`sql_dialect`, `backstage_owner`, `confluence_space`, …).
+  - **New** `docs/riddl/tools/riddlg/release-notes.md` — 0.2.0 → 0.6.0, with
+    the two breaking changes called out (`OSSUM_GEN_*` → `RIDDLG_*` in 0.5.0;
+    license files removed in 0.4.0).
+  - Corrected errors the site was actively serving: `gen` documented as **4**
+    subcommands (it has **9**); `-f hugo` labeled "coming Q3 2026" (shipped in
+    0.5.0); Pro tier listed as **2** features (it is **4**); five
+    `/generate/*` endpoints undocumented; install URLs at 0.4.0; a Client Note
+    claiming "there is no streaming endpoint" (0.5.0 added SSE on
+    `/ai/messages`).
+  - `coming-soon/index.md` generation tables rebuilt — Hugo moved from roadmap
+    to available; AsyncAPI/JSON Schema/SQL/DBML added; new Catalog Generators
+    table for Backstage + EventCatalog.
+  - Verified with `mkdocs build --strict` **plus** `validation.anchors: warn`
+    (temporarily enabled, then reverted) — zero broken links, zero broken
+    anchors. Note: strict mode alone does **not** check anchors; the repo has
+    no `validation:` block, so anchor checking must be enabled ad hoc.
+  - No local mkdocs on this machine — used a venv in the session scratchpad.
+
 **Completed (2026-07-16):**
 
 - Backlog sweep + accuracy fixes (Tier 1 + CI gate). Scoured CLAUDE.md,

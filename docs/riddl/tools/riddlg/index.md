@@ -51,8 +51,12 @@ pick a smaller one.
 ## Key Features
 
 - **Validation** - Parse and validate RIDDL files (same checks as `riddlc`)
-- **Documentation generation** - AsciiDoc or MkDocs sites from your model
-- **API specification generation** - Smithy, gRPC, or OpenAPI
+- **Documentation generation** - AsciiDoc (which builds to a website and a
+  PDF), MkDocs, two Hugo themes, and — with Pro — DocBook and DITA
+- **API specification generation** - Smithy, gRPC, OpenAPI, JSON Schema, and
+  AsyncAPI 3.0
+- **Schemas and catalogs** - SQL DDL in five dialects, DBML, Backstage
+  software catalogs, EventCatalog sites, and — with Pro — Confluence pages
 - **AI RIDDL generation** - Describe a system in plain language, get a
   validated RIDDL model; large systems can be built compositionally across
   multiple files
@@ -68,16 +72,19 @@ pick a smaller one.
 ## Free and Pro
 
 `riddlg` is proprietary software with a freemium model. The download is free,
-and the free tier includes validation, documentation generation, API spec
-generation, AI RIDDL generation with the local model, and all of the MCP
-tools.
+and the free tier includes validation, AI RIDDL generation with the local
+model, all of the MCP tools, and most of the
+[generators](generators.md) — documentation, API specs, SQL, DBML, Backstage,
+and EventCatalog.
 
-Two features require a **Pro subscription**:
+Four capabilities require a **Pro subscription**:
 
 | Pro feature | What it covers |
 |-------------|----------------|
 | Quarkus code generation | `riddlg gen code` and `POST /generate/code` |
 | Cloud AI providers | Any non-local [AI provider](ai-providers.md) profile |
+| Confluence generation | `riddlg gen confluence` and `POST /generate/confluence` |
+| DocBook and DITA docs | `riddlg gen docs -f docbook` / `-f dita` |
 
 Pro comes from your Ossum account — the **same subscription as Synapify**, not
 a separate purchase. Sign in with the device flow:
@@ -104,11 +111,13 @@ disable code generation.
 |---------|-------------|
 | [Installation](installation.md) | Homebrew, direct download, Linux packages, and hardware guidance |
 | [Command Reference](command-reference.md) | Every command and option, with examples |
+| [Generators](generators.md) | Every artifact riddlg can produce, and what each contains |
 | [AI Providers](ai-providers.md) | Using the local model or a cloud provider (BYOK), and managing profiles |
 | [AI Models](models.md) | The default local model, downloading alternatives, and sizing for your hardware |
 | [Configuration](configuration.md) | The config file, every setting, and environment variables |
 | [Server API](server-api.md) | The HTTP API served by `riddlg serve` |
 | [MCP Tools](mcp-tools.md) | The RIDDL tools exposed to AI assistants |
+| [Release Notes](release-notes.md) | What changed in each release |
 
 ## How `riddlg` Relates to Other Tools
 
