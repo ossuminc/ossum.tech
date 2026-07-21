@@ -138,6 +138,15 @@ plugins:
   - search
   - offline
 
+# `mkdocs build --strict` promotes warnings to errors, but it does NOT check
+# heading anchors by default -- a link to page.md#renamed-heading builds clean
+# and 404s in the browser. Turning these on makes the CI strict build catch it.
+validation:
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn
+
 nav:
   - Home: index.md
   - RIDDL:
