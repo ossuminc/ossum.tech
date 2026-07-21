@@ -40,6 +40,13 @@ highlighting.
   - Verified with `mkdocs build --strict` — zero broken links, zero broken
     anchors.
   - No local mkdocs on this machine — used a venv in the session scratchpad.
+  - **Upstream drift found, owned by Reid (not this repo):**
+    `riddl-generator`'s own `README.md` and `CLAUDE.md` are stale the same way
+    this site was — riddl-lib 1.28.0/1.29.0 vs actual 1.31.0, no mention of
+    the nine 0.6.0 generators, config table missing `token-param`/`auth`. Also
+    a real inconsistency: `scripts/fetch-default-model.sh` defaults to the
+    **bartowski** HF repo while `riddlg.model.url` defaults to the **official
+    Qwen** repo — two sources for the same ~23 GB model.
 
 - **Anchor validation is now permanent.** `mkdocs build --strict` promotes
   warnings to errors but does **not** check heading anchors by default, so a
@@ -49,15 +56,32 @@ highlighting.
   a link to a non-existent anchor and confirming the build aborts. The whole
   site passes, so there was no pre-existing anchor rot.
 
-- **`gh` is not authenticated on this machine** — no `~/.config/gh/hosts.yml`,
-  no keychain entry. `GITHUB_TOKEN` in the environment is the only credential,
-  so the ossuminc `CLAUDE.md` advice to `unset GITHUB_TOKEN` before `gh`
-  commands **breaks `gh` here** rather than helping. Either run
-  `gh auth login` once, or don't unset it in this repo.
+- **The site has no PWA and no service worker** — `CLAUDE.md` claimed
+  "Service worker caches pages for offline access"; the build output contains
+  no `sw.js`, no web manifest, nothing. Material's `offline` plugin only
+  (a) forces `use_directory_urls = False`, (b) adds an iframe-worker polyfill,
+  and (c) inlines the search index so the *built* site can be copied to disk
+  and browsed over `file://`. Visitors get zero offline caching. Claim
+  corrected; a future session won't go hunting for a broken service worker.
 
-- **`main` has PR-required branch protection**, which contradicts the ossuminc
-  convention of committing directly to `main`. Pushes succeed via admin
-  bypass but log `Bypassed rule violations`. Worth reconciling.
+- **Page URLs end in `.html`, not `/`.** Consequence of the above — both Reid
+  and Claude independently hit a 404 assuming `.../generators/`. The real URL
+  is `.../generators.html`. `use_directory_urls: true` in `mkdocs.yml` is
+  silently overridden by the plugin (`plugin.py`, `on_config`), so switching
+  URL style means dropping `offline` entirely, which would 404 every indexed
+  URL. **Decision: keep `.html`** — directory URLs are cosmetic, the breakage
+  is real. Documented in `CLAUDE.md` so it isn't re-litigated.
+
+**Resolved this session (no longer open):**
+
+- ~~`unset GITHUB_TOKEN` breaks `gh` here~~ — `gh` has no keychain auth on
+  this machine, so `GITHUB_TOKEN` is its only credential. Fixed at source:
+  ossuminc `CLAUDE.md` commit `6f76baa` reverses the guidance for all 17
+  repos.
+- ~~`main` had PR-required branch protection~~ — contradicted the ossuminc
+  commit-directly-to-`main` convention and pushes were logging
+  `Bypassed rule violations`. Reid removed it (confirmed: the final push
+  logged no bypass).
 
 **Completed (2026-07-16):**
 
@@ -354,6 +378,9 @@ hugo {
 | riddlc validation-only | Code generation available via Synapify | 2026-01-27 |
 | Don't mention riddl-gen | Closed source; say generation is "via Synapify" | 2026-01-30 |
 | Separate MCP section | MCP distinct from IDE plugins; deserves own nav | 2026-01-21 |
+| Keep `.html` page URLs | `offline` plugin forces it; directory URLs are cosmetic and would 404 every indexed URL | 2026-07-21 |
+| Anchor validation in CI | `--strict` alone misses broken `#anchors`; they 404 silently in the browser | 2026-07-21 |
+| riddlg gets its own Generators + Release Notes pages | Output surface outgrew the command reference; releases ship ~weekly and need a landing place | 2026-07-21 |
 
 ---
 
@@ -361,5 +388,5 @@ hugo {
 
 | Question | Answer | Date |
 |----------|--------|------|
-| MCP Server public URL | `https://mcp.ossuminc.com/mcp/v1/` | 2026-01-28 |
+| ~~MCP Server public URL~~ | ~~`https://mcp.ossuminc.com/mcp/v1/`~~ — **obsolete**: that hosted server was retired 2026-07-16 in favor of local `riddlg mcp` (stdio) / `riddlg serve` (`POST /mcp`, port 8910) | 2026-01-28 |
 | Synapify beta availability | March 1, 2026 | 2026-01-28 |

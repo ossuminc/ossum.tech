@@ -374,7 +374,7 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 | Install lexer | `pip install -e .` |
 | Start dev server | `mkdocs serve` |
 | Build site | `mkdocs build` |
-| Check links | `mkdocs build --strict` |
+| Check links **and anchors** | `mkdocs build --strict` |
 | Deploy | `mkdocs gh-deploy` |
 
 ---
@@ -396,8 +396,8 @@ in favor of local `riddlg`; all MCP guides now point at `riddlg mcp` /
 **Resolved (2026-07-21):** riddlg docs brought current to **0.6.0** (download
 links verified live on GCS via `latest.json`). Added
 `docs/riddl/tools/riddlg/generators.md` (the full output catalog) and
-`release-notes.md` (0.2.0 → 0.6.0). Hugo doc generation **shipped** in 0.5.0 —
-`coming-soon/index.md` no longer lists it as roadmap.
+`release-notes.md` (0.2.0 → 0.6.0). Hugo doc generation **shipped** in
+0.5.0 — `coming-soon/index.md` no longer lists it as roadmap.
 
 !!! note "Keeping riddlg docs current"
     `riddlg` releases roughly weekly. When a new tag lands in
