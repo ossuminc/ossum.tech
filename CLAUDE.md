@@ -130,8 +130,24 @@ The site uses MkDocs Material theme with these notable features:
 - Code highlighting via Pygments with custom RIDDL lexer
 - Custom CSS in `docs/stylesheets/`
 - **Edit links** - Each page links to GitHub for community contributions
-- **PWA/offline support** - Service worker caches pages for offline access
+- **Offline plugin** - Lets the *built* site be copied to disk and browsed
+  over `file://` with working search (the search index is inlined into
+  `search/search_index.js`). This is **not** a PWA and there is **no service
+  worker** - visitors to ossum.tech get no browser-side offline caching.
 - **SEO meta descriptions** - Key pages have frontmatter descriptions
+
+!!! warning "Page URLs end in `.html`, not `/`"
+    Material's `offline` plugin hard-sets `use_directory_urls = False`
+    (`material/plugins/offline/plugin.py`, in `on_config`), so pages build to
+    `generators.html`, **not** `generators/index.html`. A link or bookmark to
+    `.../riddlg/generators/` returns 404; the real URL is
+    `.../riddlg/generators.html`.
+
+    Setting `use_directory_urls: true` in `mkdocs.yml` does nothing - the
+    plugin overrides it silently. Changing the URL style means dropping the
+    offline plugin, which would 404 every currently-indexed URL. Decided
+    2026-07-21 to keep `.html` URLs; the benefit of directory URLs is
+    cosmetic and the cost is real.
 
 ### Markdown Extensions
 
