@@ -6,7 +6,9 @@ site_description: >-
   reactive systems. Learn to model internet-scale applications with DDD patterns.
 repo_url: https://github.com/ossuminc/ossum.tech
 repo_name: ossuminc/ossum.tech
-edit_uri: edit/main/docs/
+# This branch is the RIDDL 1.x maintenance line, so "Edit this page" must land
+# on docs/1.x -- not main, which documents 2.0.
+edit_uri: edit/docs/1.x/docs/
 copyright: >
   Copyright &copy; 2019-2026 Ossum Inc. -
   <a href="#__consent">Change cookie settings</a>
@@ -74,6 +76,12 @@ extra_javascript:
   - javascripts/extra.js
 
 extra:
+  # Documentation is versioned with `mike`, one entry per RIDDL minor version.
+  # The version a reader is on is part of the URL path, so the selection sticks
+  # as they navigate. See docs-version.yml for which version this branch is.
+  version:
+    provider: mike
+    alias: true
   analytics:
     provider: google
     property: G-97Q04B6XCX

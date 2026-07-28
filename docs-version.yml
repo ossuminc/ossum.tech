@@ -1,0 +1,26 @@
+# Which documentation version this branch publishes as.
+#
+# Read by .github/workflows/publish.yaml, which runs:
+#     mike deploy --push --update-aliases <version> <aliases...>
+#
+# This is the docs/1.x branch: the RIDDL 1.x maintenance line. It is LIVE, not
+# frozen -- when RIDDL 1.32 ships, update the language documentation here and
+# change `version` below to "1.32". 1.31 stays deployed as its own entry, so
+# readers on either release keep working documentation.
+#
+# One entry per RIDDL MINOR version -- patch releases do not get their own
+# documentation version.
+#
+#   branch      version   aliases    role
+#   ----------  --------  ---------  ---------------------------------------
+#   docs/1.x    1.31      latest     RIDDL 1.x maintenance line  <-- this one
+#   main        2.0       next       RIDDL 2.0 (becomes `latest` when 2.0 ships)
+#
+# `latest` is the site default (`mike set-default latest`) and must point at the
+# newest RELEASED version. RIDDL 2.0 is not released yet, which is why it lives
+# here for now. When 2.0 ships, drop `latest` from this file and add it to
+# main's -- the alias moves, this branch keeps publishing 1.31 as itself.
+
+version: "1.31"
+aliases:
+  - latest
