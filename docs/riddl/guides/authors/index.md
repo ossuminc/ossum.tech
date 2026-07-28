@@ -224,7 +224,7 @@ handler CartHandler is {
   }
 
   on query GetCartContents {
-    reply result CartContents with { items: @fields.items }
+    yield result CartContents with { items: @fields.items }
   }
 } with {
   briefly "Handles shopping cart operations"
@@ -457,7 +457,7 @@ entity Order is {
   record ShippedData is { orderId is OrderId, shippedAt is TimeStamp }
   record CancelledData is { orderId is OrderId }
 
-  state Pending of PendingData is {
+  state Pending of record PendingData is {
     handler PendingHandler is {
       on command ConfirmPayment {
         morph entity Order to state Paid
@@ -472,7 +472,7 @@ entity Order is {
     }
   }
 
-  state Paid of PaidData is {
+  state Paid of record PaidData is {
     handler PaidHandler is {
       on command Ship {
         morph entity Order to state Shipped
@@ -482,11 +482,11 @@ entity Order is {
     }
   }
 
-  state Shipped of ShippedData is {
+  state Shipped of record ShippedData is {
     // Final state - no transitions out
   }
 
-  state Cancelled of CancelledData is {
+  state Cancelled of record CancelledData is {
     // Final state - no transitions out
   }
 } with {

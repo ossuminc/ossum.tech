@@ -110,9 +110,9 @@ RIDDL was designed with AI code generation in mind:
 ```riddl
 handler OrderHandler is {
   on command CreateOrder is {
-    prompt "Validate inventory availability for all items"
-    prompt "Calculate total including tax and shipping"
-    prompt "Reserve inventory and create order record"
+    do "Validate inventory availability for all items"
+    do "Calculate total including tax and shipping"
+    do "Reserve inventory and create order record"
     send event OrderCreated to outlet Events
   }
 }

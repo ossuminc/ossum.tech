@@ -162,7 +162,7 @@ domain OnlineShop is {
             send event ItemAdded to outlet Events
           }
           on query GetContents {
-            reply result CartContents
+            yield result CartContents
           }
         }
       }
@@ -253,7 +253,7 @@ domain OnlineShop is {
             send event ItemAdded to outlet Events
           }
           on query GetContents {
-            reply result CartContents
+            yield result CartContents
           }
         }
       }

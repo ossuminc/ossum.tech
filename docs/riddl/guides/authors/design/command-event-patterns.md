@@ -17,6 +17,42 @@ requires careful design.
 
 For background on messages, see the [Message concept](../../../concepts/message.md).
 
+## Declaring the Pairing
+
+Whichever pattern you choose below, RIDDL 2.0 lets you state the
+command→event pairing **declaratively** with a `yields` clause:
+
+```riddl
+command AddMember yields event MemberAdded is {
+  orgId: OrgId,
+  memberId: MemberId
+}
+```
+
+This does two things a comment cannot. Generators get a precise
+request/response signature rather than having to infer one, and the validator
+checks conformance: a handler for a `yields`-declaring command must
+`yield` exactly that event, and one that never yields is an **Error**.
+
+A command's `yields` must name an **event** and a query's must name a
+**result**; anything else is an Error.
+
+`yields` is optional and adoptable one message at a time. A handler in a model
+that declares none may still yield whatever it likes, so adding the clause to
+an existing model never breaks the parts you have not annotated yet.
+
+The corresponding statement is `yield`:
+
+```riddl
+on cmd: command AddMember {
+  yield event MemberAdded(orgId = cmd.orgId, memberId = cmd.memberId)
+}
+```
+
+!!! warning "`reply` is deprecated"
+    `reply` is a deprecated synonym for `yield` and emits a `[deprecated]`
+    message. Both parse to the same node.
+
 ## Type Cardinality Notation
 
 RIDDL uses suffixes to indicate how many values a field can hold:
