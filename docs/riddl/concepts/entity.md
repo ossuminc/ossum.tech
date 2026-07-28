@@ -105,14 +105,19 @@ API, etc.) to make implementation decisions.
   consistency in [Eric Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
   [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). 
 
-### finite state machine
+### finite-state-machine
 * *Arguments*: None
 * *Implications*: The entity is intended to implement a finite state machine.
 
-### message queue
+### message-queue
 * *Arguments*: None
 * *Implications*: The entity should allow receipt of commands and queries via a
   message queue.
+
+### auto-id
+* *Arguments*: None
+* *Implications*: The entity is assigned a ULID automatically at
+  instantiation, rather than the model supplying an identifier.
 
 ### kind
 * *Arguments:* one string indicating the kind of entity
@@ -122,15 +127,65 @@ API, etc.) to make implementation decisions.
   by downstream AST processors, especially code generators. Downstream processors may
   require additional entity kind values.
 
+## Lifecycle Handlers
+
+An entity has two pairs of lifecycle [on clauses](onclause.md), and they mean
+different things:
+
+| Clause | Fires |
+|--------|-------|
+| `on init` / `on term` | Once ever, at creation and destruction |
+| `on activate` / `on passivate` | Every time, at rehydration and eviction |
+
+An entity that is evicted from memory and later rehydrated passivates and
+activates repeatedly without ever being initialized or terminated again. That
+distinction matters for anything cached or connection-scoped.
+
+```riddl
+handler Lifecycle is {
+  on init      { do "assign the account number" }
+  on activate  { do "warm the pricing cache" }
+  on passivate { do "flush the pricing cache" }
+  on term      { do "archive the account record" }
+}
+```
+
+`on activate` and `on passivate` are **entity-only** and must be side-effect
+free: `send`, `tell`, `yield`, `morph` and `become` are rejected at parse time.
+
+## Entities Bear Ports
+
+An entity is a [processor](processor.md), so it may declare
+[inlets](inlet.md) and [outlets](outlet.md) — which is how it publishes its
+events into a stream:
+
+```riddl
+entity Order is {
+  outlet OrderEvents is type OrderEvent
+
+  initial state Active of record OrderData is {
+    handler H is {
+      on cmd: command PlaceOrder {
+        send event OrderPlaced(cmd.id) to outlet OrderEvents
+      }
+    }
+  }
+}
+```
+
 ## Occurs In
 * [Contexts](context.md)
+* [Modules](module.md)
 
 ## Contains
 
+* [Copyrights](copyright.md) - the applicable legal notice
 * [Functions](function.md) - named definitions of processing
 * [Handlers](handler.md) - how to handle messages sent to an entity
 * [Includes](include.md) - inclusion of entity content from a file
+* [Inlets](inlet.md) and [Outlets](outlet.md) - stream ports
 * [Invariants](invariant.md) - logical expressions that must always
   hold true
-* [States](state.md) - the data an entity holds
+* [States](state.md) - the data an entity holds, each typed by a record
 * [Types](type.md) - the definition of a type of information
+* [Versions](version.md) - one component of the version coordinate
