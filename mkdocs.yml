@@ -74,6 +74,12 @@ extra_javascript:
   - javascripts/extra.js
 
 extra:
+  # Documentation is versioned with `mike`, one entry per RIDDL minor version.
+  # The version a reader is on is part of the URL path, so the selection sticks
+  # as they navigate. See docs-version.yml for which version this branch is.
+  version:
+    provider: mike
+    alias: true
   analytics:
     provider: google
     property: G-97Q04B6XCX

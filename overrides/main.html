@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 
+{#
+  Shown by Material only when this build is NOT the version aliased `latest`.
+  Each publishing branch words it for its own situation, because each is a
+  separate build: this branch documents RIDDL 2.0, which is unreleased, so the
+  banner announces a preview. The docs/1.x branch says the opposite -- that a
+  newer release exists. When 2.0 ships and becomes `latest`, this stops showing
+  on its own.
+#}
+{% block outdated %}
+  This is a preview of the RIDDL 2.0 documentation. RIDDL 2.0 has not been
+  released yet.
+  <a href="{{ '../' ~ base_url }}">
+    <strong>Go to the current release.</strong>
+  </a>
+{% endblock %}
+
 {% block extrahead %}
   <link rel="icon" sizes="192x192" href="{{ 'assets/images/favicon-192.jpg' | url }}" type="image/jpeg"/>
   <link rel="shortcut icon" href="{{ 'assets/images/favicon.jpg' | url }}" type="image/jpeg"/>

@@ -1,0 +1,24 @@
+# Which documentation version this branch publishes as.
+#
+# Read by .github/workflows/publish.yaml, which runs:
+#     mike deploy --push --update-aliases <version> <aliases...>
+#
+# One entry per RIDDL MINOR version -- patch releases do not get their own
+# documentation version. Each branch declares its own values:
+#
+#   branch      version   aliases    role
+#   ----------  --------  ---------  ---------------------------------------
+#   docs/1.x    1.31      latest     RIDDL 1.x maintenance line
+#   main        2.0       next       RIDDL 2.0 (becomes `latest` when 2.0 ships)
+#
+# `latest` is the site default (`mike set-default latest`), so it must point at
+# the newest RELEASED version. RIDDL 2.0 is not released yet, which is why 2.0
+# publishes under `next` for now. Flipping it at release time is one command:
+#
+#     mike deploy --push --update-aliases 2.0 latest
+#
+# ...or simply change `aliases` below to `latest` and push.
+
+version: "2.0"
+aliases:
+  - next

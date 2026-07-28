@@ -2,7 +2,11 @@ name: publishing
 on:
   push:
     branches:
-      - main
+      # Each publishing branch declares the version it deploys as in
+      # docs-version.yml. release/2 is deliberately absent: work in progress
+      # must not refresh the production site.
+      - main        # RIDDL 2.0 documentation
+      - docs/1.x    # RIDDL 1.x maintenance line
 permissions:
   contents: write
 jobs:
@@ -10,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # mike commits into the gh-pages branch, so its history must be
+          # present locally. The default shallow checkout does not fetch it.
+          fetch-depth: 0
       - name: Configure Git Credentials
         run: |
           git config user.name github-actions[bot]
@@ -24,6 +32,17 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      - run: pip install mkdocs-material
+      - run: pip install -r requirements.txt
       - run: pip install -e .
-      - run: mkdocs gh-deploy --force
+      - name: Read the documentation version for this branch
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          import yaml
+          cfg = yaml.safe_load(open("docs-version.yml"))
+          print(f"DOCS_VERSION={cfg['version']}")
+          print(f"DOCS_ALIASES={' '.join(cfg.get('aliases') or [])}")
+          PY
+      - name: Deploy with mike
+        run: |
+          echo "Publishing version $DOCS_VERSION with aliases: $DOCS_ALIASES"
+          mike deploy --push --update-aliases "$DOCS_VERSION" $DOCS_ALIASES
