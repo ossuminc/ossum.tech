@@ -24,6 +24,42 @@ that sends data of a specific [type](type.md) from the application to its
 [result message](message.md#result) as the data sent to the 
 user.
 
+## Syntax
+
+An output is written as an alias, an identifier, a presentation verb, and what
+it presents:
+
+```riddl
+document Receipt   shows    type ReceiptData
+list     CartLines displays type CartLine
+picture  Avatar    presents type ImageRef
+```
+
+**Aliases**: `output`, `document`, `list`, `table`, `graph`, `animation`,
+`picture`
+
+**Presentation verbs**: `presents`, `shows`, `displays`, `writes`, `emits`
+
+## Writing to an Output
+
+A [handler](handler.md) publishes a value to an output with the `put`
+statement, which is valid in application and context handlers:
+
+```riddl
+on query GetReceipt {
+  put order.confirmationNumber to output Receipt
+}
+```
+
+An output that no handler ever writes to draws a **CompletenessWarning** when
+a use case claims to show it — see
+[Use Case](use-case.md) witnessing.
+
+## Design References
+
+An output may carry a [figma reference](metadata.md#figma-references) linking
+it to the frame that depicts it.
+
 ## Occurs In
 * [Group](group.md)
 

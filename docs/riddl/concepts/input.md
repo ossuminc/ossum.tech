@@ -28,6 +28,54 @@ data [types](type.md) and declares a
 [command message](message.md#command) as the data received
 by the application's input.
 
+## Syntax
+
+An input is written as an alias, an identifier, an acquisition verb, and the
+type it takes in:
+
+```riddl
+form  Signup   accepts type SignupDetails
+button Checkout activates type Boolean
+picklist Country selects type CountryCode
+```
+
+**Aliases**: `input`, `form`, `text`, `button`, `picklist`, `selector`, `item`
+
+**Acquisition verbs**: `acquires`, `reads`, `takes`, `accepts`, `admits`,
+`enters`, `provides`, `selects`, `chooses`, `picks`, `initiates`, `submits`,
+`triggers`, `activates`, `starts`
+
+The verbs `selects`, `chooses`, `picks`, `enters` and `provides` were added in
+RIDDL 2.0; the rest are unchanged.
+
+!!! warning "Selection verbs expect a choice type"
+    An input using a **selection** verb — `selects`, `chooses` or `picks` —
+    whose type is not a choice among options draws a **StyleWarning**. A
+    selection widget should take an
+    [Enumeration or Alternation](type.md#compounds); a `String` or an
+    `Integer` is almost certainly not what was meant.
+
+    This is never an Error: a predefined type is treated as resolved-but-not-a-
+    choice, and a genuinely unresolved reference is skipped so the warning does
+    not pile onto the real error.
+
+## Reading an Input
+
+A [handler](handler.md) reads an input's value with the `get from` value
+expression:
+
+```riddl
+on command Register {
+  let details = get from input Signup
+  tell command CreateAccount(details) to entity Account
+}
+```
+
+## Design References
+
+An input may carry a [figma reference](metadata.md#figma-references) linking it
+to the frame that depicts it.
+
 ## Occurs In
 * [Group](group.md)
 
