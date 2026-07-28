@@ -26,7 +26,7 @@ definition, as shown in this table:
 | Context     | Implements API of the stateless context                          |
 | Entity      | Handler to use on new entity before any morph action             |
 | Processor   | Provide ETL logic for moving inputs to outputs                   |
-| Projector   | Handle updates and queries on the projection                     |
+| Projector   | Handle events, building the projection                           |
 | Repository  | Handle updates and queries on the repository                     |
 | State       | Handle messages while entity is in that state                    |
 
@@ -60,8 +60,43 @@ the handler within that state (see below).
 
 Projector handlers process events to build and maintain read-side views of
 data. They receive events from the event stream and update the projection's
-state accordingly. Projector handlers also respond to queries that read from
-the projected data.
+state accordingly.
+
+!!! warning "Projectors are event-only"
+    As of RIDDL 2.0 a projector handler may contain `on event` and `on result`
+    clauses only. `on command`, `on query` and `on record` are rejected at
+    parse time. Queries against the projected data are served by the
+    [repository](repository.md) the projector `updates`, not by the projector
+    itself.
+
+## The `initial` Marker
+
+An optional `initial` keyword marks the handler that is live after a
+[morph](statement.md#morph-and-become-entity-only):
+
+```riddl
+state Pending of record PendingData is {
+  initial handler PendingHandler is { ??? }
+  handler AuditHandler is { ??? }
+}
+```
+
+Without the marker, the first handler declared wins — which means reordering
+handlers silently changes behavior. Marking it explicitly makes the model safe
+to reorder, and is fully backward compatible with models that do not.
+
+An entity-scope handler is defaulted to `initial` only when the entity has
+exactly **one** state. With multiple states, entity-scope handlers are common
+parts merged into each state's handler set, so none of them is the entity's
+initial handler.
+
+Declaring more than one `initial` handler in a state — or more than one at
+entity scope when the entity has at most one state — is an **Error**.
+
+## Options
+
+`timeout` (1 argument), `retry` (1–2 arguments), `idempotent`, `cacheable` and
+`rate-limit` (2 arguments) may be set on a handler's metadata.
 
 ## State Handler
 State handlers process messages while an entity is in that
@@ -72,15 +107,19 @@ entity transitions to a new state via a `morph` statement,
 the new state's handlers become active.
 
 ```riddl
-state ActiveOrder of ActiveOrderData is {
+state ActiveOrder of record ActiveOrderData is {
   handler ActiveOrderHandler is {
-    on command ShipOrder {
+    on ship: command ShipOrder {
       morph entity Order to state Order.ShippedOrder
-        with command ShipOrder
+        with record ShippedOrderData(ship.trackingNumber)
     }
   }
 }
 ```
+
+Note that a state is typed by a **record**, and that a `morph` carries a
+record too — not the command that triggered it. A command is a request; the
+record is the new state's data.
 
 ## Occurs In
 * [Adaptors](adaptor.md)

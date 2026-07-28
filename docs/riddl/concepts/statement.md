@@ -1,6 +1,9 @@
 ---
 title: "Statement"
 draft: false
+description: >-
+  The actions available inside an on clause, function body, or saga step,
+  and the value expressions they operate on.
 ---
 
 A Statement is an action that can be taken in response to a message. Statements
@@ -10,18 +13,21 @@ of your system in a structured but abstract way.
 
 ## Statement Types
 
-RIDDL provides the following statement types:
-
 | Statement | Description | Example |
 |-----------|-------------|---------|
-| `when` | Conditional logic with optional else | `when "condition" then { ... } end` |
-| `match` | Pattern matching for multiple cases | `match "status" { case "x" { ... } }` |
-| `send` | Send a message to an outlet or inlet | `send event X to outlet Events` |
-| `tell` | Send a message directly to a processor | `tell command X to entity Y` |
-| `set` | Assign a value to a field | `set field status to "Active"` |
-| `let` | Create a local variable binding | `let total = "price * quantity"` |
-| `prompt` | Natural language action description | `prompt "Calculate the total"` |
-| `error` | Produce an error with a message | `error "Invalid state"` |
+| `when` | Conditional logic with optional else | `when total > Minimum then { ... } end` |
+| `match` | Pattern matching over a typed subject | `match status { case Pending { ... } }` |
+| `foreach` | Bounded iteration over a collection | `foreach line in field order.lines { ... }` |
+| `send` | Emit a message on one of this processor's outlets | `send event X to outlet Events` |
+| `tell` | Deliver a message directly to a processor | `tell command X to entity Y` |
+| `yield` | Produce a command's or query's declared response | `yield result Info(id)` |
+| `set` | Assign a value to a field or state | `set field status to "Active"` |
+| `let` | Create a local variable binding | `let total = call function Cart.Total(items)` |
+| `put` | Publish a value to a UI output | `put order.number to output Panel` |
+| `return` | Return a function's result | `return call function Tax.Compute(sub)` |
+| `require` | Assert a precondition | `require amount > Zero` |
+| `do` | Natural language action description | `do "Calculate the total"` |
+| `error` | Refuse to proceed, with a reason | `error "Invalid state"` |
 | `code` | Embed implementation code | `` ```scala ... ``` `` |
 
 ### Entity-Specific Statements
@@ -30,40 +36,98 @@ These statements are only valid within Entity handlers:
 
 | Statement | Description | Example |
 |-----------|-------------|---------|
-| `morph` | Change entity to a different state | `morph entity X to state Y with command Z` |
+| `morph` | Change entity to a different state | `morph entity X to state Y with record Z()` |
 | `become` | Switch entity to a different handler | `become entity X to handler Y` |
+
+## Value Expressions
+
+RIDDL 2.0 introduces a real value-expression system beneath the statements.
+Wherever a statement needs a value, any of these forms is accepted:
+
+| Form | Syntax | Meaning |
+|------|--------|---------|
+| Literal | `"some text"` | Opaque pseudo-code, or a literal constant |
+| Value reference | `order.total` | A field, state field, function input, or `let` local |
+| Constructor | `OrderPlaced(id, total = x)` | Builds a message or record |
+| Get | `get from input SignupForm` | Reads a UI input or an entity state |
+| Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
+| Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
+| Boolean | `a > b and not c` | A structured boolean expression |
+
+### Constructors
+
+A constructor builds a [message](message.md) or record inline. Arguments are
+positional first, then named, and are checked against the target's fields for
+count, name, order and (best effort) type:
+
+```riddl
+yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
+```
+
+### Boolean Expressions
+
+Precedence runs `or` < `and` < `not` < comparison < atom, with parentheses to
+group. `and`, `or`, `not`, `true` and `false` are **context-sensitive**: they
+are recognized only inside a boolean expression, so they stay legal identifiers
+everywhere else.
+
+!!! warning "Comparisons are type-safe and reference-only"
+    Both operands of a comparison must be a **typed reference** — a value
+    reference, a `get from`, or a named [constant](constant.md). A literal is
+    not permitted, and this is enforced at **parse** time:
+
+    ```riddl
+    when count > 5 then ??? end        // fails to parse
+    when count > "5" then ??? end      // fails to parse
+    ```
+
+    Name the threshold instead:
+
+    ```riddl
+    constant MaxItems is Natural = "100"
+    when cart.itemCount > MaxItems then error "too many items" end
+    ```
+
+    This removes magic constants from models and makes every comparison check
+    the types on both sides. `==` and `!=` require operands of the same
+    category; `<`, `>`, `<=` and `>=` require an ordered numeric type.
 
 ## Statement Details
 
 ### When Statement
 
-The `when` statement provides conditional logic:
-
 ```riddl
-when "user is authenticated" then {
+when order.isPaid and not order.isCancelled then {
   send event LoginSucceeded to outlet Events
 } else {
   error "Authentication failed"
 } end
 ```
 
-The `end` keyword is required. Conditions can be:
+The `end` keyword is required. A condition may be:
 
-- Literal strings: `when "condition description" then`
-- Identifier references: `when authorized then` (using a `let` binding)
-- Negated identifiers: `when !authorized then`
+- a boolean expression: `when a > b and not c then`
+- a bare boolean-typed reference, including a dotted path:
+  `when order.isPaid then`
+- a `let` binding, optionally negated: `when authorized then`,
+  `when !authorized then`
+- an opaque literal string: `when "user is authenticated" then`
+
+A bare reference is resolved and checked to be Boolean-typed; a clearly
+non-Boolean condition is an **Error**.
 
 ### Match Statement
 
-Pattern matching for multiple conditions:
-
 ```riddl
-match "orderStatus" {
-  case "pending" {
+match order.status {
+  case Pending {
     tell command ProcessOrder to entity OrderProcessor
   }
-  case "shipped" {
+  case Shipped when order.isPaid {
     send event OrderShipped to outlet Events
+  }
+  case >= HighValueThreshold {
+    tell command EscalateReview to entity Review
   }
   default {
     error "Unknown order status"
@@ -71,53 +135,134 @@ match "orderStatus" {
 }
 ```
 
-### Send vs Tell
+The subject is a value reference, a `get from`, or a legacy pseudo-code
+literal. A case pattern is one of:
 
-- **send**: Routes messages through outlets/inlets (streaming, pub/sub)
-- **tell**: Sends messages directly to a specific processor (point-to-point)
+- **Type case** — a bare type reference matching an alternant, enumerator or
+  message subtype: `case Pending`
+- **Comparison** — an operator and a comparand, with the subject as the
+  implicit left operand: `case >= HighValueThreshold`
+- **Literal** — a legacy pseudo-code label: `case "pending"`
+
+Each case may carry an optional `when <boolean>` guard. Naming an unknown
+type-case is an **Error**. For a *closed* subject — an Enumeration or
+Alternation — a non-exhaustive match without `default` draws a
+**StyleWarning**.
+
+### Foreach Statement
+
+RIDDL's only loop, and deliberately bounded — there is no unbounded iteration
+in the language:
 
 ```riddl
-// Send to an outlet (for streaming/events)
+foreach line in field order.lines {
+  send event LineShipped(sku = line.sku) to outlet Shipments
+}
+```
+
+The collection is a `field` reference or a `let`-bound local whose type
+resolves to a collection: Sequence, Set, Graph, Table, Replica, Mapping, or a
+cardinality wrapper such as `many` or `optional`.
+
+### Send, Tell and Yield
+
+- **send** — emit on one of *this* processor's own [outlets](outlet.md); a
+  [connector](connector.md) routes it onward
+- **tell** — deliver directly to a specific processor (point-to-point)
+- **yield** — produce a command's or query's declared response, without
+  needing to know the sender's identity
+
+```riddl
 send event ItemAdded to outlet CartEvents
-
-// Tell a specific entity (direct command)
-tell command ProcessPayment to entity PaymentService
+tell command ProcessPayment(orderId) to entity PaymentService
+yield result CartInfo(cart.id, cart.total)
 ```
 
-### Prompt Statement
+!!! warning "`send … to inlet` is deprecated"
+    Sending directly into another processor's inlet bypasses the streaming
+    model — that is `tell`'s job. The inlet form still parses and emits a
+    `[deprecated]` message.
 
-Use `prompt` to describe complex business logic in natural language that will
-be implemented in target code:
+!!! warning "`reply` is deprecated"
+    `reply` is a deprecated synonym for `yield`, parsing to the same node.
+
+### Put and Return
+
+`put` publishes a value to a UI [output](output.md) and is valid only in
+application and context handlers. `return` produces a
+[function](function.md)'s result and is valid only in a function body.
 
 ```riddl
-prompt "Calculate the total price including all applicable taxes, discounts,
-        and shipping based on the customer's location and membership tier"
+put order.confirmationNumber to output ConfirmationPanel
+return call function Tax.Compute(subtotal)
 ```
+
+### Require and Error
+
+```riddl
+require amount > Zero
+require invariant BalanceNonNegative
+error "Price must be greater than zero"
+```
+
+!!! warning "Refusals before effects"
+    Within any single linear statement list, every **refusal** (`require`,
+    `error`) must appear before every **effect** (`set`, `morph`, `become`,
+    `send`, `tell`, `yield`, `put`). Acting and then refusing would leave
+    partial changes behind.
+
+    Each statement list is checked independently, so each branch of a `when`,
+    `match` or `foreach` body is its own list. A refusal after an effect in the
+    same list is an **Error**.
+
+    ```riddl
+    on cmd: command Withdraw {
+      require cmd.amount > Zero          // refusals first
+      require balance >= cmd.amount
+      set field balance to "balance - amount"    // then effects
+      yield event Withdrawn(amount = cmd.amount)
+    }
+    ```
+
+### Do Statement
+
+Use `do` to describe business logic in natural language that will be
+implemented in target code:
+
+```riddl
+do "Calculate the total price including all applicable taxes, discounts,
+    and shipping based on the customer's location and membership tier"
+```
+
+!!! warning "The `prompt` statement is deprecated"
+    `do` is canonical; `prompt "..."` emits a `[deprecated]` message and
+    prettify normalizes it.
+
+    Do not confuse it with the `prompt(...)` **value**, distinguished by its
+    parentheses. The statement describes an action for a human to implement;
+    the value denotes something AI computes.
 
 ### Code Statement
 
 Embed actual implementation code when necessary:
 
-```riddl
+````riddl
 ```scala
 val total = items.map(_.price).sum * (1 - discountRate)
 ```
-```
+````
 
 Supported languages: `scala`, `java`, `python`, `mojo`
 
 ### Morph and Become (Entity Only)
 
-- **morph**: Transitions an entity to a new state
-- **become**: Switches which handler processes messages
-
 ```riddl
-// Transition to a new state
-morph entity Order to state Shipped with command ShipOrder
-
-// Switch to a different handler
+morph entity Order to state Shipped with record ShippedData(trackingNumber)
 become entity Order to handler ShippedHandler
 ```
+
+The `morph` payload is a **record** — a bare record reference or an inline
+constructor. It is not a message; a message cannot type a [state](state.md).
 
 ## Level of Detail
 
@@ -126,20 +271,36 @@ require the system model to contain implementation code. The objectives are:
 
 - Converting specifications to executable code should be done by humans or AI
 - Statements capture interactions between model definitions
-- Statements are intentionally **not** Turing complete
-- Natural language descriptions (via `prompt`) suffice for complex logic
+- Statements are intentionally **not** Turing complete — `foreach` is bounded
+  by its collection, so it does not change this
+- Natural language descriptions (via `do`) suffice for complex logic
 
 ## Applicability
 
-Not all statements can be used everywhere. Statement availability depends on
-the containing definition:
+Not all statements can be used everywhere. Availability depends on the
+containing definition — and, as of 2.0, several places actively *ban*
+statements:
 
 | Context | Available Statements |
 |---------|---------------------|
-| All handlers | when, match, send, tell, set, let, prompt, error, code |
+| All handlers | when, match, foreach, send, tell, yield, require, set, let, do, error, code |
 | Entity handlers | All above + morph, become |
-| Functions | when, match, set, let, prompt, error, code |
-| Saga steps | send, tell, prompt, error |
+| Application / context handlers | All above + put |
+| Functions | when, match, foreach, require, let, return, do, error, code |
+| `on activate` / `on passivate` | Side-effect free only — no send, tell, yield, morph, become |
+| `on event` | No require or error — an event has happened and must be accepted |
+| Saga steps | send, tell, yield, put, do, error |
+
+The function and lifecycle bans are enforced at **parse** time, so a banned
+statement can never enter the AST at all.
+
+## Deprecated Statements
+
+| Deprecated | Replacement |
+|------------|-------------|
+| `reply <msg>` | `yield <msg>` |
+| `prompt "..."` | `do "..."` |
+| `send … to inlet X` | `send … to outlet Y`, or `tell` |
 
 ## Occurs In
 
@@ -151,7 +312,9 @@ the containing definition:
 
 Statements may contain:
 
-- Conditionals (in `when` and `match`)
+- Value expressions (constructors, calls, gets, references, boolean
+  expressions)
+- Conditionals (in `when`, `match` guards, and `require`)
 - Literal values
 - Field references
 - Path identifiers to reference definitions
