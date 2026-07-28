@@ -47,7 +47,15 @@ brew upgrade riddlc
 
 ## Build from Source
 
-Building from source requires JDK 25 and sbt.
+Building RIDDL 2.0 from source requires JDK 25 and **sbt 2.0.2 or later**.
+
+!!! warning "sbt 2 is required for RIDDL 2.0"
+    RIDDL 2.0 migrated to sbt 2 and the `projectMatrix` build layout, so an
+    sbt 1.x installation will not build it. The version is pinned in
+    `project/build.properties`, and sbt's launcher will fetch the right one —
+    but the launcher itself must be recent enough to understand it.
+
+    Credentials for sbt 2 live in `~/.sbt/2/`, not `~/.sbt/1.0/`.
 
 ### Prerequisites
 
@@ -123,16 +131,17 @@ You should see output like:
 ```
 [info] About RIDDL:
 [info]            name: utils
-[info]         version: 1.2.1
-[info]   documentation: https://github.com/ossuminc/riddl
+[info]         version: 2.0.0
+[info]      git commit: 4af86d6712c9f0b1a3e5d8c47b2f6a90de13c8b5
+[info]   documentation: https://ossum.tech/riddl
 [info]       copyright: © 2019-2026 Ossum, Inc.
-[info]        built at: 2026-02-01 23:24:51.835-0500
+[info]        built at: 2026-07-27 11:04:12.117-0400
 [info]        licenses: Apache-2.0
 [info]    organization: Ossum, Inc.
-[info]   scala version: 3.7.4
-[info]     sbt version: 1.12.0
+[info]   scala version: 3.9.0
+[info]     sbt version: 2.0.2
 [info]        jvm name: OpenJDK 64-Bit Server VM
-[info]     jvm version: 21.0.10
+[info]     jvm version: 25.0.1
 [info]   operating sys: Mac OS X
 ```
 

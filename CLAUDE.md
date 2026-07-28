@@ -83,6 +83,9 @@ The source links point to `riddl-models` (not `riddl-examples`).
 ### Local Development
 
 ```bash
+# Install build dependencies (mkdocs-material, mike)
+pip install -r requirements.txt
+
 # Install the RIDDL lexer for syntax highlighting
 pip install -e .
 
@@ -90,13 +93,80 @@ pip install -e .
 mkdocs serve
 
 # Build static site
-mkdocs build
+mkdocs build --strict
 
-# Deploy to GitHub Pages
-mkdocs gh-deploy
+# Preview the versioned site as deployed
+mike serve
 ```
 
 The site will be available at `http://localhost:8000` when serving locally.
+
+**Do not run `mkdocs gh-deploy`.** The site is versioned with `mike`; a
+`gh-deploy` would flatten the version structure. CI runs
+`mike deploy --push --update-aliases` instead.
+
+---
+
+## Documentation Versioning
+
+The site is versioned with [`mike`](https://github.com/jimporter/mike), one
+entry per RIDDL **minor** version — never per patch. Each version builds from
+a **different git ref**, so there is never a second copy of unchanged prose to
+maintain.
+
+| Branch | Publishes as | Role |
+|--------|--------------|------|
+| `docs/1.x` | `1.31` `[latest]` | The RIDDL 1.x maintenance line. Live, not frozen — a future 1.32 is documented here and deploys from here. |
+| `main` | `2.0` `[next]` | RIDDL 2.0. Becomes `[latest]` when 2.0 ships. |
+
+`docs-version.yml` at the repo root is the single place a branch declares what
+it publishes as. The release-time alias flip is a one-line edit there, not a
+workflow change.
+
+**Only `main` and `docs/1.x` publish.** Work branches such as `release/2` can
+be pushed freely without touching production.
+
+### Things that will bite
+
+- **`mkdocs build --strict` does NOT fail on dangling intra-page anchors.** It
+  reports them at INFO level and exits 0. Always verify with:
+  ```bash
+  mkdocs build --strict 2>&1 | grep -E 'anchor|WARNING|ERROR'
+  ```
+- **Live URLs are `.html`-style**, not directory-style, because the `offline`
+  plugin sets `use_directory_urls: false`. mike preserves this; versioning only
+  adds a path prefix. `scripts/gh-pages-404.html` redirects legacy unversioned
+  links and lives at the `gh-pages` root, which mike does not manage.
+- **This machine has mkdocs-material Insiders; CI installs the community
+  edition.** Do not use Insiders-only features in `mkdocs.yml`.
+- **`sbt extractGrammar` resolves the *published* riddl library.** Until RIDDL
+  2.0 is published it would overwrite the 2.0 grammar with a 1.x one. See the
+  warning at the task in `build.sbt`.
+- **The `outdated` banner in `overrides/main.html` is worded per branch**, since
+  each branch is its own build. `main` announces an unreleased preview;
+  `docs/1.x` announces that a newer release exists.
+
+### Migrating gh-pages
+
+`gh-pages` still holds a flat unversioned site. The restructure is a one-time
+supervised step: see `scripts/migrate-gh-pages-to-mike.md`, which has a backup
+branch and a rollback. Rehearse it against a throwaway clone first — that is
+how the `CNAME`/`.nojekyll` survival and `offline`-plugin compatibility were
+confirmed rather than assumed.
+
+### Verifying RIDDL code blocks
+
+`scripts/check-riddl-blocks.py` scans every ` ```riddl ` fence for retired 1.x
+constructs. It is advisory (exit 0 unless `--strict`), because many fences are
+deliberate fragments.
+
+```bash
+python3 scripts/check-riddl-blocks.py docs
+```
+
+Counter-examples are suppressed by a trailing comment on the offending line —
+`// fails to parse`, `// invalid`, `// deprecated` — so a page can teach a rule
+by showing what it forbids.
 
 ### RIDDL Syntax Highlighting
 
@@ -355,11 +425,13 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 | Task | Command |
 |------|---------|
-| Install lexer | `pip install -e .` |
+| Install deps | `pip install -r requirements.txt && pip install -e .` |
 | Start dev server | `mkdocs serve` |
-| Build site | `mkdocs build` |
-| Check links | `mkdocs build --strict` |
-| Deploy | `mkdocs gh-deploy` |
+| Build site | `mkdocs build --strict` |
+| Check links **and anchors** | `mkdocs build --strict 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
+| Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py docs` |
+| Preview versioned site | `mike serve` |
+| Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
 
 ---
 
