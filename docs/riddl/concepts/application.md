@@ -3,10 +3,32 @@ title: "Application"
 draft: false
 ---
 
-An application in RIDDL is not a separate definition type—it is simply a
-[Context](context.md) that contains [Group](group.md)s. When a context has
-groups, it represents an interface portion of a system where a user (human
-or machine) initiates actions.
+An application in RIDDL is not a separate definition type—it is a
+[Context](context.md) declared with the `application`
+[intention](context.md#intention), which is the only place
+[Group](group.md)s, and therefore user interface, may be modeled. It
+represents the interface portion of a system where a user (human or machine)
+initiates actions.
+
+```riddl
+application context Storefront is {
+  page ProductDetails is { ??? }
+  page ShoppingCart is {
+    button Checkout activates type Boolean
+  }
+}
+```
+
+!!! warning "UI outside an application context is an Error"
+    In RIDDL 1.x, any context that happened to contain groups was an
+    application. In 2.0 the intention must be declared: a context holding a
+    group without the `application` prefix is a hard **Error**.
+
+    This is what makes the application boundary checkable. Because the
+    boundary is now explicit, RIDDL can also enforce that a
+    [user](user.md) interacts only *at* it — an interaction step putting a
+    user opposite something that is neither a UI element nor a definition
+    inside an application context is an Error too.
 
 Applications only define the net result of the interaction between the user
 and the system. They are abstract on purpose. There is nothing in RIDDL that
@@ -40,7 +62,35 @@ Application contexts have message [handlers](handler.md) like other contexts.
 These handlers receive messages from [users](user.md) and typically forward
 messages to other components like [entities](entity.md).
 
+Handlers in an application context may also use the `put` statement to publish
+a value to an [output](output.md), and read one with `get from input`:
+
+```riddl
+handler Checkout is {
+  on command PlaceOrder {
+    let email = get from input SignupForm
+    put email to output ConfirmationPanel
+  }
+}
+```
+
+## Design References
+
+An application context, and the groups, inputs and outputs inside it, may carry
+a `figma` reference linking the model element to the exact frame that depicts
+it:
+
+```riddl
+page Checkout is { ??? } with {
+  figma "aBcD1234" node "42:1337"
+}
+```
+
+See [Metadata](metadata.md#figma-references) for the optional drift validation.
+
 ## See Also
 
 * [Context](context.md) — The definition type used to model applications
 * [Group](group.md) — UI structure within application contexts
+* [Input](input.md) and [Output](output.md) — the data-flow endpoints
+* [User](user.md) — who interacts at the application boundary

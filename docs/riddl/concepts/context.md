@@ -61,17 +61,68 @@ To further your understanding, watch this
 [Eric Evans](../introduction/who-made-riddl-possible.md#eric-evans)
 from DDD Europe 2020 conference.
 
+## Intention
+
+A context may declare its **intention** — what kind of bounded context it is —
+with an optional keyword prefix:
+
+```riddl
+application context Storefront    is { ??? }
+external    context StripePayments is { ??? }
+gateway     context PublicApi      is { ??? }
+service     context Pricing        is { ??? }
+```
+
+| Intention | Meaning |
+|-----------|---------|
+| `application` | Presents a user interface. The only place UI may be modeled. |
+| `external` | A third-party system the model describes but does not own. |
+| `gateway` | An entry point adapting the outside world to the inside. |
+| `service` | An internal service with no user interface. |
+
+The intention is optional. A plain `context` declares none and is subject to no
+intention rules, so existing models are unaffected.
+
+!!! warning "Intention validation"
+    **Errors:**
+
+    - A context containing a [group](group.md) (or any of its UI aliases) that
+      is not an `application` context. UI belongs at the application boundary.
+      In RIDDL 1.x any context could hold UI; in 2.0 this is a hard error.
+    - A `service` or `gateway` context whose shape contradicts its intention
+    - An `external` context modeling persistence it cannot own
+
+!!! warning "The `gateway`, `service`, `external` and `wrapper` options are deprecated"
+    These were previously spelled as options in the `with { }` block. Use the
+    intention prefix instead. The options still parse and emit a
+    `[deprecated]` message.
+
+## A Context Is a Processor
+
+A Context is itself a [processor](processor.md), so it may hold
+[handlers](handler.md) that act as the context's external API, and may declare
+[inlets](inlet.md) and [outlets](outlet.md) and an `as <shape>` ascription of
+its own.
 
 ## Occurs In
 * [Domains](domain.md)
+* [Modules](module.md)
 
 ## Contains
 * [Adaptors](adaptor.md)
+* [Connectors](connector.md)
+* [Constants](constant.md)
+* [Copyrights](copyright.md)
 * [Entities](entity.md)
 * [Functions](function.md)
+* [Groups](group.md) — only in an `application` context
 * [Handlers](handler.md)
 * [Includes](include.md)
+* [Inlets](inlet.md) and [Outlets](outlet.md)
+* [Invariants](invariant.md)
 * [Processors](processor.md)
 * [Projectors](projector.md)
+* [Repositories](repository.md)
 * [Sagas](saga.md)
 * [Types](type.md)
+* [Versions](version.md)
