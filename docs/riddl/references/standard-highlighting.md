@@ -36,13 +36,13 @@ Each token type has a specific semantic meaning:
 
 | Token Type | What It Covers | Examples |
 |------------|----------------|----------|
-| **Keyword** | Definition and statement keywords | `domain`, `context`, `entity`, `handler`, `send`, `tell` |
+| **Keyword** | Definition and statement keywords | `domain`, `context`, `entity`, `processor`, `handler`, `send`, `yield`, `foreach` |
 | **Readability** | Connecting words that aid readability | `is`, `of`, `to`, `with`, `by`, `from` |
 | **Predefined** | Built-in type names | `String`, `Integer`, `UUID`, `Timestamp`, `Boolean` |
 | **Identifier** | User-defined names | `MyEntity`, `OrderPlaced`, `customerId` |
 | **QuotedString** | Double-quoted string literals | `"Hello world"`, `"application/json"` |
 | **Numeric** | Number literals | `42`, `3.14`, `100` |
-| **Punctuation** | Structural delimiters and operators | `{`, `}`, `(`, `)`, `,`, `:`, `=` |
+| **Punctuation** | Structural delimiters and operators | `{`, `}`, `(`, `)`, `,`, `:`, `=`, and the comparison operators `==`, `!=`, `<`, `>`, `<=`, `>=` |
 | **Comment** | Line and block comments | `// comment`, `/* block */` |
 | **MarkdownLine** | Pipe-prefixed documentation lines | `\|## Heading`, `\|Some description text` |
 | **LiteralCode** | Triple-quoted code blocks | ` ```scala ... ``` ` |
