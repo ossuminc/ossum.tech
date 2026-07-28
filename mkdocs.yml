@@ -152,6 +152,7 @@ nav:
   - RIDDL:
     - riddl/index.md
     - Quickstart: riddl/quickstart.md
+    - Migrating from 1.x: riddl/migration/1.x-to-2.0.md
     - Tutorials:
       - riddl/tutorials/index.md
       - Getting Started: riddl/tutorials/basics.md

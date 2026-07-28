@@ -16,6 +16,7 @@ riddlc [common-options] command [command-options]
 | Command | Description |
 |---------|-------------|
 | `about` | Print out information about RIDDL |
+| `advise` | Report remediation advice for a model |
 | `bastify` | Convert a RIDDL file to BAST (Binary AST) format |
 | `dump` | Dump the AST of the input file |
 | `flatten` | Flatten all includes into a single file |
@@ -57,8 +58,58 @@ These options apply to all commands:
 | `-G`, `--group-messages-by-kind` | Group messages by severity |
 | `-x`, `--max-parallel-parsing` | Max parallel include file parsing |
 | `--max-include-wait` | Max time to wait for include parsing |
+| `-c`, `--show-completeness-warnings` | Control completeness warning display |
 | `--warnings-are-fatal` | Treat warnings as errors |
 | `-B`, `--auto-generate-bast` | Auto-generate .bast files after parsing |
+| `--provide-tips` | Include a remediation suggestion with each message that has one, for AI-assisted fixing |
+| `--check-figma-drift` | Check `figma` references against the Figma REST API |
+
+### Completeness Warnings
+
+`--show-completeness-warnings` (default: on) controls severity-4 messages —
+models that parse and validate but lack detail needed for a complete,
+implementable specification.
+
+When it is on, `validate` additionally runs the message-flow, entity-lifecycle
+and use-case analyses, so epic and use-case completeness warnings surface here
+rather than only through the analysis API. When it is off, those passes are
+skipped entirely and cost nothing.
+
+### Figma Drift Checking
+
+`--check-figma-drift` is **off by default** and verifies that each
+`figma "<file>" node "<id>"` reference in the model still resolves:
+
+```bash
+export FIGMA_TOKEN=figd_...
+riddlc --check-figma-drift validate model.riddl
+```
+
+A node the API does not know about is an **Error**; a frame whose name no
+longer corresponds to the annotated definition's name is a **Warning**.
+
+An offline or token-less build cannot be affected. No token means no client at
+all, and every failure to reach or understand the API produces nothing —
+**only a successful API answer can produce a message**. With the flag on but
+no client available, one informational message says so, and that is the whole
+consequence.
+
+The HOCON equivalent for a `from` configuration file is `check-figma-drift`.
+
+### Deprecation Messages
+
+RIDDL 2.0 gives deprecations their own `[deprecated]` label rather than
+rendering them as ordinary warnings, so a model can be checked for zero
+deprecations independently of zero warnings:
+
+```bash
+riddlc validate model.riddl 2>&1 | grep '\[deprecated\]'
+```
+
+They also surface under **every** command that parses — `parse`, `stats`,
+`bastify`, `prettify` and the generation commands — not only `validate`. In
+1.x a successful parse that accumulated any message discarded the result, so
+parse-time warnings never reached the user at all.
 
 ## Command Details
 
@@ -194,12 +245,28 @@ Example output:
 ```
 [info] About riddlc:
 [info]            name: riddlc
-[info]         version: 1.1.2
-[info]   documentation: https://riddl.tech
+[info]         version: 2.0.0
+[info]      git commit: 4af86d6712c9f0b1a3e5d8c47b2f6a90de13c8b5
+[info]   documentation: https://ossum.tech/riddl
 [info]       copyright: © 2019-2026 Ossum Inc.
 [info]        licenses: Apache License, Version 2.0
 [info]    organization: Ossum Inc.
-[info]   scala version: 3.3.7
+[info]   scala version: 3.9.0
+```
+
+`git commit` is new in RIDDL 2.0: the full source SHA the binary was built
+from. It lets a model repository locate the exact compiler changes a given
+`riddlc` embodies — useful when a validation message appears that an older
+build did not produce. Outside a git checkout it reads `unknown`.
+
+### advise
+
+Report remediation advice for a model. Pairs with `--provide-tips`, which
+attaches a suggested fix to each message that has one — intended for
+AI-assisted correction.
+
+```bash
+riddlc advise model.riddl
 ```
 
 ### help
