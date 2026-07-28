@@ -39,11 +39,50 @@ update works and may optionally yield an
 [Event message](message.md#event) but generally that is
 handled at a higher level of abstraction. 
 
+## Repositories at Domain Scope
+
+A repository normally lives in a [Context](context.md). But a repository that
+**synthesizes** messages from entities across several contexts, and is queried
+by several contexts, belongs to the [Domain](domain.md) instead — putting it
+inside any one context would misrepresent who owns it.
+
+```riddl
+domain Commerce is {
+  repository SalesData is { ??? }   // reaches Orders, Catalog and Shipping
+
+  context Orders   is { ??? }
+  context Catalog  is { ??? }
+  context Shipping is { ??? }
+}
+```
+
+!!! warning "Scope validation"
+    A repository's **reach** is the set of contexts owning the messages its
+    `on` clauses handle.
+
+    - **Error** — a domain-scoped repository reaching only ONE context. It is
+      provably unnecessary at domain scope; move it into that context. Zero
+      resolvable contexts means an incomplete model rather than proof, so that
+      draws nothing.
+    - **CompletenessWarning** — a context-scoped repository reaching another
+      context. Consider promoting it to domain scope.
+
+## Options
+
+`transient` marks a repository whose contents are not durably persisted — a
+cache-like store. `batch` (1 argument), `microservice` and `protocol` are also
+available.
+
 ## Occurs In
 * [Context](context.md)
+* [Domain](domain.md) — when it synthesizes across several contexts
+* [Module](module.md)
 
 ## Contains
+* Schemas
 * [Types](type.md)
 * [Messages](message.md)
 * [Handler](handler.md)
+* [Inlets](inlet.md) and [Outlets](outlet.md)
+* [Versions](version.md) and [Copyrights](copyright.md)
 
