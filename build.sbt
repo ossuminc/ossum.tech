@@ -22,7 +22,15 @@ lazy val root = Root(
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
-  // Extract RIDDL grammar by compiling and running ExtractGrammar
+  // Extract RIDDL grammar by compiling and running ExtractGrammar.
+  //
+  // CAUTION on this branch: the grammar in docs/ is RIDDL 2.0's, taken
+  // directly from riddl's release/2 branch at
+  //   language/src/main/resources/riddl/grammar/ebnf-grammar.ebnf
+  // because RIDDL 2.0 is not published yet and `With.Riddl.library` above
+  // still resolves 1.29.0. Running this task now would silently overwrite the
+  // 2.0 grammar with a 1.x one. Bump the library version to 2.0.0 first, then
+  // this task is once again the way to keep the grammar in sync.
   extractGrammar := {
     (Compile / compile).value
     val log = streams.value.log
