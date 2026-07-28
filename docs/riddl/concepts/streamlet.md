@@ -1,135 +1,142 @@
 ---
 title: "Streamlet"
 draft: false
+description: >-
+  The generic streaming processor, declared with the `processor` keyword and
+  an optional `as <shape>` ascription.
 ---
 
 A Streamlet is a [processor](processor.md) that handles streaming data flows.
 Streamlets are the building blocks for data pipelines, connecting sources of
 data to consumers through transformations.
 
-## Streamlet Types
-
-The type of a streamlet is determined by its inlets (inputs) and outlets
-(outputs):
-
-| Type | Inlets | Outlets | Description |
-|------|--------|---------|-------------|
-| Source | 0 | 1+ | Generates data (e.g., from external systems, timers) |
-| Sink | 1+ | 0 | Consumes data (e.g., writes to database, sends notifications) |
-| Flow | 1 | 1 | Transforms data from input to output |
-| Split | 1 | 2+ | Routes data from one input to multiple outputs |
-| Merge | 2+ | 1 | Combines data from multiple inputs to one output |
-| Router | 1+ | 1+ | Routes data based on content or rules |
-| Void | 0 | 0 | No data flow (placeholder or utility) |
-
-## Syntax
+In RIDDL 2.0 a streamlet is declared with the generic `processor` keyword and
+an optional shape ascription. The shape is otherwise **derived** from how many
+[inlets](inlet.md) and [outlets](outlet.md) the processor declares.
 
 ```riddl
-streamlet TemperatureProcessor is {
-  inlet readings of type TemperatureReading
-  outlet alerts of type TemperatureAlert
-  outlet metrics of type TemperatureMetric
+processor TemperatureProcessor as split is {
+  inlet readings is type TemperatureReading
+  outlet alerts is type TemperatureAlert
+  outlet metrics is type TemperatureMetric
 
   handler ProcessReading is {
-    on event TemperatureReading {
-      when "reading.value > threshold" then {
-        send event TemperatureAlert to outlet alerts
-      } end
-      send event TemperatureMetric to outlet metrics
+    on reading: event TemperatureReading {
+      when reading.value > AlertThreshold then
+        send event TemperatureAlert(reading.value) to outlet alerts
+      end
+      send event TemperatureMetric(reading.value) to outlet metrics
     }
   }
 }
 ```
 
-## Source Streamlets
+## Shapes
 
-Sources generate data without receiving input. They might:
+| Shape | Inlets | Outlets | Description | Synonym |
+|-------|--------|---------|-------------|---------|
+| `source` | 0 | 1+ | Generates data (external systems, timers) | |
+| `sink` | 1+ | 0 | Consumes data (database writes, notifications) | |
+| `flow` | 1 | 1 | Transforms data from input to output | `cascade` |
+| `merge` | 2+ | 1 | Combines data from several inputs into one | `fanin` |
+| `split` | 1 | 2+ | Routes data from one input to several outputs | `broadcast`, `fanout` |
+| `router` | 1 | 2+ | Routes data based on content or rules | |
+| `void` | 0 | 0 | No ports (placeholder or utility) | |
 
-- Poll external systems
-- Listen for external events
-- Generate data on timers
-- Read from files or databases
+!!! warning "The dedicated shape keywords are deprecated"
+    `source`, `sink`, `flow`, `merge`, `split` and `router` still parse as
+    standalone keywords, but each emits a `[deprecated]` message telling you to
+    write `processor <id> as <keyword>` instead. They are slated for removal in
+    3.0. Prettified output normalizes them, so running `riddlc prettify` over a
+    1.x model migrates them for you.
+
+## Sources
+
+Sources generate data without receiving input. They might poll external
+systems, listen for external events, generate data on timers, or read from
+files and databases.
 
 ```riddl
-streamlet OrderEventSource is {
-  outlet orders of type OrderEvent
+processor OrderEventSource as source is {
+  outlet orders is type OrderEvent
 
   handler GenerateEvents is {
     on init {
-      prompt "Subscribe to order queue and emit events"
+      do "Subscribe to order queue and emit events"
     }
   }
 }
 ```
 
-## Sink Streamlets
+## Sinks
 
-Sinks consume data without producing output. They might:
-
-- Write to databases
-- Send notifications
-- Update external systems
-- Log or archive data
+Sinks consume data without producing output. They might write to databases,
+send notifications, update external systems, or log and archive data.
 
 ```riddl
-streamlet NotificationSink is {
-  inlet notifications of type UserNotification
+processor NotificationSink as sink is {
+  inlet notifications is type UserNotification
 
   handler SendNotifications is {
     on event UserNotification {
-      prompt "Send notification via email or push"
+      do "Send notification via email or push"
     }
   }
 }
 ```
 
-## Flow Streamlets
+## Flows
 
-Flows transform data from one format to another:
+Flows transform data from one shape to another:
 
 ```riddl
-streamlet OrderEnricher is {
-  inlet rawOrders of type RawOrder
-  outlet enrichedOrders of type EnrichedOrder
+processor OrderEnricher as flow is {
+  inlet rawOrders is type RawOrder
+  outlet enrichedOrders is type EnrichedOrder
 
   handler EnrichOrder is {
-    on event RawOrder {
-      prompt "Look up customer details and product info"
-      send event EnrichedOrder to outlet enrichedOrders
+    on raw: event RawOrder {
+      do "Look up customer details and product info"
+      send event EnrichedOrder(raw.id) to outlet enrichedOrders
     }
   }
 }
 ```
 
-## Connecting Streamlets
+## Connecting Processors
 
-Streamlets are connected using [Connectors](connector.md) that link outlets
-to inlets:
+Processors are wired together with [Connectors](connector.md), which link an
+outlet to an inlet:
 
 ```riddl
 context DataPipeline is {
-  streamlet source is { ... }
-  streamlet transform is { ... }
-  streamlet sink is { ... }
+  processor Ingest    as source is { outlet events is type RawOrder }
+  processor Transform as flow   is {
+    inlet input is type RawOrder
+    outlet output is type EnrichedOrder
+  }
+  processor Store     as sink   is { inlet data is type EnrichedOrder }
 
-  connector SourceToTransform is {
-    from outlet source.events to inlet transform.input
-  }
-  connector TransformToSink is {
-    from outlet transform.output to inlet sink.data
-  }
+  connector IngestToTransform is
+    from outlet Ingest.events to inlet Transform.input
+  connector TransformToStore is
+    from outlet Transform.output to inlet Store.data
 }
 ```
 
+Exactly one connector may attach to any given port. To fan out, declare more
+outlets rather than more connectors. To discard output you genuinely do not
+need, route it to the [standard module's](standard-module.md) `BottomlessPit`.
+
 ## Use Cases
 
-- **Event Processing**: React to events in real-time
+- **Event Processing**: React to events in real time
 - **Data Integration**: Move data between systems
-- **ETL Pipelines**: Extract, transform, and load data
+- **ETL Pipelines**: Extract, transform and load data
 - **Monitoring**: Collect and process metrics
 - **Notifications**: Route alerts to appropriate channels
 
-## When to Use Streamlets vs. Entities
+## Streamlets vs. Entities
 
 | Use Case | Streamlet | Entity |
 |----------|-----------|--------|
@@ -142,11 +149,15 @@ context DataPipeline is {
 
 **Rule of thumb**: If you need to remember something between messages, use an
 Entity. If you're transforming or routing messages without persistent state,
-use a Streamlet.
+use a streaming processor.
+
+This is a question of *purpose*, not of capability: an entity may declare ports
+too, and often does — that is how it publishes its events into a stream.
 
 ## Occurs In
 
 * [Contexts](context.md)
+* Any other processor body
 
 ## Contains
 

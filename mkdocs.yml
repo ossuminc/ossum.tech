@@ -203,6 +203,7 @@ nav:
     - Concepts:
       - riddl/concepts/index.md
       - Root: riddl/concepts/root.md
+      - Module: riddl/concepts/module.md
       - Domain: riddl/concepts/domain.md
       - Context: riddl/concepts/context.md
       - Entity: riddl/concepts/entity.md
@@ -229,6 +230,7 @@ nav:
       - Inlet: riddl/concepts/inlet.md
       - Outlet: riddl/concepts/outlet.md
       - Connector: riddl/concepts/connector.md
+      - Standard Module: riddl/concepts/standard-module.md
       - Group: riddl/concepts/group.md
       - Input: riddl/concepts/input.md
       - Output: riddl/concepts/output.md
@@ -237,6 +239,8 @@ nav:
       - Statement: riddl/concepts/statement.md
       - Include: riddl/concepts/include.md
       - Author: riddl/concepts/author.md
+      - Version: riddl/concepts/version.md
+      - Copyright: riddl/concepts/copyright.md
       - Term: riddl/concepts/term.md
       - Comment: riddl/concepts/comment.md
       - Description: riddl/concepts/description.md
