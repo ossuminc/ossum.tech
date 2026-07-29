@@ -244,7 +244,8 @@ do "Calculate the total price including all applicable taxes, discounts,
 
 ### Code Statement
 
-Embed actual implementation code when necessary:
+RIDDL's deliberate **escape hatch**: an opaque pass-through of raw
+target-language source, handed to the code generator untouched.
 
 ````riddl
 ```scala
@@ -252,7 +253,25 @@ val total = items.map(_.price).sum * (1 - discountRate)
 ```
 ````
 
-Supported languages: `scala`, `java`, `python`, `mojo`
+Supported languages: `scala`, `java`, `python`, `mojo`. RIDDL does not parse
+or check the contents — everything between the fences is carried through
+verbatim.
+
+`code` is allowed in **every** statement scope, including pure
+[function](function.md) bodies and `on activate` / `on passivate`. It is also
+exempt from the [refusals-before-effects](#require-and-error) rule, being
+neither a refusal nor an effect.
+
+!!! warning "Using it opts out of the guarantees"
+    Those exemptions are not oversights: RIDDL cannot classify opaque source,
+    so it declines to guess rather than guessing wrong. But the rules exist to
+    buy something — a provably pure function, a lifecycle clause that provably
+    does not emit — and a `code` block suspends that for as long as it lasts,
+    while tying the model to one target language.
+
+    Prefer [`do "..."`](#do-statement) to describe intent and let the
+    generator implement it. Reach for `code` when a generator genuinely cannot
+    express what you need.
 
 ### Morph and Become (Entity Only)
 

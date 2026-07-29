@@ -59,6 +59,34 @@ Key facts to carry forward:
 - The local machine has mkdocs-material **Insiders**; CI installs
   the community edition. Do not use Insiders-only features.
 
+### Incoming tasks cleared (2026-07-28)
+
+All four `task/` files closed to `task/done/`.
+
+- **document-code-statement** — added a Code Statement section to the language
+  reference (it had none) and extended `concepts/statement.md` with the
+  escape-hatch semantics. Claims re-verified against the compiler.
+- **migration-guide-gaps** — findings real, **premise wrong**. All four
+  reported breakages fail identically under 1.31 *and* 2.0, and the grammars
+  are identical on each point, so none is a 1.x→2.0 change. Documented in the
+  language reference under a new "Common Parse Errors" section instead of the
+  migration guide, where they would have misled anyone upgrading from 1.31.
+  Item 4 routed to riddl.
+- **upgrade-riddl-1.13.1 / 1.13.3** — obsolete; `build.sbt` is on 1.29.0.
+
+Two things worth remembering from that work:
+
+- A user type named after a **parameterized** predefined (`Currency`,
+  `Decimal`, `Pattern`, `Id`) gives `Expected ("(")` at the **use site**,
+  arbitrarily far from the declaration. A **bare** one (`Location`) gives a
+  clear error at the declaration. That asymmetry is why `Currency` was hard to
+  diagnose.
+- The `code` statement's language tag is matched by **prefix**, so `javafoo`
+  and `pythonic` parse. Only `scala`/`java`/`python`/`mojo` are supported.
+
+Filed against riddl: `riddl/task/2026-07-28-grammar-questions-from-docs.md`
+(comment-with-`???`, and `command X()` leniency).
+
 ### Cross-repo dependency
 
 `riddl-models/task/2026-07-26-release2-syntax-migration.md` has an

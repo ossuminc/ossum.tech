@@ -1038,6 +1038,59 @@ target code.
     construct distinguished by its parentheses — it denotes a value computed by
     AI rather than an action described for a human.
 
+### Code Statement
+
+The `code` statement is RIDDL's deliberate **escape hatch**: an opaque
+pass-through of raw target-language source, handed to the code generator
+untouched.
+
+It is written as a fenced block with a language tag:
+
+````riddl
+```scala
+val total = items.map(_.price).sum * (1 - discountRate)
+```
+````
+
+The language tag must be one of exactly four: **`scala`**, **`java`**,
+**`python`**, **`mojo`**.
+
+RIDDL does not parse, check, or understand the contents. Everything between
+the fences is carried through verbatim.
+
+#### Where it is allowed
+
+Everywhere. Unlike every other statement, `code` is subject to none of the
+scope rules:
+
+| Rule | Applies to `code`? |
+|------|--------------------|
+| [Functions must be pure](#functions) | **No** — `code` is legal in a function body |
+| `on activate` / `on passivate` must be side-effect free | **No** — `code` is legal there |
+| [Refusals must precede effects](#refusals-before-effects) | **No** — `code` is neither, so it never trips the check |
+
+That is not an oversight. RIDDL cannot classify opaque source: it has no way
+to know whether a block of Scala writes state, sends a message, or computes a
+number, so it declines to guess rather than guessing wrong.
+
+!!! warning "Using it opts out of the guarantees"
+    Every rule above exists to give a model a property worth having — a
+    function that is provably pure, a lifecycle clause that provably does not
+    emit, a handler that provably refuses before it acts. A `code` block
+    suspends those guarantees for as long as it lasts, and it makes the model
+    specific to one target language.
+
+    That is a real trade and worth making deliberately. Prefer
+    [`do "..."`](#do-statement) to describe intent and let the generator
+    implement it; reach for `code` when a generator genuinely cannot express
+    what you need.
+
+!!! info "The tag is matched by prefix"
+    The parser matches the four tags as prefixes, so `javafoo` and `pythonic`
+    are currently accepted, with the surplus text treated as part of the code
+    body. Do not rely on this — only the four tags above are supported, and
+    the leniency may be tightened.
+
 ### Become Statement
 
 Switches the live handler of an entity:
@@ -1785,6 +1838,94 @@ addressed before considering a model ready for translation or code generation.
     containers.
 12. **Terminate Every Stream**: Every outlet needs a connector; route genuinely
     unused output to `BottomlessPit`.
+
+## Common Parse Errors
+
+Some mistakes produce an error that does not point at the thing that is
+wrong. These are the ones worth recognising by their symptom.
+
+### `Expected ("(")` at a field, far from any obvious cause
+
+You have named one of your own types after a **parameterized predefined
+type**. The parser reaches the reference, recognises the built-in name, and
+demands its argument list — so the error is reported at the *use*, which may be
+hundreds of lines from the declaration that caused it.
+
+```riddl
+type Currency is any of { USD, EUR, GBP, JPY }   // the actual cause
+// ...
+record Payment is {
+  amount: Currency                                // Expected ("(") reported HERE
+}
+```
+
+The fix is to rename your type — `CurrencyCode`, say.
+
+Predefined names whose parentheses are **required** produce this misleading
+form: `Currency`, `Decimal`, `Pattern`, `Id`. Naming a type after a **bare**
+predefined instead gives a clear, well-located error at the declaration —
+*"Type 'Location' redefines built-in type 'Location'"* — so those are easy.
+
+The full set of reserved type names:
+
+| Group | Names |
+|-------|-------|
+| Text | `String`, `Pattern`, `URL` |
+| Numeric | `Boolean`, `Integer`, `Natural`, `Whole`, `Number`, `Real`, `Decimal` |
+| Physical | `Current`, `Length`, `Luminosity`, `Mass`, `Mole`, `Temperature` |
+| Temporal | `Date`, `Time`, `DateTime`, `TimeStamp`, `Duration`, `ZonedDate`, `ZonedDateTime` |
+| Identity | `UUID`, `UserId`, `Id` |
+| Other | `Currency`, `Location`, `Nothing`, `Anything`, `Abstract` |
+
+Grep a model for these before you start if you are hunting an error of this
+shape.
+
+### `Expected one of ("*" | "+" | "," | …)` after a collection field
+
+You have written `many of X`. The collection prefix is **`many`** with no
+`of`:
+
+```riddl
+items: many ProductInfo     // correct
+items: ProductInfo*         // equivalent
+items: many of ProductInfo  // does not parse
+```
+
+`of` does belong to the *other* collection forms — `sequence of X`, `set of X`,
+`graph of X`, `mapping from K to V` — which is what makes `many of` such an
+easy slip.
+
+### `Expected one of ("(" | "yields")` at the `is` of a message
+
+The body is empty. RIDDL has no empty body; use the `???` placeholder:
+
+```riddl
+command Checkout is { ??? }   // correct
+command Checkout is {}        // does not parse
+```
+
+The error lands on `is` rather than on the braces, because the parser is still
+looking for what may follow the identifier.
+
+### `???` will not sit alongside anything else
+
+The placeholder is an *alternative* to a body's contents, not a member of them
+— `domain_body = domain_definitions | "???"` — so it cannot share a body with
+a comment, in either order:
+
+```riddl
+domain MyDomain is {
+  ???                       // fine
+}
+
+domain MyDomain is {
+  // Start building here
+  ???                       // does not parse
+}
+```
+
+Put explanatory prose in a `with { briefly … }` block, or in a comment
+*outside* the braces.
 
 ## Common Syntax Issues
 
