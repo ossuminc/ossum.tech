@@ -182,11 +182,30 @@ Options:
 
 ### flatten
 
-Resolve all includes into a single file:
+Collapse a multi-file model into a single file:
 
 ```bash
 riddlc flatten input-file.riddl -o output-file.riddl
 ```
+
+This removes every `include` and `import` node, promoting its children into
+the enclosing container. In RIDDL 2.0 it covers **both**: `import` nodes from
+`.bast` modules are flattened alongside `include` nodes from source files.
+
+!!! warning "Flattening is lossy, and is not a prerequisite for anything"
+    An `include` or `import` is a **node** in the model whose children are the
+    definitions it brought in. Passes traverse through it, so those definitions
+    already resolve, validate and generate exactly as if written in place. You
+    do **not** need to flatten to make a multi-file model work.
+
+    What flattening removes is the **origin**: after it, nothing records which
+    file or module a definition came from. That costs you the file attribution
+    in diagnostics and the ability to tell your own model apart from what it
+    imported.
+
+    Use it only when a single self-contained file is the actual goal — handing
+    one file to a tool that cannot follow includes, for instance — and keep the
+    unflattened model as the source of truth.
 
 ### stats
 

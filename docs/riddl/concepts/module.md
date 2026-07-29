@@ -88,12 +88,32 @@ An importable kind may be any of `domain`, `context`, `entity`, `type`, `epic`,
 
 ### Import versus Include
 
-[`include`](include.md) splices **source** text at the current location, and
-the parser rules are determined by the enclosing container.
-`import` loads **compiled** definitions from a binary module.
+[`include`](include.md) brings in **source** text, with the parser rules
+determined by the enclosing container. `import` brings in **compiled**
+definitions from a binary module.
 
-Loading populates the import directive only. Nothing is auto-spliced: a
-self-contained model requires an explicit flatten step.
+### Both Are Nodes in the Model
+
+An `include` and an `import` each become a **node** in the model, with the
+definitions they bring in as that node's children. Nothing is copied or
+spliced: traversal simply descends through the node, so the definitions
+inside participate exactly as if written in place. References to them resolve,
+validation covers them, and generators see them.
+
+The node also records where the content **came from**, which is what lets a
+diagnostic point at the right file and lets tooling tell your model apart from
+what it imported.
+
+!!! warning "Flattening is lossy — you rarely want it"
+    `riddlc flatten` removes those nodes, promoting their children into the
+    enclosing container. The definitions survive; the **origin does not**.
+    After flattening, nothing records that a definition came from another file
+    or another module.
+
+    Flattening is not a step in making a model work — it already works — and
+    it is not something to do routinely. Reach for it only when a single
+    self-contained file is the actual goal, such as handing one file to a tool
+    that cannot follow includes.
 
 ## Occurs In
 
