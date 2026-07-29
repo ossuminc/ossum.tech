@@ -355,11 +355,21 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 | Task | Command |
 |------|---------|
-| Install lexer | `pip install -e .` |
+| Install deps | `pip install -r requirements.txt && pip install -e .` |
 | Start dev server | `mkdocs serve` |
-| Build site | `mkdocs build` |
-| Check links | `mkdocs build --strict` |
-| Deploy | `mkdocs gh-deploy` |
+| Build site | `mkdocs build --strict` |
+| Check links **and anchors** | `mkdocs build --strict 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
+| Validate RIDDL examples | `python3 scripts/validate-riddl-examples.py $(which riddlc) docs/riddl/quickstart.md` |
+| Preview versioned site | `scripts/preview-versioned-site.sh` |
+| Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
+
+!!! note "This branch documents RIDDL 1.x"
+    Examples here must validate against the **1.31** `riddlc`, which is the
+    one on `PATH`. They will draw deprecations under a 2.0 compiler — that is
+    expected, and the 2.0 documentation lives on `main`.
+
+    `mkdocs build --strict` does NOT fail on dangling intra-page anchors; it
+    reports them at INFO and exits 0. Grep the output as shown above.
 
 ---
 
