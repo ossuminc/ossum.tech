@@ -9,6 +9,9 @@ description: >-
 This tutorial takes you from zero to a working RIDDL model. By the end, you'll
 have a simple e-commerce domain with a product catalog and shopping cart.
 
+Every example on this page is validated against the RIDDL compiler, so you can
+copy any of them and expect them to work.
+
 ---
 
 ## Step 1: Create Your First Domain
@@ -17,13 +20,15 @@ A **domain** is a knowledge boundary. Start with a file called `shop.riddl`:
 
 ```riddl
 domain OnlineShop is {
-  // Your model goes here
+  ???
 } with {
   briefly "A simple e-commerce system"
 }
 ```
 
-The `with` clause adds metadata. `briefly` is a short description.
+The `with` clause adds metadata. `briefly` is a short description. The `???`
+is RIDDL's placeholder for "not specified yet" — it lets an incomplete model
+still parse.
 
 ---
 
@@ -34,7 +39,7 @@ A **context** is a self-contained subsystem with its own terminology:
 ```riddl
 domain OnlineShop is {
   context Catalog is {
-    // Product management goes here
+    ???
   } with {
     briefly "Product catalog and inventory"
   }
@@ -45,13 +50,14 @@ domain OnlineShop is {
 
 ## Step 3: Define Types
 
-Types describe your data. Here's a product:
+Types describe your data. Here is a product:
 
+<!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
-  type ProductId is Id(Product)
+  type ProductId is Id(Catalog.Product)
 
-  type Product is {
+  record ProductInfo is {
     id is ProductId,
     name is String(1, 200),
     price is Decimal(10, 2),
@@ -59,11 +65,17 @@ context Catalog is {
   } with {
     briefly "A product available for purchase"
   }
+
+  entity Product is { ??? }
 }
 ```
 
-`Id(Product)` creates a type-safe identifier. `String(1, 200)` is a string
-between 1 and 200 characters.
+`Id(Catalog.Product)` creates an identifier tied to the `Product` entity.
+`String(1, 200)` is a string between 1 and 200 characters.
+
+Note this is a **`record`**, not a plain `type`. A record is aggregate-shaped
+data, and it is what an entity's state must be built from — which is exactly
+what Step 4 needs.
 
 ---
 
@@ -72,13 +84,150 @@ between 1 and 200 characters.
 An **entity** is something with identity that persists and responds to
 messages:
 
+<!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
-  type ProductId is Id(Product)
-  type Product is { ??? }  // defined above
+  type ProductId is Id(Catalog.Product)
+
+  record ProductInfo is {
+    id is ProductId,
+    name is String(1, 200),
+    price is Decimal(10, 2),
+    inStock is Boolean
+  }
+
+  command CreateProduct is {
+    name is String,
+    price is Decimal(10, 2)
+  }
+
+  event ProductCreated is {
+    id is ProductId,
+    name is String,
+    price is Decimal(10, 2),
+    at is TimeStamp
+  }
 
   entity Product is {
-    option event-sourced
+    outlet ProductEvents is event ProductCreated
+
+    initial state Active of record ProductInfo is {
+      handler Main is {
+        on command CreateProduct {
+          do "create the product with a new ID"
+          send event ProductCreated to outlet ProductEvents
+        }
+      }
+    }
+  } with {
+    option is event-sourced
+    briefly "A product in the catalog"
+  }
+}
+```
+
+Key concepts:
+
+- **Commands** request changes (imperative: `CreateProduct`)
+- **Events** record what happened (past tense: `ProductCreated`)
+- **State** holds the entity's data, and is always typed by a `record`
+- **Handlers** define behavior when messages arrive
+- **Outlets** are how an entity publishes its events into a stream
+
+Three details that are easy to get wrong:
+
+- **Options go in `with { }`**, not in the body. `option is event-sourced`
+  inside the entity body is a parse error.
+- **`do "..."`** describes work for a human or AI to implement later. A bare
+  quoted string on its own is not a statement.
+- **`initial`** marks the starting state. Without it the first state declared
+  wins, so reordering states would silently change behavior.
+
+---
+
+## Step 5: Add a Shopping Cart
+
+Let's add another context for shopping:
+
+<!-- riddl: in-domain -->
+```riddl
+context Catalog is {
+  type ProductId is Id(Catalog.Product)
+  entity Product is { ??? }
+}
+
+context Shopping is {
+  type CartId is Id(Shopping.Cart)
+
+  record CartItem is {
+    productId is Catalog.ProductId,
+    quantity is Integer,
+    price is Decimal(10, 2)
+  }
+
+  record CartState is {
+    items is CartItem*
+  }
+
+  command AddItem is {
+    productId is Catalog.ProductId,
+    quantity is Integer
+  }
+
+  event ItemAdded is {
+    cartId is CartId,
+    productId is Catalog.ProductId,
+    quantity is Integer,
+    at is TimeStamp
+  }
+
+  query GetContents is { cartId is CartId }
+  result CartContents is { items is CartItem* }
+
+  entity Cart is {
+    outlet CartEvents is event ItemAdded
+
+    initial state Active of record CartState is {
+      handler Main is {
+        on command AddItem {
+          do "add or update the item in the cart"
+          send event ItemAdded to outlet CartEvents
+        }
+        on query GetContents {
+          yield result CartContents
+        }
+      }
+    }
+  } with {
+    option is event-sourced
+  }
+}
+```
+
+Note: `CartItem*` means a list of zero or more items. You can reference types
+from other contexts with `Catalog.ProductId`.
+
+`yield` produces a query's answer without the handler needing to know who
+asked.
+
+---
+
+## Complete Example
+
+Here is the full model in one file:
+
+```riddl
+domain OnlineShop is {
+
+  context Catalog is {
+    type ProductId is Id(Catalog.Product)
+
+    record ProductInfo is {
+      id is ProductId,
+      name is String(1, 200),
+      price is Decimal(10, 2),
+      inStock is Boolean
+    }
 
     command CreateProduct is {
       name is String,
@@ -92,172 +241,77 @@ context Catalog is {
       at is TimeStamp
     }
 
-    state Active is {
-      fields {
-        info is Product
-      }
-      handler Main is {
-        on command CreateProduct {
-          "create the product with a new ID"
-          send event ProductCreated to outlet Events
-        }
-      }
-    }
-  } with {
-    briefly "A product in the catalog"
-  }
-}
-```
-
-Key concepts:
-
-- **Commands** request changes (imperative: `CreateProduct`)
-- **Events** record what happened (past tense: `ProductCreated`)
-- **State** holds the entity's data
-- **Handlers** define behavior when messages arrive
-
----
-
-## Step 5: Add a Shopping Cart
-
-Let's add another context for shopping:
-
-```riddl
-domain OnlineShop is {
-  context Catalog is { ??? }  // from above
-
-  context Shopping is {
-    type CartId is Id(Cart)
-    type CartItem is {
-      productId is Catalog.ProductId,
-      quantity is Integer,
-      price is Decimal(10, 2)
-    }
-
-    entity Cart is {
-      option event-sourced
-
-      command AddItem is {
-        productId is Catalog.ProductId,
-        quantity is Integer
-      }
-
-      event ItemAdded is {
-        cartId is CartId,
-        productId is Catalog.ProductId,
-        quantity is Integer,
-        at is TimeStamp
-      }
-
-      query GetContents is { cartId is CartId }
-      result CartContents is { items is CartItem* }
-
-      state Active is {
-        fields {
-          items is CartItem*
-        }
-        handler Main is {
-          on command AddItem {
-            "add or update item in cart"
-            send event ItemAdded to outlet Events
-          }
-          on query GetContents {
-            yield result CartContents
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-Note: `CartItem*` means a list of zero or more items. You can reference types
-from other contexts with `Catalog.ProductId`.
-
----
-
-## Complete Example
-
-Here's the full model in one file:
-
-```riddl
-domain OnlineShop is {
-
-  context Catalog is {
-    type ProductId is Id(Product)
-    type Product is {
-      id is ProductId,
-      name is String(1, 200),
-      price is Decimal(10, 2),
-      inStock is Boolean
-    }
-
     entity Product is {
-      option event-sourced
+      outlet ProductEvents is event ProductCreated
 
-      command CreateProduct is {
-        name is String,
-        price is Decimal(10, 2)
-      }
-
-      event ProductCreated is {
-        id is ProductId,
-        name is String,
-        price is Decimal(10, 2),
-        at is TimeStamp
-      }
-
-      state Active is {
-        fields { info is Product }
+      initial state Active of record ProductInfo is {
         handler Main is {
           on command CreateProduct {
-            "create the product with a new ID"
-            send event ProductCreated to outlet Events
+            do "create the product with a new ID"
+            send event ProductCreated to outlet ProductEvents
           }
         }
+      } with {
+        briefly "The live product record"
       }
+    } with {
+      option is event-sourced
+      briefly "A product in the catalog"
     }
+  } with {
+    briefly "Product catalog and inventory"
   }
 
   context Shopping is {
-    type CartId is Id(Cart)
-    type CartItem is {
+    type CartId is Id(Shopping.Cart)
+
+    record CartItem is {
       productId is Catalog.ProductId,
       quantity is Integer,
       price is Decimal(10, 2)
     }
 
+    record CartState is {
+      items is CartItem*
+    }
+
+    command AddItem is {
+      productId is Catalog.ProductId,
+      quantity is Integer
+    }
+
+    event ItemAdded is {
+      cartId is CartId,
+      productId is Catalog.ProductId,
+      quantity is Integer,
+      at is TimeStamp
+    }
+
+    query GetContents is { cartId is CartId }
+    result CartContents is { items is CartItem* }
+
     entity Cart is {
-      option event-sourced
+      outlet CartEvents is event ItemAdded
 
-      command AddItem is {
-        productId is Catalog.ProductId,
-        quantity is Integer
-      }
-
-      event ItemAdded is {
-        cartId is CartId,
-        productId is Catalog.ProductId,
-        quantity is Integer,
-        at is TimeStamp
-      }
-
-      query GetContents is { cartId is CartId }
-      result CartContents is { items is CartItem* }
-
-      state Active is {
-        fields { items is CartItem* }
+      initial state Active of record CartState is {
         handler Main is {
           on command AddItem {
-            "add or update item in cart"
-            send event ItemAdded to outlet Events
+            do "add or update the item in the cart"
+            send event ItemAdded to outlet CartEvents
           }
           on query GetContents {
             yield result CartContents
           }
         }
+      } with {
+        briefly "The live cart contents"
       }
+    } with {
+      option is event-sourced
+      briefly "A customer's shopping cart"
     }
+  } with {
+    briefly "Shopping cart management"
   }
 
 } with {
@@ -285,6 +339,10 @@ For other platforms, see the [installation guide](tools/riddlc/installation.md).
 riddlc validate shop.riddl
 ```
 
+A clean model exits 0. RIDDL also reports non-fatal findings — style, missing
+descriptions, completeness — which are worth reading even when the model
+validates.
+
 You can also get real-time validation in your editor with RIDDL IDE support:
 
 - [VS Code Extension](../OSS/vscode-extension/index.md)
@@ -311,12 +369,17 @@ You've built a working RIDDL model! Here's where to go from here:
 
 | Concept | Purpose | Example |
 |---------|---------|---------|
-| `domain` | Knowledge boundary | `domain Shop is { ... }` |
-| `context` | Bounded subsystem | `context Catalog is { ... }` |
-| `type` | Data shape | `type Product is { name is String }` |
-| `entity` | Stateful object | `entity Cart is { ... }` |
-| `command` | Request to change | `command AddItem is { ... }` |
-| `event` | Record of change | `event ItemAdded is { ... }` |
-| `query` | Request for info | `query GetContents is { ... }` |
-| `state` | Entity's data | `state Active is { fields { ... } }` |
-| `handler` | Message behavior | `handler Main is { on command ... }` |
+| `domain` | Knowledge boundary | `domain Shop is { ??? }` |
+| `context` | Bounded subsystem | `context Catalog is { ??? }` |
+| `type` | Data shape | `type Name is String(1, 80)` |
+| `record` | Aggregate data | `record Info is { name is String }` |
+| `entity` | Stateful object | `entity Cart is { ??? }` |
+| `command` | Request to change | `command AddItem is { qty is Integer }` |
+| `event` | Record of change | `event ItemAdded is { at is TimeStamp }` |
+| `query` | Request for info | `query GetContents is { id is CartId }` |
+| `result` | Answer to a query | `result Contents is { items is Item* }` |
+| `state` | Entity's data | `state Active of record Info` |
+| `handler` | Message behavior | `handler Main is { on command X { ??? } }` |
+| `outlet` | Publishes events | `outlet CartEvents is event ItemAdded` |
+| `do` | Describe work to do | `do "recalculate the total"` |
+| `yield` | Answer a query | `yield result Contents` |
