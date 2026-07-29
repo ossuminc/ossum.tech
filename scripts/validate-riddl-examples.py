@@ -10,6 +10,7 @@ readers.
     <!-- riddl: standalone -->        a complete model; validate as-is (default)
     <!-- riddl: in-domain -->         wrap in `domain Example is { ... }`
     <!-- riddl: in-context -->        wrap in a domain AND a context
+    <!-- riddl: in-entity -->         wrap in a domain, context AND entity
     <!-- riddl: skip -->              not RIDDL, or deliberately invalid
     <!-- riddl: skip reason=... -->   same, with the reason recorded
 
@@ -58,6 +59,11 @@ def directive_for(text: str, fence_start: int) -> tuple[str, str]:
 
 def wrap(kind: str, body: str, prelude: str) -> str:
     body = body.rstrip()
+    if kind == "in-entity":
+        inner = "\n".join("      " + ln if ln.strip() else ln for ln in body.split("\n"))
+        pre = "\n".join("    " + ln for ln in prelude.strip().split("\n")) if prelude.strip() else ""
+        return (f"domain Example is {{\n  context Example is {{\n{pre}\n"
+                f"    entity Example is {{\n{inner}\n    }}\n  }}\n}}\n")
     if kind == "in-context":
         inner = "\n".join("    " + ln if ln.strip() else ln for ln in body.split("\n"))
         pre = "\n".join("    " + ln for ln in prelude.strip().split("\n")) if prelude.strip() else ""
@@ -100,7 +106,9 @@ def main() -> int:
     if len(sys.argv) < 3:
         print(__doc__)
         return 2
-    riddlc, files = sys.argv[1], sys.argv[2:]
+    args = [a for a in sys.argv[1:] if a != "--auto"]
+    auto = "--auto" in sys.argv
+    riddlc, files = args[0], args[1:]
 
     total = skipped = failed = 0
     for f in files:
@@ -111,11 +119,24 @@ def main() -> int:
         for fm in FENCE.finditer(text):
             line = text[: fm.start()].count("\n") + 1
             kind, rest = directive_for(text, fm.start())
+            if auto and kind == "standalone":
+                kind = "auto"
             if kind == "skip":
                 skipped += 1
                 continue
             total += 1
-            ok, detail = validate(riddlc, wrap(kind, fm.group("body"), prelude))
+            if kind == "auto":
+                # Try each wrapping; a fence that fits ANY of them is a
+                # fragment needing context, not a broken example. Used to
+                # measure how many fences are genuinely wrong on pages that
+                # do not yet carry directives.
+                ok, detail = False, ""
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity"):
+                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), prelude))
+                    if ok:
+                        break
+            else:
+                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), prelude))
             if not ok:
                 failed += 1
                 print(f"\nFAIL {md}:{line}  (riddl: {kind})")

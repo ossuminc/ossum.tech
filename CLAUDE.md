@@ -168,6 +168,57 @@ Counter-examples are suppressed by a trailing comment on the offending line —
 `// fails to parse`, `// invalid`, `// deprecated` — so a page can teach a rule
 by showing what it forbids.
 
+### Compiling RIDDL examples
+
+`scripts/validate-riddl-examples.py` runs each ` ```riddl ` fence through a
+**real riddlc**, which is the only way to know an example works. Unlike the
+checker above it is a **gate**: it exits non-zero on failure.
+
+```bash
+# 2.0 (this branch) -- the release/2 build
+python3 scripts/validate-riddl-examples.py ../bin/riddlc docs/riddl/quickstart.md
+
+# 1.31 (docs/1.x branch) -- the riddlc on PATH
+python3 scripts/validate-riddl-examples.py "$(which riddlc)" docs/riddl/quickstart.md
+```
+
+Most fences are **fragments** and cannot validate as written, so each declares
+how to be made whole with an HTML comment above it. HTML comments do not
+render, so readers never see them:
+
+| Directive | Wraps the fence in |
+|-----------|--------------------|
+| `<!-- riddl: standalone -->` | nothing — a complete model (the default) |
+| `<!-- riddl: in-domain -->` | `domain Example is { … }` |
+| `<!-- riddl: in-context -->` | a domain and a context |
+| `<!-- riddl: in-entity -->` | a domain, context and entity |
+| `<!-- riddl: skip -->` | not validated |
+
+A page may declare a `<!-- riddl-prelude ... -->` block of definitions that its
+fragments reference but do not show.
+
+`--auto` tries every wrapping and reports a fence only if none works. It is a
+*measurement* mode for pages that do not yet carry directives — not a
+substitute for them.
+
+**Status**: `quickstart.md` is fully annotated and validates clean on both
+branches. The ~50 concept pages are not yet annotated; with `--auto`, 99 of
+their 120 fences still fail, dominated by fragments that reference definitions
+they deliberately do not show and so need a per-page prelude. That is a
+known gap, not a claim that those examples are wrong.
+
+**Version differences that matter for examples** (verified against both
+compilers):
+
+| Construct | 1.31 | 2.0 |
+|-----------|------|-----|
+| `state S of record R` | ✅ | ✅ — use this in both |
+| `do "..."` | ✅ | ✅ — use this in both |
+| `option is X` in `with { }` | ✅ | ✅ — never in the body |
+| `initial state` / `initial handler` | ❌ | ✅ |
+| query response | `reply` | `yield` (`reply` deprecated) |
+| outlet on an entity | ❌ — put it on a `source` | ✅ |
+
 ### RIDDL Syntax Highlighting
 
 The `riddl_lexer/` package provides custom Pygments syntax highlighting for
@@ -430,7 +481,8 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 | Build site | `mkdocs build --strict` |
 | Check links **and anchors** | `mkdocs build --strict 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py docs` |
-| Preview versioned site | `mike serve` |
+| Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc docs/riddl/quickstart.md` |
+| Preview versioned site | `scripts/preview-versioned-site.sh` |
 | Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
 
 ---
