@@ -11,6 +11,161 @@ to the task file and note completion in this notebook.
 
 ---
 
+## RESUME HERE — open work as of 2026-07-30
+
+Everything below survives a session restart. The RIDDL 2.0 documentation is
+**shipped and live**; what remains is two pieces of follow-up work.
+
+### Where things stand
+
+| Branch | State |
+|--------|-------|
+| `main` | RIDDL 2.0 docs, publishes as mike version `2.0` alias `next` |
+| `docs/1.x` | RIDDL 1.31 docs, publishes as `1.31` alias `latest` |
+| `gh-pages` | restructured and live; flat pre-versioning site removed |
+
+All three pushed and in sync. Backup branch `gh-pages-preversioning` is on the
+remote; rollback is
+`git push --force origin gh-pages-preversioning:gh-pages`.
+
+**Which compiler to use** — this bites immediately:
+
+```bash
+# 2.0 work (main / release/2)
+riddlc                                          # PATH = riddlc-rc 2.0.0-rc.1
+# 1.x work (docs/1.x)
+/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc   # NOT $(which riddlc)
+```
+
+`riddlc-rc` declares `conflicts_with "riddlc"`, so installing the RC took over
+the PATH symlink. Validating 1.x docs with the PATH binary reports false
+failures (3 on that Quickstart, all correct-for-1.31 deprecations).
+
+---
+
+### TASK A — mermaid DAG + per-scope mini-diagrams
+
+**Decided 2026-07-30:** do both.
+
+1. Replace the ASCII hierarchy diagram on `docs/riddl/concepts/index.md` with a
+   **mermaid flowchart** of the containment DAG.
+2. On each definition's concept page, replace the prose `## Contains` list with
+   a **small per-scope mermaid mini-diagram**.
+
+**Prerequisite — mermaid is not enabled.** `mkdocs.yml` has no mermaid fence.
+Add under `pymdownx.superfences`:
+
+```yaml
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+```
+
+mkdocs-material renders ```` ```mermaid ```` natively once that fence exists.
+This is deferred item 2.5 further down this file.
+
+**Why a DAG, not a tree.** Saga and Connector occur at *two* scopes (Domain and
+Context), processors nest, Groups nest. A tree cannot state containment
+honestly — which is part of how the ASCII diagram drifted. Use dashed edges for
+conditionally-scoped placements (Repository and Connector at Domain scope only
+when they span contexts).
+
+**The 13 errors in the current diagram**, each verified against
+`docs/riddl/references/riddl-grammar.ebnf`:
+
+| # | Wrong | Correct |
+|---|-------|---------|
+| 1 | Case → Statement | Case → **Interaction** |
+| 2 | "Processor" *and* "Streamlet" separately | one concept — show **Processor** |
+| 3 | Repository absent from Context | `context_definition` includes it |
+| 4 | Repository/Connector absent at Domain | `domain_content` includes both (conditional) |
+| 5 | Domain shows only Context, Epic, Type | + nested Domain, user, saga, author, version, copyright, import, include |
+| 6 | Root shows only Domain | + module, author, version, copyright, import, include |
+| 7 | Module absent | top-level container, unit of reuse |
+| 8 | State → Handler only | + **Invariant** |
+| 9 | Inlet/Outlet absent | every processor bears ports — **and so does a Saga** |
+| 10 | Version/Copyright absent | nine scopes; **not** saga, **not** function |
+| 11 | Connector absent | `domain_content` *and* `processor_definition_contents` |
+| 12 | Saga only under Context | also `domain_content` |
+| 13 | Relationship absent | `processor_definition_contents` |
+
+**Verify against the GRAMMAR, never against the old picture.** The containment
+*table* on that page was corrected in `e4cda9d` and is trustworthy; the diagram
+above it is not.
+
+Grammar rules to read: `root_content`, `root_definition`, `module_content`,
+`domain_content`, `context_definition`, `entity_content`, `state_content`,
+`processor_definition_contents`, `vital_definition_contents`,
+`saga_definitions`, `epic_definitions`, `use_case`, `interactions`,
+`group_definitions`, `function_definitions`, `repository_definitions`,
+`projector_definitions`, `adaptor_contents`.
+
+Confirm the mermaid actually *renders* — `scripts/preview-versioned-site.sh`
+and look at the page. A missing fence registration shows it as a code block,
+and `--strict` will not complain.
+
+---
+
+### TASK B — the last 60 example fences (best effort)
+
+Current baseline, from `main`:
+
+```
+137 validated, 145 skipped, 60 failed
+```
+
+By page: `guides/authors/index.md` 18, `introduction/what-conventions-does-riddl-use.md`
+8, `guides/authors/design/ui-modeling.md` 5, `concepts/user.md` 4, then ones and
+twos.
+
+The automatable classes are exhausted. Each remaining fence needs its own
+judgement: a page-prelude entry of the right *kind*, a split, or a `skip` with
+a reason.
+
+**Tooling** (all in `scripts/`, all take the riddlc path as argv[1]):
+
+| Script | Does |
+|--------|------|
+| `validate-riddl-examples.py` | the gate. Uses each fence's declared directive — **most reliable error messages** |
+| `annotate-riddl-examples.py` | tries every wrapper, writes the first that validates |
+| `triage-riddl-examples.py` | three-way split; `--apply` auto-skips resolution-only failures |
+| `suggest-riddl-prelude.py` | lists missing names |
+| `check-riddl-blocks.py` | advisory scan for retired 1.x constructs |
+
+Ten wrappers exist: `standalone`, `in-domain`, `in-context`, `in-entity`,
+`in-handler`, `in-clauses`, `in-usecase`, `in-application`, `in-function`,
+`in-record`.
+
+**Traps, all learned the hard way:**
+
+- `suggest-riddl-prelude.py` guesses *kinds* badly — riddlc says "should refer
+  to a Type" for messages too, so `OrderPlaced` must be declared an `event`.
+  Take the names, supply the kinds yourself.
+- A page prelude must be **self-contained**. Never reference a
+  wrapper-synthetic name (`ExampleEntity`, `ExampleCommand`) — every fence then
+  fails *on the prelude*, and the errors point at lines that look fine.
+- A prelude is **not** injected into `standalone` fences: context-level
+  definitions are illegal at root and would break the fences needing no help.
+- `mkdocs build --strict` does **not** fail on dangling intra-page anchors. Always
+  `mkdocs build --strict 2>&1 | grep -E 'anchor|WARNING|ERROR'`.
+
+Not a merge blocker: prose and syntax are correct and separately checked.
+The CI gate stays off until this reaches zero.
+
+---
+
+### Also open
+
+- **When 2.0 ships final:** `scripts/promote-2.0-to-latest.md`. Do not
+  improvise — there is a silent-revert hazard if both branches declare
+  `latest`.
+- `sbt extractGrammar` still resolves the *published* riddl library and would
+  overwrite the 2.0 grammar. `build.sbt` warns at the task.
+
+---
+
 ## Current Status
 
 Documentation site is deployed at https://ossum.tech. All major
@@ -117,44 +272,11 @@ Two traps learned here, both recorded in CLAUDE.md:
   to origin/gh-pages"). Sync the branch; never reach for
   `--ignore-remote-status`, which clobbers the remote.
 
-### Open: the Concepts hierarchy diagram is wrong for 2.0
+### Concepts hierarchy diagram
 
-`docs/riddl/concepts/index.md`'s ASCII hierarchy diagram was **not** updated
-when the containment table below it was rewritten, so the page now contradicts
-itself. All of the following was verified against
-`docs/riddl/references/riddl-grammar.ebnf`, not inferred:
-
-| # | Wrong | Should be |
-|---|-------|-----------|
-| 1 | Case → Statement | Case → **Interaction** (`interactions = {interaction \| comment}`) |
-| 2 | "Processor" *and* "Streamlet" as separate children | one concept — `streamlet = source\|sink\|…\|processor` |
-| 3 | Repository absent from Context | `context_definition` includes it |
-| 4 | Repository/Connector absent at Domain scope | `domain_content` includes both, when they span contexts |
-| 5 | Domain shows only Context, Epic, Type | also domain (nesting), user, saga, author, version, copyright, import, include |
-| 6 | Root shows only Domain | also module, author, version, copyright, import, include |
-| 7 | Module absent entirely | it is a top-level container and the unit of reuse |
-| 8 | State → Handler only | `state_content = handler \| invariant \| comment` |
-| 9 | Inlet/Outlet absent | in `processor_definition_contents` — **every** processor bears ports |
-| 10 | Version/Copyright absent | nine scopes each |
-| 11 | Connector absent | `domain_content` *and* `processor_definition_contents` |
-| 12 | Saga only under Context | also `domain_content` |
-| 13 | Relationship absent | `processor_definition_contents` |
-
-**Why ASCII cannot be made right:** containment is a **DAG, not a tree** — Saga
-and Connector appear at two scopes and processors nest. The current picture is
-wrong partly because a tree cannot express that.
-
-Diagram options (user is open to ideas):
-
-- **Mermaid flowchart** — needs mermaid enabled in `mkdocs.yml` superfences
-  (deferred item 2.5 below, never done). Can show the DAG, with dashed edges
-  for conditionally-scoped placements. Renders natively.
-- **Small per-scope diagrams** rather than one mega-diagram — easier to read
-  and to keep correct.
-- **Drop the diagram**; the table beneath it is already accurate and complete.
-
-Verify any replacement against the grammar rules above, not against the old
-picture.
+Superseded — see **TASK A** in the RESUME HERE section at the top of this
+file, which carries the decision (mermaid DAG + per-scope mini-diagrams) and
+the full list of errors.
 
 ### Cross-repo dependency
 
