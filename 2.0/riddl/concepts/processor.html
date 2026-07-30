@@ -6513,8 +6513,11 @@ port-bearing, may carry a streaming shape, and may declare a
 <div class="admonition info">
 <p class="admonition-title">Saga and Function are not processors</p>
 <p>A <a href="saga.html">Saga</a> and a <a href="function.html">Function</a> extend the
-<a href="vital.html">vital definition</a> base rather than Processor. They bear no
-ports, no version and no copyright.</p>
+<a href="vital.html">vital definition</a> base rather than Processor, so neither takes a
+<a href="version.html">version</a> or a <a href="copyright.html">copyright</a>.</p>
+<p>A Saga does, however, bear <a href="inlet.html">inlets</a> and <a href="outlet.html">outlets</a> —
+being a coordinator, it has messages to receive and emit. A Function does
+not.</p>
 </div>
 <h2 id="the-processor-keyword">The <code>processor</code> Keyword<a class="headerlink" href="#the-processor-keyword" title="Permanent link">&para;</a></h2>
 <p>The generic streaming processor is declared with the <code>processor</code> keyword and an

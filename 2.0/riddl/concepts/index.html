@@ -6556,7 +6556,7 @@ easier to comprehend, we've taken some short-cuts :</p>
 <tbody>
 <tr>
 <td><a href="root.html"><strong>Root</strong></a></td>
-<td><a href="domain.html">Domain</a>, <a href="module.html">Module</a>, <a href="author.html">Author</a>, <a href="version.html">Version</a>, <a href="copyright.html">Copyright</a></td>
+<td><a href="domain.html">Domain</a>, <a href="module.html">Module</a>, <a href="author.html">Author</a>, <a href="version.html">Version</a>, <a href="copyright.html">Copyright</a>, <a href="include.html">Include</a>, Import</td>
 </tr>
 <tr>
 <td><a href="module.html"><strong>Module</strong></a></td>
@@ -6564,11 +6564,11 @@ easier to comprehend, we've taken some short-cuts :</p>
 </tr>
 <tr>
 <td><a href="domain.html"><strong>Domain</strong></a></td>
-<td><a href="type.html">Type</a>, <a href="epic.html">Epic</a>, <a href="context.html">Context</a>, <a href="saga.html">Saga</a>, <a href="user.html">User</a>, <a href="author.html">Author</a>, <a href="repository.html">Repository</a>†, <a href="connector.html">Connector</a>†, <a href="version.html">Version</a>, <a href="copyright.html">Copyright</a></td>
+<td><a href="type.html">Type</a>, <a href="epic.html">Epic</a>, <a href="context.html">Context</a>, <a href="domain.html">Domain</a> (nested), <a href="saga.html">Saga</a>, <a href="user.html">User</a>, <a href="author.html">Author</a>, <a href="repository.html">Repository</a>†, <a href="connector.html">Connector</a>†, <a href="version.html">Version</a>, <a href="copyright.html">Copyright</a>, <a href="include.html">Include</a>, Import</td>
 </tr>
 <tr>
 <td><a href="epic.html"><strong>Epic</strong></a></td>
-<td><a href="use-case.html">Case</a> → <a href="interaction.html">Interaction</a></td>
+<td><a href="use-case.html">Case</a> → <a href="interaction.html">Interaction</a>, <a href="type.html">Type</a>, <code>shown by</code>, <a href="include.html">Include</a></td>
 </tr>
 <tr>
 <td><a href="context.html"><strong>Context</strong></a></td>
@@ -6588,7 +6588,7 @@ easier to comprehend, we've taken some short-cuts :</p>
 </tr>
 <tr>
 <td><a href="saga.html"><strong>Saga</strong></a></td>
-<td><a href="type.html">Type</a>, <a href="sagastep.html">SagaStep</a> → <a href="statement.html">Statement</a></td>
+<td><a href="sagastep.html">SagaStep</a> → <a href="statement.html">Statement</a>, <a href="inlet.html">Inlet</a>, <a href="outlet.html">Outlet</a>, <a href="function.html">Function</a>, <a href="include.html">Include</a></td>
 </tr>
 <tr>
 <td><a href="adaptor.html"><strong>Adaptor</strong></a></td>
@@ -6599,12 +6599,12 @@ easier to comprehend, we've taken some short-cuts :</p>
 <td>Schema, + <em>processor contents</em></td>
 </tr>
 <tr>
-<td><a href="streamlet.html"><strong>Streamlet</strong></a></td>
+<td><a href="processor.html"><strong>Processor</strong></a></td>
 <td><em>processor contents</em></td>
 </tr>
 <tr>
 <td><a href="function.html"><strong>Function</strong></a></td>
-<td><a href="statement.html">Statement</a>, <a href="field.html">Field</a></td>
+<td><a href="statement.html">Statement</a>, <a href="type.html">Type</a>, <a href="function.html">Function</a> (nested), <a href="include.html">Include</a></td>
 </tr>
 <tr>
 <td><a href="handler.html"><strong>Handler</strong></a></td>
@@ -6612,7 +6612,7 @@ easier to comprehend, we've taken some short-cuts :</p>
 </tr>
 <tr>
 <td><a href="group.html"><strong>Group</strong></a></td>
-<td><a href="group.html">Group</a>, <a href="input.html">Input</a>, <a href="output.html">Output</a>, <a href="type.html">Type</a></td>
+<td><a href="group.html">Group</a> (nested), <code>contains</code>, <a href="input.html">Input</a>, <a href="output.html">Output</a>, <code>shown by</code></td>
 </tr>
 <tr>
 <td><a href="invariant.html"><strong>Invariant</strong></a></td>

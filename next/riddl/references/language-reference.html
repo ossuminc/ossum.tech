@@ -9021,8 +9021,9 @@ inlets and outlets, and may carry an ascribed streaming shape:</p>
 </ul>
 <p>A <strong>Saga</strong> orchestrates multi-step processes with compensation logic for
 failure recovery. A <strong>Function</strong> defines a pure, reusable computation. Neither
-is a processor: both extend the vital-definition base instead, so neither bears
-ports, a version, or a copyright.</p>
+is a processor — both extend the vital-definition base — so neither takes a
+version or a copyright. A Saga does nonetheless bear inlets and outlets, being
+a coordinator with messages to receive and emit; a Function does not.</p>
 <p>All processors can contain handlers, functions, types, constants, invariants,
 ports, and other processor-specific definitions.</p>
 <h3 id="streaming-shapes">Streaming Shapes<a class="headerlink" href="#streaming-shapes" title="Permanent link">&para;</a></h3>
