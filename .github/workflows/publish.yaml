@@ -2,11 +2,11 @@ name: publishing
 on:
   push:
     branches:
-      # Each publishing branch declares the version it deploys as in
-      # docs-version.yml. release/2 is deliberately absent: work in progress
-      # must not refresh the production site.
-      - main        # RIDDL 2.0 documentation
-      - docs/1.x    # RIDDL 1.x maintenance line
+      # Each publishing branch declares what it publishes in docs-version.yml.
+      # Work branches are deliberately absent: work in progress must not
+      # refresh the production site.
+      - main        # the shell, RIDDL 2.0, riddlg, Synapify
+      - docs/1.x    # RIDDL 1.x maintenance line only
 permissions:
   contents: write
 jobs:
@@ -34,20 +34,70 @@ jobs:
             mkdocs-material-
       - run: pip install -r requirements.txt
       - run: pip install -e .
-      - name: Read the documentation version for this branch
+
+      # Shared logos and CSS live once in common/ and are copied into each
+      # sub-site's docs tree. The copies are gitignored, so this is required
+      # before any build -- without it every page loses its stylesheet.
+      - name: Sync shared assets
+        run: ./scripts/sync-shared-assets.sh
+
+      # Cross-site links are absolute, so MkDocs treats them as external and
+      # never checks them. --strict proves the intra-site links; this proves
+      # the rest. Run before deploying anything.
+      - name: Check cross-site links
+        run: python3 scripts/check-cross-site-links.py
+
+      - name: Deploy each versioned sub-site
         run: |
-          python - <<'PY' >> "$GITHUB_ENV"
-          import yaml
+          python - <<'PY' > /tmp/deploy.sh
+          import yaml, shlex
           cfg = yaml.safe_load(open("docs-version.yml"))
-          print(f"DOCS_VERSION={cfg['version']}")
-          print(f"DOCS_ALIASES={' '.join(cfg.get('aliases') or [])}")
+          for s in cfg.get("sites") or []:
+              url = f"https://ossum.tech/{s['prefix']}/{s['version']}/"
+              args = " ".join(shlex.quote(a) for a in (s.get("aliases") or []))
+              # --alias-type copy is REQUIRED, not a preference. mike's default
+              # is `symlink`, and GitHub Pages does not serve symlinked content
+              # -- so /riddl/latest/... would 404 in production while working
+              # perfectly under a local `python -m http.server`, which DOES
+              # follow symlinks. A passing local rehearsal cannot catch it.
+              print(f"echo '--> {s['prefix']} {s['version']} [{args}]'")
+              print(f"DOCS_SITE_URL={shlex.quote(url)} mike deploy --push "
+                    f"--update-aliases --alias-type copy "
+                    f"--deploy-prefix {shlex.quote(s['prefix'])} "
+                    f"-F {shlex.quote(s['config'])} "
+                    f"{shlex.quote(s['version'])} {args}")
+              # Point <prefix>/index.html at this product's default alias.
+              # NEVER run set-default without --deploy-prefix: it would write a
+              # redirect over the shell's index.html at the site root.
+              default = (s.get("aliases") or [s["version"]])[0]
+              print(f"mike set-default --push --deploy-prefix "
+                    f"{shlex.quote(s['prefix'])} {shlex.quote(default)}")
           PY
-      - name: Deploy with mike
+          cat /tmp/deploy.sh
+          bash -euo pipefail /tmp/deploy.sh
+
+      # The shell is not versioned, so mike is not involved. It is built and
+      # committed to the gh-pages root, touching only the paths it owns --
+      # never the product prefixes or their versions.json.
+      - name: Deploy the unversioned shell
         run: |
-          echo "Publishing version $DOCS_VERSION with aliases: $DOCS_ALIASES"
-          # --alias-type copy is REQUIRED, not a preference. mike's default is
-          # `symlink`, and GitHub Pages does not follow symlinks -- so
-          # /latest/... would 404 in production while working perfectly under a
-          # local `python -m http.server`, which does follow them.
-          mike deploy --push --update-aliases --alias-type copy \
-            "$DOCS_VERSION" $DOCS_ALIASES
+          SHELL_CFG=$(python -c "import yaml;c=yaml.safe_load(open('docs-version.yml'));print((c.get('shell') or {}).get('config',''))")
+          if [ -z "$SHELL_CFG" ]; then
+            echo "This branch does not publish the shell; skipping."
+            exit 0
+          fi
+          DOCS_SITE_URL=https://ossum.tech/ mkdocs build -f "$SHELL_CFG" -d /tmp/shell
+          git fetch origin gh-pages
+          git worktree add /tmp/ghp origin/gh-pages
+          cp -r /tmp/shell/. /tmp/ghp/
+          # Copied last, deliberately: the shell build emits its own 404.html
+          # and this one -- which redirects legacy unversioned links -- must win.
+          cp scripts/gh-pages-404.html /tmp/ghp/404.html
+          cd /tmp/ghp
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Shell unchanged."
+          else
+            git commit -m "Deploy the unversioned shell"
+            git push origin HEAD:gh-pages
+          fi

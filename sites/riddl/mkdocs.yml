@@ -14,6 +14,14 @@ extra:
   version:
     provider: mike
     alias: true
+  # Shown only when this build is not the `latest` alias. Worded per branch,
+  # because each branch is its own build: this one documents RIDDL 2.0, which
+  # is unreleased, so it announces a preview. docs/1.x says the opposite --
+  # that a newer release exists. When 2.0 becomes `latest` this stops showing
+  # on its own.
+  outdated_banner: >-
+    This is a preview of the RIDDL 2.0 documentation. RIDDL 2.0 has not been
+    released yet.
 
 nav:
   - Home: index.md

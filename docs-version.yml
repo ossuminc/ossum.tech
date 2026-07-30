@@ -1,24 +1,47 @@
-# Which documentation version this branch publishes as.
+# What this branch publishes.
 #
-# Read by .github/workflows/publish.yaml, which runs:
-#     mike deploy --push --update-aliases <version> <aliases...>
+# Read by .github/workflows/publish.yaml. Each `sites` entry becomes one
+#     mike deploy --deploy-prefix <prefix> -F <config> <version> <aliases...>
 #
-# One entry per RIDDL MINOR version -- patch releases do not get their own
-# documentation version. Each branch declares its own values:
+# One documentation version per product MINOR version -- patch releases do not
+# get their own. Each product has its own version axis and its own
+# <prefix>/versions.json, so RIDDL shipping 2.1 does not renumber Synapify.
 #
-#   branch      version   aliases    role
-#   ----------  --------  ---------  ---------------------------------------
-#   docs/1.x    1.31      latest     RIDDL 1.x maintenance line
-#   main        2.0       next       RIDDL 2.0 (becomes `latest` when 2.0 ships)
+#   branch      publishes
+#   ----------  ----------------------------------------------------------
+#   main        the shell, riddl 2.0, riddlg 0.6, synapify 0.17
+#   docs/1.x    riddl 1.31 only -- see docs-version.yml on that branch
 #
-# `latest` is the site default (`mike set-default latest`), so it must point at
-# the newest RELEASED version. RIDDL 2.0 is not released yet, which is why 2.0
-# publishes under `next` for now. Flipping it at release time is one command:
-#
-#     mike deploy --push --update-aliases 2.0 latest
-#
-# ...or simply change `aliases` below to `latest` and push.
+# DANGER: two branches must never declare the same prefix AND the same alias.
+# The workflow deploys with --update-aliases, which MOVES an alias to the most
+# recent deploy. If docs/1.x still declared riddl + latest after 2.0 was
+# promoted, any later push to it would silently drag the site default back to
+# 1.x -- months later, from an unrelated typo fix, with no error at all. See
+# scripts/promote-2.0-to-latest.md.
 
-version: "2.0"
-aliases:
-  - next
+# The unversioned part of the site: landing page, About, Coming Soon. Deployed
+# to the gh-pages root, without mike, because none of it tracks a product
+# release. Only `main` publishes it.
+shell:
+  config: sites/shell/mkdocs.yml
+
+sites:
+  # `latest` deliberately stays on 1.31, published from docs/1.x, until RIDDL
+  # 2.0 ships final. Promoting it is scripts/promote-2.0-to-latest.md.
+  - prefix: riddl
+    config: sites/riddl/mkdocs.yml
+    version: "2.0"
+    aliases:
+      - next
+
+  - prefix: riddlg
+    config: sites/riddlg/mkdocs.yml
+    version: "0.6"
+    aliases:
+      - latest
+
+  - prefix: synapify
+    config: sites/synapify/mkdocs.yml
+    version: "0.17"
+    aliases:
+      - latest
