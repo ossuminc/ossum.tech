@@ -81,6 +81,7 @@ definition in RIDDL.
 An enumeration defines a type that may take the value of one identifier from a
 closed set of constant identifiers using the `any of` keywords and the set of
 identifiers enclosed in curly braces, like this:
+<!-- riddl: in-domain -->
 ```riddl
 type Color = any of { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
 ```
@@ -121,6 +122,7 @@ A type can be defined as a mapping from one type (the key) to another type
 (the value). For example, here is a dictionary definition that maps a word
 (lower case letters) to a type named DictionaryEntry that presumably
 contains all the things one would find in a dictionary entry.
+<!-- riddl: in-domain -->
 ```riddl
 type dictionary = mapping from Pattern("[a-z]+") to DictionaryEntry
 ```

@@ -14,6 +14,7 @@ Options appear in `with { }` metadata blocks, not inside a
 definition's body. The syntax is `option is` *option_name* with
 optional string arguments:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   ???

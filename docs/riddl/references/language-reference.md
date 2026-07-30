@@ -4,6 +4,33 @@ description: >-
   rules, the type system, statements, value expressions, and validation.
 ---
 
+<!-- riddl-prelude
+    type Price is Decimal(10, 2)
+    type OrderId is UUID
+    type ProductId is UUID
+    type CartId is UUID
+    type OrderEvent is String
+    type EnrichedOrderEvent is String
+    record ProductInfo is { id is ProductId, price is Price }
+    record OrderData is { id is OrderId, total is Price }
+    record TotalInputs is { subtotal is Price, taxRate is Price }
+    record CartItem is { sku is String, quantity is Integer }
+    record ShippedData is { trackingNumber is String }
+    constant Zero is Natural = "0"
+    constant MinimumOrder is Natural = "1"
+    constant MinimumPrice is Natural = "1"
+    constant AlertThreshold is Natural = "10"
+    constant HighValueThreshold is Natural = "1000"
+    constant MaxItems is Natural = "100"
+    event PriceUpdated is { productId is ProductId, newPrice is Price }
+    event OrderPlaced is { id is OrderId, total is Price }
+    result OrderInfo is { id is OrderId, total is Price }
+    command UpdatePrice yields event PriceUpdated is { productId is ProductId, newPrice is Price }
+    command PlaceOrder yields event OrderPlaced is { id is OrderId, total is Price }
+    query GetProduct yields result OrderInfo is { id is ProductId }
+-->
+
+
 # RIDDL Language Guide
 
 ## Overview
@@ -100,6 +127,7 @@ from the number of ports the processor declares, and may optionally be
 | `router` | Routes messages based on content | 1 | 2+ | |
 | `void` | Declares no ports at all | 0 | 0 | |
 
+<!-- riddl: in-context -->
 ```riddl
 processor OrderEnricher as flow is {
   inlet RawOrders is type OrderEvent
@@ -285,6 +313,7 @@ handler projector is { ??? }     // Error: two introducing keywords in a row
 
 Two escapes, both legal:
 
+<!-- riddl: in-context -->
 ```riddl
 handler 'projector' is { ??? }   // quoted identifier
 handler Projector  is { ??? }    // the check is case-sensitive
@@ -391,6 +420,7 @@ they say.
 ### Complex Types
 
 - **Record Types**: Named collections of fields
+  <!-- riddl: in-domain -->
   ```riddl
   record Address is {
     street1 is String
@@ -408,6 +438,7 @@ they say.
   ```
 
 - **Enumerations**:
+  <!-- riddl: in-domain -->
   ```riddl
   type Status is any of {
     Active
@@ -429,6 +460,7 @@ A command or query may declare the response it produces. This makes the
 request/response pairing declarative, so generators can emit precise
 signatures:
 
+<!-- riddl: in-function -->
 ```riddl
 command PlaceOrder yields event OrderPlaced is {
   cartId is CartId
@@ -628,6 +660,7 @@ entity Order is {
 
 Commands represent requests to change state:
 
+<!-- riddl: in-function -->
 ```riddl
 command UpdatePrice yields event PriceUpdated is {
   productId is ProductId
@@ -639,6 +672,7 @@ command UpdatePrice yields event PriceUpdated is {
 
 Events represent state changes that have occurred:
 
+<!-- riddl: in-record -->
 ```riddl
 event PriceUpdated is {
   productId is ProductId
@@ -654,6 +688,7 @@ event PriceUpdated is {
 Commands should always result in one or more events being emitted. This follows
 the reactive principles of RIDDL:
 
+<!-- riddl: in-context -->
 ```riddl
 handler ProductCommandHandler is {
   on cmd: command UpdatePrice {
@@ -696,6 +731,7 @@ rejected inside them at parse time.
 An `on` clause may bind a local name to the message it is handling, using
 ordinary type ascription. Within the body the name denotes the whole message:
 
+<!-- riddl: in-context -->
 ```riddl
 handler H is {
   on ord: command PlaceOrder {
@@ -1066,6 +1102,7 @@ require invariant BalanceNonNegative
 
 Refuses to proceed, with a reason:
 
+<!-- riddl: in-handler -->
 ```riddl
 error "Price must be greater than zero"
 ```
@@ -1094,6 +1131,7 @@ on cmd: command Withdraw {
 
 Describes an action in natural language for later implementation:
 
+<!-- riddl: in-handler -->
 ```riddl
 do "Calculate the total price including all applicable taxes and discounts"
 ```
@@ -1117,6 +1155,7 @@ untouched.
 
 It is written as a fenced block with a language tag:
 
+<!-- riddl: in-context -->
 ````riddl
 ```scala
 val total = items.map(_.price).sum * (1 - discountRate)
@@ -1826,6 +1865,7 @@ comments.
 A `figma` reference connects a model element to the exact frame in a Figma file
 that depicts it:
 
+<!-- riddl: in-domain -->
 ```riddl
 application context Storefront is {
   page Checkout is { ??? } with {

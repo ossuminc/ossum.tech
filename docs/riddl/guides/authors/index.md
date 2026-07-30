@@ -323,6 +323,7 @@ validation messages.
 Every definition should have at least a `briefly` clause. Important
 definitions should also have full `described as` blocks:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   // ... entity contents ...
@@ -355,6 +356,7 @@ domain OnlineRetail is {
 }
 ```
 
+<!-- riddl: in-domain -->
 ```riddl
 // catalog.riddl
 context Catalog is {

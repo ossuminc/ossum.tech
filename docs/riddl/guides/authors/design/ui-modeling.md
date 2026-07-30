@@ -90,6 +90,7 @@ the system. It represents the system facade that permits user interaction.
 In RIDDL, "user" is a term of art. It doesn't necessarily mean a human being.
 A user is anything that uses the system:
 
+<!-- riddl: in-domain -->
 ```riddl
 user Shopper is "a human customer browsing products"
 user APIClient is "an automated system consuming our API"
@@ -198,6 +199,7 @@ A [group](../../../concepts/group.md) — under any of its aliases, including
 `page`, `pane`, `dialog` and `form` — may only appear in a context declared
 with the `application` intention:
 
+<!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
   page ProductSearch is { ??? }

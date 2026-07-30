@@ -141,6 +141,7 @@ An entity that is evicted from memory and later rehydrated passivates and
 activates repeatedly without ever being initialized or terminated again. That
 distinction matters for anything cached or connection-scoped.
 
+<!-- riddl: in-entity -->
 ```riddl
 handler Lifecycle is {
   on init      { do "assign the account number" }

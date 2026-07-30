@@ -76,6 +76,7 @@ type Address is {
 ```
 
 **contexts/catalog.riddl**
+<!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
   entity Product is {

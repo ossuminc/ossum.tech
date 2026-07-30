@@ -235,6 +235,7 @@ error "Price must be greater than zero"
 Use `do` to describe business logic in natural language that will be
 implemented in target code:
 
+<!-- riddl: in-handler -->
 ```riddl
 do "Calculate the total price including all applicable taxes, discounts,
     and shipping based on the customer's location and membership tier"
@@ -253,6 +254,7 @@ do "Calculate the total price including all applicable taxes, discounts,
 RIDDL's deliberate **escape hatch**: an opaque pass-through of raw
 target-language source, handed to the code generator untouched.
 
+<!-- riddl: in-function -->
 ````riddl
 ```scala
 val total = items.map(_.price).sum * (1 - discountRate)

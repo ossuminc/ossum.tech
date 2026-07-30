@@ -13,6 +13,7 @@ brace.
 
 Metadata appears **after** a definition's body, not inside it:
 
+<!-- riddl: in-domain -->
 ```riddl
 context OrderManagement is {
   // body definitions go here (entities, types, handlers, etc.)
@@ -32,6 +33,7 @@ context OrderManagement is {
 
 A short, one-line summary using `briefly`:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Customer is { ??? } with {
   briefly "A person or organization that purchases products"
@@ -43,6 +45,7 @@ entity Customer is { ??? } with {
 Longer documentation using `described by` (or `described as`,
 `explained by`, `explained as`):
 
+<!-- riddl: in-context -->
 ```riddl
 entity Customer is { ??? } with {
   described by {
@@ -86,6 +89,7 @@ Options are instructions to translators about how a definition
 should be implemented or interpreted. The syntax is `option is`
 *option_name* with optional string arguments:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   ???
@@ -180,6 +184,7 @@ domain ECommerce is {
 A `figma` reference connects a model element to the exact frame in a Figma file
 that depicts it:
 
+<!-- riddl: in-domain -->
 ```riddl
 application context Storefront is {
   page Checkout is { ??? } with {
@@ -239,6 +244,7 @@ An attachment associates supplementary material — a diagram, a spreadsheet, an
 image — with a definition. There are three forms, and the **MIME type comes
 before the content**:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   ???

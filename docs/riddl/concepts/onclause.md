@@ -34,6 +34,7 @@ and `on passivate` bracket each *residency*: an entity that is evicted from
 memory and later rehydrated passivates and activates repeatedly without ever
 being initialized or terminated again.
 
+<!-- riddl: in-entity -->
 ```riddl
 handler OrderHandler is {
   on init      { do "load configuration" }

@@ -12,6 +12,7 @@ statements for pattern matching.
 The simplest form describes the condition in natural language, wrapped in
 `prompt(…)` so it is clear an AI decides it:
 
+<!-- riddl: in-handler -->
 ```riddl
 when prompt("the user is authenticated") then {
   // actions when the condition holds
@@ -35,6 +36,7 @@ Evaluating the condition is left to code generation.
 
 Conditions can reference identifiers defined with `let`:
 
+<!-- riddl: in-handler -->
 ```riddl
 let isValid = "order.items.count > 0"
 when isValid then {
@@ -44,6 +46,7 @@ when isValid then {
 
 Identifiers can be negated:
 
+<!-- riddl: in-handler -->
 ```riddl
 when !isValid then {
   error "Order must have at least one item"
@@ -85,6 +88,7 @@ when "user.isVerified AND order.total > 0" then {
 
 The `match` statement provides pattern matching:
 
+<!-- riddl: in-handler -->
 ```riddl
 match "orderStatus" {
   case "pending" {
