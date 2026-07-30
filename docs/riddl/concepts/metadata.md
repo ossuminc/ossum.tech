@@ -235,17 +235,38 @@ renamed or repurposed frame, not to police house style.
 
 ## Attachments
 
-Attachments associate external files (diagrams, spreadsheets,
-images) with a definition:
+An attachment associates supplementary material — a diagram, a spreadsheet, an
+image — with a definition. There are three forms, and the **MIME type comes
+before the content**:
 
 ```riddl
 entity Order is {
   ???
 } with {
-  attachment StateChart is "diagrams/order-states.png"
-    as "image/png"
+  // content held in a separate file
+  attachment StateChart is image/png in file "diagrams/order-states.png"
+
+  // content given inline
+  attachment Note is text/plain as "reviewed 2026-07-29"
+
+  // a ULID identifying the definition
+  attachment ULID is "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 }
 ```
+
+The order matters and is easy to get backwards. `attachment X is
+"path" as "image/png"` — content first, type second — does **not** parse; the
+parser is looking for a MIME type where the path appears.
+
+!!! info "The ULID form became usable in 2.0"
+    `attachment ULID is "…"` was documented syntax that could not actually be
+    parsed: all three forms begin with the same `attachment` keyword, and
+    because the keyword combinator commits, whichever rule came first won
+    unconditionally — so the ULID branch was unreachable. The three forms now
+    share one keyword match, and each is exercised by a fixture.
+
+    An ordinary attachment merely *named* `ULID` still works: it fails the
+    ULID branch at its literal string and falls through to the general form.
 
 ## Occurs In
 

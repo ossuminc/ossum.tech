@@ -111,7 +111,13 @@ The `end` keyword is required. A condition may be:
   `when order.isPaid then`
 - a `let` binding, optionally negated: `when authorized then`,
   `when !authorized then`
-- an opaque literal string: `when "user is authenticated" then`
+- an AI-evaluated prompt: `when prompt("the user is authenticated") then`
+
+!!! warning "A bare string condition is deprecated"
+    `when "the user is authenticated" then` parses but draws a `[deprecated]`
+    message; write `when prompt("…")`. Everywhere else a bare string is a
+    **literal**, while `prompt(…)` marks a value an AI decides — and a
+    natural-language condition is the latter.
 
 A bare reference is resolved and checked to be Boolean-typed; a clearly
 non-Boolean condition is an **Error**.

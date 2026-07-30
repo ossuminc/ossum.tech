@@ -1273,7 +1273,15 @@ cannot be expressed in Markdown descriptions.
 
 **Lives in**: Any vital definition.
 
-**Syntax**: `attachment Name is "path/to/file" as "mime/type"`
+**Syntax** — the MIME type comes **before** the content, in all three forms:
+
+```riddl
+attachment StateChart is image/png in file "diagrams/states.png"
+attachment Note      is text/plain as "reviewed 2026-07-29"
+attachment ULID      is "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+```
+
+`attachment X is "path" as "image/png"` — content first — does not parse.
 
 ---
 

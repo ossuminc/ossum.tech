@@ -14,6 +14,13 @@ with the reference grammar written in Scala/fastparse form.
     definitions, and the `figma` metadata reference. Rules that are retained
     only for backward compatibility carry a comment saying so.
 
+    One rule is worth finding first: **`undefined = {comment} "???"`**. It
+    replaces what used to be 23 separate inline `"???"` sites, and it is why a
+    comment may introduce a stub — see
+    [Undefined Bodies](language-reference.md#undefined-bodies). Each body tries
+    `undefined` *before* its content alternative, because a PEG would otherwise
+    consume the comments as content and never reach the marker.
+
 ```ebnf
 --8<-- "riddl/references/riddl-grammar.ebnf"
 ```

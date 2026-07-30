@@ -45,6 +45,50 @@ later:
 brew upgrade riddlc
 ```
 
+## Release Candidates
+
+RIDDL 2.0 is being released through a series of **release candidates**, which
+ship from a separate formula so they can never reach anyone who did not ask for
+them.
+
+```bash
+brew unlink riddlc && brew install ossuminc/tap/riddlc-rc
+```
+
+To go back to the stable line:
+
+```bash
+brew unlink riddlc-rc && brew link riddlc
+```
+
+The `unlink` step is not optional. Both formulae install a binary called
+`riddlc`, and the RC formula declares `conflicts_with "riddlc"`, so only one of
+them can own the name at a time. The stable version stays installed while
+unlinked — reverting does not re-download anything.
+
+Confirm which one you are running:
+
+```bash
+riddlc info | grep version
+```
+
+Once RIDDL 2.0 ships as a final release, `brew upgrade riddlc` on the stable
+formula is all you need, and the RC formula can be removed:
+
+```bash
+brew uninstall riddlc-rc && brew link riddlc && brew upgrade riddlc
+```
+
+!!! info "Why a separate formula rather than a flag"
+    Homebrew has no prerelease flag, and its `devel` block was deprecated and
+    removed. A separately named formula that you opt into is the supported
+    pattern — the name itself is the experimental marking.
+
+!!! warning "An RC is not for production models"
+    A release candidate may still change language behaviour before the final
+    release. Expect to re-validate models against the final 2.0, and see
+    [Migrating from 1.x](../../migration/1.x-to-2.0.md) for what changed.
+
 ## Build from Source
 
 Building RIDDL 2.0 from source requires JDK 25 and **sbt 2.0.2 or later**.

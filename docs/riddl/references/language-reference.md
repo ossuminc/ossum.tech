@@ -907,10 +907,19 @@ A condition may be any of:
   `when order.isPaid then`
 - A `let` binding, optionally negated: `when authorized then`,
   `when !authorized then`
-- An opaque literal string: `when "user is authenticated" then`
+- An AI-evaluated prompt: `when prompt("the user is authenticated") then`
 
 A bare reference is resolved and checked to be Boolean-typed; a clearly
 non-Boolean condition is an Error.
+
+!!! warning "A bare string condition is deprecated"
+    `when "the user is authenticated" then` still parses but draws a
+    `[deprecated]` message. Write `when prompt("…")` instead.
+
+    The reason is consistency: everywhere else in RIDDL a bare quoted string
+    denotes a **literal value**, while `prompt(…)` marks something an AI
+    decides. A natural-language condition is plainly the latter, so it should
+    say so rather than borrow the literal's spelling.
 
 An `else` clause handles the false case:
 
@@ -1907,25 +1916,38 @@ command Checkout is {}        // does not parse
 The error lands on `is` rather than on the braces, because the parser is still
 looking for what may follow the identifier.
 
-### `???` will not sit alongside anything else
+### A comment after `???`
 
-The placeholder is an *alternative* to a body's contents, not a member of them
-— `domain_body = domain_definitions | "???"` — so it cannot share a body with
-a comment, in either order:
+`???` **ends** the body, so nothing may follow it inside the braces. A comment
+may, however, come *before* it — that is the whole point of the
+`undefined = {comment} "???"` production:
 
 ```riddl
 domain MyDomain is {
-  ???                       // fine
+  // Start building your domain model here
+  ???                       // fine -- the comment introduces the stub
 }
 
 domain MyDomain is {
-  // Start building here
-  ???                       // does not parse
+  ???
+  // Start building your domain model here
+                            // does not parse -- ??? already closed the body
 }
 ```
 
-Put explanatory prose in a `with { briefly … }` block, or in a comment
-*outside* the braces.
+Both parts survive a prettify round trip. The comment is **kept** as part of
+the container's contents, and the `???` is re-emitted for a body that holds
+nothing but comments — because the marker records deliberate intent ("not
+specified yet") that a bare comment does not.
+
+## Undefined Bodies
+
+`???` is available wherever a body may be left unspecified, and the same rule
+applies at each: an optional run of comments, then the marker. That covers
+container bodies (domain, context, entity, processor, repository, adaptor,
+projector, group, handler, author), type bodies (`aggregate_definitions`,
+`enumerators`, `alternation_contents`), statement blocks, `with { }` metadata
+blocks and doc blocks.
 
 ## Common Syntax Issues
 
@@ -2001,6 +2023,8 @@ it is slated for removal in 3.0.
 | `reply <msg>` | `yield <msg>` |
 | `prompt "..."` statement | `do "..."` |
 | `Abstract` type | `Anything` |
+| `state X is record R`, or no introducer at all | `state X of record R` |
+| `when "a natural-language condition"` | `when prompt("…")` |
 | `send … to inlet X` | `send … to outlet Y`, or `tell` |
 | anonymous nebula (top-level definitions with no wrapper) | `module <Name> is { … }` |
 | `option is gateway`/`service`/`external`/`wrapper` | the context intention prefix |

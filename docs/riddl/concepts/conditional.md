@@ -7,19 +7,29 @@ A condition is a logical (boolean) expression resulting in true or false.
 Conditions are used in `when` statements to control flow and in `match`
 statements for pattern matching.
 
-## Arbitrary Conditional
+## Natural-Language Conditions
 
-The simplest form is a string that describes the condition in natural language:
+The simplest form describes the condition in natural language, wrapped in
+`prompt(…)` so it is clear an AI decides it:
 
 ```riddl
-when "user is authenticated" then {
-  // actions when condition is true
+when prompt("the user is authenticated") then {
+  // actions when the condition holds
 } end
 ```
 
-This allows authors to express conditions at the appropriate level of
-abstraction. The actual implementation of the condition check is left to
-code generation or manual implementation.
+This lets authors express conditions at the appropriate level of abstraction.
+Evaluating the condition is left to code generation.
+
+!!! warning "The bare-string form is deprecated"
+    ```riddl
+    when "user is authenticated" then { ??? } end   // deprecated
+    ```
+
+    It still parses, but draws a `[deprecated]` message. Everywhere else in
+    RIDDL a bare quoted string denotes a **literal value**, while `prompt(…)`
+    marks something an AI decides — so a natural-language condition should say
+    which of the two it is rather than borrowing the literal's spelling.
 
 ## Identifier Conditions
 
