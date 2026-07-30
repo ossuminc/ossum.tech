@@ -133,7 +133,15 @@ markdown_extensions:
   - pymdownx.smartsymbols
   - pymdownx.snippets:
       base_path: docs
-  - pymdownx.superfences
+  # The custom_fences entry registers ```mermaid so mkdocs-material renders it
+  # as a diagram. WITHOUT it a mermaid block renders as an ordinary code block
+  # and `--strict` says nothing -- so a broken diagram looks like a passing
+  # build. Always eyeball a page after touching this.
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:

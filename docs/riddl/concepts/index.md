@@ -35,49 +35,95 @@ easier to comprehend, we've taken some short-cuts :
 
 ### Hierarchy
 
-With those clarifying simplifications, here's the hierarchy:
+With those clarifying simplifications, here is the containment graph. It is a
+*graph*, not a tree: several definitions are legal at more than one scope, and
+four of them nest inside themselves. These three views split it up so each stays
+readable; the [table below](#detailed-containment-reference) is the exhaustive
+version.
 
-<div class="riddl-hierarchy" markdown>
+**Where definitions live.** Dashed edges are conditional — a
+[Repository](repository.md) or [Connector](connector.md) sits at domain scope
+only when it genuinely spans several contexts, and a [Group](group.md) only in a
+context with the `application` [intention](context.md#intention).
 
-```
-                              ┌─────────────────────────────────────────────┐
-                              │                    Root                     │
-                              └──────────────────────┬──────────────────────┘
-                                                     │
-                              ┌──────────────────────┴──────────────────────┐
-                              │                   Domain                    │
-                              └──────────────────────┬──────────────────────┘
-                                                     │
-                 ┌───────────────────────────────────┼───────────────────────────────────┐
-                 │                                   │                                   │
-           ┌─────┴─────┐                       ┌─────┴─────┐                       ┌─────┴─────┐
-           │  Context  │                       │   Epic    │                       │   Type    │
-           └─────┬─────┘                       └─────┬─────┘                       └───────────┘
-                 │                                   │
-    ┌────────────┼────────────┐                ┌─────┴─────┐
-    │            │            │                │   Case    │
-┌───┴───┐  ┌─────┴─────┐  ┌───┴───┐            └─────┬─────┘
-│Entity │  │ Projector │  │ Saga  │                  │
-└───┬───┘  │ Adaptor   │  └───┬───┘            ┌─────┴─────┐
-    │      │ Processor │      │                │ Statement │
-┌───┴───┐  │ Streamlet │  ┌───┴───┐            └───────────┘
-│ State │  │ Function  │  │  Saga │
-└───┬───┘  │ Handler   │  │  Step │
-    │      │ Group     │  └───┬───┘
-┌───┴───┐  │ Type      │      │
-│Handler│  └───────────┘  ┌───┴───┐
-└───┬───┘                 │ Stmt  │
-    │                     └───────┘
-┌───┴────┐
-│OnClause│
-└───┬────┘
-    │
-┌───┴───┐
-│ Stmt  │
-└───────┘
+```mermaid
+flowchart TD
+    Root(["Root"]) --> Module
+    Root --> Domain
+    Module -->|"any top-level<br/>definition"| Domain
+
+    Domain -->|nested| Domain
+    Domain --> Context
+    Domain --> Epic
+    Domain --> Saga
+    Domain -.->|spans contexts| Repository
+    Domain -.->|spans contexts| Connector
+
+    Context --> Entity
+    Context --> Adaptor
+    Context --> Projector
+    Context --> Repository
+    Context --> Processor
+    Context --> Saga
+    Context --> Connector
+    Context -.->|application| Group
+
+    Entity --> State
 ```
 
-</div>
+Note that [Saga](saga.md) and [Connector](connector.md) each have **two**
+parents. A tree cannot say that, which is part of how the old diagram drifted.
+
+**What every processor may contain.** RIDDL 2.0 unified the processors, so
+rather than repeat one bundle of contents six times, it is drawn once. Everything
+below the hub is legal inside *any* of the six above it.
+
+```mermaid
+flowchart TD
+    Context --> PC
+    Entity --> PC
+    Adaptor --> PC
+    Projector --> PC
+    Repository --> PC
+    Processor --> PC
+
+    PC(["Processor contents"])
+    PC --> Handler
+    PC --> Function
+    PC --> Connector
+    PC -->|nested| Processor
+    PC --> Ports["Inlet · Outlet<br/>Relationship"]
+    PC --> Leaves["Type · Constant · Invariant<br/>Version · Copyright<br/>Comment · Include"]
+
+    Repository --> Schema
+    Projector --> Updates["updates"]
+
+    classDef bundle stroke-dasharray: 4 3;
+    class Ports,Leaves bundle;
+```
+
+**Behaviour and stories.** Where the pseudocode and the user-facing narrative
+live. [Saga](saga.md) is the outlier that bears stream ports without being a
+processor.
+
+```mermaid
+flowchart TD
+    State --> Handler
+    State --> Invariant
+    Handler --> OnClause["On Clause"] --> Statement
+    Function -->|nested| Function
+    Function --> Statement
+
+    Saga --> Step["Saga Step"] --> Statement
+    Saga --> SagaPorts["Inlet · Outlet<br/>Function · Include"]
+
+    Epic --> Case --> Interaction
+    Group -->|nested| Group
+    Group --> GroupDefs["Input · Output<br/>contains · shown by"]
+
+    classDef bundle stroke-dasharray: 4 3;
+    class SagaPorts,GroupDefs bundle;
+```
 
 #### Detailed Containment Reference
 
@@ -106,7 +152,7 @@ With those clarifying simplifications, here's the hierarchy:
 ***Processor contents*** — every [processor](processor.md) may contain:
 [Handler](handler.md), [Function](function.md), [Type](type.md),
 [Constant](constant.md), [Invariant](invariant.md), [Inlet](inlet.md),
-[Outlet](outlet.md), nested [Processor](processor.md),
+[Outlet](outlet.md), Relationship, nested [Processor](processor.md),
 [Connector](connector.md), [Version](version.md), [Copyright](copyright.md),
 [Comment](comment.md), [Include](include.md).
 

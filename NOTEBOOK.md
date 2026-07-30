@@ -47,24 +47,31 @@ failures (3 on that Quickstart, all correct-for-1.31 deprecations).
 
 **Decided 2026-07-30:** do both.
 
-1. Replace the ASCII hierarchy diagram on `docs/riddl/concepts/index.md` with a
-   **mermaid flowchart** of the containment DAG.
-2. On each definition's concept page, replace the prose `## Contains` list with
-   a **small per-scope mermaid mini-diagram**.
+1. ✅ **DONE** — the ASCII hierarchy diagram on `docs/riddl/concepts/index.md`
+   is replaced with mermaid.
+2. ⬜ On each definition's concept page, replace the prose `## Contains` list
+   with a **small per-scope mermaid mini-diagram**. 45 pages carry one.
 
-**Prerequisite — mermaid is not enabled.** `mkdocs.yml` has no mermaid fence.
-Add under `pymdownx.superfences`:
+**Stage 1, as built.** The mermaid fence is registered in `mkdocs.yml` under
+`pymdownx.superfences.custom_fences`. Three things learned doing it:
 
-```yaml
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-```
+- **One diagram was unreadable.** All 13 relations plus leaf bundles in a single
+  flowchart renders as a wide, squished hairball — it *builds* and *renders*,
+  it just cannot be read. It is now three: *where definitions live*, *what every
+  processor may contain*, *behaviour and stories*. The diagram carries shape;
+  the table below it carries completeness.
+- **The containment table was wrong too.** It omitted `Relationship` from the
+  *Processor contents* list, though `riddl-grammar.ebnf:102` includes it — so
+  error #13 below had survived the `e4cda9d` correction. Fixed.
+- **mermaid loads from a CDN** (`https://unpkg.com/mermaid@11/…`); Material does
+  not bundle it. Verified by grepping the built `assets/javascripts/bundle.*.js`.
+  Diagrams therefore need a real browser to verify, and would not have rendered
+  under the `offline` plugin — which is one reason that plugin is being dropped.
 
-mkdocs-material renders ```` ```mermaid ```` natively once that fence exists.
-This is deferred item 2.5 further down this file.
+**Stage 2 is a correctness pass, not just a rendering one.** Spot checks show
+the prose lists have drifted the same way the diagram had: `entity.md` omits
+Constant, Connector, Relationship and nested Processor; `saga.md` omits Inlet,
+Outlet, Function and Include. Build each from the grammar, not from the list.
 
 **Why a DAG, not a tree.** Saga and Connector occur at *two* scopes (Domain and
 Context), processors nest, Groups nest. A tree cannot state containment
@@ -72,7 +79,7 @@ honestly — which is part of how the ASCII diagram drifted. Use dashed edges fo
 conditionally-scoped placements (Repository and Connector at Domain scope only
 when they span contexts).
 
-**The 13 errors in the current diagram**, each verified against
+**The 13 errors in the old diagram** (all now fixed), each verified against
 `docs/riddl/references/riddl-grammar.ebnf`:
 
 | # | Wrong | Correct |
@@ -91,9 +98,9 @@ when they span contexts).
 | 12 | Saga only under Context | also `domain_content` |
 | 13 | Relationship absent | `processor_definition_contents` |
 
-**Verify against the GRAMMAR, never against the old picture.** The containment
-*table* on that page was corrected in `e4cda9d` and is trustworthy; the diagram
-above it is not.
+**Verify against the GRAMMAR, never against the old picture.** Note this applies
+to the containment *table* as well — `e4cda9d` corrected it but left error #13
+in place, so it is not the oracle either. The grammar is.
 
 Grammar rules to read: `root_content`, `root_definition`, `module_content`,
 `domain_content`, `context_definition`, `entity_content`, `state_content`,
@@ -102,9 +109,11 @@ Grammar rules to read: `root_content`, `root_definition`, `module_content`,
 `group_definitions`, `function_definitions`, `repository_definitions`,
 `projector_definitions`, `adaptor_contents`.
 
-Confirm the mermaid actually *renders* — `scripts/preview-versioned-site.sh`
-and look at the page. A missing fence registration shows it as a code block,
-and `--strict` will not complain.
+Confirm the mermaid actually *renders* — build, serve, and look at the page in a
+browser. Two distinct failures hide from `--strict`: a missing fence
+registration shows the block as a code block, and a registered fence can still
+render an unreadable diagram. Check the built HTML for `class="mermaid"` to
+tell those two apart.
 
 ---
 
