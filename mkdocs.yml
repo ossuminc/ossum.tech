@@ -71,6 +71,12 @@ extra_css:
   - stylesheets/extra.css
 
 extra:
+  # Documentation is versioned with `mike`, one entry per RIDDL minor version.
+  # The version a reader is on is part of the URL path, so the selection sticks
+  # as they navigate. See docs-version.yml for which version this branch is.
+  version:
+    provider: mike
+    alias: true
   analytics:
     provider: google
     property: G-97Q04B6XCX
@@ -152,6 +158,7 @@ nav:
   - RIDDL:
     - riddl/index.md
     - Quickstart: riddl/quickstart.md
+    - Migrating from 1.x: riddl/migration/1.x-to-2.0.md
     - Tutorials:
       - riddl/tutorials/index.md
       - Getting Started: riddl/tutorials/basics.md
@@ -203,6 +210,7 @@ nav:
     - Concepts:
       - riddl/concepts/index.md
       - Root: riddl/concepts/root.md
+      - Module: riddl/concepts/module.md
       - Domain: riddl/concepts/domain.md
       - Context: riddl/concepts/context.md
       - Entity: riddl/concepts/entity.md
@@ -229,6 +237,7 @@ nav:
       - Inlet: riddl/concepts/inlet.md
       - Outlet: riddl/concepts/outlet.md
       - Connector: riddl/concepts/connector.md
+      - Standard Module: riddl/concepts/standard-module.md
       - Group: riddl/concepts/group.md
       - Input: riddl/concepts/input.md
       - Output: riddl/concepts/output.md
@@ -237,6 +246,8 @@ nav:
       - Statement: riddl/concepts/statement.md
       - Include: riddl/concepts/include.md
       - Author: riddl/concepts/author.md
+      - Version: riddl/concepts/version.md
+      - Copyright: riddl/concepts/copyright.md
       - Term: riddl/concepts/term.md
       - Comment: riddl/concepts/comment.md
       - Description: riddl/concepts/description.md

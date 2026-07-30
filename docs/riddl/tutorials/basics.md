@@ -52,7 +52,7 @@ domain Greeting is {
     type Name is String
 
     entity Greeter is {
-      state GreeterState of Greeter.State
+      state GreeterState of record Greeter.State
 
       record State is {
         greetingsCount: Integer

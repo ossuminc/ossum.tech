@@ -45,9 +45,65 @@ later:
 brew upgrade riddlc
 ```
 
+## Release Candidates
+
+RIDDL 2.0 is being released through a series of **release candidates**, which
+ship from a separate formula so they can never reach anyone who did not ask for
+them.
+
+```bash
+brew unlink riddlc && brew install ossuminc/tap/riddlc-rc
+```
+
+To go back to the stable line:
+
+```bash
+brew unlink riddlc-rc && brew link riddlc
+```
+
+The `unlink` step is not optional. Both formulae install a binary called
+`riddlc`, and the RC formula declares `conflicts_with "riddlc"`, so only one of
+them can own the name at a time. The stable version stays installed while
+unlinked — reverting does not re-download anything.
+
+Confirm which one you are running:
+
+```bash
+riddlc version
+```
+
+```
+[info] 2.0.0-rc.1
+```
+
+Once RIDDL 2.0 ships as a final release, `brew upgrade riddlc` on the stable
+formula is all you need, and the RC formula can be removed:
+
+```bash
+brew uninstall riddlc-rc && brew link riddlc && brew upgrade riddlc
+```
+
+!!! info "Why a separate formula rather than a flag"
+    Homebrew has no prerelease flag, and its `devel` block was deprecated and
+    removed. A separately named formula that you opt into is the supported
+    pattern — the name itself is the experimental marking.
+
+!!! warning "An RC is not for production models"
+    A release candidate may still change language behaviour before the final
+    release. Expect to re-validate models against the final 2.0, and see
+    [Migrating from 1.x](../../migration/1.x-to-2.0.md) for what changed.
+
 ## Build from Source
 
-Building from source requires JDK 25 and sbt.
+Building RIDDL 2.0 from source requires JDK 25 and **sbt 2.0.2 or later**.
+
+!!! warning "sbt 2 is required for RIDDL 2.0"
+    RIDDL 2.0 migrated to sbt 2 and the `projectMatrix` build layout, so an
+    sbt 1.x installation will not build it. The version is pinned in
+    `project/build.properties`, and sbt's launcher will fetch the right one —
+    but the launcher itself must be recent enough to understand it.
+
+    Credentials for sbt 2 live in `~/.sbt/2/`, not `~/.sbt/1.0/`.
 
 ### Prerequisites
 
@@ -123,16 +179,17 @@ You should see output like:
 ```
 [info] About RIDDL:
 [info]            name: utils
-[info]         version: 1.2.1
-[info]   documentation: https://github.com/ossuminc/riddl
+[info]         version: 2.0.0-rc.1
+[info]      git commit: ebce6ba945739bef06907445e5a570b2d030591b
+[info]   documentation: https://ossum.tech/riddl
 [info]       copyright: © 2019-2026 Ossum, Inc.
-[info]        built at: 2026-02-01 23:24:51.835-0500
+[info]        built at: 2026-07-27 11:04:12.117-0400
 [info]        licenses: Apache-2.0
 [info]    organization: Ossum, Inc.
-[info]   scala version: 3.7.4
-[info]     sbt version: 1.12.0
+[info]   scala version: 3.9.0
+[info]     sbt version: 2.0.2
 [info]        jvm name: OpenJDK 64-Bit Server VM
-[info]     jvm version: 21.0.10
+[info]     jvm version: 25.0.1
 [info]   operating sys: Mac OS X
 ```
 

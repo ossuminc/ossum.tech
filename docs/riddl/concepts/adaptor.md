@@ -43,32 +43,67 @@ Outbound adaptors provide an adaptation that occurs from the
 
 ## Syntax
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 context Orders is {
   adaptor PaymentAdapter from context Payments is {
-    |Translates payment-related messages between Orders and Payments contexts.
-
     handler InboundPayments is {
-      on event Payments.PaymentCompleted {
-        tell entity Order to MarkAsPaid
+      on paid: event Payments.PaymentCompleted {
+        tell command MarkAsPaid(paid.orderId) to entity Order
       }
       on event Payments.PaymentFailed {
-        tell entity Order to HandlePaymentFailure
+        tell command HandlePaymentFailure to entity Order
+      }
+      on other {
+        error "Unrecognized message from the Payments context"
       }
     }
+  } with {
+    briefly as "Translates payment messages between Orders and Payments"
   }
 
   adaptor InventoryAdapter to context Inventory is {
-    |Translates inventory requests from Orders to Inventory context.
-
     handler OutboundInventory is {
       on command ReserveItems {
-        tell context Inventory to Inventory.ReserveStock
+        tell command Inventory.ReserveStock to context Inventory
+      }
+      on other {
+        error "Unrecognized outbound message"
       }
     }
+  } with {
+    briefly as "Translates inventory requests from Orders to Inventory"
   }
 }
 ```
+
+Note the operand order: `tell <message> to <processor>`, not the reverse.
+
+## The Isolation Seam
+
+An adaptor bridges **exactly two** contexts: the context that contains it, and
+the `referent` context named in its declaration. It is the only sanctioned
+crossing point between contexts, so it must not traffic in a **third**
+context's messages.
+
+!!! warning "Validation"
+    **Errors:**
+
+    - A message whose owning context is neither the parent nor the referent.
+      This applies both to the message an `on` clause consumes and to every
+      `send`/`tell` target it emits, including those nested inside `when`,
+      `match` and `foreach` bodies.
+    - A handler with no `on other` clause. An adaptor must say explicitly what
+      it does with messages it does not recognize, rather than discarding them
+      silently.
+
+    Types defined at [domain](domain.md) or [root](root.md) level are shared
+    vocabulary common to both sides and are never flagged.
+
+## Options
+
+`circuit-breaker` (0–2 arguments) is valid on an adaptor, tripping the
+adaptation when the far side is failing.
 
 ## When to Use Adaptors
 
@@ -96,6 +131,11 @@ these models so neither context needs to know about the other's terminology.
 
 ## Occurs In
 * [Contexts](context.md)
+* [Modules](module.md)
 
 ## Contains
 * [Handlers](handler.md)
+* [Functions](function.md), [Types](type.md), [Constants](constant.md),
+  [Invariants](invariant.md)
+* [Inlets](inlet.md) and [Outlets](outlet.md)
+* [Versions](version.md) and [Copyrights](copyright.md)

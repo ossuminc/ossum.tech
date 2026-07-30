@@ -30,7 +30,7 @@ simple predefined types:
 
 | Name        | Description                                                       |
 |-------------|-------------------------------------------------------------------|
-| Abstract    | An unspecified, arbitrary type, compatible with any other type    |
+| Anything    | An unspecified, arbitrary type, compatible with any other type    |
 | Nothing     | A type that cannot hold any value, commonly used as a placeholder |
 | Boolean     | A Boolean value, with values true or false                        |
 | Current     | An SI unit of electric current, measured in Amperes               |
@@ -47,6 +47,17 @@ simple predefined types:
 | Time        | A time value comprising an hour, minute, second and millisecond   |
 | TimeStamp   | A fixed point in time                                             |
 | UUID        | A randomly unique identifier with low likeliness of collision     |
+
+`Anything` and `Nothing` are duals: `Anything` is assignment-compatible with
+every type in both directions, while `Nothing` holds no value at all. A
+[port](inlet.md) typed `Anything` is compatible with any port it is connected
+to, which is what lets the [standard module's](standard-module.md) universal
+terminators accept every stream.
+
+!!! warning "`Abstract` was renamed to `Anything` in RIDDL 2.0"
+    The old spelling still parses to the same node and emits a
+    `[deprecated]` message, so existing models keep working. Prettified output
+    emits `Anything`.
 
 ### Parameterized Predefined Types {#parameterized}
 Some predefined types take parameters to customize their content, we 
@@ -70,14 +81,27 @@ definition in RIDDL.
 An enumeration defines a type that may take the value of one identifier from a
 closed set of constant identifiers using the `any of` keywords and the set of
 identifiers enclosed in curly braces, like this:
+<!-- riddl: in-domain -->
 ```riddl
 type Color = any of { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
 ```
 
 ### Alternation
+
+!!! warning "An alternation must offer a real choice"
+    | Alternatives | Result |
+    |---|---|
+    | zero — `one of { }` | **Error** |
+    | one — `one of { A }` | `[deprecated]` — it names no alternative |
+    | two or more | clean |
+    | `one of { ??? }` | fine — undecided is not the same as empty |
+
+    A one-armed alternation still parses, so no model breaks today.
+
 A type can be defined as any one type chosen from a set of other type names
 using the `one of` keywords followed by type names in curly braces, like this:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 type References = one of { String, URL }
 ```
@@ -99,21 +123,43 @@ A type can be defined as a mapping from one type (the key) to another type
 (the value). For example, here is a dictionary definition that maps a word
 (lower case letters) to a type named DictionaryEntry that presumably
 contains all the things one would find in a dictionary entry.
+<!-- riddl: in-domain -->
 ```riddl
 type dictionary = mapping from Pattern("[a-z]+") to DictionaryEntry
 ```
 
-### Messages
-An aggregate type (_value object_ in DDD) can be declared to be one of four
-kinds of message types using the `command`, `event`, `query`, and `result`
-keywords. These type definitions are useful for sending messages to
-[entities](entity.md) or across 
-[streamlets](streamlet.md). 
+### Aggregate Use Cases
 
-For example, here is a command definition:
+An aggregate type (_value object_ in DDD) can be declared with a keyword that
+says what kind of thing it is. Eight are available: `type`, `command`,
+`query`, `event`, `result`, `record`, `graph` and `table`.
+
+Four of them — `command`, `query`, `event` and `result` — are the
+[messages](message.md), and only those four can be sent, told, yielded or
+handled. A `record` is data: it types an entity [state](state.md) and supplies
+the payload of a `morph`, but can never be sent. `graph` and `table` model
+graph-structured and tabular data respectively.
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
-type JustDoIt = command { id: Id(AnEntity), encouragement: String, swoosh: URL }
+command JustDoIt is { id: Id(AnEntity), encouragement: String, swoosh: URL }
+record  OrderData is { id: OrderId, total: Currency(USD) }
 ```
+
+#### The `yields` Clause
+
+A `command` or `query` may declare the response it produces, between the
+identifier and the body:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+command PlaceOrder yields event OrderPlaced is { cartId is CartId }
+query   GetOrder   yields result OrderInfo  is { orderId is OrderId }
+```
+
+A command's `yields` must resolve to an event and a query's to a result;
+anything else is an **Error**, as is `yields` on a type that is neither. See
+[Messages](message.md#declared-responses) for the conformance rules.
 
 ### Cardinality
 You can use a cardinality suffix or prefix with any of the type expressions 

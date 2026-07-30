@@ -14,6 +14,8 @@ code using AI. There are many kinds of resources to help you:
     model, then explore the resources below.
 
 - [Quickstart](quickstart.md) - Build your first RIDDL model in 5 minutes
+- [Migrating from 1.x](migration/1.x-to-2.0.md) - What changed in RIDDL 2.0
+  and the order to fix things in
 - [Introduction](introduction/index.md) - An introduction to RIDDL that answers fundamental
   questions for those that are new
 - [Guides](guides/index.md) - provide tutorials and guidance on how various kinds of users would

@@ -83,21 +83,44 @@ With those clarifying simplifications, here's the hierarchy:
 
 | Container | Can Contain |
 |-----------|-------------|
-| [**Root**](root.md) | [Domain](domain.md) |
-| [**Domain**](domain.md) | [Type](type.md), [Epic](epic.md), [Context](context.md) |
-| [**Epic**](epic.md) | [Case](case.md) → [Statement](statement.md) |
-| [**Context**](context.md) | [Type](type.md), [Entity](entity.md), [Projector](projector.md), [Saga](saga.md), [Adaptor](adaptor.md), [Processor](processor.md), [Function](function.md), [Streamlet](streamlet.md), [Handler](handler.md), [Group](element.md#group) |
-| [**Entity**](entity.md) | [Type](type.md), [State](state.md), [Function](function.md), [Handler](handler.md), [Invariant](invariant.md) |
-| [**State**](state.md) | [Type](type.md), [Field](field.md), [Handler](handler.md) |
-| [**Projector**](projector.md) | [Type](type.md), [Field](field.md), [Handler](handler.md) |
+| [**Root**](root.md) | [Domain](domain.md), [Module](module.md), [Author](author.md), [Version](version.md), [Copyright](copyright.md) |
+| [**Module**](module.md) | *any* top-level definition, flat and unordered |
+| [**Domain**](domain.md) | [Type](type.md), [Epic](epic.md), [Context](context.md), [Saga](saga.md), [User](user.md), [Author](author.md), [Repository](repository.md)†, [Connector](connector.md)†, [Version](version.md), [Copyright](copyright.md) |
+| [**Epic**](epic.md) | [Case](use-case.md) → [Interaction](interaction.md) |
+| [**Context**](context.md) | [Entity](entity.md), [Projector](projector.md), [Saga](saga.md), [Adaptor](adaptor.md), [Repository](repository.md), [Processor](processor.md), [Connector](connector.md), [Group](group.md)‡, + *processor contents* |
+| [**Entity**](entity.md) | [State](state.md), + *processor contents* |
+| [**State**](state.md) | [Handler](handler.md), [Invariant](invariant.md) |
+| [**Projector**](projector.md) | `updates`, + *processor contents* |
 | [**Saga**](saga.md) | [Type](type.md), [SagaStep](sagastep.md) → [Statement](statement.md) |
-| [**Adaptor**](adaptor.md) | [Type](type.md), [Handler](handler.md) |
-| [**Processor**](processor.md) | [Type](type.md), [Inlet](inlet.md), [Outlet](outlet.md), [Statement](statement.md) |
-| [**Streamlet**](streamlet.md) | [Type](type.md), [Inlet](inlet.md), [Outlet](outlet.md), [Connector](connector.md) |
-| [**Function**](function.md) | [Statement](statement.md) |
+| [**Adaptor**](adaptor.md) | *processor contents* |
+| [**Repository**](repository.md) | Schema, + *processor contents* |
+| [**Streamlet**](streamlet.md) | *processor contents* |
+| [**Function**](function.md) | [Statement](statement.md), [Field](field.md) |
 | [**Handler**](handler.md) | [On Clause](onclause.md) → [Statement](statement.md) |
-| [**Group**](element.md#group) | [Input](input.md), [Output](output.md) |
-| [**Invariant**](invariant.md) | [Conditional](conditional.md) |
+| [**Group**](group.md) | [Group](group.md), [Input](input.md), [Output](output.md), [Type](type.md) |
+| [**Invariant**](invariant.md) | a [Value](value.md) condition |
+
+† at domain scope only when the definition genuinely spans several contexts
+‡ only in a context with the `application` [intention](context.md#intention)
+
+***Processor contents*** — every [processor](processor.md) may contain:
+[Handler](handler.md), [Function](function.md), [Type](type.md),
+[Constant](constant.md), [Invariant](invariant.md), [Inlet](inlet.md),
+[Outlet](outlet.md), nested [Processor](processor.md),
+[Connector](connector.md), [Version](version.md), [Copyright](copyright.md),
+[Comment](comment.md), [Include](include.md).
+
+!!! info "New in RIDDL 2.0"
+    Four concepts are new, and one changed shape:
+
+    * [Module](module.md) — a flat, named collection of any top-level
+      definition, which absorbed the deprecated *nebula*
+    * [Version](version.md) — one component of a composed version coordinate
+    * [Copyright](copyright.md) — a named notice, inherited nearest-first
+    * [Standard Module](standard-module.md) — the predefined stream
+      terminators every model can use without importing anything
+    * [Processor](processor.md) — unified: every processor kind now bears
+      ports and carries a shape derived from its arity
 
 ## Next
 When you're done exploring all the concepts, check out our 

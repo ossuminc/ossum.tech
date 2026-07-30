@@ -1,12 +1,15 @@
 ---
 title: "Saga Steps"
 draft: false
+description: >-
+  One action in a saga, pairing a forward action with the compensating action
+  that reverses it.
 ---
 
 A saga step represents one action in a [Saga](saga.md)—a distributed
 transaction that coordinates changes across multiple components. Each step
-defines both a forward action (`do`) and a compensating action (`undo`) to
-enable rollback if later steps fail.
+defines both a forward action and a compensating action, so a later failure
+can be rolled back.
 
 ## Purpose
 
@@ -19,118 +22,107 @@ Saga steps provide:
 
 ## Syntax
 
+A step is an identifier, a forward block, and a `reverted by` compensation
+block. Inputs and outputs are declared once for the whole saga, not per step:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 saga ProcessPayment is {
+  requires record PaymentInputs
+  returns  record PaymentOutcome
+
   step ReserveInventory is {
-    input: { orderId: OrderId, items: OrderItem* }
-    output: { reservationId: ReservationId }
-
-    do {
-      tell entity Inventory to ReserveItems
-    }
-
-    undo {
-      tell entity Inventory to ReleaseReservation
-    }
+    tell command ReserveItems(orderId) to entity Inventory
+  } reverted by {
+    tell command ReleaseReservation(orderId) to entity Inventory
+  } with {
+    briefly as "Holds stock while payment is attempted"
   }
 
   step ChargePayment is {
-    input: { customerId: CustomerId, amount: Money }
-    output: { transactionId: TransactionId }
-
-    do {
-      tell entity PaymentService to ProcessCharge
-    }
-
-    undo {
-      tell entity PaymentService to RefundCharge
-    }
+    tell command ProcessCharge(customerId, amount) to entity PaymentService
+  } reverted by {
+    tell command RefundCharge(transactionId) to entity PaymentService
   }
 
   step CreateOrder is {
-    input: { customerId: CustomerId, items: OrderItem* }
-    output: { orderId: OrderId }
-
-    do {
-      tell entity OrderService to CreateOrder
-    }
-
-    undo {
-      tell entity OrderService to CancelOrder
-    }
+    tell command CreateOrder(customerId) to entity OrderService
+  } reverted by {
+    tell command CancelOrder(orderId) to entity OrderService
   }
+} with {
+  option is compensate
 }
 ```
+
+The `by` in `reverted by` is optional, as readability words generally are.
 
 ## Step Components
 
 | Component | Required | Description |
 |-----------|----------|-------------|
-| `input` | Yes | Data the step receives |
-| `output` | Yes | Data the step produces |
-| `do` | Yes | Forward action to perform |
-| `undo` | Yes | Compensation action for rollback |
+| identifier | Yes | The step's name |
+| forward block | Yes | The action to perform |
+| `reverted by` block | Yes | The compensation that reverses it |
+| `with { }` | No | Metadata, including step options |
 
 ## Execution Flow
 
 When a saga executes:
 
-1. Steps run in sequence, each `do` action executing in order
+1. Steps run in sequence, each forward action executing in order
 2. If a step fails, the saga reverses direction
-3. Each completed step's `undo` action runs in reverse order
+3. Each completed step's compensation runs in reverse order
 4. The saga completes when all compensations finish
 
 ```
-Normal flow:     Step1.do → Step2.do → Step3.do → Success
-Failure at S3:   Step1.do → Step2.do → Step3.do (fails)
-                          ↓
-Compensation:    Step2.undo → Step1.undo → Saga failed (clean state)
+Normal flow:     Step1 → Step2 → Step3 → Success
+Failure at S3:   Step1 → Step2 → Step3 (fails)
+                        ↓
+Compensation:    Step2.reverted → Step1.reverted → clean state
 ```
 
-## Example: Order Fulfillment Saga
+Add `option is compensate` on the [saga](saga.md) to declare that this
+rollback happens automatically. With `option is parallel`, all steps start at
+once and any one failure compensates in reverse order of the original sends.
 
-```riddl
-saga FulfillOrder is {
-  |Coordinates order fulfillment across inventory,
-  |payment, and shipping services.
+## One Failure Point Per Step
 
-  step ValidateOrder is {
-    input: { orderId: OrderId }
-    output: { validated: Boolean }
-    do { tell entity OrderValidator to ValidateOrder }
-    undo { prompt "No compensation needed for validation" }
-  }
+!!! warning "Validation"
+    A step's forward and compensating blocks are **all-or-nothing**: the
+    compensation assumes all or none of the forward block happened. A step
+    should therefore have **at most one** potential failure point, and more
+    than one draws a **Warning** suggesting the step be split.
 
-  step ReserveStock is {
-    input: { orderId: OrderId, items: OrderItem* }
-    output: { reservationId: ReservationId }
-    do { tell entity Inventory to ReserveItems }
-    undo { tell entity Inventory to ReleaseItems }
-  }
+    `send`, `tell`, `yield` and `put` can fail, and so can each embedded
+    `call` or `get` — `let x = call F(get from input I)` counts as two. The
+    count walks nested `when`, `match` and `foreach` bodies too.
 
-  step ProcessPayment is {
-    input: { orderId: OrderId, amount: Money }
-    output: { paymentId: PaymentId }
-    do { tell entity PaymentGateway to Charge }
-    undo { tell entity PaymentGateway to Refund }
-  }
+    This is the concrete form of the "keep steps small" advice below: a step
+    that can fail in two places cannot be cleanly compensated.
 
-  step ShipOrder is {
-    input: { orderId: OrderId, address: Address }
-    output: { trackingNumber: String }
-    do { tell entity ShippingService to CreateShipment }
-    undo { tell entity ShippingService to CancelShipment }
-  }
-}
-```
+!!! warning "Steps stay within one domain"
+    Every reference in a step must resolve to a definition within the saga's
+    own enclosing [domain](domain.md). A reference owned by a different domain
+    is an **Error**.
+
+## Options
+
+`timeout` (1 argument), `retry` (1–2 arguments) and `delay` (1 argument) may
+be set in a step's `with { }` block.
+
+## Statements Available
+
+A saga step's blocks admit `send`, `tell`, `yield`, `put`, `do` and `error`.
 
 ## Best Practices
 
 1. **Make steps idempotent**: Steps should be safe to retry
-2. **Keep steps small**: Each step should do one thing
-3. **Design compensations carefully**: Ensure undo truly reverses the action
-4. **Handle partial failures**: Some actions can't be fully undone (e.g., sent
-   emails)—design accordingly
+2. **Keep steps small**: One failure point per step, which the validator
+   checks
+3. **Design compensations carefully**: Ensure the reversal truly reverses
+4. **Handle partial failures**: Some actions can't be fully undone (a sent
+   email, for instance) — design accordingly
 5. **Log everything**: Saga debugging requires visibility into each step
 
 ## Occurs In
@@ -139,4 +131,4 @@ saga FulfillOrder is {
 
 ## Contains
 
-* [Statements](statement.md) within `do` and `undo` blocks
+* [Statements](statement.md) within the forward and `reverted by` blocks

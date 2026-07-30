@@ -20,17 +20,41 @@ Includes help you:
 
 ## Syntax
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 include "path/to/file.riddl"
 ```
 
 The path is relative to the file containing the include statement.
 
+## An Include Is a Node, Not a Paste
+
+It is tempting to think of an include as textual substitution. It is not. The
+include becomes a **node** in the model, and the definitions from the included
+file are that node's children.
+
+Nothing is copied. Traversal descends through the node, so the included
+definitions participate exactly as though they had been written in place —
+references to them resolve, validation covers them, and generators see them.
+
+The node also records the file the content **came from**, which is how a
+diagnostic can point at the right file and line.
+
+!!! warning "Flattening discards that origin"
+    `riddlc flatten` removes include nodes, promoting their children into the
+    enclosing container. The definitions survive; the record of which file
+    each came from does not.
+
+    A model does not need flattening to work — it already works. Flatten only
+    when a single self-contained file is genuinely what you want, and expect
+    to lose the file structure in exchange.
+
 ## Example: Organizing a Domain
 
 A complex domain might be organized like this:
 
 **main.riddl**
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 domain ECommerce is {
   include "types/common-types.riddl"
@@ -54,6 +78,7 @@ type Address is {
 ```
 
 **contexts/catalog.riddl**
+<!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
   entity Product is {

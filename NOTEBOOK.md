@@ -13,9 +13,86 @@ to the task file and note completion in this notebook.
 
 ## Current Status
 
-Documentation site is complete and deployed at https://ossum.tech.
-All major sections are documented with proper RIDDL syntax
-highlighting.
+Documentation site is deployed at https://ossum.tech. All major
+sections are documented with proper RIDDL syntax highlighting.
+
+**In progress — RIDDL 2.0 docs on `release/2` (2026-07-28):**
+
+Documentation is being versioned with `mike`, one entry per RIDDL
+MINOR version. Nothing is pushed yet; all work is local.
+
+| branch | publishes as | role |
+|--------|--------------|------|
+| `docs/1.x` | `1.31` `[latest]` | 1.x maintenance line, live not frozen |
+| `release/2` → `main` | `2.0` `[next]` | becomes `[latest]` when 2.0 ships |
+
+Key facts to carry forward:
+
+- `docs-version.yml` on each branch declares what it publishes.
+  The release-time flip is a one-line edit there, not a workflow
+  change.
+- CI publishes only from `main` and `docs/1.x`, so `release/2`
+  cannot refresh production.
+- The `gh-pages` restructure is **not done** — it is supervised
+  and happens at merge time. Runbook:
+  `scripts/migrate-gh-pages-to-mike.md`, with backup branch and
+  rollback.
+- Live URLs are `.html`-style (the `offline` plugin sets
+  `use_directory_urls: false`), and mike preserves that. Only a
+  version prefix is added. `scripts/gh-pages-404.html` rewrites
+  legacy links.
+- Rehearsed against a clone of real `gh-pages`: mike leaves
+  `CNAME`/`.nojekyll` alone and does not conflict with `offline`.
+
+**Remaining before merge:** the RBBQ tutorial re-sync (blocked on
+`riddl-models`, see below), and a final read-through.
+
+### Traps found while doing this work
+
+- **`mkdocs build --strict` does NOT fail on dangling intra-page
+  anchors.** It reports them at INFO and exits 0. Always also run
+  `mkdocs build --strict 2>&1 | grep -E 'anchor|WARNING|ERROR'`.
+- **`sbt extractGrammar` would overwrite the 2.0 grammar.** It
+  resolves the *published* riddl library, still 1.29.0. `build.sbt`
+  carries a warning at the task. Bump the library version to 2.0.0
+  before running it again.
+- The local machine has mkdocs-material **Insiders**; CI installs
+  the community edition. Do not use Insiders-only features.
+
+### Incoming tasks cleared (2026-07-28)
+
+All four `task/` files closed to `task/done/`.
+
+- **document-code-statement** — added a Code Statement section to the language
+  reference (it had none) and extended `concepts/statement.md` with the
+  escape-hatch semantics. Claims re-verified against the compiler.
+- **migration-guide-gaps** — findings real, **premise wrong**. All four
+  reported breakages fail identically under 1.31 *and* 2.0, and the grammars
+  are identical on each point, so none is a 1.x→2.0 change. Documented in the
+  language reference under a new "Common Parse Errors" section instead of the
+  migration guide, where they would have misled anyone upgrading from 1.31.
+  Item 4 routed to riddl.
+- **upgrade-riddl-1.13.1 / 1.13.3** — obsolete; `build.sbt` is on 1.29.0.
+
+Two things worth remembering from that work:
+
+- A user type named after a **parameterized** predefined (`Currency`,
+  `Decimal`, `Pattern`, `Id`) gives `Expected ("(")` at the **use site**,
+  arbitrarily far from the declaration. A **bare** one (`Location`) gives a
+  clear error at the declaration. That asymmetry is why `Currency` was hard to
+  diagnose.
+- The `code` statement's language tag is matched by **prefix**, so `javafoo`
+  and `pythonic` parse. Only `scala`/`java`/`python`/`mojo` are supported.
+
+Filed against riddl: `riddl/task/2026-07-28-grammar-questions-from-docs.md`
+(comment-with-`???`, and `command X()` leniency).
+
+### Cross-repo dependency
+
+`riddl-models/task/2026-07-26-release2-syntax-migration.md` has an
+appended section for re-syncing the RBBQ tutorial. The tutorial
+deliberately still shows 1.x syntax, with a note saying so, because
+its 30 pages quote that repo verbatim.
 
 **Completed (2026-07-21):**
 

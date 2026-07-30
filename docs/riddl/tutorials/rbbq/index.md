@@ -18,6 +18,23 @@ chain, Reactive BBQ.
     Every code snippet in this tutorial is copied verbatim from that
     source.
 
+!!! info "RIDDL 1.x syntax"
+
+    This tutorial's code is copied verbatim from `riddl-models`, which
+    migrates to RIDDL 2.0 syntax on its own schedule. Until it does, the
+    snippets here use constructs that 2.0 still parses but reports as
+    `[deprecated]` — chiefly `state X of Y` without the `record` keyword,
+    the `prompt` statement, `reply`, and the dedicated streamlet shape
+    keywords.
+
+    Keeping the tutorial in step with the model source matters more than
+    keeping it in step with the newest spelling: a snippet that disagrees
+    with the file it claims to quote is worse than one that is a version
+    behind. The [concepts](../../concepts/index.md) and
+    [language reference](../../references/language-reference.md) describe
+    2.0 syntax throughout, and the deprecated forms are listed there with
+    their replacements.
+
 ## About Reactive BBQ
 
 The Reactive BBQ domain is a familiar one for those who have taken the

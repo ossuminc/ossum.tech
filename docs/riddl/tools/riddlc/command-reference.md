@@ -16,6 +16,7 @@ riddlc [common-options] command [command-options]
 | Command | Description |
 |---------|-------------|
 | `about` | Print out information about RIDDL |
+| `advise` | Report remediation advice for a model |
 | `bastify` | Convert a RIDDL file to BAST (Binary AST) format |
 | `dump` | Dump the AST of the input file |
 | `flatten` | Flatten all includes into a single file |
@@ -57,8 +58,58 @@ These options apply to all commands:
 | `-G`, `--group-messages-by-kind` | Group messages by severity |
 | `-x`, `--max-parallel-parsing` | Max parallel include file parsing |
 | `--max-include-wait` | Max time to wait for include parsing |
+| `-c`, `--show-completeness-warnings` | Control completeness warning display |
 | `--warnings-are-fatal` | Treat warnings as errors |
 | `-B`, `--auto-generate-bast` | Auto-generate .bast files after parsing |
+| `--provide-tips` | Include a remediation suggestion with each message that has one, for AI-assisted fixing |
+| `--check-figma-drift` | Check `figma` references against the Figma REST API |
+
+### Completeness Warnings
+
+`--show-completeness-warnings` (default: on) controls severity-4 messages —
+models that parse and validate but lack detail needed for a complete,
+implementable specification.
+
+When it is on, `validate` additionally runs the message-flow, entity-lifecycle
+and use-case analyses, so epic and use-case completeness warnings surface here
+rather than only through the analysis API. When it is off, those passes are
+skipped entirely and cost nothing.
+
+### Figma Drift Checking
+
+`--check-figma-drift` is **off by default** and verifies that each
+`figma "<file>" node "<id>"` reference in the model still resolves:
+
+```bash
+export FIGMA_TOKEN=figd_...
+riddlc --check-figma-drift validate model.riddl
+```
+
+A node the API does not know about is an **Error**; a frame whose name no
+longer corresponds to the annotated definition's name is a **Warning**.
+
+An offline or token-less build cannot be affected. No token means no client at
+all, and every failure to reach or understand the API produces nothing —
+**only a successful API answer can produce a message**. With the flag on but
+no client available, one informational message says so, and that is the whole
+consequence.
+
+The HOCON equivalent for a `from` configuration file is `check-figma-drift`.
+
+### Deprecation Messages
+
+RIDDL 2.0 gives deprecations their own `[deprecated]` label rather than
+rendering them as ordinary warnings, so a model can be checked for zero
+deprecations independently of zero warnings:
+
+```bash
+riddlc validate model.riddl 2>&1 | grep '\[deprecated\]'
+```
+
+They also surface under **every** command that parses — `parse`, `stats`,
+`bastify`, `prettify` and the generation commands — not only `validate`. In
+1.x a successful parse that accumulated any message discarded the result, so
+parse-time warnings never reached the user at all.
 
 ## Command Details
 
@@ -131,11 +182,30 @@ Options:
 
 ### flatten
 
-Resolve all includes into a single file:
+Collapse a multi-file model into a single file:
 
 ```bash
 riddlc flatten input-file.riddl -o output-file.riddl
 ```
+
+This removes every `include` and `import` node, promoting its children into
+the enclosing container. In RIDDL 2.0 it covers **both**: `import` nodes from
+`.bast` modules are flattened alongside `include` nodes from source files.
+
+!!! warning "Flattening is lossy, and is not a prerequisite for anything"
+    An `include` or `import` is a **node** in the model whose children are the
+    definitions it brought in. Passes traverse through it, so those definitions
+    already resolve, validate and generate exactly as if written in place. You
+    do **not** need to flatten to make a multi-file model work.
+
+    What flattening removes is the **origin**: after it, nothing records which
+    file or module a definition came from. That costs you the file attribution
+    in diagnostics and the ability to tell your own model apart from what it
+    imported.
+
+    Use it only when a single self-contained file is the actual goal — handing
+    one file to a tool that cannot follow includes, for instance — and keep the
+    unflattened model as the source of truth.
 
 ### stats
 
@@ -194,12 +264,28 @@ Example output:
 ```
 [info] About riddlc:
 [info]            name: riddlc
-[info]         version: 1.1.2
-[info]   documentation: https://riddl.tech
+[info]         version: 2.0.0-rc.1
+[info]      git commit: ebce6ba945739bef06907445e5a570b2d030591b
+[info]   documentation: https://ossum.tech/riddl
 [info]       copyright: © 2019-2026 Ossum Inc.
 [info]        licenses: Apache License, Version 2.0
 [info]    organization: Ossum Inc.
-[info]   scala version: 3.3.7
+[info]   scala version: 3.9.0
+```
+
+`git commit` is new in RIDDL 2.0: the full source SHA the binary was built
+from. It lets a model repository locate the exact compiler changes a given
+`riddlc` embodies — useful when a validation message appears that an older
+build did not produce. Outside a git checkout it reads `unknown`.
+
+### advise
+
+Report remediation advice for a model. Pairs with `--provide-tips`, which
+attaches a suggested fix to each message that has one — intended for
+AI-assisted correction.
+
+```bash
+riddlc advise model.riddl
 ```
 
 ### help

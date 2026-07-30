@@ -32,9 +32,37 @@ might devise a domain hierarchy like this:
     * Handtruck
     * Human With Training Wheels
 
+## Cross-Context Definitions
+
+Domains are inert, but two definitions may live at domain scope precisely
+because they *span* the contexts beneath it:
+
+- A [Repository](repository.md) that synthesizes data from entities in several
+  contexts, and is queried by several contexts
+- A [Connector](connector.md) whose two ends are ports in different contexts
+
+Both are validated for correct scope. A domain-scoped repository that reaches
+only one context is an **Error** — it is provably unnecessary there. A
+context-scoped connector whose ends cross contexts is likewise an Error, and so
+is the reverse.
+
+## Authorship and Attribution
+
+A domain is one of only two places an [author](author.md) may be *defined*
+(the other is a [Module](module.md)); everywhere else, authors are referenced
+with `by author Name`. A domain may also declare a [version](version.md) and a
+[copyright](copyright.md).
+
+!!! warning "Validation"
+    A domain that identifies no author — considering its own author references
+    and defined authors, as well as those of any enclosing domain — draws a
+    **MissingWarning**. It is suppressible through the existing missing-warning
+    gates.
+
 ## Occurs In
 
 * [Root](root.md)
+* [Modules](module.md)
 * [Domains](domain.md) :material-recycle: — domains
   can be nested in a super-domain
 
@@ -42,17 +70,20 @@ might devise a domain hierarchy like this:
 
 Within a domain, you can define these things:
 
-* [Actors](user.md) - someone or thing that uses the domain
-* [Applications](application.md) - a user interface
+* [Users](user.md) - someone or thing that uses the domain
 * [Authors](author.md) - who defined the domain
+* [Connectors](connector.md) - when the two ends are in different contexts
 * [Contexts](context.md) - a precisely defined bounded context
-  within the domain
+  within the domain, including [application](application.md) contexts
+* [Copyrights](copyright.md) - the applicable legal notice
 * [Domains](domain.md) :material-recycle: - domains
   can have nested domains (subdomains)
 * [Epics](epic.md) - a story about external entities
   interacting with the domain
-* [Includes](include.md) - inclusion of entity content from a
-  file
+* [Includes](include.md) and `import` directives
+* [Repositories](repository.md) - when they synthesize across contexts
+* [Sagas](saga.md) - multi-step atomic processes
 * [Types](type.md) - information definitions used throughout
   the domain
+* [Versions](version.md) - one component of the version coordinate
 

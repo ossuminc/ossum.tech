@@ -8,12 +8,71 @@ other definitions. We can define functions in several places and then use
 them in an expression or action. This way, we only need to define the logic 
 for something once.
 
+## Signature
+
+A function's `requires` and `returns` may name an existing [type](type.md)
+rather than spelling out an inline aggregation, which makes unary and nullary
+functions natural to write:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+function CalculateTotal is {
+  requires record TotalInputs
+  returns Price
+
+  return call function Tax.Apply(subtotal)
+}
+```
+
+Any type works, and the kind keyword is optional: `requires Age`,
+`requires type Age` and `requires record Args` are all valid.
+
+!!! warning "The inline aggregation form is deprecated"
+    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+    ```riddl
+    requires { subtotal is Price, taxes is Price }   // still works
+    ```
+    It continues to parse and validate but emits a `[deprecated]` message.
+    Name a type instead.
+
+## Functions Must Be Pure
+
+A function body may **not** write entity state (`set`, `morph`, `become`), nor
+`send`, `tell` or `yield`. This is enforced at **parse** time, so an effect
+statement can never enter a function's AST at all.
+
+What remains legal is refusal (`require`, `error`) and pure computation
+(`let`, `when`, `match`, `foreach`, `do`, `return`, embedded code blocks).
+
+Purity is what makes a function safe to `call` from anywhere — a handler body
+or another function — with no scope gate and no ordering concern.
+
+## Calling a Function
+
+`call` is a [value](value.md) expression rather than a bare statement, because
+a pure function's result would otherwise be discarded:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+let total = call function Pricing.CalculateTotal(subtotal, taxRate = rate)
+set field grandTotal to call function Tax.Apply(total)
+```
+
+Arguments are positional first, then named, and are bound to the function's
+`requires` fields. Calling a function that declares no `returns` is an
+**Error**.
+
 ## Occurs In
-* [Contexts](context.md)
-* [Entities](entity.md)
-* [Handlers](handler.md)
+* Any [processor](processor.md) — [contexts](context.md),
+  [entities](entity.md), repositories, projectors, adaptors, streamlets
+* [Modules](module.md)
 
 ## Contains
 * [Fields](field.md)
 * [Statements](statement.md)
 * [Functions](function.md) :material-recycle:
+
+!!! info "A Function is not a Processor"
+    A Function extends the [vital definition](vital.md) base rather than
+    [Processor](processor.md), so it bears no [ports](inlet.md), no
+    [version](version.md) and no [copyright](copyright.md).

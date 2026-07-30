@@ -1,0 +1,9 @@
+# Python packages needed to build and publish ossum.tech.
+#
+# CI installs these, then `pip install -e .` for the RIDDL Pygments lexer.
+# Keep to the community edition of mkdocs-material: a local machine may have
+# Insiders installed, but CI does not, so Insiders-only features must not be
+# used in mkdocs.yml.
+
+mkdocs-material>=9.5
+mike>=2.1

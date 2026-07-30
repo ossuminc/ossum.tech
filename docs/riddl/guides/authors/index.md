@@ -112,6 +112,7 @@ domain OnlineRetail is {
 Types define the shape of information in your model. Start with the core
 concepts in your domain—the "nouns" of your ubiquitous language.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 context Catalog is {
   type ProductId is Id(Product) with {
@@ -120,7 +121,7 @@ context Catalog is {
 
   type Money is {
     amount is Decimal(10,2),
-    currency is Currency("USD")
+    currency is Currency(USD)
   } with {
     briefly "Monetary amount with currency"
   }
@@ -224,7 +225,7 @@ handler CartHandler is {
   }
 
   on query GetCartContents {
-    reply result CartContents with { items: @fields.items }
+    yield result CartContents with { items: @fields.items }
   }
 } with {
   briefly "Handles shopping cart operations"
@@ -323,6 +324,7 @@ validation messages.
 Every definition should have at least a `briefly` clause. Important
 definitions should also have full `described as` blocks:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   // ... entity contents ...
@@ -346,6 +348,7 @@ entity Order is {
 
 For large models, split content across multiple files:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 // main.riddl
 domain OnlineRetail is {
@@ -355,6 +358,7 @@ domain OnlineRetail is {
 }
 ```
 
+<!-- riddl: in-domain -->
 ```riddl
 // catalog.riddl
 context Catalog is {
@@ -457,7 +461,7 @@ entity Order is {
   record ShippedData is { orderId is OrderId, shippedAt is TimeStamp }
   record CancelledData is { orderId is OrderId }
 
-  state Pending of PendingData is {
+  state Pending of record PendingData is {
     handler PendingHandler is {
       on command ConfirmPayment {
         morph entity Order to state Paid
@@ -472,7 +476,7 @@ entity Order is {
     }
   }
 
-  state Paid of PaidData is {
+  state Paid of record PaidData is {
     handler PaidHandler is {
       on command Ship {
         morph entity Order to state Shipped
@@ -482,11 +486,11 @@ entity Order is {
     }
   }
 
-  state Shipped of ShippedData is {
+  state Shipped of record ShippedData is {
     // Final state - no transitions out
   }
 
-  state Cancelled of CancelledData is {
+  state Cancelled of record CancelledData is {
     // Final state - no transitions out
   }
 } with {

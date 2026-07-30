@@ -2,7 +2,11 @@ name: publishing
 on:
   push:
     branches:
-      - main
+      # Each publishing branch declares the version it deploys as in
+      # docs-version.yml. release/2 is deliberately absent: work in progress
+      # must not refresh the production site.
+      - main        # RIDDL 2.0 documentation
+      - docs/1.x    # RIDDL 1.x maintenance line
 permissions:
   contents: write
 jobs:
@@ -10,13 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # mike commits into the gh-pages branch, so its history must be
+          # present locally. The default shallow checkout does not fetch it.
+          fetch-depth: 0
       - name: Configure Git Credentials
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: 3.x
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
       - uses: actions/cache@v4
         with:
@@ -24,9 +32,22 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      # Pinned below 10.x: Material 10 / MkDocs 2.0 are backward-incompatible.
-      - run: pip install "mkdocs-material>=9.5,<10"
+      - run: pip install -r requirements.txt
       - run: pip install -e .
-      # Fail the build on broken links, missing nav targets, or bad includes.
-      - run: mkdocs build --strict
-      - run: mkdocs gh-deploy --force
+      - name: Read the documentation version for this branch
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          import yaml
+          cfg = yaml.safe_load(open("docs-version.yml"))
+          print(f"DOCS_VERSION={cfg['version']}")
+          print(f"DOCS_ALIASES={' '.join(cfg.get('aliases') or [])}")
+          PY
+      - name: Deploy with mike
+        run: |
+          echo "Publishing version $DOCS_VERSION with aliases: $DOCS_ALIASES"
+          # --alias-type copy is REQUIRED, not a preference. mike's default is
+          # `symlink`, and GitHub Pages does not follow symlinks -- so
+          # /latest/... would 404 in production while working perfectly under a
+          # local `python -m http.server`, which does follow them.
+          mike deploy --push --update-aliases --alias-type copy \
+            "$DOCS_VERSION" $DOCS_ALIASES

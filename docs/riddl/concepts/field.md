@@ -6,6 +6,7 @@ draft: false
 Fields are the unit of composition of an aggregate type, state, or 
 projection. A field is a simple mapping of a name to a type. For example:
 
+<!-- riddl: in-record -->
 ```riddl
 name: Number
 ```

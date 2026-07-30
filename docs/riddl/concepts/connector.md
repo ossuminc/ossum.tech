@@ -1,100 +1,138 @@
 ---
 title: "Connector"
 draft: false
+description: >-
+  A uni-directional conduit joining exactly one outlet to exactly one inlet,
+  with validated placement and cardinality.
 ---
 
 # Connector
+
 Connectors are uni-directional conduits for reliably transmitting data of a
-particular [type](type.md).
+particular [type](type.md). A connector joins exactly one
+[outlet](outlet.md) to exactly one [inlet](inlet.md).
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+connector OrderFlow is
+  from outlet OrderEventSource.OrderEvents
+  to inlet OrderEnricher.RawOrders
+with {
+  briefly as "Connects the order source to enrichment"
+}
+```
 
 ## Data Transmission Type
-Pipes can transmit any data type that RIDDL can specify. There is only one
-data type that flows in a pipe.  The transmission type is often used with
-an [alternation](type.md#alternation ) of
-[messages](message.md) such as the
-commands and queries that an [entity](entity.md) might receive.
 
-## Pipe End Connections
-Pipes have two ends, `from` and `to`, and each must be connected to a 
-[processor](processor.md). Data elements of the transmission 
-type flow from `from` to `end`. Such end connections may be closed or 
-open. A closed end is specified in the definition of the pipe by 
-connecting it to an [inlet](inlet.md) (for `to` ends) or 
-[outlet](outlet.md) (for `from` ends).
-An open end is not specified in the pipe definition. Instead, it is 
-implied by use of the`publish` and `subscribe`
-[statements](statement.md)s. This permits multiple
-publishers and multiple subscribers. 
+A connector transmits one data type. The transmission type is often an
+[alternation](type.md#alternation) of [messages](message.md), such as the
+commands and queries an [entity](entity.md) might receive.
 
+The outlet's type and the inlet's type must be compatible. A port typed
+`Anything` is compatible with every other type — which is what lets the
+[standard module's](standard-module.md) universal terminators accept any
+stream.
 
-## Pipe Options
-Pipes may play a large role in the resiliency of a reactive system, so we 
-permit a variety of options to be specified on them. These options are 
-only intended as advice to the translators converting the pipe into something 
-else. For example, a pipe may or may not need to be persistent. If a pipe has
-the burden of persistence removed, it is likely much more performant because 
-the latency of storage is not involved.
+## Port Cardinality
+
+**Exactly one connector may attach to any given port.**
+
+Fan-in and fan-out are modeled by declaring **multiple ports** — the arity is
+what derives a `merge` or `split` [shape](processor.md#shape) — never by
+attaching several connectors to a single port.
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+// Correct: a split declares two outlets, each with its own connector
+processor Router as split is {
+  inlet incoming is type Order
+  outlet domestic is type Order
+  outlet international is type Order
+}
+connector ToDomestic      is from outlet Router.domestic      to inlet Home.in
+connector ToInternational is from outlet Router.international to inlet Abroad.in
+```
+
+Attaching more than one connector to a port is an **Error**.
+
+## Scope
+
+A connector may be declared in a [Context](context.md) or, when its two ends
+are in different contexts, in the enclosing [Domain](domain.md).
+
+!!! warning "Placement validation"
+    Both ends are resolved, and their owning contexts and domains compared:
+
+    - **Error** — the ends resolve to different **domains**. A stream edge
+      across a domain boundary is a failure of domain analysis, not something
+      to wire around.
+    - **Error** — a domain-scoped connector whose ends share one context. It is
+      over-scoped; move it into that context.
+    - **Error** — a context-scoped connector whose ends cross contexts. It is
+      under-scoped; promote it to domain scope.
+    - **CompletenessWarning** — a domain-scoped cross-context connector without
+      the `persistent` option. Durability at a context boundary can be model
+      correctness, not merely a deployment concern.
+
+    These checks are conservative: they only fire when both ends resolve.
+
+## Options
+
+Connector options are advice to the translators converting a connector into
+something else. A connector often plays a large part in a reactive system's
+resilience, so several are available.
+
+| Option | Arguments | Meaning |
+|--------|:---------:|---------|
+| `persistent` | 0 | Messages are persisted to stable, durable storage, so they survive failure or shutdown |
+| `ordered` | 0 | Delivery preserves order |
+| `unordered` | 0 | Delivery order is not significant, enabling partitioning and parallelism |
+| `at-least-once` | 0 | Each item is delivered one or more times; handlers must be idempotent |
+| `at-most-once` | 0 | Each item is delivered zero or one times; loss is possible |
+| `exactly-once` | 0 | Each item is delivered precisely once |
+| `partitioned` | 1 | Data is partitioned by a key so a consumer group can process it in parallel |
+| `circuit-breaker` | 0–2 | Trip the connection when the downstream is failing |
 
 ### `persistent`
-The messages flowing through the pipe are persisted to stable, durable storage,
-so they cannot be lost even in the event of system failure or shutdown. This
-arranges for a kind of 
-[bulkhead](https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead) 
-in the system that retains
-published data despite failures on either end of the pipe
 
-### `commitable`
-With this option, pipes support the notion of being _commitable_. This means
-the consuming processors of a pipe's data may commit to the pipe that they
-have completed their work on one or more data items. The pipe then guarantees
-that it will never transmit those data items to that processor again. This is
-helpful when the processor is starting up to know where it left off from its
-previous incarnation.
+Messages flowing through the connector are persisted to stable, durable
+storage, so they cannot be lost even if the system fails or shuts down. This
+arranges a kind of
+[bulkhead](https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead)
+that retains published data despite failures on either end.
 
-### `partitions(n)`
-For scale purposes, a pipe must be able to partition the data by some data
-value that is in each data item (a _key_) and assign the consumption of the
-data to corresponding members of a consumer group. This permits multiple
-instances of a consuming processor to handle the data in parallel. The `n`
-value is the minimum recommended number of partitions which defaults to 5
-if not specified
+Removing the burden of persistence is likely to make a connector considerably
+more performant, since storage latency is no longer involved — which is why it
+is opt-in rather than the default.
 
-### `lossy`
+### Delivery semantics
 
-By default, pipes provide the guarantee that they will deliver each data item
-_at least once_. The implementation must then arrange for data items to be 
-idempotent so that the effect of running the event two or more times is the
-same as running it once. To counteract this assumption a pipe can be use the
-`lossy` option which reduces the guarantee to merely _best reasonable effort_,
-which could mean loss of data. This may increase throughput and lower overhead
-and is warranted in situations where data loss is not catastrophic to the
-system. For example, some IoT systems permit this kind of data loss because 
-the next transmission is imminent.
+`at-least-once` requires the implementation to make handling idempotent, so
+that running an item twice has the same effect as running it once.
+`at-most-once` relaxes that to best-effort, which may increase throughput and
+lower overhead where data loss is not catastrophic — some IoT systems permit it
+because the next transmission is imminent.
 
-## Producers & Consumers
+## Producers and Consumers
 
-Attached to the ends of pipes are producers and consumers. These are
-[processors](processor.md) of data and may originate, 
-terminate or flow data through them,
-connecting two pipes together. Producers provide the data, consumers consume
-the data. Sometimes we call producers *sources* because they originate the data.
-Sometimes we call consumers *sinks* because they terminate the data.
+Attached to the ends of connectors are producers and consumers. These are
+[processors](processor.md) that may originate, terminate, or flow data through
+them, joining two connectors together.
 
 ```mermaid
 graph LR;
-Producers --> P{{Pipe}} --> Consumers
-Source --> P1{{Pipe 1}} --> Flow --> P2{{Pipe 2}} --> Sink
+Source --> C1{{Connector 1}} --> Flow --> C2{{Connector 2}} --> Sink
 ```
 
-Pipes may have multiple publishers (writers of data to the pipe) and multiple
-consumers (readers of data from the pipe). In fact, because of the
-_partitioned consumption_ principle, there can be multiple groups of consumers,
-each group getting each data item from the pipe.
+Because each port takes exactly one connector, a processor that must serve
+several downstream consumers does so by declaring several outlets — becoming a
+`split` — rather than by sharing one outlet among several connectors.
 
 ## Occurs In
 
-* [Streamlets](streamlet.md)
-
+* [Contexts](context.md)
+* [Domains](domain.md) — when the two ends are in different contexts
 
 ## Contains
+
 Nothing
