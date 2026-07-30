@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+INHERIT: ../common.yml
+
+site_name: Synapify Documentation
+site_url: https://ossum.tech/synapify/latest/
+edit_uri: edit/main/sites/synapify/docs/
+
+extra:
+  version:
+    provider: mike
+    alias: true
+
+nav:
+  - Home: index.md
+  - User Interface: user-interface.md
+  - Generation: generation.md
+  - Simulation: simulation.md

@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+INHERIT: ../common.yml
+
+site_name: riddlg Documentation
+site_url: https://ossum.tech/riddlg/latest/
+edit_uri: edit/main/sites/riddlg/docs/
+
+extra:
+  # riddlg releases on its own cadence, so it carries its own version axis and
+  # its own /riddlg/versions.json -- it is no longer stamped with RIDDL's
+  # version number.
+  version:
+    provider: mike
+    alias: true
+
+# The MCP guides live here rather than with the RIDDL language docs because
+# that is where their links point: 21 of their 22 outbound links target riddlg
+# pages (installation, mcp-tools, server-api) and only one targets RIDDL. They
+# document the server riddlg drives, so they version with riddlg.
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Command Reference: command-reference.md
+  - Generators: generators.md
+  - AI Providers: ai-providers.md
+  - AI Models: models.md
+  - Configuration: configuration.md
+  - Server API: server-api.md
+  - MCP Tools: mcp-tools.md
+  - Release Notes: release-notes.md
+  - MCP Clients:
+    - MCP/index.md
+    - Claude Desktop: MCP/claude-desktop.md
+    - Claude Code: MCP/claude-code.md
+    - GitHub Copilot CLI: MCP/github-copilot.md
+    - VS Code Copilot: MCP/vscode-copilot.md
+    - Gemini: MCP/gemini.md
+    - IntelliJ AI Assistant: MCP/intellij-ai.md
+    - IntelliJ Junie: MCP/intellij-junie.md

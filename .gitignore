@@ -1,3 +1,10 @@
+# Shared assets are stored once in common/ and copied into each sub-site's
+# docs tree by scripts/sync-shared-assets.sh. Ignore the copies so there is
+# exactly one editable original.
+/sites/*/docs/assets/
+/sites/*/docs/stylesheets/
+/sites/*/site/
+
 /.idea/
 /.bsp/
 /project/project/

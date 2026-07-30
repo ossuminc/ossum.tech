@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+INHERIT: ../common.yml
+
+site_name: Ossum Technologies
+site_url: https://ossum.tech/
+edit_uri: edit/main/sites/shell/docs/
+
+# NO `extra.version` block, and mike is never run against this config. The
+# shell is the unversioned part of the site: the landing page, the company
+# pages and the privacy policy, none of which track a product release. Before
+# the split these were rebuilt into every RIDDL version directory, so the
+# privacy policy existed once per RIDDL version and a correction had to be
+# landed on two branches to be visible at both URLs.
+#
+# It deploys to the gh-pages ROOT, so `mike set-default` must always be given
+# a --deploy-prefix; without one it would overwrite this site's index.html
+# with a redirect. See scripts/migrate-to-per-product-versioning.md.
+nav:
+  - Home: index.md
+  - Coming Soon: coming-soon/index.md
+  - About:
+    - about/index.md
+    - Privacy Policy: about/privacy-policy.md
