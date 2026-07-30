@@ -109,47 +109,75 @@ The site will be available at `http://localhost:8000` when serving locally.
 
 ## Documentation Versioning
 
-The site is versioned with [`mike`](https://github.com/jimporter/mike), one
-entry per RIDDL **minor** version — never per patch. Each version builds from
-a **different git ref**, so there is never a second copy of unchanged prose to
-maintain.
+**The site is four MkDocs projects, not one.** `mike` versions a whole project,
+so a single project meant every product carried RIDDL's version number — the
+privacy policy existed once per RIDDL version, and the Synapify docs were
+stamped `2.0`. Each product now deploys under its own prefix with its own
+`versions.json` and its own version selector.
 
-| Branch | Publishes as | Role |
-|--------|--------------|------|
-| `docs/1.x` | `1.31` `[latest]` | The RIDDL 1.x maintenance line. Live, not frozen — a future 1.32 is documented here and deploys from here. |
-| `main` | `2.0` `[next]` | RIDDL 2.0. Becomes `[latest]` when 2.0 ships. |
+| Deployed at | Source | Published from |
+|---|---|---|
+| `/` | `sites/shell/` — landing page, About, Coming Soon | `main`, **unversioned** |
+| `/riddl/<ver>/` | `sites/riddl/` — language docs plus `OSS/` | `main` (2.0), `docs/1.x` (1.31) |
+| `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | `main` |
+| `/synapify/<ver>/` | `sites/synapify/` | `main` |
 
-`docs-version.yml` at the repo root is the single place a branch declares what
-it publishes as. The release-time alias flip is a one-line edit there, not a
-workflow change.
+One documentation version per product **minor** version, never per patch.
 
-**Only `main` and `docs/1.x` publish.** Work branches such as `release/2` can
-be pushed freely without touching production.
+The MCP guides live with riddlg, not with the language docs, because 21 of
+their 22 outbound links point at riddlg — they document the server riddlg
+drives, so they version with it.
+
+`docs-version.yml` is where a branch declares what it publishes; the
+release-time alias flip is an edit there, not a workflow change. **Only `main`
+and `docs/1.x` publish**, so work branches can be pushed freely.
+
+Shared theme config lives in `sites/common.yml`, pulled in with `INHERIT`.
+Shared logos and CSS live once in `common/` and are copied into each site by
+`scripts/sync-shared-assets.sh` — **run it before any build**, or every page
+loses its stylesheet. The copies are gitignored.
 
 ### Things that will bite
 
 - **`mike` aliases must be `--alias-type copy`.** The default is `symlink`, and
-  GitHub Pages does not serve symlinked content, so `/latest/…` 404s in
+  GitHub Pages does not serve symlinked content, so `/riddl/latest/…` 404s in
   production. A local `python -m http.server` rehearsal DOES follow symlinks
   and so cannot catch it. The workflow passes the flag; keep it.
-
+- **Never run `mike set-default` without `--deploy-prefix`.** Without one it
+  writes a redirect over `gh-pages/index.html`, which is the shell's landing
+  page.
+- **Two branches must never declare the same prefix AND alias.** See the
+  release section below.
 - **`mkdocs build --strict` does NOT fail on dangling intra-page anchors.** It
   reports them at INFO level and exits 0. Always verify with:
   ```bash
-  mkdocs build --strict 2>&1 | grep -E 'anchor|WARNING|ERROR'
+  mkdocs build --strict -f sites/<site>/mkdocs.yml 2>&1 | grep -E 'anchor|WARNING|ERROR'
   ```
-- **Live URLs are `.html`-style**, not directory-style, because the `offline`
-  plugin sets `use_directory_urls: false`. mike preserves this; versioning only
-  adds a path prefix. `scripts/gh-pages-404.html` redirects legacy unversioned
-  links and lives at the `gh-pages` root, which mike does not manage.
+- **`--strict` says nothing about cross-site links.** They are absolute, so
+  MkDocs treats them as external and never checks them. `scripts/check-cross-site-links.py`
+  covers them; run it alongside the strict builds.
+- **A broken `--8<--` include renders as NOTHING, silently**, and `--strict`
+  stays quiet. The EBNF grammar page shipped completely empty this way.
+  `check_paths: true` in `sites/common.yml` makes it fail loudly — keep it on.
+- **Live URLs are directory-style** (`/riddl/latest/concepts/entity/`). The
+  `offline` plugin, which forced `use_directory_urls: false`, has been removed.
+  `scripts/gh-pages-404.html` maps the two older URL shapes onto the current
+  one; it lives at the `gh-pages` root, which mike does not manage.
+- **The 404 handler cannot be verified with `curl`.** GitHub Pages serves it
+  with a 404 status and the rewrite happens in the browser, so every legacy URL
+  looks like a failure from the command line either way. Use
+  `node scripts/test-404-redirects.js`.
+- **`overrides/` is `custom_dir` for all four sites.** Anything product-specific
+  hard-coded there appears on every site — that is how the Synapify docs briefly
+  announced themselves as a preview of RIDDL 2.0. The outdated banner's wording
+  comes from `extra.outdated_banner` per site.
+- **mermaid loads from a CDN** (`unpkg.com`); Material does not bundle it. A
+  diagram can only be verified in a real browser, never by a build check.
 - **This machine has mkdocs-material Insiders; CI installs the community
-  edition.** Do not use Insiders-only features in `mkdocs.yml`.
+  edition.** Do not use Insiders-only features.
 - **`sbt extractGrammar` resolves the *published* riddl library.** Until RIDDL
   2.0 is published it would overwrite the 2.0 grammar with a 1.x one. See the
   warning at the task in `build.sbt`.
-- **The `outdated` banner in `overrides/main.html` is worded per branch**, since
-  each branch is its own build. `main` announces an unreleased preview;
-  `docs/1.x` announces that a newer release exists.
 
 ### When RIDDL 2.0 ships final
 
@@ -167,11 +195,15 @@ adding it to `main`.
 
 ### Migrating gh-pages
 
-`gh-pages` still holds a flat unversioned site. The restructure is a one-time
-supervised step: see `scripts/migrate-gh-pages-to-mike.md`, which has a backup
-branch and a rollback. Rehearse it against a throwaway clone first — that is
-how the `CNAME`/`.nojekyll` survival and `offline`-plugin compatibility were
+Two migrations, both one-time and supervised, both rehearsed against a
+throwaway clone before being run — that is how `CNAME`/`.nojekyll` survival was
 confirmed rather than assumed.
+
+- `scripts/migrate-gh-pages-to-mike.md` — **historical, already executed.** It
+  describes the flat-to-versioned move and still documents `.html` URLs. Do not
+  follow it; it is kept for the record.
+- `scripts/migrate-to-per-product-versioning.md` — the current layout. Read its
+  landmines section before touching deployment.
 
 ### Verifying RIDDL code blocks
 
@@ -493,16 +525,34 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 ## Quick Reference
 
+There is **no `mkdocs.yml` at the repo root** — every command needs
+`-f sites/<site>/mkdocs.yml`, where `<site>` is `shell`, `riddl`, `riddlg` or
+`synapify`. Run `sync-shared-assets.sh` first or pages build without CSS.
+
 | Task | Command |
 |------|---------|
 | Install deps | `pip install -r requirements.txt && pip install -e .` |
-| Start dev server | `mkdocs serve` |
-| Build site | `mkdocs build --strict` |
-| Check links **and anchors** | `mkdocs build --strict 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
-| Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py docs` |
-| Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc docs/riddl/quickstart.md` |
-| Preview versioned site | `scripts/preview-versioned-site.sh` |
-| Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
+| **Sync shared assets** (before any build) | `./scripts/sync-shared-assets.sh` |
+| Start dev server | `mkdocs serve -f sites/riddl/mkdocs.yml` |
+| Build one site | `mkdocs build --strict -f sites/riddl/mkdocs.yml` |
+| Check links **and anchors** | `mkdocs build --strict -f sites/riddl/mkdocs.yml 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
+| Check **cross-site** links | `python3 scripts/check-cross-site-links.py` |
+| Check the 404 redirect map | `node scripts/test-404-redirects.js` |
+| Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
+| Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
+| Preview the whole site | `scripts/preview-versioned-site.sh` |
+| Deploy | push to `main` or `docs/1.x`; CI loops over `docs-version.yml` |
+
+Build every site before concluding a change is clean — a cross-site link edit
+can only break the site at the *other* end:
+
+```bash
+./scripts/sync-shared-assets.sh
+for s in shell riddl riddlg synapify; do
+  mkdocs build --strict -f sites/$s/mkdocs.yml 2>&1 | grep -E 'anchor|WARNING|ERROR'
+done
+python3 scripts/check-cross-site-links.py
+```
 
 ---
 

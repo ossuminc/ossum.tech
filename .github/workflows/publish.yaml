@@ -69,9 +69,13 @@ jobs:
               # Point <prefix>/index.html at this product's default alias.
               # NEVER run set-default without --deploy-prefix: it would write a
               # redirect over the shell's index.html at the site root.
+              # -F is required too -- set-default reads mkdocs.yml from the
+              # working directory to resolve the remote and branch, and there
+              # is no config at the repo root any more.
               default = (s.get("aliases") or [s["version"]])[0]
               print(f"mike set-default --push --deploy-prefix "
-                    f"{shlex.quote(s['prefix'])} {shlex.quote(default)}")
+                    f"{shlex.quote(s['prefix'])} -F {shlex.quote(s['config'])} "
+                    f"{shlex.quote(default)}")
           PY
           cat /tmp/deploy.sh
           bash -euo pipefail /tmp/deploy.sh

@@ -13,8 +13,69 @@ to the task file and note completion in this notebook.
 
 ## RESUME HERE — open work as of 2026-07-30
 
-Everything below survives a session restart. The RIDDL 2.0 documentation is
-**shipped and live**; what remains is two pieces of follow-up work.
+### TASK C — finish the per-product versioning split ⬅ **IN FLIGHT**
+
+On branch **`restructure/per-product-versioning`**, unmerged and unpushed.
+Runbook: `scripts/migrate-to-per-product-versioning.md`. Plan:
+`~/.claude/plans/on-1-you-need-hashed-willow.md`.
+
+**Do not push `main` until this is finished** — a push to `main` deploys.
+
+Done and rehearsed end-to-end against a throwaway clone of the real
+`gh-pages`. All four sites build `--strict` clean; 63 cross-site links check
+clean; the 404 map passes 25 cases; `CNAME`, `.nojekyll` and three distinct
+`versions.json` survive; aliases are real directories, not symlinks.
+
+| Deployed at | Source | From |
+|---|---|---|
+| `/` | `sites/shell/` | `main`, unversioned |
+| `/riddl/<ver>/` | `sites/riddl/` + `OSS/` | `main` 2.0, `docs/1.x` 1.31 |
+| `/riddlg/<ver>/` | `sites/riddlg/` + `MCP/` | `main` |
+| `/synapify/<ver>/` | `sites/synapify/` | `main` |
+
+**What is left, in order:**
+
+1. **`docs/1.x` restructure** — it still has the old flat layout, so
+   `preview-versioned-site.sh` skips it and **`/riddl/latest/` currently 404s**.
+   Every cross-site link written as `/riddl/latest/…` depends on this. It needs
+   only `sites/riddl/`, and a `docs-version.yml` declaring the `riddl` site at
+   `1.31`/`latest` with **no `shell:` key** — the shell and the non-RIDDL
+   products publish from `main` alone. Its `extra.outdated_banner` says the
+   opposite of `main`'s: a newer release exists.
+   *Open question, do not assume:* its `OSS/` and `MCP/` pages describe 1.x-era
+   tooling and would stop publishing. Confirm before deleting.
+2. **`scripts/promote-2.0-to-latest.md`** — still written for the old layout.
+   Needs `--deploy-prefix` (and `-F`) threaded through, and its `.html`
+   verification URLs updated.
+3. **Merge and deploy**, following the runbook. Take a **fresh** backup branch
+   first: `gh-pages-preversioning` predates the mike migration and restoring it
+   would discard weeks of deploys.
+4. **Reply to `task/publish-riddl-license-page.md`** once deployed — riddl must
+   change **three** places to `https://ossum.tech/riddl/2.0/licenses/`, not the
+   one the task file mentions. Results section already written.
+
+**Traps found doing this, all now guarded in code:**
+
+- `mike set-default` reads `mkdocs.yml` from the CWD to resolve the branch, so
+  it needs `-F` as well as `--deploy-prefix`. There is no root config any more.
+  It failed a whole rehearsal cycle with its output suppressed.
+- A broken `--8<--` include renders as **nothing**, silently, and `--strict`
+  stays quiet. The EBNF grammar page shipped empty this way. `check_paths` is
+  on now.
+- `overrides/` is `custom_dir` for all four sites, so the hard-coded outdated
+  banner made **Synapify** announce itself as a preview of RIDDL 2.0.
+- `TMPDIR` on macOS is not `/tmp`, and the `python3` first on `PATH` is not the
+  one mkdocs runs under (no `pyyaml`). The preview script resolves the
+  interpreter from mkdocs's shebang.
+- `overrides/main.html`'s `'../' ~ base_url` was **expected to break** under
+  directory URLs and does not — it renders `../../..` on a deep page and `../.`
+  on the root, both landing on the product prefix root. Verified by reading the
+  rendered href, not by reasoning.
+
+---
+
+The RIDDL 2.0 documentation is **shipped and live**. Two older pieces of
+follow-up work remain below.
 
 ### Where things stand
 
@@ -655,7 +716,12 @@ hugo {
 | riddlc validation-only | Code generation available via Synapify | 2026-01-27 |
 | Don't mention riddl-gen | Closed source; say generation is "via Synapify" | 2026-01-30 |
 | Separate MCP section | MCP distinct from IDE plugins; deserves own nav | 2026-01-21 |
-| Keep `.html` page URLs | `offline` plugin forces it; directory URLs are cosmetic and would 404 every indexed URL | 2026-07-21 |
+| ~~Keep `.html` page URLs~~ | ~~`offline` plugin forces it; directory URLs are cosmetic and would 404 every indexed URL~~ | 2026-07-21 |
+| **REVERSED**: directory-style URLs, `offline` dropped | The reasoning stood on its own, but the cost was about to be paid anyway: the per-product split moves every URL regardless, so the choice was one breakage or two. `offline` also bought nothing real — it advertised offline support the site never had (no service worker, no manifest) while blocking `navigation.instant` and preventing mermaid, which loads from a CDN, from ever rendering | 2026-07-30 |
+| One MkDocs project per product | `mike` versions a whole project, so one project stamped RIDDL's version on everything — the privacy policy existed once per RIDDL version and had to be fixed on two branches | 2026-07-30 |
+| MCP guides ship with riddlg, not RIDDL | 21 of their 22 outbound links point at riddlg; they document the server riddlg drives | 2026-07-30 |
+| Licenses page URL is version-pinned | Notices must describe the artifact the reader is holding; a `/latest/` URL would show a riddlc 2.0.0 user some future release's dependencies | 2026-07-30 |
+| Cross-site search deferred | Material's index is per-build. Pagefind indexes built HTML and would work, but keeping a search-UI change separate from a URL migration keeps both revertible | 2026-07-30 |
 | Anchor validation in CI | `--strict` alone misses broken `#anchors`; they 404 silently in the browser | 2026-07-21 |
 | riddlg gets its own Generators + Release Notes pages | Output surface outgrew the command reference; releases ship ~weekly and need a landing place | 2026-07-21 |
 
