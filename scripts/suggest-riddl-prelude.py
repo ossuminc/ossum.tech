@@ -32,7 +32,7 @@ FENCE, PRELUDE, wrap, directive_for = (
 )
 
 ATTEMPTS = ("standalone", "in-domain", "in-context", "in-entity", "in-handler",
-            "in-application", "in-function", "in-record", "in-clauses")
+            "in-application", "in-function", "in-record", "in-clauses", "in-usecase")
 
 UNRESOLVED = re.compile(
     r"Path '([^']+)' was not resolved.*?it should refer to (?:an?\s+)?(\w+)",

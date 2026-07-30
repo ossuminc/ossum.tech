@@ -13,6 +13,7 @@ readers.
     <!-- riddl: in-entity -->         wrap in a domain, context AND entity
     <!-- riddl: in-handler -->        wrap deep enough to be inside an on-clause
     <!-- riddl: in-clauses -->        wrap in a handler (for `on ...` clause fragments)
+    <!-- riddl: in-usecase -->        wrap in an epic + use case (for interaction steps)
     <!-- riddl: in-application -->    as in-handler, but an `application` context (for `put`)
     <!-- riddl: in-function -->       wrap in a function body (for `return`)
     <!-- riddl: in-record -->         wrap in a record (for a bare field declaration)
@@ -76,11 +77,15 @@ def wrap(kind: str, body: str, prelude: str) -> str:
         return "\n".join(pad + ln if ln.strip() else ln for ln in txt.split("\n"))
 
     pre = ind(prelude.strip(), 4) if prelude.strip() else ""
+    # An author may only be DEFINED in a Module or Domain, so a context-level
+    # page prelude cannot supply one -- yet `by author X` appears on many
+    # pages. Every wrapper therefore defines one at domain level.
+    AUTHOR = '  author Reid is { name is "Reid Spencer" email is "reid@ossuminc.com" }\n'
 
     if kind == "in-function":
         # `return` is legal only in a function body.
         return (
-            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             "    record FnInput is { note is String }\n"
             "    function ExampleFunction is {\n"
             "      requires FnInput returns FnInput\n"
@@ -90,7 +95,7 @@ def wrap(kind: str, body: str, prelude: str) -> str:
     if kind == "in-application":
         # `put ... to output` is legal only in an application/context handler.
         return (
-            "domain Example is {\n  application context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  application context Example is {\n" + pre + "\n"
             "    record ExampleData is { note is String }\n"
             "    command ExampleCommand is { note is String }\n"
             "    page ExamplePage is {\n"
@@ -105,14 +110,31 @@ def wrap(kind: str, body: str, prelude: str) -> str:
     if kind == "in-record":
         # A bare field declaration, e.g. `items is many Item`.
         return (
-            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             "    record ExampleRecord is {\n" + ind(body, 6) + "\n"
+            "    }\n  }\n}\n"
+        )
+    if kind == "in-usecase":
+        # An interaction step lives in a use case, inside an epic, inside a
+        # domain -- three levels no other wrapper provides.
+        return (
+            "domain Example is {\n" + AUTHOR +
+            "  user Customer is \"a customer\"\n"
+            "  context Example is {\n" + pre + "\n"
+            "    record ExampleData is { note is String }\n"
+            "    entity Cart is { ??? }\n"
+            "  }\n"
+            "  epic ExampleEpic is {\n"
+            "    user Customer wants to \"do a thing\" so that \"a benefit follows\"\n"
+            "    case ExampleCase is {\n"
+            "      user Customer wants to \"do a thing\" so that \"a benefit follows\"\n"
+            + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
         )
     if kind == "in-clauses":
         # An `on ...` clause fragment: give it a handler to sit in.
         return (
-            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             "    record ExampleData is { note is String }\n"
             "    command ExampleCommand is { note is String }\n"
             "    entity ExampleEntity is {\n"
@@ -124,7 +146,7 @@ def wrap(kind: str, body: str, prelude: str) -> str:
     if kind == "in-handler":
         # Statement-level fragment: give it an on-clause to live in.
         return (
-            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             "    record ExampleData is { note is String }\n"
             "    command ExampleCommand is { note is String }\n"
             "    entity ExampleEntity is {\n"
@@ -136,17 +158,17 @@ def wrap(kind: str, body: str, prelude: str) -> str:
         )
     if kind == "in-entity":
         return (
-            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             "    entity ExampleEntity is {\n" + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
         )
     if kind == "in-context":
         return (
-            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             + ind(body, 4) + "\n  }\n}\n"
         )
     if kind == "in-domain":
-        return "domain Example is {\n" + ind(body, 2) + "\n}\n"
+        return "domain Example is {\n" + AUTHOR + ind(body, 2) + "\n}\n"
     # standalone: complete by definition, so the prelude is NOT injected --
     # a page prelude holds context-level definitions, and those are illegal at
     # root, which would break the very fences that need no help.
@@ -208,7 +230,7 @@ def main() -> int:
                 # measure how many fences are genuinely wrong on pages that
                 # do not yet carry directives.
                 ok, detail = False, ""
-                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record", "in-clauses"):
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record", "in-clauses", "in-usecase"):
                     ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), prelude))
                     if ok:
                         break

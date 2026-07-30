@@ -42,7 +42,7 @@ wrap = _ns["wrap"]
 validate = _ns["validate"]
 
 ATTEMPTS = ("standalone", "in-domain", "in-context", "in-entity", "in-handler",
-            "in-application", "in-function", "in-record", "in-clauses")
+            "in-application", "in-function", "in-record", "in-clauses", "in-usecase")
 
 
 def main() -> int:

@@ -28,6 +28,11 @@ description: >-
     command UpdatePrice yields event PriceUpdated is { productId is ProductId, newPrice is Price }
     command PlaceOrder yields event OrderPlaced is { id is OrderId, total is Price }
     query GetProduct yields result OrderInfo is { id is ProductId }
+    record CheckoutInputs is { orderId is OrderId }
+    record CheckoutOutcome is { ok is Boolean }
+    command ProcessPayment is { orderId is OrderId }
+    command RefundPayment is { orderId is OrderId }
+    entity PaymentService is { ??? }
 -->
 
 
@@ -897,9 +902,18 @@ Calling something with no declared `returns` is an Error.
 Boolean expressions have the usual precedence: `or` < `and` < `not` <
 comparison < atom. Parentheses group.
 
+<!-- riddl: in-handler -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 when order.isPaid and not order.isCancelled then ??? end
 require count == total
+```
+
+An [invariant](../concepts/invariant.md) takes one too, though it is a
+definition rather than a statement:
+
+<!-- riddl: in-context -->
+```riddl
 invariant InStock is quantity >= Zero
 ```
 
@@ -915,6 +929,7 @@ everywhere else.
 
     To compare against a fixed value, name it:
 
+    <!-- riddl: skip reason="elided template; a context-level constant beside a statement" -->
     ```riddl
     constant MaxItems is Natural = "100"
     // ...
@@ -1745,6 +1760,7 @@ The **refusal** step is new in 2.0. It models a system element declining a
 user's request, which previously had no way to be expressed except as free
 text:
 
+<!-- riddl: in-usecase -->
 ```riddl
 step entity Cart refuses user Customer "the item is out of stock"
 ```

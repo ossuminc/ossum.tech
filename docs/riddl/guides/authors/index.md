@@ -112,6 +112,7 @@ domain OnlineRetail is {
 Types define the shape of information in your model. Start with the core
 concepts in your domain—the "nouns" of your ubiquitous language.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 context Catalog is {
   type ProductId is Id(Product) with {
@@ -120,7 +121,7 @@ context Catalog is {
 
   type Money is {
     amount is Decimal(10,2),
-    currency is Currency("USD")
+    currency is Currency(USD)
   } with {
     briefly "Monetary amount with currency"
   }
