@@ -178,7 +178,10 @@ port it is connected to.
 
 - **Aggregation**: `{ field1 is Type1, field2 is Type2 }` — Named field
   collections
-- **Alternation**: `one of { TypeA, TypeB, TypeC }` — Union/sum types
+- **Alternation**: `one of { TypeA, TypeB, TypeC }` — Union/sum types. An
+  alternation must offer a **real choice**: zero alternatives is an **Error**,
+  exactly one draws a `[deprecated]` message, two or more is clean, and
+  `one of { ??? }` remains the way to say "not decided yet".
 - **Enumeration**: `any of { Value1, Value2, Value3 }` — Enumerated values
 
 **Aggregate Use Cases:**
@@ -245,6 +248,56 @@ types an entity's state and supplies the payload of a `morph`.
      - `event OrderCreated`
      - `record ProductData`
      - `user Customer`
+
+## Naming Rules
+
+### Sibling names must be unique, regardless of kind
+
+Two definitions in the same container may not share a name, even when they are
+different kinds of thing:
+
+```riddl
+context Catalog is {
+  type   Thing is String
+  entity Thing is { ??? }     // Error: 'Thing' is already taken
+}
+```
+
+!!! warning "Changed in RIDDL 2.0"
+    Uniqueness used to be checked per *kind*, so `type Thing` beside
+    `entity Thing` passed with zero errors. It is now an **Error**.
+
+    This is the rule behind a class of confusing failures: with both defined,
+    a reference such as `Id(Thing)` had two plausible referents, and which one
+    it found was not something the model stated.
+
+### A definition keyword may not be a bare identifier
+
+Eleven keywords **introduce** a definition, and none may be used as a bare
+name:
+
+`domain`, `context`, `entity`, `adaptor`, `saga`, `epic`, `projector`,
+`repository`, `streamlet`, `handler`, `function`
+
+```riddl
+handler projector is { ??? }     // Error: two introducing keywords in a row
+```
+
+Two escapes, both legal:
+
+```riddl
+handler 'projector' is { ??? }   // quoted identifier
+handler Projector  is { ??? }    // the check is case-sensitive
+```
+
+Nothing is wrong with the *names* — the point is that two introducing keywords
+in a row leave a reader, and any tool, guessing which word is the keyword. The
+quoted form says which.
+
+This is deliberately **not** all 156 keywords. `version` and `copyright`, in
+particular, remain usable as field and type names; that was a compatibility
+decision when they were added, and it stands. The ambiguity only bites where a
+word would otherwise start a definition, so that is where the rule bites.
 
 ## Containment Rules
 
@@ -556,7 +609,13 @@ entity Order is {
 
     - States without an `on init` clause
     - `on init` without a `set` statement
-    - Command handlers that neither `send` nor `yield` an event
+    - Command handlers that neither `send` nor `yield` an event, **and do
+      not refuse**. A clause that refuses with `error` or `require` has
+      processed the command — it decided, it declined, and there is nothing
+      to record — so it discharges the obligation. Previously this flagged the
+      honest refusal-only clause, and was silenced by adding a `send` *after*
+      the refusal, which the refusals-before-effects rule makes unreachable:
+      it rewarded exactly the dead code a modeller should avoid.
     - Query handlers that don't `yield` or `send` a result
     - Entities without any `on query` clause
     - Entities with no handlers at all
@@ -735,6 +794,9 @@ first, then named:
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 ```
+
+An **empty** argument list is an arity of zero and must match like any other,
+so `OrderPlaced()` against a message that has fields is an Error.
 
 Argument count, names, ordering and (best effort) types are all checked against
 the target's fields.

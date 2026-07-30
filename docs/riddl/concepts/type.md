@@ -86,6 +86,17 @@ type Color = any of { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
 ```
 
 ### Alternation
+
+!!! warning "An alternation must offer a real choice"
+    | Alternatives | Result |
+    |---|---|
+    | zero — `one of { }` | **Error** |
+    | one — `one of { A }` | `[deprecated]` — it names no alternative |
+    | two or more | clean |
+    | `one of { ??? }` | fine — undecided is not the same as empty |
+
+    A one-armed alternation still parses, so no model breaks today.
+
 A type can be defined as any one type chosen from a set of other type names
 using the `one of` keywords followed by type names in curly braces, like this:
 

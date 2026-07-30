@@ -24,6 +24,28 @@ schema may be: flat, relational, time-series, graphical, hierarchical, star,
 document, columnar, vector, or other. These are only suggestive of the kind of
 storage layout the repository uses. 
 
+```riddl
+repository CartRepository is {
+  schema CartData is relational
+    of cart as type Cart
+    link cartItems as field Cart.items.id to field Product.id
+    index on field Cart.id
+}
+```
+
+!!! warning "`as type T` is strict — changed in RIDDL 2.0"
+    The clause says `as type`, so `T` must genuinely **be** a
+    [Type](type.md). A path that lands on an Entity, or on anything else,
+    is an **Error** even though it parses.
+
+    This check previously never ran. Turning it on produced 202 errors across
+    186 of the 187 models in `riddl-models` — nearly the whole corpus — every
+    one of them a clause that had been relying on a check that did nothing. If
+    a schema of yours suddenly errors here, that is why.
+
+    The fix is usually to point at the `record` that describes the stored
+    shape, rather than at the entity that owns it.
+
 ## Handling Messages
 A repository has a [handler](handler.md) that processes 
 messages with respect to the repository's stored information.

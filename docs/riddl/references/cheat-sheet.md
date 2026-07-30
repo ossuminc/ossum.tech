@@ -413,7 +413,9 @@ messages, states, and parameters in RIDDL.
 **Key details**:
 
 - **Aggregation** (record): `type X is { field1: T1, field2: T2 }`
-- **Alternation** (union): `type X is one of { T1, T2, T3 }`
+- **Alternation** (union): `type X is one of { T1, T2, T3 }` — zero
+  alternatives is an Error, one draws a deprecation, `one of { ??? }` is
+  undecided
 - **Enumeration**: `type X is any of { A, B, C }`
 - **Aggregate use cases**: `graph`, `table`
 - **Collection**: `many T`, `set of T`, `mapping from K to V`, `T?`
@@ -1097,6 +1099,22 @@ behavioral flags, or classification metadata.
     context intention prefix and emit a `[deprecated]` message.
 
 > *[For more details →](../concepts/option.md)*
+
+### Naming Rules
+
+Two rules constrain every identifier, both **Errors** as of RIDDL 2.0:
+
+- **Sibling names are unique regardless of kind.** `type Thing` beside
+  `entity Thing` in one container is an Error; uniqueness used to be checked
+  per kind, so this previously passed.
+- **A definition-introducing keyword may not be a bare identifier** —
+  `domain`, `context`, `entity`, `adaptor`, `saga`, `epic`, `projector`,
+  `repository`, `streamlet`, `handler`, `function`. Use a quoted identifier
+  (`handler 'projector' is { ??? }`) or different case (`Projector`); the
+  check is case-sensitive.
+
+`version` and `copyright` are deliberately *not* in that list and remain
+usable as field and type names.
 
 ### Version
 

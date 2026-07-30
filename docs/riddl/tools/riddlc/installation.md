@@ -69,7 +69,11 @@ unlinked — reverting does not re-download anything.
 Confirm which one you are running:
 
 ```bash
-riddlc info | grep version
+riddlc version
+```
+
+```
+[info] 2.0.0-rc.1
 ```
 
 Once RIDDL 2.0 ships as a final release, `brew upgrade riddlc` on the stable
@@ -175,8 +179,8 @@ You should see output like:
 ```
 [info] About RIDDL:
 [info]            name: utils
-[info]         version: 2.0.0
-[info]      git commit: 4af86d6712c9f0b1a3e5d8c47b2f6a90de13c8b5
+[info]         version: 2.0.0-rc.1
+[info]      git commit: ebce6ba945739bef06907445e5a570b2d030591b
 [info]   documentation: https://ossum.tech/riddl
 [info]       copyright: © 2019-2026 Ossum, Inc.
 [info]        built at: 2026-07-27 11:04:12.117-0400

@@ -264,8 +264,8 @@ Example output:
 ```
 [info] About riddlc:
 [info]            name: riddlc
-[info]         version: 2.0.0
-[info]      git commit: 4af86d6712c9f0b1a3e5d8c47b2f6a90de13c8b5
+[info]         version: 2.0.0-rc.1
+[info]      git commit: ebce6ba945739bef06907445e5a570b2d030591b
 [info]   documentation: https://ossum.tech/riddl
 [info]       copyright: © 2019-2026 Ossum Inc.
 [info]        licenses: Apache License, Version 2.0
