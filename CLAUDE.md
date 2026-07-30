@@ -137,6 +137,33 @@ Shared logos and CSS live once in `common/` and are copied into each site by
 `scripts/sync-shared-assets.sh` — **run it before any build**, or every page
 loses its stylesheet. The copies are gitignored.
 
+### Search: two layers, on purpose
+
+| Layer | Covers | Built by |
+|---|---|---|
+| Each site's header search box | that site only | Material, per build |
+| `/find/` | **all products at once** | Pagefind, `scripts/build-search-index.sh` |
+
+Material builds one search index per MkDocs project, so its search can never
+span the four sites — a reader in the RIDDL docs searching "Synapify" gets
+nothing. Pagefind indexes **built HTML** instead of sources, so it does not
+care how many projects produced the tree. It runs last, over the assembled
+`gh-pages` content, and writes `/pagefind/` at the root.
+
+Two things about the index that are deliberate:
+
+- **It covers each product's `latest` alias only**, plus the shell pages. mike
+  deploys aliases as full *copies*, so indexing everything would return each
+  page three or four times. Following the alias rather than a pinned version
+  means no edit is needed when 2.0 is promoted.
+- **Older versions are therefore not globally searchable.** That is the
+  trade-off, not an oversight; each version's own search box still works.
+
+Material's `toc.permalink` pilcrow is excluded, or every sub-result reads
+"Purpose¶". The header link to `/find/` is injected from `overrides/main.html`
+because Material has no block for adding a header item and copying
+`partials/header.html` would pin the repo to one Material release.
+
 ### Things that will bite
 
 - **`mike` aliases must be `--alias-type copy`.** The default is `symlink`, and
@@ -156,6 +183,8 @@ loses its stylesheet. The copies are gitignored.
 - **`--strict` says nothing about cross-site links.** They are absolute, so
   MkDocs treats them as external and never checks them. `scripts/check-cross-site-links.py`
   covers them; run it alongside the strict builds.
+- **`pagefind[bin]`, not `pagefind`.** The bare package is only the Python API
+  wrapper and fails at run time with "Could not find pagefind binary".
 - **A broken `--8<--` include renders as NOTHING, silently**, and `--strict`
   stays quiet. The EBNF grammar page shipped completely empty this way.
   `check_paths: true` in `sites/common.yml` makes it fail loudly — keep it on.
@@ -538,6 +567,7 @@ There is **no `mkdocs.yml` at the repo root** — every command needs
 | Check links **and anchors** | `mkdocs build --strict -f sites/riddl/mkdocs.yml 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
 | Check **cross-site** links | `python3 scripts/check-cross-site-links.py` |
 | Check the 404 redirect map | `node scripts/test-404-redirects.js` |
+| Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
 | Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |

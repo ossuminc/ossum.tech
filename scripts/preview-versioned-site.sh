@@ -141,6 +141,10 @@ fi
 # Copied last: the shell build emits its own 404.html and this one must win.
 cp "$REPO/scripts/gh-pages-404.html" "$SERVE/404.html"
 
+# Cross-site search, built exactly as CI builds it -- same script, so the
+# preview exercises the real thing rather than an approximation.
+"$REPO/scripts/build-search-index.sh" "$SERVE"
+
 echo
 for p in riddl riddlg synapify; do
   [ -f "$SERVE/$p/versions.json" ] && printf '%-10s %s\n' "$p" "$(cat "$SERVE/$p/versions.json")"

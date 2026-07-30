@@ -17,6 +17,7 @@ edit_uri: edit/main/sites/shell/docs/
 # with a redirect. See scripts/migrate-to-per-product-versioning.md.
 nav:
   - Home: index.md
+  - Search All Docs: find.md
   - Coming Soon: coming-soon/index.md
   - About:
     - about/index.md

@@ -7,3 +7,10 @@
 
 mkdocs-material>=9.5
 mike>=2.1
+
+# Cross-site search. Pagefind indexes BUILT HTML, which is why it can span the
+# four separate MkDocs projects that Material's own per-build search cannot.
+#
+# The [bin] extra is REQUIRED: the bare `pagefind` package is only the Python
+# API wrapper and raises "Could not find pagefind binary" at run time.
+pagefind[bin]>=1.5

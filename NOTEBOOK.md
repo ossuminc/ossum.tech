@@ -58,9 +58,21 @@ published docs. `OSS/`, `synapify/` and `about/` were byte-identical to
 3. **Reply to `task/publish-riddl-license-page.md`** once deployed — riddl must
    change **three** places to `https://ossum.tech/riddl/2.0/licenses/`, not the
    one the task file mentions. Results section already written.
-4. **Deferred, agreed:** cross-site search (Pagefind — Material's index is
-   per-build, so search is per-product until then), and a `robots.txt`, which
-   has never existed.
+4. **Deferred, agreed:** a `robots.txt`, which has never existed — the
+   unreleased 2.0 docs are fully indexable and compete with 1.31 in search
+   results.
+
+✅ **Cross-site search is done** (2026-07-30). `/find/` on the shell searches
+all products at once via Pagefind, which indexes built HTML and so spans the
+four MkDocs projects that Material's per-build index cannot. Material's own
+per-site search boxes are untouched. Verified in a browser: "Synapify" returns
+22 hits across synapify, riddl, riddlg and the shell, with **zero** duplicate
+hits from alias copies, and the page degrades to a warning rather than a dead
+search box when the index is missing.
+
+Two traps recorded in CLAUDE.md: `pagefind[bin]` is required (the bare package
+is just the Python API wrapper and fails at run time), and Material's
+`toc.permalink` pilcrow must be excluded or every sub-result reads "Purpose¶".
 
 **Traps found doing this, all now guarded in code:**
 
