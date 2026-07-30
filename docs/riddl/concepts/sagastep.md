@@ -25,6 +25,7 @@ Saga steps provide:
 A step is an identifier, a forward block, and a `reverted by` compensation
 block. Inputs and outputs are declared once for the whole saga, not per step:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 saga ProcessPayment is {
   requires record PaymentInputs

@@ -160,6 +160,7 @@ An entity is a [processor](processor.md), so it may declare
 [inlets](inlet.md) and [outlets](outlet.md) — which is how it publishes its
 events into a stream:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 entity Order is {
   outlet OrderEvents is type OrderEvent

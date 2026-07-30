@@ -29,6 +29,7 @@ user.
 An output is written as an alias, an identifier, a presentation verb, and what
 it presents:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 document Receipt   shows    type ReceiptData
 list     CartLines displays type CartLine

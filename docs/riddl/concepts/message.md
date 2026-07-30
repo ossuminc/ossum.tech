@@ -70,6 +70,7 @@ handled by an [on clause](onclause.md); it types an entity
 A command or query may declare the response it produces, with an optional
 `yields` clause between the identifier and the body:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 command PlaceOrder yields event OrderPlaced is {
   cartId is CartId

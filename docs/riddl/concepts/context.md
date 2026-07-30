@@ -66,11 +66,22 @@ from DDD Europe 2020 conference.
 A context may declare its **intention** — what kind of bounded context it is —
 with an optional keyword prefix:
 
+<!-- riddl: in-domain -->
 ```riddl
-application context Storefront    is { ??? }
+type Request is String
+
+application context Storefront     is { ??? }
 external    context StripePayments is { ??? }
-gateway     context PublicApi      is { ??? }
-service     context Pricing        is { ??? }
+
+gateway context PublicApi is {          // a merge: >=2 inlets, 1 outlet
+  inlet fromWeb    is type Request
+  inlet fromMobile is type Request
+  outlet inbound   is type Request
+}
+service context Pricing is {            // a flow: 1 inlet, 1 outlet
+  inlet  request  is type Request
+  outlet response is type Request
+}
 ```
 
 | Intention | Meaning |
@@ -89,7 +100,10 @@ intention rules, so existing models are unaffected.
     - A context containing a [group](group.md) (or any of its UI aliases) that
       is not an `application` context. UI belongs at the application boundary.
       In RIDDL 1.x any context could hold UI; in 2.0 this is a hard error.
-    - A `service` or `gateway` context whose shape contradicts its intention
+    - A `gateway` context that is not a **merge** (2+ inlets, 1 outlet), or a
+      `service` context that is not a **flow** (1 inlet, 1 outlet). Unlike
+      `application` and `external`, these two cannot be stubbed with `???` —
+      declaring the intention commits you to the ports.
     - An `external` context modeling persistence it cannot own
 
 !!! warning "The `gateway`, `service`, `external` and `wrapper` options are deprecated"

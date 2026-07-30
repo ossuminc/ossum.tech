@@ -12,6 +12,7 @@ readers.
     <!-- riddl: in-context -->        wrap in a domain AND a context
     <!-- riddl: in-entity -->         wrap in a domain, context AND entity
     <!-- riddl: in-handler -->        wrap deep enough to be inside an on-clause
+    <!-- riddl: in-clauses -->        wrap in a handler (for `on ...` clause fragments)
     <!-- riddl: in-application -->    as in-handler, but an `application` context (for `put`)
     <!-- riddl: in-function -->       wrap in a function body (for `return`)
     <!-- riddl: in-record -->         wrap in a record (for a bare field declaration)
@@ -108,6 +109,18 @@ def wrap(kind: str, body: str, prelude: str) -> str:
             "    record ExampleRecord is {\n" + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
         )
+    if kind == "in-clauses":
+        # An `on ...` clause fragment: give it a handler to sit in.
+        return (
+            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "    record ExampleData is { note is String }\n"
+            "    command ExampleCommand is { note is String }\n"
+            "    entity ExampleEntity is {\n"
+            "      state ExampleState of record ExampleData is {\n"
+            "        handler ExampleHandler is {\n"
+            + ind(body, 10) + "\n"
+            "        }\n      }\n    }\n  }\n}\n"
+        )
     if kind == "in-handler":
         # Statement-level fragment: give it an on-clause to live in.
         return (
@@ -195,7 +208,7 @@ def main() -> int:
                 # measure how many fences are genuinely wrong on pages that
                 # do not yet carry directives.
                 ok, detail = False, ""
-                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record"):
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record", "in-clauses"):
                     ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), prelude))
                     if ok:
                         break

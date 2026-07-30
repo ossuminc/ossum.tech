@@ -12,6 +12,7 @@ Connectors are uni-directional conduits for reliably transmitting data of a
 particular [type](type.md). A connector joins exactly one
 [outlet](outlet.md) to exactly one [inlet](inlet.md).
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 connector OrderFlow is
   from outlet OrderEventSource.OrderEvents
@@ -40,6 +41,7 @@ Fan-in and fan-out are modeled by declaring **multiple ports** — the arity is
 what derives a `merge` or `split` [shape](processor.md#shape) — never by
 attaching several connectors to a single port.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 // Correct: a split declares two outlets, each with its own connector
 processor Router as split is {

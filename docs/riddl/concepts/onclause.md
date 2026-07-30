@@ -50,6 +50,7 @@ An `on` clause may bind a local name to the message it is handling, using
 ordinary type ascription — the same rule as `let x: T = ...` and a field
 declaration `p1: String`, read as "`ord` has type `command PlaceOrder`":
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 on ord: command PlaceOrder {
   when ord.total > MinimumOrder then
@@ -76,6 +77,7 @@ parses to exactly the same structure.
 An `on` clause may also name where the message came from, optionally binding a
 local name to the origin:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 on command DoIt from context Other { ??? }
 on command DoIt from di: context Other { ??? }

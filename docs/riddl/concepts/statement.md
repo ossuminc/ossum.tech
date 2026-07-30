@@ -60,6 +60,7 @@ A constructor builds a [message](message.md) or record inline. Arguments are
 positional first, then named, and are checked against the target's fields for
 count, name, order and (best effort) type:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 ```
@@ -76,6 +77,7 @@ everywhere else.
     reference, a `get from`, or a named [constant](constant.md). A literal is
     not permitted, and this is enforced at **parse** time:
 
+    <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
     ```riddl
     when count > 5 then ??? end        // fails to parse
     when count > "5" then ??? end      // fails to parse
@@ -96,6 +98,7 @@ everywhere else.
 
 ### When Statement
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 when order.isPaid and not order.isCancelled then {
   send event LoginSucceeded to outlet Events
@@ -124,6 +127,7 @@ non-Boolean condition is an **Error**.
 
 ### Match Statement
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 match order.status {
   case Pending {
@@ -160,6 +164,7 @@ Alternation — a non-exhaustive match without `default` draws a
 RIDDL's only loop, and deliberately bounded — there is no unbounded iteration
 in the language:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 foreach line in field order.lines {
   send event LineShipped(sku = line.sku) to outlet Shipments
@@ -178,6 +183,7 @@ cardinality wrapper such as `many` or `optional`.
 - **yield** — produce a command's or query's declared response, without
   needing to know the sender's identity
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 send event ItemAdded to outlet CartEvents
 tell command ProcessPayment(orderId) to entity PaymentService
@@ -205,6 +211,7 @@ return call function Tax.Compute(subtotal)
 
 ### Require and Error
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 require amount > Zero
 require invariant BalanceNonNegative
@@ -221,6 +228,7 @@ error "Price must be greater than zero"
     `match` or `foreach` body is its own list. A refusal after an effect in the
     same list is an **Error**.
 
+    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
     ```riddl
     on cmd: command Withdraw {
       require cmd.amount > Zero          // refusals first
@@ -283,6 +291,7 @@ neither a refusal nor an effect.
 
 ### Morph and Become (Entity Only)
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 morph entity Order to state Shipped with record ShippedData(trackingNumber)
 become entity Order to handler ShippedHandler

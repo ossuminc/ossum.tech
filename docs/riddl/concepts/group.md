@@ -26,6 +26,7 @@ thing structurally. Pick whichever reads best for what you are modeling:
 `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
 `window`, `section`, `tab`, `flow`, `block`
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 page ShoppingCart is {
   list Items shows type CartLine
@@ -45,6 +46,7 @@ page ShoppingCart is {
 A group may carry a [figma reference](metadata.md#figma-references) linking it
 to the exact frame that depicts it:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 page Checkout is { ??? } with {
   figma "aBcD1234" node "42:1337"

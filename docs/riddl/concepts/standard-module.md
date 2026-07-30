@@ -30,6 +30,7 @@ that isn't true.
 
 Route output you genuinely do not consume into the pit:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 connector DiscardDiagnostics is
   from outlet MyProcessor.Diagnostics
@@ -38,6 +39,7 @@ connector DiscardDiagnostics is
 
 Feed an inlet that has no upstream yet:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 connector NoInputYet is
   from outlet ForeverEmpty.void

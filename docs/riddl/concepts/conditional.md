@@ -23,6 +23,7 @@ This lets authors express conditions at the appropriate level of abstraction.
 Evaluating the condition is left to code generation.
 
 !!! warning "The bare-string form is deprecated"
+    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
     ```riddl
     when "user is authenticated" then { ??? } end   // deprecated
     ```
@@ -60,6 +61,7 @@ Numeric expressions involve comparisons and arithmetic:
 - **Comparison operators**: `>`, `<`, `>=`, `<=`, `==`, `!=`
 - **Arithmetic operators**: `+`, `-`, `*`, `/`
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 when "order.total > 100" then {
   // apply discount
@@ -78,6 +80,7 @@ Boolean expressions combine conditions using logical operators:
 - **OR**: Either condition must be true
 - **NOT**: Negates a condition
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 when "user.isVerified AND order.total > 0" then {
   // process order

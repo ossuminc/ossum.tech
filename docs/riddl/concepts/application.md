@@ -10,6 +10,7 @@ An application in RIDDL is not a separate definition type—it is a
 represents the interface portion of a system where a user (human or machine)
 initiates actions.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 application context Storefront is {
   page ProductDetails is { ??? }
@@ -65,6 +66,7 @@ messages to other components like [entities](entity.md).
 Handlers in an application context may also use the `put` statement to publish
 a value to an [output](output.md), and read one with `get from input`:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 handler Checkout is {
   on command PlaceOrder {
@@ -80,6 +82,7 @@ An application context, and the groups, inputs and outputs inside it, may carry
 a `figma` reference linking the model element to the exact frame that depicts
 it:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 page Checkout is { ??? } with {
   figma "aBcD1234" node "42:1337"

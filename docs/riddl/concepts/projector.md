@@ -27,6 +27,7 @@ one job is to fold events into a read model; it does not accept commands, and
 it does not answer queries. Queries are served by the
 [repository](repository.md) the projector `updates`.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 projector SalesDashboard is {
   updates repository SalesData

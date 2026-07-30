@@ -347,6 +347,7 @@ entity Order is {
 
 For large models, split content across multiple files:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 // main.riddl
 domain OnlineRetail is {

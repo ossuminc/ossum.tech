@@ -22,6 +22,7 @@ For background on messages, see the [Message concept](../../../concepts/message.
 Whichever pattern you choose below, RIDDL 2.0 lets you state the
 command→event pairing **declaratively** with a `yields` clause:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 command AddMember yields event MemberAdded is {
   orgId: OrgId,
@@ -43,6 +44,7 @@ an existing model never breaks the parts you have not annotated yet.
 
 The corresponding statement is `yield`:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 on cmd: command AddMember {
   yield event MemberAdded(orgId = cmd.orgId, memberId = cmd.memberId)
@@ -103,6 +105,7 @@ command ModifyContacts is { orgId: OrganizationId, contacts: Contacts }
 
 **Question:** Should all commands on an entity yield the same event?
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 event OrganizationModified is {
   id: OrganizationId,
@@ -133,6 +136,7 @@ event OrganizationModified is {
 
 **Question:** Should each command have its own event containing the full entity?
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 event OrganizationEstablished is {
   id: OrganizationId,
@@ -179,6 +183,7 @@ modification events.
 
 **Question:** Should modification events use optional versions of types?
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 type InfoUpdate is {
   name: String?,
@@ -228,6 +233,7 @@ event OrganizationContactsModified is {
 
 **Question:** Should events contain only the changed fields directly?
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 event OrganizationMembersModified is {
   id: OrganizationId,

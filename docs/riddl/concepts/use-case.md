@@ -24,6 +24,7 @@ Use cases in RIDDL serve several purposes:
 A use case restates the user story, then lists its
 [interaction](interaction.md) steps:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 epic UserAuthentication is {
   user Customer wants to "securely access their account"

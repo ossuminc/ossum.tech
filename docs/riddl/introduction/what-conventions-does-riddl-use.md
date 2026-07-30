@@ -197,6 +197,7 @@ prevents fragments of definitions from being separated across files.
 
 For example, this is allowed:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 domain ThingAmaJig is {
   include "thingamajig/thing-context.riddl"
@@ -207,6 +208,7 @@ domain ThingAmaJig is {
 
 While this is **not** allowed:
 
+<!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
 ```riddl
 domain
 include "ThingAmaJig-domain.riddl"  // ERROR: include inside definition name
@@ -234,6 +236,7 @@ myproject/
 
 With `main.riddl` containing:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 domain OnlineRetail is {
   include "catalog/catalog-context.riddl"

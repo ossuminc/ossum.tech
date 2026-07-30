@@ -43,6 +43,7 @@ Outbound adaptors provide an adaptation that occurs from the
 
 ## Syntax
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 context Orders is {
   adaptor PaymentAdapter from context Payments is {

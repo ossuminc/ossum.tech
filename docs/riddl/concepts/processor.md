@@ -37,6 +37,7 @@ The following definitions are all processors:
 The generic streaming processor is declared with the `processor` keyword and an
 optional shape ascription:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 processor OrderEnricher as flow is {
   inlet RawOrders is type OrderEvent

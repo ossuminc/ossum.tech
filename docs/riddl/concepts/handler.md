@@ -74,6 +74,7 @@ state accordingly.
 An optional `initial` keyword marks the handler that is live after a
 [morph](statement.md#morph-and-become-entity-only):
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 state Pending of record PendingData is {
   initial handler PendingHandler is { ??? }
@@ -106,6 +107,7 @@ foundation for modeling state machines in RIDDL. When an
 entity transitions to a new state via a `morph` statement,
 the new state's handlers become active.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 state ActiveOrder of record ActiveOrderData is {
   handler ActiveOrderHandler is {

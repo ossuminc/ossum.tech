@@ -16,6 +16,7 @@ As of RIDDL 2.0 an invariant's condition may be a structured
 [boolean expression](value.md#boolean-expressions), not only an opaque quoted
 string:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 invariant BalanceNonNegative is balance >= Zero
 invariant InStock             is quantity > Zero
@@ -27,6 +28,7 @@ The quoted form remains available for rules that genuinely resist structure.
 Because comparisons are reference-only, a threshold is named rather than
 written inline:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 constant Zero is Natural = "0"
 invariant BalanceNonNegative is balance >= Zero
@@ -37,6 +39,7 @@ invariant BalanceNonNegative is balance >= Zero
 An invariant may be declared inside an entity [state](state.md) body, where it
 constrains that state's record-shaped data:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 entity Account is {
   initial state Open of record OpenData is {

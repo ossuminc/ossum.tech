@@ -24,6 +24,7 @@ schema may be: flat, relational, time-series, graphical, hierarchical, star,
 document, columnar, vector, or other. These are only suggestive of the kind of
 storage layout the repository uses. 
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 repository CartRepository is {
   schema CartData is relational

@@ -10,6 +10,7 @@ An Outlet is a component of a [Processor](processor.md) that specifies a named
 output through which data of a particular [type](type.md) streams out of the
 processor.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 outlet alerts is type TemperatureAlert
 ```
@@ -25,6 +26,7 @@ its events into a stream.
 A processor emits on its **own** outlet, and a [connector](connector.md) routes
 the message to a downstream inlet:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 send event TemperatureAlert(reading.value) to outlet alerts
 ```
@@ -53,6 +55,7 @@ genuinely has no consumer, route it to the
 [standard module's](standard-module.md) `BottomlessPit` rather than leaving it
 dangling:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 connector DiscardDiagnostics is
   from outlet MyProcessor.Diagnostics

@@ -121,6 +121,7 @@ Applications are composed of:
 
 Inputs are manipulated by the user and send messages to the application:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 application context StoreFront is {
   group ProductSearch is {
@@ -134,6 +135,7 @@ application context StoreFront is {
 
 Outputs receive messages from the application and present them to the user:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 application context StoreFront is {
   group ProductDisplay is {
@@ -221,6 +223,7 @@ send-message step where exactly one side is a User, the other side must be a
 UI element or a definition whose enclosing context has the `application`
 intention. Otherwise it is an **Error**:
 
+<!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
 ```riddl
 // Error: the user reaches directly into a domain entity
 step send command PlaceOrder from user Shopper to entity Order
@@ -238,6 +241,7 @@ is what makes "the application boundary" a thing the validator can locate.
 An application handler reads an input's value and publishes to an output with
 two statements added in RIDDL 2.0:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 application context StoreFront is {
   page Checkout is {
@@ -275,6 +279,7 @@ them is checked.
     Enumeration or Alternation draws a **StyleWarning**. A selection widget
     should choose among options:
 
+    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
     ```riddl
     type Country is any of { US, CA, MX, UK }
 
@@ -296,6 +301,7 @@ Beyond `shown by`, a UI definition may carry a structured
 [figma reference](../../../concepts/metadata.md#figma-references) resolving to
 one specific frame:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 page Checkout is { ??? } with {
   figma "aBcD1234" node "42:1337"

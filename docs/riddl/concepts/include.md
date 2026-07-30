@@ -20,6 +20,7 @@ Includes help you:
 
 ## Syntax
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 include "path/to/file.riddl"
 ```
@@ -53,6 +54,7 @@ diagnostic can point at the right file and line.
 A complex domain might be organized like this:
 
 **main.riddl**
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 domain ECommerce is {
   include "types/common-types.riddl"

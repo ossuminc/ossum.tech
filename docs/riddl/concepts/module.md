@@ -64,12 +64,14 @@ the size.
 
 The **full** form takes everything the file's root module holds:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 import "commerce.bast"
 ```
 
 The **selective** form takes exactly one named definition, optionally renamed:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 import domain Shopping from "commerce.bast"
 import type Money from "commerce.bast" as Currency

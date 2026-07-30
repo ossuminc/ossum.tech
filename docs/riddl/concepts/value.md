@@ -49,6 +49,7 @@ shadowed inside nested blocks.
 A constructor builds a [message](message.md) or record inline, rather than
 requiring it be assembled elsewhere first:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 morph entity Order to state Done with record DoneData()
@@ -62,6 +63,7 @@ Arguments are **positional first, then named**. Count, names, ordering and
 `get from` reads a value from a UI [input](input.md) or an entity
 [state](state.md):
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 let email   = get from input SignupForm
 let current = get from state Active
@@ -72,6 +74,7 @@ let current = get from state Active
 `call` invokes a [function](function.md) — and only a function, since
 functions are the only definitions guaranteed pure — and produces its result:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 let total = call function Pricing.CalculateTotal(subtotal, taxRate = rate)
 ```
@@ -84,6 +87,7 @@ declares no `returns` is an **Error**.
 
 `prompt("...")` denotes a value computed by AI at generation time:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 set field recommendation to prompt("suggest a complementary product")
 ```
@@ -97,6 +101,7 @@ something AI computes.
 Precedence runs `or` < `and` < `not` < comparison < atom, with parentheses to
 group:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 when order.isPaid and not (order.isCancelled or order.isRefunded) then ??? end
 ```

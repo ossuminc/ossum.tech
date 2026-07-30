@@ -101,6 +101,7 @@ type Color = any of { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
 A type can be defined as any one type chosen from a set of other type names
 using the `one of` keywords followed by type names in curly braces, like this:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 type References = one of { String, URL }
 ```
@@ -139,6 +140,7 @@ handled. A `record` is data: it types an entity [state](state.md) and supplies
 the payload of a `morph`, but can never be sent. `graph` and `table` model
 graph-structured and tabular data respectively.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 command JustDoIt is { id: Id(AnEntity), encouragement: String, swoosh: URL }
 record  OrderData is { id: OrderId, total: Currency(USD) }
@@ -149,6 +151,7 @@ record  OrderData is { id: OrderId, total: Currency(USD) }
 A `command` or `query` may declare the response it produces, between the
 identifier and the body:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 command PlaceOrder yields event OrderPlaced is { cartId is CartId }
 query   GetOrder   yields result OrderInfo  is { orderId is OrderId }

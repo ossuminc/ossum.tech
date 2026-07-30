@@ -107,6 +107,7 @@ RIDDL was designed with AI code generation in mind:
 - Natural language descriptions guide implementation
 - The `prompt` statement explicitly captures implementation intent
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 handler OrderHandler is {
   on command CreateOrder is {

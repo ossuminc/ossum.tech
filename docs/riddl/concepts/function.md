@@ -14,6 +14,7 @@ A function's `requires` and `returns` may name an existing [type](type.md)
 rather than spelling out an inline aggregation, which makes unary and nullary
 functions natural to write:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 function CalculateTotal is {
   requires record TotalInputs
@@ -27,6 +28,7 @@ Any type works, and the kind keyword is optional: `requires Age`,
 `requires type Age` and `requires record Args` are all valid.
 
 !!! warning "The inline aggregation form is deprecated"
+    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
     ```riddl
     requires { subtotal is Price, taxes is Price }   // still works
     ```
@@ -50,6 +52,7 @@ or another function — with no scope gate and no ordering concern.
 `call` is a [value](value.md) expression rather than a bare statement, because
 a pure function's result would otherwise be discarded:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 let total = call function Pricing.CalculateTotal(subtotal, taxRate = rate)
 set field grandTotal to call function Tax.Apply(total)

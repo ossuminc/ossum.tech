@@ -14,6 +14,7 @@ options — the same principle that makes [author](author.md) a definition. A
 
 A version's component is **either a name or a natural number**, never both:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 version Garibaldi
 version 4
@@ -30,6 +31,7 @@ have to sanitize.
 A definition's precise version is **composed** from the versions its ancestors
 declare, root to leaf, joined with `.`:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 domain Garibaldi is {
   version Garibaldi

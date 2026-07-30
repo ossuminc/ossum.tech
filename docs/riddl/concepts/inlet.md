@@ -9,6 +9,7 @@ An Inlet is a component of a [Processor](processor.md) that specifies a named
 input through which data of a particular [type](type.md) streams into the
 processor.
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 inlet readings is type TemperatureReading
 ```

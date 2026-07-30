@@ -29,6 +29,7 @@ are active.
 
 ### Syntax
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 initial state ActiveOrder of record ActiveOrderData is {
   invariant TotalIsPositive is total > Zero
@@ -42,6 +43,7 @@ initial state ActiveOrder of record ActiveOrderData is {
 
 The state body is optional — a state can also be defined simply as:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 state ActiveOrder of record ActiveOrderData
 ```
@@ -50,6 +52,7 @@ state ActiveOrder of record ActiveOrderData
 
 An optional `initial` keyword marks the entity's starting state:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 entity Order is {
   initial state Pending of record PendingData is { ??? }
@@ -78,6 +81,7 @@ The `morph` statement transitions an entity from one state to another,
 changing which handlers are active. Its payload is a **record** — the new
 state's data — not the message that triggered the transition:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 on ship: command ShipOrder {
   morph entity Order to state Order.Shipped

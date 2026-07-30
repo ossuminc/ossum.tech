@@ -33,6 +33,7 @@ by the application's input.
 An input is written as an alias, an identifier, an acquisition verb, and the
 type it takes in:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 form  Signup   accepts type SignupDetails
 button Checkout activates type Boolean
@@ -64,6 +65,7 @@ RIDDL 2.0; the rest are unchanged.
 A [handler](handler.md) reads an input's value with the `get from` value
 expression:
 
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 on command Register {
   let details = get from input Signup
