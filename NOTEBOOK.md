@@ -11,6 +11,24 @@ to the task file and note completion in this notebook.
 
 ---
 
+## This is the RIDDL 1.x branch
+
+The open work queue lives on `main`, under **RESUME HERE** in its
+`NOTEBOOK.md` — both outstanding items (the mermaid hierarchy diagrams, and the
+last ~60 unvalidated example fences) are 2.0 work. It is deliberately not
+duplicated here, so the two cannot drift.
+
+What is specific to *this* branch:
+
+- **Validate with the 1.31 compiler**, not `$(which riddlc)`:
+  `/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc`. The RC formula took over the
+  PATH symlink, and the 2.0 binary reports false failures on 1.x docs.
+- **This branch currently owns the `latest` alias**, so it controls the site's
+  default version. When 2.0 ships final, `latest` must be removed from
+  `docs-version.yml` here *before* it is added on `main` — see
+  `scripts/promote-2.0-to-latest.md`. Otherwise any later push here silently
+  drags the site's default back to 1.x.
+
 ## Current Status
 
 Documentation site is complete and deployed at https://ossum.tech.
