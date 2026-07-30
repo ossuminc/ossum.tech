@@ -61,6 +61,7 @@ def doc_for(url: str) -> tuple[Path, str] | None:
 def main() -> int:
     problems: list[str] = []
     checked = 0
+    unverifiable: dict[str, int] = {}
 
     for md in sorted((REPO / "sites").rglob("*.md")):
         if "/site/" in md.as_posix():
@@ -73,12 +74,23 @@ def main() -> int:
                 problems.append(f"{rel}: unroutable cross-site link {url!r}")
                 continue
             path, label = resolved
+            # Not every branch carries every sub-site: docs/1.x publishes only
+            # `riddl`, and its links into riddlg or Synapify point at content
+            # published from `main`. Those cannot be checked from here, and
+            # calling them broken would be wrong.
+            tsite = label.split(":")[0]
+            if not (REPO / "sites" / tsite / "docs").is_dir():
+                unverifiable[tsite] = unverifiable.get(tsite, 0) + 1
+                continue
             checked += 1
             if not path.exists():
                 problems.append(f"{rel}: {url!r} -> no such document ({label})")
 
     for p in problems:
         print(p, file=sys.stderr)
+    for site, n in sorted(unverifiable.items()):
+        print(f"note: {n} link(s) into '{site}', which this branch does not "
+              f"build -- published from another branch, not checked")
     print(f"checked {checked} cross-site links, {len(problems)} broken")
     return 1 if problems else 0
 

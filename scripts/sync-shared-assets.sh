@@ -15,14 +15,17 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
-SITES=(shell riddl riddlg synapify)
+# Discovered rather than listed, because the set of sites differs by branch:
+# `main` publishes the shell plus three products, while docs/1.x publishes only
+# the riddl sub-site.
+shopt -s nullglob
+SITES=(sites/*/docs)
+if (( ${#SITES[@]} == 0 )); then
+  echo "sync-shared-assets: no sites/*/docs found -- wrong directory?" >&2
+  exit 1
+fi
 
-for site in "${SITES[@]}"; do
-  dest="sites/$site/docs"
-  if [[ ! -d $dest ]]; then
-    echo "sync-shared-assets: no such site: $dest" >&2
-    exit 1
-  fi
+for dest in "${SITES[@]}"; do
   # --delete so a removed shared asset does not linger in the copies.
   rsync -a --delete common/assets/      "$dest/assets/"
   rsync -a --delete common/stylesheets/ "$dest/stylesheets/"
