@@ -359,14 +359,30 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 | Start dev server | `mkdocs serve` |
 | Build site | `mkdocs build --strict` |
 | Check links **and anchors** | `mkdocs build --strict 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
-| Validate RIDDL examples | `python3 scripts/validate-riddl-examples.py $(which riddlc) docs/riddl/quickstart.md` |
+| Validate RIDDL examples | `python3 scripts/validate-riddl-examples.py $RIDDLC_131 docs/riddl/quickstart.md` |
 | Preview versioned site | `scripts/preview-versioned-site.sh` |
 | Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
 
-!!! note "This branch documents RIDDL 1.x"
-    Examples here must validate against the **1.31** `riddlc`, which is the
-    one on `PATH`. They will draw deprecations under a 2.0 compiler — that is
-    expected, and the 2.0 documentation lives on `main`.
+!!! danger "Do NOT use `$(which riddlc)` on this branch"
+    Examples here must validate against **1.31**, but `riddlc` on `PATH` is no
+    longer 1.31. The RIDDL 2.0 release-candidate formula (`riddlc-rc`) declares
+    `conflicts_with "riddlc"` — both install a binary called `riddlc` — so
+    installing the RC takes over the symlink.
+
+    Use the Cellar path directly:
+
+    ```bash
+    export RIDDLC_131=/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc
+    python3 scripts/validate-riddl-examples.py "$RIDDLC_131" docs/riddl/quickstart.md
+    ```
+
+    This is not theoretical. The Quickstart reports **0 failures** against real
+    1.31 and **3** against 2.0.0-rc.1 — the 2.0 compiler flags `source`,
+    `reply` and the state introducer as deprecated, which is correct for 2.0
+    and wrong for this branch. Validating with the PATH binary would send you
+    "fixing" 1.x docs into 2.0 syntax.
+
+    Confirm which binary you have with `riddlc version`.
 
     `mkdocs build --strict` does NOT fail on dangling intra-page anchors; it
     reports them at INFO and exits 0. Grep the output as shown above.

@@ -10,6 +10,11 @@ readers.
     <!-- riddl: standalone -->        a complete model; validate as-is (default)
     <!-- riddl: in-domain -->         wrap in `domain Example is { ... }`
     <!-- riddl: in-context -->        wrap in a domain AND a context
+    <!-- riddl: in-entity -->         wrap in a domain, context AND entity
+    <!-- riddl: in-handler -->        wrap deep enough to be inside an on-clause
+    <!-- riddl: in-application -->    as in-handler, but an `application` context (for `put`)
+    <!-- riddl: in-function -->       wrap in a function body (for `return`)
+    <!-- riddl: in-record -->         wrap in a record (for a bare field declaration)
     <!-- riddl: skip -->              not RIDDL, or deliberately invalid
     <!-- riddl: skip reason=... -->   same, with the reason recorded
 
@@ -57,17 +62,82 @@ def directive_for(text: str, fence_start: int) -> tuple[str, str]:
 
 
 def wrap(kind: str, body: str, prelude: str) -> str:
+    """Nest a fragment deep enough to be a whole model.
+
+    The prelude always lands at CONTEXT level, whatever the depth, because
+    that is where a page's shared vocabulary belongs -- a fragment nested in
+    a handler still needs to see the types the page defined around it.
+    """
     body = body.rstrip()
+
+    def ind(txt: str, n: int) -> str:
+        pad = " " * n
+        return "\n".join(pad + ln if ln.strip() else ln for ln in txt.split("\n"))
+
+    pre = ind(prelude.strip(), 4) if prelude.strip() else ""
+
+    if kind == "in-function":
+        # `return` is legal only in a function body.
+        return (
+            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "    record FnInput is { note is String }\n"
+            "    function ExampleFunction is {\n"
+            "      requires FnInput returns FnInput\n"
+            + ind(body, 6) + "\n"
+            "    }\n  }\n}\n"
+        )
+    if kind == "in-application":
+        # `put ... to output` is legal only in an application/context handler.
+        return (
+            "domain Example is {\n  application context Example is {\n" + pre + "\n"
+            "    record ExampleData is { note is String }\n"
+            "    command ExampleCommand is { note is String }\n"
+            "    page ExamplePage is {\n"
+            "      document ExampleOutput shows type String\n"
+            "      form ExampleInput accepts type String\n"
+            "    }\n"
+            "    handler ExampleHandler is {\n"
+            "      on command ExampleCommand {\n"
+            + ind(body, 8) + "\n"
+            "      }\n    }\n  }\n}\n"
+        )
+    if kind == "in-record":
+        # A bare field declaration, e.g. `items is many Item`.
+        return (
+            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "    record ExampleRecord is {\n" + ind(body, 6) + "\n"
+            "    }\n  }\n}\n"
+        )
+    if kind == "in-handler":
+        # Statement-level fragment: give it an on-clause to live in.
+        return (
+            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "    record ExampleData is { note is String }\n"
+            "    command ExampleCommand is { note is String }\n"
+            "    entity ExampleEntity is {\n"
+            "      state ExampleState of record ExampleData is {\n"
+            "        handler ExampleHandler is {\n"
+            "          on command ExampleCommand {\n"
+            + ind(body, 12) + "\n"
+            "          }\n        }\n      }\n    }\n  }\n}\n"
+        )
+    if kind == "in-entity":
+        return (
+            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            "    entity ExampleEntity is {\n" + ind(body, 6) + "\n"
+            "    }\n  }\n}\n"
+        )
     if kind == "in-context":
-        inner = "\n".join("    " + ln if ln.strip() else ln for ln in body.split("\n"))
-        pre = "\n".join("    " + ln for ln in prelude.strip().split("\n")) if prelude.strip() else ""
-        return f"domain Example is {{\n  context Example is {{\n{pre}\n{inner}\n  }}\n}}\n"
+        return (
+            "domain Example is {\n  context Example is {\n" + pre + "\n"
+            + ind(body, 4) + "\n  }\n}\n"
+        )
     if kind == "in-domain":
-        inner = "\n".join("  " + ln if ln.strip() else ln for ln in body.split("\n"))
-        pre = "\n".join("  " + ln for ln in prelude.strip().split("\n")) if prelude.strip() else ""
-        return f"domain Example is {{\n{pre}\n{inner}\n}}\n"
-    # standalone: a prelude, if any, sits beside the model at top level
-    return (prelude.rstrip() + "\n\n" if prelude.strip() else "") + body + "\n"
+        return "domain Example is {\n" + ind(body, 2) + "\n}\n"
+    # standalone: complete by definition, so the prelude is NOT injected --
+    # a page prelude holds context-level definitions, and those are illegal at
+    # root, which would break the very fences that need no help.
+    return body + "\n"
 
 
 def validate(riddlc: str, source: str) -> tuple[bool, str]:
@@ -100,7 +170,9 @@ def main() -> int:
     if len(sys.argv) < 3:
         print(__doc__)
         return 2
-    riddlc, files = sys.argv[1], sys.argv[2:]
+    args = [a for a in sys.argv[1:] if a != "--auto"]
+    auto = "--auto" in sys.argv
+    riddlc, files = args[0], args[1:]
 
     total = skipped = failed = 0
     for f in files:
@@ -111,11 +183,24 @@ def main() -> int:
         for fm in FENCE.finditer(text):
             line = text[: fm.start()].count("\n") + 1
             kind, rest = directive_for(text, fm.start())
+            if auto and kind == "standalone":
+                kind = "auto"
             if kind == "skip":
                 skipped += 1
                 continue
             total += 1
-            ok, detail = validate(riddlc, wrap(kind, fm.group("body"), prelude))
+            if kind == "auto":
+                # Try each wrapping; a fence that fits ANY of them is a
+                # fragment needing context, not a broken example. Used to
+                # measure how many fences are genuinely wrong on pages that
+                # do not yet carry directives.
+                ok, detail = False, ""
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record"):
+                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), prelude))
+                    if ok:
+                        break
+            else:
+                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), prelude))
             if not ok:
                 failed += 1
                 print(f"\nFAIL {md}:{line}  (riddl: {kind})")
