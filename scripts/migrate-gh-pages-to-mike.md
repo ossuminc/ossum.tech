@@ -71,9 +71,15 @@ Keep `CNAME` (custom domain — losing it takes the site down) and `.nojekyll`.
 
 ### 4. Deploy both versions
 
+!!! danger "`--alias-type copy` is required"
+    mike's default alias type is **symlink**, and **GitHub Pages does not
+    follow symlinks** — `/latest/…` would 404 in production while working
+    perfectly under a local `python -m http.server`, which does follow them.
+    A local rehearsal therefore cannot catch this; the flag must be passed.
+
 ```bash
-git checkout docs/1.x && mike deploy --push 1.31 latest
-git checkout main     && mike deploy --push 2.0  next
+git checkout docs/1.x && mike deploy --push --alias-type copy 1.31 latest
+git checkout main     && mike deploy --push --alias-type copy 2.0  next
 mike set-default --push latest
 ```
 

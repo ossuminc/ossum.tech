@@ -68,11 +68,11 @@ fi
 
 echo "==> Deploying $V1_VERSION [$V1_ALIAS] from $V1_BRANCH"
 git checkout --quiet "$V1_BRANCH"
-mike deploy "$V1_VERSION" "$V1_ALIAS" >/dev/null 2>&1
+mike deploy --alias-type copy "$V1_VERSION" "$V1_ALIAS" >/dev/null 2>&1
 
 echo "==> Deploying $V2_VERSION [$V2_ALIAS] from $V2_BRANCH"
 git checkout --quiet "$V2_BRANCH"
-mike deploy "$V2_VERSION" "$V2_ALIAS" >/dev/null 2>&1
+mike deploy --alias-type copy "$V2_VERSION" "$V2_ALIAS" >/dev/null 2>&1
 
 echo "==> Setting the default version to $DEFAULT_ALIAS"
 mike set-default "$DEFAULT_ALIAS" >/dev/null 2>&1
