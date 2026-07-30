@@ -117,6 +117,45 @@ Two traps learned here, both recorded in CLAUDE.md:
   to origin/gh-pages"). Sync the branch; never reach for
   `--ignore-remote-status`, which clobbers the remote.
 
+### Open: the Concepts hierarchy diagram is wrong for 2.0
+
+`docs/riddl/concepts/index.md`'s ASCII hierarchy diagram was **not** updated
+when the containment table below it was rewritten, so the page now contradicts
+itself. All of the following was verified against
+`docs/riddl/references/riddl-grammar.ebnf`, not inferred:
+
+| # | Wrong | Should be |
+|---|-------|-----------|
+| 1 | Case → Statement | Case → **Interaction** (`interactions = {interaction \| comment}`) |
+| 2 | "Processor" *and* "Streamlet" as separate children | one concept — `streamlet = source\|sink\|…\|processor` |
+| 3 | Repository absent from Context | `context_definition` includes it |
+| 4 | Repository/Connector absent at Domain scope | `domain_content` includes both, when they span contexts |
+| 5 | Domain shows only Context, Epic, Type | also domain (nesting), user, saga, author, version, copyright, import, include |
+| 6 | Root shows only Domain | also module, author, version, copyright, import, include |
+| 7 | Module absent entirely | it is a top-level container and the unit of reuse |
+| 8 | State → Handler only | `state_content = handler \| invariant \| comment` |
+| 9 | Inlet/Outlet absent | in `processor_definition_contents` — **every** processor bears ports |
+| 10 | Version/Copyright absent | nine scopes each |
+| 11 | Connector absent | `domain_content` *and* `processor_definition_contents` |
+| 12 | Saga only under Context | also `domain_content` |
+| 13 | Relationship absent | `processor_definition_contents` |
+
+**Why ASCII cannot be made right:** containment is a **DAG, not a tree** — Saga
+and Connector appear at two scopes and processors nest. The current picture is
+wrong partly because a tree cannot express that.
+
+Diagram options (user is open to ideas):
+
+- **Mermaid flowchart** — needs mermaid enabled in `mkdocs.yml` superfences
+  (deferred item 2.5 below, never done). Can show the DAG, with dashed edges
+  for conditionally-scoped placements. Renders natively.
+- **Small per-scope diagrams** rather than one mega-diagram — easier to read
+  and to keep correct.
+- **Drop the diagram**; the table beneath it is already accurate and complete.
+
+Verify any replacement against the grammar rules above, not against the old
+picture.
+
 ### Cross-repo dependency
 
 `riddl-models/task/2026-07-26-release2-syntax-migration.md` has an
