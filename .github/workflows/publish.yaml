@@ -45,4 +45,9 @@ jobs:
       - name: Deploy with mike
         run: |
           echo "Publishing version $DOCS_VERSION with aliases: $DOCS_ALIASES"
-          mike deploy --push --update-aliases "$DOCS_VERSION" $DOCS_ALIASES
+          # --alias-type copy is REQUIRED, not a preference. mike's default is
+          # `symlink`, and GitHub Pages does not follow symlinks -- so
+          # /latest/... would 404 in production while working perfectly under a
+          # local `python -m http.server`, which does follow them.
+          mike deploy --push --update-aliases --alias-type copy \
+            "$DOCS_VERSION" $DOCS_ALIASES

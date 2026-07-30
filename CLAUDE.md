@@ -128,6 +128,11 @@ be pushed freely without touching production.
 
 ### Things that will bite
 
+- **`mike` aliases must be `--alias-type copy`.** The default is `symlink`, and
+  GitHub Pages does not serve symlinked content, so `/latest/…` 404s in
+  production. A local `python -m http.server` rehearsal DOES follow symlinks
+  and so cannot catch it. The workflow passes the flag; keep it.
+
 - **`mkdocs build --strict` does NOT fail on dangling intra-page anchors.** It
   reports them at INFO level and exits 0. Always verify with:
   ```bash
