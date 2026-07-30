@@ -363,6 +363,19 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 | Preview versioned site | `scripts/preview-versioned-site.sh` |
 | Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
 
+!!! danger "This branch currently owns the `latest` alias"
+    `docs-version.yml` here declares `1.31` with the `latest` alias, so this
+    branch controls the site's default version.
+
+    When RIDDL 2.0 ships final, `latest` moves to `main` — and **`latest` must
+    be removed from THIS file first**. The workflow deploys with
+    `--update-aliases`, which moves the alias to the most recent deploy, so
+    while both branches declare it, any push here silently drags the site's
+    default back to 1.x. Months later, from an unrelated typo fix, with no
+    error.
+
+    Procedure: `scripts/promote-2.0-to-latest.md`.
+
 !!! danger "Do NOT use `$(which riddlc)` on this branch"
     Examples here must validate against **1.31**, but `riddlc` on `PATH` is no
     longer 1.31. The RIDDL 2.0 release-candidate formula (`riddlc-rc`) declares
