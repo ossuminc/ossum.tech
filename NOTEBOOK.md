@@ -33,26 +33,34 @@ clean; the 404 map passes 25 cases; `CNAME`, `.nojekyll` and three distinct
 | `/riddlg/<ver>/` | `sites/riddlg/` + `MCP/` | `main` |
 | `/synapify/<ver>/` | `sites/synapify/` | `main` |
 
+**Two branches carry this work, both unmerged and unpushed:**
+
+| Branch | Base | State |
+|---|---|---|
+| `restructure/per-product-versioning` | `main` | shell + riddl 2.0 + riddlg + synapify |
+| `restructure/docs-1.x` | `docs/1.x` | riddl 1.31 only |
+
+✅ `docs/1.x` restructured. Decided 2026-07-30: its `MCP/` pages are **dropped**
+— they documented the standalone `riddl-mcp-server`, never mentioned riddlg,
+and `main` replaced rather than updated them, so that server now has no
+published docs. `OSS/`, `synapify/` and `about/` were byte-identical to
+`main`'s, so publishing them once from `main` loses nothing.
+✅ `scripts/promote-2.0-to-latest.md` rewritten for prefixes.
+
 **What is left, in order:**
 
-1. **`docs/1.x` restructure** — it still has the old flat layout, so
-   `preview-versioned-site.sh` skips it and **`/riddl/latest/` currently 404s**.
-   Every cross-site link written as `/riddl/latest/…` depends on this. It needs
-   only `sites/riddl/`, and a `docs-version.yml` declaring the `riddl` site at
-   `1.31`/`latest` with **no `shell:` key** — the shell and the non-RIDDL
-   products publish from `main` alone. Its `extra.outdated_banner` says the
-   opposite of `main`'s: a newer release exists.
-   *Open question, do not assume:* its `OSS/` and `MCP/` pages describe 1.x-era
-   tooling and would stop publishing. Confirm before deleting.
-2. **`scripts/promote-2.0-to-latest.md`** — still written for the old layout.
-   Needs `--deploy-prefix` (and `-F`) threaded through, and its `.html`
-   verification URLs updated.
-3. **Merge and deploy**, following the runbook. Take a **fresh** backup branch
-   first: `gh-pages-preversioning` predates the mike migration and restoring it
-   would discard weeks of deploys.
-4. **Reply to `task/publish-riddl-license-page.md`** once deployed — riddl must
+1. **Merge both branches**, then deploy following the runbook. Take a **fresh**
+   backup branch first: `gh-pages-preversioning` predates the mike migration
+   and restoring it would discard weeks of deploys.
+2. **Ordering matters at deploy time.** Cross-site links point at
+   `/riddl/latest/…`, and `latest` is owned by `docs/1.x`. Until that branch
+   deploys, those links 404 — deploy `docs/1.x` first, or accept a gap.
+3. **Reply to `task/publish-riddl-license-page.md`** once deployed — riddl must
    change **three** places to `https://ossum.tech/riddl/2.0/licenses/`, not the
    one the task file mentions. Results section already written.
+4. **Deferred, agreed:** cross-site search (Pagefind — Material's index is
+   per-build, so search is per-product until then), and a `robots.txt`, which
+   has never existed.
 
 **Traps found doing this, all now guarded in code:**
 
