@@ -25,7 +25,9 @@ SERVE="$SCRATCH/site"
 
 # The RIDDL 1.x line is published from its own branch, so it has to be deployed
 # from there. Everything else comes from the current branch's docs-version.yml.
-V1_BRANCH="docs/1.x"; V1_VERSION="1.31"; V1_ALIAS="latest"
+# Overridable so a not-yet-merged branch can be rehearsed:
+#   V1_BRANCH=restructure/docs-1.x scripts/preview-versioned-site.sh
+V1_BRANCH="${V1_BRANCH:-docs/1.x}"; V1_VERSION="1.31"; V1_ALIAS="latest"
 
 command -v mike >/dev/null || { echo "mike not installed: pip install -r requirements.txt" >&2; exit 1; }
 
