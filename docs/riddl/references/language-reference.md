@@ -110,8 +110,9 @@ inlets and outlets, and may carry an ascribed streaming shape:
 
 A **Saga** orchestrates multi-step processes with compensation logic for
 failure recovery. A **Function** defines a pure, reusable computation. Neither
-is a processor: both extend the vital-definition base instead, so neither bears
-ports, a version, or a copyright.
+is a processor — both extend the vital-definition base — so neither takes a
+version or a copyright. A Saga does nonetheless bear inlets and outlets, being
+a coordinator with messages to receive and emit; a Function does not.
 
 All processors can contain handlers, functions, types, constants, invariants,
 ports, and other processor-specific definitions.

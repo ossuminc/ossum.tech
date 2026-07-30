@@ -83,21 +83,21 @@ With those clarifying simplifications, here's the hierarchy:
 
 | Container | Can Contain |
 |-----------|-------------|
-| [**Root**](root.md) | [Domain](domain.md), [Module](module.md), [Author](author.md), [Version](version.md), [Copyright](copyright.md) |
+| [**Root**](root.md) | [Domain](domain.md), [Module](module.md), [Author](author.md), [Version](version.md), [Copyright](copyright.md), [Include](include.md), Import |
 | [**Module**](module.md) | *any* top-level definition, flat and unordered |
-| [**Domain**](domain.md) | [Type](type.md), [Epic](epic.md), [Context](context.md), [Saga](saga.md), [User](user.md), [Author](author.md), [Repository](repository.md)†, [Connector](connector.md)†, [Version](version.md), [Copyright](copyright.md) |
-| [**Epic**](epic.md) | [Case](use-case.md) → [Interaction](interaction.md) |
+| [**Domain**](domain.md) | [Type](type.md), [Epic](epic.md), [Context](context.md), [Domain](domain.md) (nested), [Saga](saga.md), [User](user.md), [Author](author.md), [Repository](repository.md)†, [Connector](connector.md)†, [Version](version.md), [Copyright](copyright.md), [Include](include.md), Import |
+| [**Epic**](epic.md) | [Case](use-case.md) → [Interaction](interaction.md), [Type](type.md), `shown by`, [Include](include.md) |
 | [**Context**](context.md) | [Entity](entity.md), [Projector](projector.md), [Saga](saga.md), [Adaptor](adaptor.md), [Repository](repository.md), [Processor](processor.md), [Connector](connector.md), [Group](group.md)‡, + *processor contents* |
 | [**Entity**](entity.md) | [State](state.md), + *processor contents* |
 | [**State**](state.md) | [Handler](handler.md), [Invariant](invariant.md) |
 | [**Projector**](projector.md) | `updates`, + *processor contents* |
-| [**Saga**](saga.md) | [Type](type.md), [SagaStep](sagastep.md) → [Statement](statement.md) |
+| [**Saga**](saga.md) | [SagaStep](sagastep.md) → [Statement](statement.md), [Inlet](inlet.md), [Outlet](outlet.md), [Function](function.md), [Include](include.md) |
 | [**Adaptor**](adaptor.md) | *processor contents* |
 | [**Repository**](repository.md) | Schema, + *processor contents* |
-| [**Streamlet**](streamlet.md) | *processor contents* |
-| [**Function**](function.md) | [Statement](statement.md), [Field](field.md) |
+| [**Processor**](processor.md) | *processor contents* |
+| [**Function**](function.md) | [Statement](statement.md), [Type](type.md), [Function](function.md) (nested), [Include](include.md) |
 | [**Handler**](handler.md) | [On Clause](onclause.md) → [Statement](statement.md) |
-| [**Group**](group.md) | [Group](group.md), [Input](input.md), [Output](output.md), [Type](type.md) |
+| [**Group**](group.md) | [Group](group.md) (nested), `contains`, [Input](input.md), [Output](output.md), `shown by` |
 | [**Invariant**](invariant.md) | a [Value](value.md) condition |
 
 † at domain scope only when the definition genuinely spans several contexts

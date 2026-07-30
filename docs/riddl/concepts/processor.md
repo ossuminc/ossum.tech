@@ -29,8 +29,12 @@ The following definitions are all processors:
 
 !!! info "Saga and Function are not processors"
     A [Saga](saga.md) and a [Function](function.md) extend the
-    [vital definition](vital.md) base rather than Processor. They bear no
-    ports, no version and no copyright.
+    [vital definition](vital.md) base rather than Processor, so neither takes a
+    [version](version.md) or a [copyright](copyright.md).
+
+    A Saga does, however, bear [inlets](inlet.md) and [outlets](outlet.md) —
+    being a coordinator, it has messages to receive and emit. A Function does
+    not.
 
 ## The `processor` Keyword
 

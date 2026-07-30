@@ -324,8 +324,12 @@ contexts and must either complete entirely or be undone.
 
 - Each step has a forward action and a `reverted by` compensation block
 - Steps execute sequentially; failure triggers compensation in reverse
-- A Saga is a **vital definition, not a processor** — it bears no ports, no
-  version and no copyright
+- A Saga is a **vital definition, not a processor** — it takes no
+  [version](#version) and no [copyright](#copyright). It **does** bear
+  [inlets](#inlet) and [outlets](#outlet), though: `saga_definitions` admits
+  them alongside steps, functions and includes.
+- **A saga needs at least two steps.** One step is an Error — a
+  single-step transaction has nothing to coordinate.
 - Options: `compensate` (run undo blocks in reverse on failure),
   `parallel` (start all steps at once). Sequential is the default, so there
   is no `sequential` option.
@@ -1343,7 +1347,8 @@ directly instantiated in RIDDL models:
 - **[Processor](../concepts/processor.md)** — The abstract parent of
   Context, Entity, Repository, Projector, Adaptor, and Streamlet. All of
   them bear ports, a version and a copyright. Saga and Function extend the
-  vital-definition base instead, so they bear none of those.
+  vital-definition base instead, so neither takes a version or a copyright —
+  but a **Saga does bear ports**, unlike a Function.
 - **[Element](../concepts/element.md)** — Any named thing in a RIDDL
   model (broader than Definition).
 - **[Value](../concepts/value.md)** — A definition that carries a type

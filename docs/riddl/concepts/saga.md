@@ -57,6 +57,11 @@ Both options are contracts for the code generator rather than behavior
     crosses the saga's boundary and is an **Error**. A referent with no owning
     domain — a root or shared definition — is allowed.
 
+!!! warning "A saga needs at least two steps"
+    One step is an **Error**: *"Sagas must define at least 2 steps"*. A
+    single-step transaction has nothing to coordinate and no ordering to
+    compensate in reverse, so it wants a plain handler instead.
+
 !!! warning "One failure point per step"
     A step's do/undo is all-or-nothing: the compensation assumes all or none
     of the do-block happened. So a step should have **at most one** potential
@@ -69,9 +74,13 @@ Both options are contracts for the code generator rather than behavior
 ## A Saga Is Not a Processor
 
 A Saga extends the [vital definition](vital.md) base rather than
-[Processor](processor.md), so it bears no [ports](inlet.md), no
-[version](version.md) and no [copyright](copyright.md). Earlier documentation
-described sagas as processors; they are not.
+[Processor](processor.md), so it takes no [version](version.md) and no
+[copyright](copyright.md).
+
+It **does** bear [inlets](inlet.md) and [outlets](outlet.md) — a coordinator
+has messages to receive and emit — so "not a processor" is about the version and
+copyright scopes, not about ports. Its contents are exactly: steps, ports,
+functions and includes.
 
 ## Occurs In
 * [Contexts](context.md)
