@@ -1,0 +1,180 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+#
+# Shared configuration for every ossum.tech sub-site.
+#
+# Each site pulls this in with `INHERIT: ../common.yml` and adds only what is
+# genuinely its own: site_name, site_url, nav, and (for versioned sites) the
+# mike version provider.
+#
+# PATHS IN THIS FILE ARE RESOLVED RELATIVE TO THE CHILD CONFIG, NOT THIS FILE.
+# INHERIT is a plain YAML deep-merge performed at load time
+# (mkdocs/utils/yaml.py:139), so the merged config is validated against the
+# child's location. Every child lives at sites/<name>/mkdocs.yml, so `../..`
+# reaches the repo root from all of them -- keep it that way when adding a
+# site, or `custom_dir` and `hooks` will silently resolve somewhere else.
+
+site_description: >-
+  Documentation for RIDDL - a specification language for large, distributed,
+  reactive systems. Learn to model internet-scale applications with DDD patterns.
+repo_url: https://github.com/ossuminc/ossum.tech
+repo_name: ossuminc/ossum.tech
+copyright: >
+  Copyright &copy; 2019-2026 Ossum Inc. -
+  <a href="#__consent">Change cookie settings</a>
+
+theme:
+  name: material
+  custom_dir: ../../overrides
+  logo: assets/images/ossum_logo_and_name-01.png
+  favicon: assets/images/favicon.jpg
+  font:
+    text: Encode Sans
+    code: Roboto Mono
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.tooltips
+    - header.autohide
+    - navigation.footer
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - search.suggest
+    - search.share
+    - search.highlight
+  icon:
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      hint: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+extra_css:
+  - stylesheets/extra.css
+
+# Sets site_url from $DOCS_SITE_URL at build time. Without it every version's
+# sitemap.xml advertises the same unversioned URLs, so each is a soft 404 --
+# a bug that predates the split. See scripts/site_url_hook.py.
+hooks:
+  - ../../scripts/site_url_hook.py
+
+extra:
+  analytics:
+    provider: google
+    property: G-97Q04B6XCX
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    cookies:
+      analytics: GA_ossum_tech
+      github: GH_ossum_tech
+    consent:
+      actions:
+        - accept
+        - reject
+        - manage
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/ossum-inc/
+    - icon: fontawesome/brands/github
+      link: https://www.github.com/ossuminc
+  generator: false
+
+markdown_extensions:
+    # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+
+    # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  # check_paths MUST stay true. Without it a `--8<--` include whose path does
+  # not resolve renders as NOTHING, and `--strict` says nothing either -- the
+  # EBNF grammar page shipped empty exactly that way during this split. Paths
+  # are relative to the working directory, so builds run from the repo root.
+  - pymdownx.snippets:
+      check_paths: true
+      base_path:
+        - sites/riddl/docs
+        - sites/riddlg/docs
+        - sites/synapify/docs
+        - sites/shell/docs
+  # The custom_fences entry registers ```mermaid so mkdocs-material renders it
+  # as a diagram. WITHOUT it a mermaid block renders as an ordinary code block
+  # and `--strict` says nothing -- so a broken diagram looks like a passing
+  # build. Always eyeball a page after touching this.
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search
+
+# `mkdocs build --strict` promotes warnings to errors, but it does NOT check
+# heading anchors by default -- a link to page.md#renamed-heading builds clean
+# and 404s in the browser. Turning these on makes the CI strict build catch it.
+# It is also what proves the cross-site link rewrite is complete: any link that
+# is still relative across a site boundary fails the build.
+validation:
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn

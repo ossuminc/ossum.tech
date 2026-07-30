@@ -1,0 +1,170 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+INHERIT: ../common.yml
+
+site_name: RIDDL Documentation
+# Overridden per deploy by DOCS_SITE_URL (scripts/site_url_hook.py) so each
+# version's sitemap advertises its own URLs. This value is the local default.
+site_url: https://ossum.tech/riddl/1.31/
+edit_uri: edit/docs/1.x/sites/riddl/docs/
+
+extra_javascript:
+  - javascripts/extra.js
+
+extra:
+  version:
+    provider: mike
+    alias: true
+  # Shown only when this build is not the `latest` alias -- so while 1.31 still
+  # IS latest, it does not appear at all. It starts showing by itself the moment
+  # 2.0 takes the alias. The wording is the mirror image of main's, which
+  # announces an unreleased preview.
+  #
+  # It MUST live here rather than in overrides/main.html: that directory is
+  # custom_dir for every sub-site, so a message hard-coded there would appear
+  # on all of them.
+  outdated_banner: >-
+    You are reading documentation for RIDDL 1.x. A newer release is available.
+
+nav:
+  - index.md
+  - Quickstart: quickstart.md
+  - Tutorials:
+    - tutorials/index.md
+    - Getting Started: tutorials/basics.md
+    - Reactive BBQ Case Study:
+      - tutorials/rbbq/index.md
+      - Scenario: tutorials/rbbq/scenario.md
+      - Domain Model: tutorials/rbbq/reactive-bbq.md
+      - Restaurant:
+        - tutorials/rbbq/restaurant/index.md
+        - Front of House: tutorials/rbbq/restaurant/front-of-house.md
+        - Kitchen: tutorials/rbbq/restaurant/kitchen.md
+        - Bar: tutorials/rbbq/restaurant/bar.md
+        - Online Ordering: tutorials/rbbq/restaurant/online-ordering.md
+        - Delivery: tutorials/rbbq/restaurant/delivery.md
+        - Loyalty: tutorials/rbbq/restaurant/loyalty.md
+      - BackOffice:
+        - tutorials/rbbq/backoffice/index.md
+        - Scheduling: tutorials/rbbq/backoffice/scheduling.md
+        - Inventory: tutorials/rbbq/backoffice/inventory.md
+        - Reporting: tutorials/rbbq/backoffice/reporting.md
+      - Corporate:
+        - tutorials/rbbq/corporate/index.md
+        - Menu Management: tutorials/rbbq/corporate/menu-management.md
+        - Supply Chain: tutorials/rbbq/corporate/supply-chain.md
+        - Marketing: tutorials/rbbq/corporate/marketing.md
+      - External Systems: tutorials/rbbq/external-contexts.md
+      - Patterns: tutorials/rbbq/patterns.md
+      - Personas:
+        - tutorials/rbbq/personas/index.md
+        - CEO: tutorials/rbbq/personas/ceo.md
+        - Head Chef: tutorials/rbbq/personas/head-chef.md
+        - Host: tutorials/rbbq/personas/host.md
+        - Server: tutorials/rbbq/personas/server.md
+        - Bartender: tutorials/rbbq/personas/bartender.md
+        - Chef: tutorials/rbbq/personas/chef.md
+        - Cook: tutorials/rbbq/personas/cook.md
+        - Delivery Driver: tutorials/rbbq/personas/delivery-driver.md
+        - Online Customer: tutorials/rbbq/personas/online-customer.md
+  - Introduction:
+    - introduction/index.md
+    - What is RIDDL?: introduction/what-is-riddl.md
+    - Why is RIDDL Needed?: introduction/why-is-riddl-needed.md
+    - What Can RIDDL Do?: introduction/what-can-riddl-do.md
+    - What is RIDDL Based On?: introduction/what-is-riddl-based-on.md
+    - What Conventions Does RIDDL Use?: introduction/what-conventions-does-riddl-use.md
+    - Who Can Benefit from RIDDL?: introduction/who-can-benefit-from-riddl.md
+    - Who Made RIDDL Possible?: introduction/who-made-riddl-possible.md
+    - How Can I Get Help?: introduction/how-can-i-get-help.md
+  - Concepts:
+    - concepts/index.md
+    - Root: concepts/root.md
+    - Domain: concepts/domain.md
+    - Context: concepts/context.md
+    - Entity: concepts/entity.md
+    - Repository: concepts/repository.md
+    - Projector: concepts/projector.md
+    - Saga: concepts/saga.md
+    - Saga Step: concepts/sagastep.md
+    - Streamlet: concepts/streamlet.md
+    - Adaptor: concepts/adaptor.md
+    - Application: concepts/application.md
+    - Epic: concepts/epic.md
+    - Use Case: concepts/use-case.md
+    - User: concepts/user.md
+    - Interaction: concepts/interaction.md
+    - Handler: concepts/handler.md
+    - On Clause: concepts/onclause.md
+    - Function: concepts/function.md
+    - Type: concepts/type.md
+    - Field: concepts/field.md
+    - State: concepts/state.md
+    - Constant: concepts/constant.md
+    - Invariant: concepts/invariant.md
+    - Message: concepts/message.md
+    - Inlet: concepts/inlet.md
+    - Outlet: concepts/outlet.md
+    - Connector: concepts/connector.md
+    - Group: concepts/group.md
+    - Input: concepts/input.md
+    - Output: concepts/output.md
+    - Case: concepts/case.md
+    - Conditional: concepts/conditional.md
+    - Statement: concepts/statement.md
+    - Include: concepts/include.md
+    - Author: concepts/author.md
+    - Term: concepts/term.md
+    - Comment: concepts/comment.md
+    - Description: concepts/description.md
+    - Metadata: concepts/metadata.md
+    - Option: concepts/option.md
+    - Element: concepts/element.md
+    - Definition: concepts/definition.md
+    - Value: concepts/value.md
+    - Vital: concepts/vital.md
+    - Processor: concepts/processor.md
+  - Guides:
+    - guides/index.md
+    - For Authors:
+      - guides/authors/index.md
+      - Design Guide:
+        - guides/authors/design/index.md
+        - Bounded Contexts: guides/authors/design/contexts.md
+        - Command-Event Patterns: guides/authors/design/command-event-patterns.md
+        - UI Modeling: guides/authors/design/ui-modeling.md
+    - For Domain Experts:
+      - guides/domain-experts/index.md
+      - Duties: guides/domain-experts/duties.md
+      - Relating to RIDDL: guides/domain-experts/relating-to-riddl.md
+    - For Implementors:
+      - guides/implementors/index.md
+      - Ways to Use RIDDL: guides/implementors/ways-to-use-riddl.md
+    - For Developers:
+      - guides/developers/index.md
+      - Design Principles: guides/developers/principles.md
+      - Releasing: guides/developers/releasing.md
+  - Examples: examples/index.md
+  - Playground: playground/index.md
+  - References:
+    - references/index.md
+    - Cheat Sheet: references/cheat-sheet.md
+    - Standard Highlighting: references/standard-highlighting.md
+    - Language Reference: references/language-reference.md
+    - EBNF Grammar: references/ebnf-grammar.md
+  - Tools:
+    - tools/index.md
+    - riddlc:
+      - tools/riddlc/index.md
+      - Installation: tools/riddlc/installation.md
+      - Command Reference: tools/riddlc/command-reference.md
+      - Configuration: tools/riddlc/configuration.md
+      - Compilation: tools/riddlc/compilation.md
+      - GitHub Actions: tools/riddlc/github-actions.md
+    - sbt-riddl: tools/sbt-riddl/index.md
+    - MCP Server: tools/riddl-mcp-server/index.md
+    - IntelliJ Plugin: tools/riddl-idea-plugin/index.md
+  - IDE Support:
+    - OSS/index.md
+    - IntelliJ IDEA Plugin: OSS/intellij-plugin/index.md
+    - VS Code Extension: OSS/vscode-extension/index.md
+    - Authoring RIDDL: OSS/authoring-riddl.md

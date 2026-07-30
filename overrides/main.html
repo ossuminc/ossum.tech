@@ -2,15 +2,23 @@
 
 {#
   Shown by Material only when this build is NOT the version aliased `latest`.
-  Each publishing branch words it for its own situation, because each is a
-  separate build: this branch documents the RIDDL 1.x line, so the banner
-  points readers at the newer release once 2.0 takes the `latest` alias. While
-  1.x still IS `latest`, this does not show at all.
+
+  The wording comes from `extra.outdated_banner` in each site's mkdocs.yml,
+  NOT from this file. This directory is `custom_dir` for all four sub-sites, so
+  a message hard-coded here appears on every one of them -- which is how the
+  Synapify docs briefly announced themselves as a preview of RIDDL 2.0.
+
+  The link target is deliberately `'../' ~ base_url`. base_url resolves to the
+  version root (e.g. /riddl/2.0/), so one level above it is the product prefix
+  root (/riddl/), whose index.html mike points at that product's default alias.
+  This holds for both index and deep pages, and survived the change to
+  directory-style URLs -- verified by reading the rendered href on both.
 #}
 {% block outdated %}
-  You are reading documentation for RIDDL 1.x. A newer release is available.
+  {{ config.extra.outdated_banner
+     | default("You are reading documentation for an older release.") }}
   <a href="{{ '../' ~ base_url }}">
-    <strong>Go to the latest version.</strong>
+    <strong>Go to the current release.</strong>
   </a>
 {% endblock %}
 

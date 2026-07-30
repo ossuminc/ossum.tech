@@ -20,6 +20,13 @@ duplicated here, so the two cannot drift.
 
 What is specific to *this* branch:
 
+- **This branch publishes ONE sub-site: `riddl`, at `/riddl/1.31/`.** The site
+  is now four MkDocs projects, one per product plus an unversioned shell. See
+  `scripts/migrate-to-per-product-versioning.md`, and `docs-version.yml` here
+  for why this branch declares nothing else.
+- **Sources live under `sites/riddl/docs/`; there is no `mkdocs.yml` at the
+  repo root.** Every command needs `-f sites/riddl/mkdocs.yml`, and
+  `./scripts/sync-shared-assets.sh` must run first or pages build without CSS.
 - **Validate with the 1.31 compiler**, not `$(which riddlc)`:
   `/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc`. The RC formula took over the
   PATH symlink, and the 2.0 binary reports false failures on 1.x docs.
@@ -28,6 +35,22 @@ What is specific to *this* branch:
   `docs-version.yml` here *before* it is added on `main` — see
   `scripts/promote-2.0-to-latest.md`. Otherwise any later push here silently
   drags the site's default back to 1.x.
+
+### Dropped from this branch (2026-07-30)
+
+`riddlg`, `MCP/`, `synapify/`, `about/`, `coming-soon/` and the landing page no
+longer live here. `OSS/` moved *into* the riddl sub-site as `sites/riddl/docs/OSS/`
+and still publishes as **IDE Support**.
+
+`OSS/`, `synapify/` and `about/` were **byte-identical** to `main`'s, so
+publishing them once from `main` loses nothing and ends the duplication that
+put a copy in every RIDDL version directory.
+
+`MCP/` was the one real loss and was dropped deliberately. These pages
+documented the standalone `riddl-mcp-server` and never mentioned riddlg;
+`main`'s replaced rather than updated them, repointing at riddlg in `ffb0b50`.
+The standalone server now has no published documentation. Decided 2026-07-30 —
+revisit if `riddl-mcp-server` is still a supported product.
 
 ## Current Status
 
