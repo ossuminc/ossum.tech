@@ -87,6 +87,36 @@ Two things worth remembering from that work:
 Filed against riddl: `riddl/task/2026-07-28-grammar-questions-from-docs.md`
 (comment-with-`???`, and `command X()` leniency).
 
+### Deployment: live and versioned (2026-07-30)
+
+The mike migration is **done**. Both versions are live:
+
+| URL | Serves |
+|-----|--------|
+| `ossum.tech/` | redirects to `latest/` |
+| `/latest/`, `/1.31/` | RIDDL 1.31 |
+| `/next/`, `/2.0/` | RIDDL 2.0 (release candidate) |
+
+`gh-pages` was restructured: the flat pre-versioning site was removed (it was
+shadowing the versioned content — `/riddl/...` was still serving pages built
+2026-07-21), and `scripts/gh-pages-404.html` now redirects legacy unversioned
+links. Backup branch `gh-pages-preversioning` is on the remote; rollback is
+`git push --force origin gh-pages-preversioning:gh-pages`.
+
+**Next deployment action — when RIDDL 2.0 ships final:** follow
+`scripts/promote-2.0-to-latest.md`. Do not improvise it; there is a silent
+revert hazard if both branches declare `latest`.
+
+Two traps learned here, both recorded in CLAUDE.md:
+
+- **mike aliases must be `--alias-type copy`.** The default is `symlink` and
+  GitHub Pages does not serve symlinked content, so `/latest/...` 404s in
+  production — while a local `python -m http.server` rehearsal follows symlinks
+  and shows 200. A passing local preview proves nothing about aliases.
+- **`mike` refuses to act on a stale local `gh-pages`** ("gh-pages is unrelated
+  to origin/gh-pages"). Sync the branch; never reach for
+  `--ignore-remote-status`, which clobbers the remote.
+
 ### Cross-repo dependency
 
 `riddl-models/task/2026-07-26-release2-syntax-migration.md` has an

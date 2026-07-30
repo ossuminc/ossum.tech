@@ -151,6 +151,20 @@ be pushed freely without touching production.
   each branch is its own build. `main` announces an unreleased preview;
   `docs/1.x` announces that a newer release exists.
 
+### When RIDDL 2.0 ships final
+
+`latest` currently points at **1.31**, which is correct while 2.0 is a release
+candidate. Promoting it is a short procedure with one landmine, written up in
+**`scripts/promote-2.0-to-latest.md`**.
+
+The landmine, because it is worth knowing even without opening the file:
+**two branches must never both declare `latest`.** The workflow deploys with
+`--update-aliases`, which *moves* the alias to the most recent deploy — so if
+`docs/1.x` still declares `latest` after 2.0 is promoted, any later push to
+that branch silently drags the site's default back to 1.x. Months later, from
+an unrelated typo fix, with no error. Remove `latest` from `docs/1.x` **before**
+adding it to `main`.
+
 ### Migrating gh-pages
 
 `gh-pages` still holds a flat unversioned site. The restructure is a one-time
