@@ -83,29 +83,38 @@ jobs:
       # The shell is not versioned, so mike is not involved. It is built and
       # committed to the gh-pages root, touching only the paths it owns --
       # never the product prefixes or their versions.json.
-      - name: Deploy the unversioned shell
+      - name: Deploy the shell and rebuild the search index
         run: |
-          SHELL_CFG=$(python -c "import yaml;c=yaml.safe_load(open('docs-version.yml'));print((c.get('shell') or {}).get('config',''))")
-          if [ -z "$SHELL_CFG" ]; then
-            echo "This branch does not publish the shell; skipping."
-            exit 0
-          fi
-          DOCS_SITE_URL=https://ossum.tech/ mkdocs build -f "$SHELL_CFG" -d /tmp/shell
           git fetch origin gh-pages
           git worktree add /tmp/ghp origin/gh-pages
-          cp -r /tmp/shell/. /tmp/ghp/
-          # Copied last, deliberately: the shell build emits its own 404.html
-          # and this one -- which redirects legacy unversioned links -- must win.
-          cp scripts/gh-pages-404.html /tmp/ghp/404.html
-          # Cross-site search. Runs here, after every sub-site has been
-          # deployed, because Pagefind indexes built HTML rather than sources
-          # -- that is what lets one index span four MkDocs projects.
+
+          # The shell is only published by the branch that declares it. Every
+          # other branch skips this part but still reaches the indexing step
+          # below -- see the comment there for why that matters.
+          SHELL_CFG=$(python -c "import yaml;c=yaml.safe_load(open('docs-version.yml'));print((c.get('shell') or {}).get('config',''))")
+          if [ -n "$SHELL_CFG" ]; then
+            DOCS_SITE_URL=https://ossum.tech/ mkdocs build -f "$SHELL_CFG" -d /tmp/shell
+            cp -r /tmp/shell/. /tmp/ghp/
+            # Copied last, deliberately: the shell build emits its own 404.html
+            # and this one -- which redirects legacy unversioned links -- wins.
+            cp scripts/gh-pages-404.html /tmp/ghp/404.html
+          else
+            echo "This branch does not publish the shell."
+          fi
+
+          # The cross-site index is rebuilt on EVERY publishing branch, not
+          # just the one that owns the shell. It indexes each product's
+          # `latest` alias, and docs/1.x owns riddl/latest -- so if this only
+          # ran where the shell is built, a docs/1.x push would update the
+          # published pages while search kept returning their old text, with
+          # nothing to indicate the index had gone stale.
           "$GITHUB_WORKSPACE/scripts/build-search-index.sh" /tmp/ghp
+
           cd /tmp/ghp
           git add -A
           if git diff --cached --quiet; then
-            echo "Shell unchanged."
+            echo "Shell and search index unchanged."
           else
-            git commit -m "Deploy the unversioned shell"
+            git commit -m "Deploy the shell and refresh the cross-site search index"
             git push origin HEAD:gh-pages
           fi
