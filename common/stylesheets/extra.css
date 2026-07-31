@@ -72,20 +72,19 @@
 }
 
 /* ---------------------------------------------------------------------------
-   "Full Search" bar -- cross-site search, rendered by overrides/main.html into
-   Material's `hero` block so it sits directly below the sticky header.
+   "Full Search" -- cross-site search.
 
-   It is ADDITIVE: Material's own title-bar search is untouched and still
-   searches the current site and version. This searches every product.
+   Rendered by overrides/main.html into Material's `hero` block, then MOVED by
+   script into the header, between the title row and the tabs. The template
+   cannot put it there directly: with navigation.tabs.sticky the tabs are
+   rendered inside partials/header.html, so no block exists between them.
 
-   The results panel is absolutely positioned. Pagefind renders its results as
-   a sibling of the input, so without this the whole page would jump downwards
-   on every keystroke.
+   Two states are styled below because the move can fail (if Material renames
+   .md-header or .md-tabs). Unmoved it sits below the header on the page
+   background; moved it sits on the header's primary colour. It works either
+   way; only the first is ugly.
    --------------------------------------------------------------------------- */
 .ossum-fullsearch {
-  position: sticky;
-  top: 0;
-  z-index: 3;
   background: var(--md-default-bg-color);
   border-bottom: 1px solid var(--md-default-fg-color--lightest);
 }
@@ -93,64 +92,140 @@
 .ossum-fullsearch__inner {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.35rem 0.8rem;
+  gap: 0.6rem;
+  padding: 0.1rem 0.8rem 0.25rem;
 }
 
 .ossum-fullsearch__label {
   flex: 0 0 auto;
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  color: var(--md-default-fg-color--light);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.85;
   white-space: nowrap;
 }
 
 .ossum-fullsearch__ui {
-  position: relative;   /* containing block for the overlay below */
+  position: relative;   /* containing block for the results overlay */
   flex: 1 1 auto;
   min-width: 0;
 }
 
-/* Pagefind puts its results in .pagefind-ui__drawer next to the input. Lift it
-   out of the flow so it hangs over the page instead of displacing it. */
+/* --- in the header, on the primary colour ------------------------------- */
+
+.ossum-fullsearch--in-header {
+  background: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  border-bottom: none;
+  width: 100%;
+}
+
+.ossum-fullsearch--in-header .ossum-fullsearch__label {
+  color: var(--md-primary-bg-color);
+}
+
+/* Match Material's own header search field: translucent dark fill, light
+   text, so the two inputs read as a pair rather than as a stray widget.
+   
+   The extra selector depth is deliberate. pagefind-ui.css is loaded from
+   `extrahead`, i.e. AFTER extra.css, so at equal specificity Pagefind wins and
+   the input stayed 45px tall. Matching through .pagefind-ui__form outranks it
+   without resorting to !important. */
+.ossum-fullsearch--in-header .pagefind-ui .pagefind-ui__form .pagefind-ui__search-input {
+  background-color: #00000042;
+  color: var(--md-primary-bg-color);
+  border: none;
+  border-radius: 0.1rem;
+  height: 1.3rem;
+  min-height: 0;
+  font-size: 0.62rem;
+  padding: 0 1.6rem;
+  background-size: 0.75rem;
+  background-position: 0.4rem center;
+}
+
+.ossum-fullsearch--in-header .pagefind-ui__search-input::placeholder {
+  color: var(--md-primary-bg-color);
+  opacity: 0.7;
+}
+
+.ossum-fullsearch--in-header .pagefind-ui__search-clear {
+  color: var(--md-primary-bg-color);
+  background: transparent;
+  font-size: 0.6rem;
+}
+
+/* --- the results overlay ------------------------------------------------- */
+
+/* Pagefind renders results as a sibling of the input. Left in flow they would
+   shove the whole page down on every keystroke -- and inside the header they
+   would stretch the header itself. */
 .ossum-fullsearch__ui .pagefind-ui__drawer {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 0.25rem);
   left: 0;
   right: 0;
-  max-height: 70vh;
+  max-height: 75vh;
   overflow-y: auto;
-  z-index: 4;
-  padding: 0 0.8rem 0.8rem;
+  z-index: 5;
+  padding: 0.4rem 0.8rem 0.8rem;
+
+  /* Explicitly the PAGE colours, not the header's: this hangs over page
+     content and must stay readable in both schemes. */
   background: var(--md-default-bg-color);
+  color: var(--md-typeset-color);
   border: 1px solid var(--md-default-fg-color--lightest);
-  border-top: none;
+  border-radius: 0 0 0.1rem 0.1rem;
   box-shadow: var(--md-shadow-z2);
 }
 
-/* Empty drawers still carry the border, which reads as a stray line. */
 .ossum-fullsearch__ui .pagefind-ui__drawer:empty,
 .ossum-fullsearch__ui .pagefind-ui__drawer--hidden {
   display: none;
 }
 
 .ossum-fullsearch__note {
-  font-size: 0.7rem;
-  color: var(--md-default-fg-color--light);
+  font-size: 0.62rem;
 }
 
-/* Narrow screens: the label costs more than it explains. */
+/* Narrow screens: the label costs more room than it explains. */
 @media screen and (max-width: 44.9375em) {
   .ossum-fullsearch__label { display: none; }
 }
 
-/* Match Pagefind's own controls to the Material palette in both schemes. */
+/* Material's own header search field is taller than it needs to be; bring it
+   down so the two search rows sit compactly together. Material's default is
+   1.8rem. */
+.md-search__form { height: 1.3rem; }
+.md-search__input { font-size: 0.62rem; }
+.md-header .md-search__icon { height: 0.85rem; width: 0.85rem; }
+
+/* Pagefind's own control sizing, both mount points. */
 .ossum-fullsearch,
 #pagefind-search {
-  --pagefind-ui-scale: 0.75;
+  --pagefind-ui-scale: 0.5;
   --pagefind-ui-primary: var(--md-primary-fg-color);
   --pagefind-ui-text: var(--md-typeset-color);
   --pagefind-ui-background: var(--md-default-bg-color);
   --pagefind-ui-border: var(--md-default-fg-color--lightest);
   --pagefind-ui-tag: var(--md-default-fg-color--lightest);
+}
+
+/* The drawer must not inherit the header's light-on-purple text. `mark` is
+   excluded: it keeps a yellow background in both schemes, so forcing the page
+   text colour onto it gives light-on-yellow in dark mode -- unreadable. */
+.ossum-fullsearch--in-header .pagefind-ui__drawer,
+.ossum-fullsearch--in-header .pagefind-ui__drawer *:not(mark) {
+  color: var(--md-typeset-color);
+}
+
+.ossum-fullsearch .pagefind-ui__drawer mark,
+#pagefind-search .pagefind-ui__drawer mark {
+  color: #000;
+  background-color: #ffd54f;
+}
+
+.ossum-fullsearch--in-header .pagefind-ui__result-link {
+  color: var(--md-primary-fg-color);
 }

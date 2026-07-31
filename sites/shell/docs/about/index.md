@@ -113,11 +113,12 @@ versions and every alias is a full copy, so including them would return the same
 page three or four times. To search within an older release, open it and use the
 title-bar box.
 
-<div id="pagefind-search" data-pagefind-ignore></div>
+Both fields are at the top of every page: the title-bar box on the first row,
+**Full Search** on the band directly beneath it.
 
 <div id="pagefind-unavailable" hidden markdown>
 !!! warning "Search index unavailable"
-    The full-site search index could not be loaded. It is rebuilt after the
-    documentation is published, so it may be briefly missing after a release.
-    The title-bar box is unaffected.
+    The full-site search index could not be loaded, so the Full Search field is
+    hidden. It is rebuilt after the documentation is published, so it may be
+    briefly missing after a release. The title-bar box is unaffected.
 </div>
