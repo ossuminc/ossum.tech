@@ -21,13 +21,33 @@ IDE-tool pages are now unversioned at `/ide-help/`, while `authoring-riddl.md`
 stayed version-tracked and moved to the RIDDL author guides — it teaches the
 language, not a tool. Coming Soon and `/find/` are deleted.
 
-**Search is two fields, deliberately additive.** Material's title-bar box still
-searches the current site *and version*; a **Full Search** field directly below
-it queries Pagefind across all products. An earlier design replaced the
-title-bar box, which would have cost version-scoped search; that was rejected.
-Rendered from `overrides/main.html` into Material's `{% block hero %}`, which
-sits below the whole sticky header — no partial override, so no pinning to a
-Material release.
+**Search is two fields, deliberately additive**, both in the header:
+
+```
+row 1   logo · title · version · [Material search] · repo
+row 2   FULL SEARCH  [ cross-site input ]        <- purple band
+row 3   tabs
+```
+
+Material's title-bar box still searches the current site *and version*; Full
+Search queries Pagefind across all products. An earlier design replaced the
+title-bar box, which would have cost version-scoped search; rejected.
+
+Rendered into Material's `{% block hero %}` and then **moved into the header by
+script**. It cannot be templated there: with `navigation.tabs.sticky` the tabs
+are rendered inside `partials/header.html`, so no block exists between the title
+row and the tabs, and reaching it would mean copying that partial and pinning
+the repo to a Material release. If Material renames `.md-header`/`.md-tabs` the
+move silently does not happen and the bar stays below the header — worse
+looking, still working.
+
+Two sizing gotchas: `pagefind-ui.css` loads from `extrahead`, i.e. **after**
+`extra.css`, so at equal specificity Pagefind wins — the input needed an extra
+selector level to shrink. And forcing the page text colour across the results
+drawer also hit `mark`, giving light-on-yellow highlights in dark mode.
+
+`extra.css` carries no content hash, so a returning visitor may see cached
+styling until it expires. Pre-existing, not introduced here.
 
 **Three faults this turned up, all fixed:**
 
