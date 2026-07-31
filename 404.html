@@ -63,6 +63,19 @@
         return "/ide-help/" + tail;
       }
 
+      // concepts/case was a duplicate of concepts/use-case documenting retired
+      // 1.x step syntax. Removed, so send its readers to the page that
+      // survived -- keeping the version, since both versions have use-case.
+      // Before the loop guard, which would otherwise swallow it.
+      var conceptCase = path.match(/^riddl\/([^/]+)\/concepts\/case(\/|\.html)?$/);
+      if (conceptCase) {
+        window.location.replace(
+          "/riddl/" + conceptCase[1] + "/concepts/use-case/" +
+          window.location.search + window.location.hash
+        );
+        return;
+      }
+
       // /riddl/<version>/OSS/... was live only briefly, between the split and
       // this reorganisation, but it was live -- and the loop guard below would
       // otherwise swallow it. Handled before the guard for that reason.
