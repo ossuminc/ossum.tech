@@ -13,10 +13,13 @@ to the task file and note completion in this notebook.
 
 ## RESUME HERE — as of 2026-07-31
 
-**Tasks A–F are all closed.** What is still open:
+**Tasks A–H are all closed.** What is still open:
 
-- **TASK G — fold `docs/1.x` into `main` as a directory.** Written up below; the
-  biggest structural win available here.
+- **Retiring the `docs/1.x` branch.** TASK G is deployed and verified, so the
+  branch is now redundant *and* a hazard: its own copy of the workflow still
+  triggers on a push to it, which would redeploy 1.31 with the pre-TASK-G
+  chrome. It is the only other copy of that branch's history. Tag it before
+  deleting — decide and do it.
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
 - The ~50 concept pages still lack per-fence directives. 28 fences fail
@@ -31,7 +34,58 @@ The sections below are kept as the record of how the current state was reached.
 
 ---
 
-### TASK G — fold `docs/1.x` into `main` as a directory ⬅ **PROPOSED**
+### TASK H — logo linked to the sub-site, not the site ✅ **DONE 2026-07-31**
+
+Material links the logo to `nav.homepage.url`, the root of the MkDocs *project*
+being built — so on `/riddl/latest/concepts/entity/` it rendered as
+`href="../.."` and went to `/riddl/latest/`. With four projects under one
+domain, a reader inside a product had no way back to the landing page except
+the back button.
+
+Fixed with `extra.homepage: /` in `sites/common.yml`. Points worth keeping:
+
+- **Both** logo anchors read it — the header one and the drawer one in
+  `partials/nav.html` — so no template copy is needed and the repo stays
+  unpinned from a Material release. (Contrast the header and search partials,
+  which have no such hook and are therefore handled by script.)
+- Root-relative `/`, not `https://ossum.tech/`, so it is also right under
+  `preview-versioned-site.sh`. Material passes the value through MkDocs' `url`
+  filter, which leaves a root-relative path alone.
+- It went in `common.yml`, so all five sites got it at once — TASK G paying off
+  the same day.
+
+### TASK G — fold `docs/1.x` into `main` as a directory ✅ **DONE 2026-07-31**
+
+Deployed and verified live: `/riddl/1.31/` serves 1.x content with the new
+chrome, its edit links point at `main/sites/riddl-1x/`, `versions.json` still
+reads `2.0 [next]` + `1.31 [latest]`, and `/riddl/` still redirects to `latest`.
+
+Rehearsed with `preview-versioned-site.sh` before pushing, which is how the two
+same-prefix entries were confirmed to coexist.
+
+**What changed beyond moving files:**
+
+- `check-cross-site-links.py` became **version-aware**. It mapped a URL prefix
+  to one source directory; `riddl` now has two, so `/riddl/1.31/…` links were
+  being checked against the 2.0 sources. `VERSION_SOURCE` maps each version and
+  alias to the tree that builds it, and an unmapped version is now a dead link
+  rather than a silent pass. Coverage went 65 → 80 links.
+- The workflow publishes from `main` only. The `concurrency` group **stays** —
+  two pushes to `main` in quick succession still race for `gh-pages`.
+- `preview-versioned-site.sh` no longer checks out a branch mid-run.
+- `promote-2.0-to-latest.md` rewritten: promotion is now one commit.
+
+**The one ordering rule that replaced the landmine:** `mike set-default` runs
+once per entry, so the **last `riddl` entry** in `docs-version.yml` decides
+where `/riddl/` redirects. The 1.31 entry holding `latest` is last on purpose.
+
+**Proof the consolidation works:** `sites/riddl-1x/docs/stylesheets/extra.css`
+picked up the clickable-row rules from the shared copy with no action at all,
+and TASK H then reached all five sites from a single line.
+
+The original proposal follows, kept for the reasoning.
+
+#### The case, as argued before doing it
 
 **The problem, measured (2026-07-31).** `docs/1.x` has 17 commits since the
 merge base. **Twelve of them are pure replication** — "Carry the header Full
@@ -92,6 +146,10 @@ of that can be shared, and none of it needs to be: it just moves.
 
 **Do not delete `docs/1.x` until the directory build is verified deployed.** It
 is the only copy of the 1.31 content.
+
+*(That condition is now met — the deploy is verified. Retiring the branch is the
+open item at the top of this file. `sites/riddl-1x/` holds the content; the
+branch still holds its history, which is why it wants a tag before deletion.)*
 
 ### TASK F — build on sbt 2 / riddl 2.0.0-rc.5 ✅ **DONE 2026-07-31**
 
