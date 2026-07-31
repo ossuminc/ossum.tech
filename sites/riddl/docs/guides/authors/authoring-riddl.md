@@ -1,5 +1,19 @@
 # Authoring RIDDL Sources
 
+<!-- riddl-prelude
+  entity Cart is { ??? }
+  entity Order is { ??? }
+  entity Account is { ??? }
+  entity Product is { ??? }
+  type ProductId is Id(Product)
+  type Money is Currency(USD)
+  record CartItem is { product: ProductId, quantity: Natural }
+  command PlaceOrder is { cartId: Id(Cart) }
+  event OrderCompleted is { orderId: Id(Order) }
+  event OrderFailed is { orderId: Id(Order), reason: String }
+-->
+
+
 This guide provides helpful tips and techniques for writing RIDDL source files
 effectively, regardless of which IDE or editor you use.
 
@@ -14,6 +28,7 @@ and VS Code extension recognize this extension automatically.
 
 RIDDL models typically follow a hierarchical structure:
 
+<!-- riddl: skip reason="illustrates file organisation; the included paths do not exist" -->
 ```riddl
 // Main domain file: myproject.riddl
 domain MyProject is {
@@ -34,6 +49,7 @@ domain MyProject is {
 
 The `include` directive brings in content from other files:
 
+<!-- riddl: skip reason="illustrates file organisation; the included paths do not exist" -->
 ```riddl
 include "path/to/file.riddl"       // Relative path
 include "types/*.riddl"            // Glob pattern for multiple files
@@ -54,14 +70,15 @@ This metadata provides important context about the definition.
 
 Always identify who created or maintains a definition:
 
+<!-- riddl: standalone -->
 ```riddl
 domain Ordering is {
-  // domain contents
-} with {
   author Reid is {
     name: "Reid Spencer"
     email: "reid@ossuminc.com"
   }
+  // domain contents
+} with {
 }
 ```
 
@@ -69,14 +86,12 @@ domain Ordering is {
 
 For collaborative definitions, list all contributors:
 
+<!-- riddl: in-domain -->
 ```riddl
 context Payments is {
   // context contents
 } with {
-  author Reid is {
-    name: "Reid Spencer"
-    email: "reid@ossuminc.com"
-  }
+  by author Reid
   author James is {
     name: "James Lovett"
     email: "james@ossuminc.com"
@@ -88,12 +103,17 @@ context Payments is {
 
 Define domain-specific terminology:
 
+<!-- riddl: standalone -->
 ```riddl
 domain ECommerce is {
   // domain contents
 } with {
-  term "SKU" is described as "Stock Keeping Unit - unique product identifier"
-  term "Cart" is described as "Collection of items a customer intends to purchase"
+  term SKU is {
+    |Stock Keeping Unit - unique product identifier
+  }
+  term Cart is {
+    |Collection of items a customer intends to purchase
+  }
 }
 ```
 
@@ -101,6 +121,7 @@ domain ECommerce is {
 
 Add a one-line description to any definition:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Cart is {
   // entity contents
@@ -113,6 +134,7 @@ entity Cart is {
 
 For detailed documentation, use the `described by` clause with markdown:
 
+<!-- riddl: in-domain -->
 ```riddl
 context OrderFulfillment is {
   // context contents
@@ -166,6 +188,7 @@ RIDDL provides many built-in types:
 
 Define domain-specific types:
 
+<!-- riddl: in-context -->
 ```riddl
 // Simple type alias
 type OrderId is Id(Order)
@@ -192,6 +215,7 @@ type PaymentMethod is any of {
 
 Reference types defined elsewhere:
 
+<!-- riddl: in-context -->
 ```riddl
 type LineItem is {
   product: ProductId,          // Reference to Id type
@@ -208,6 +232,7 @@ type LineItem is {
 
 Commands represent requests that may change state:
 
+<!-- riddl: in-context -->
 ```riddl
 command AddItemToCart is {
   cartId: Id(Cart),
@@ -220,6 +245,7 @@ command AddItemToCart is {
 
 Events record things that happened:
 
+<!-- riddl: in-context -->
 ```riddl
 event ItemAddedToCart is {
   cartId: Id(Cart),
@@ -233,6 +259,7 @@ event ItemAddedToCart is {
 
 Queries request data without side effects:
 
+<!-- riddl: in-context -->
 ```riddl
 query GetCartContents is {
   cartId: Id(Cart)
@@ -243,6 +270,7 @@ query GetCartContents is {
 
 Results return data from queries:
 
+<!-- riddl: in-context -->
 ```riddl
 result CartContents is {
   cartId: Id(Cart),
@@ -257,6 +285,7 @@ result CartContents is {
 
 ### Basic Entity Structure
 
+<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
 ```riddl
 entity Cart is {
   option aggregate
@@ -312,6 +341,7 @@ Handlers use pseudocode statements to describe behavior:
 
 ### Common Statements
 
+<!-- riddl: in-context -->
 ```riddl
 handler OrderCommands is {
   on command PlaceOrder {
@@ -319,7 +349,7 @@ handler OrderCommands is {
     let orderId = "new OrderId"
 
     // Validate with conditional
-    if "inventory is available" then {
+    when "inventory is available" then {
       // Produce an event
       send event OrderPlaced to outlet Events
       // Update state
@@ -327,10 +357,10 @@ handler OrderCommands is {
     } else {
       // Return an error
       error "Insufficient inventory for order"
-    }
+    } end
 
-    // Log information
-    tell "Order {orderId} processed"
+    // Describe an action the implementation must perform
+    do "Record that order {orderId} was processed"
   }
 }
 ```
@@ -342,7 +372,8 @@ handler OrderCommands is {
 | `let` | Create local value | `let x = "expression"` |
 | `set` | Update state field | `set field State.name to "value"` |
 | `send` | Emit message | `send event X to outlet Y` |
-| `tell` | Log/output info | `tell "message"` |
+| `tell` | Send a message to a processor | `tell command X to context Y` |
+| `do` | Describe an action in prose | `do "recompute the totals"` |
 | `error` | Signal error | `error "error message"` |
 | `if/then/else` | Conditional | `if "condition" then { } else { }` |
 | `morph` | Transform state | `morph entity X to state Y` |
@@ -355,6 +386,7 @@ handler OrderCommands is {
 
 ### Line Comments
 
+<!-- riddl: standalone -->
 ```riddl
 // This is a single-line comment
 domain Example is {
@@ -364,6 +396,7 @@ domain Example is {
 
 ### Block Comments
 
+<!-- riddl: standalone -->
 ```riddl
 /* This is a block comment
    that spans multiple lines */
@@ -373,6 +406,7 @@ domain Example is {
 
 Use markdown lines for rich documentation:
 
+<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
 ```riddl
 entity Order is {
   |## Order Entity
@@ -396,6 +430,7 @@ entity Order is {
 
 ### Aggregate with Event Sourcing
 
+<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
 ```riddl
 entity Account is {
   option aggregate
@@ -437,11 +472,11 @@ entity Account is {
 
 ### Saga for Distributed Transactions
 
+<!-- riddl: in-context -->
 ```riddl
 saga OrderSaga is {
-  input command PlaceOrder
-  output event OrderCompleted
-  output event OrderFailed
+  requires command PlaceOrder
+  returns event OrderCompleted
 
   step ReserveInventory is {
     // reserve inventory
@@ -457,6 +492,8 @@ saga OrderSaga is {
 
   step ConfirmOrder is {
     // finalize order
+  } reverted by {
+    // mark the order cancelled
   }
 }
 ```
