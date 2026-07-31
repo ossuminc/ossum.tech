@@ -49,8 +49,13 @@ put a copy in every RIDDL version directory.
 `MCP/` was the one real loss and was dropped deliberately. These pages
 documented the standalone `riddl-mcp-server` and never mentioned riddlg;
 `main`'s replaced rather than updated them, repointing at riddlg in `ffb0b50`.
-The standalone server now has no published documentation. Decided 2026-07-30 —
-revisit if `riddl-mcp-server` is still a supported product.
+**Correction (2026-07-31):** an earlier version of this note said the
+standalone server was left with no published documentation. That was wrong.
+Its functionality moved into riddlg and is documented there — `riddlg mcp` in
+the command reference, MCP in the landing-page capabilities, `mcp-tools.md`,
+`POST /mcp` in `server-api.md`, and eight client guides. `main`'s
+`riddl/tools/riddl-mcp-server/` is a pointer page that opens "The MCP server
+now ships in riddlg". Only the superseded 1.x-era guides were dropped here.
 
 ## Current Status
 
