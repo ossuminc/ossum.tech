@@ -11,4 +11,8 @@ Allow: /
 Disallow: /pagefind/
 
 # One entry per real documentation build.
+Sitemap: https://ossum.tech/sitemap.xml
+Sitemap: https://ossum.tech/riddl/2.0/sitemap.xml
 Sitemap: https://ossum.tech/riddl/1.31/sitemap.xml
+Sitemap: https://ossum.tech/riddlg/0.6/sitemap.xml
+Sitemap: https://ossum.tech/synapify/0.17/sitemap.xml
