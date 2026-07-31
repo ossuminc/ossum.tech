@@ -28,40 +28,85 @@
   <link rel="apple-touch-icon" href="{{ 'assets/images/apple-touch-icon.jpg' | url }}" type="image/jpeg"/>
 
   {#
-    "Search all docs" link in the header, on every sub-site.
+    Cross-site search assets, loaded on every page.
 
-    Each site's own search box covers only that site, because Material builds
-    one search index per project and the docs are four projects. This points at
-    the Pagefind index, which is built over the deployed HTML and spans them
-    all -- so a reader in the RIDDL docs looking for Synapify has somewhere to
-    go instead of an empty result list.
+    The LOADER lives here rather than in the `hero` block below because there
+    are two possible mount points and only one of them is in `hero`: the About
+    page suppresses the bar and hosts its own container alongside the prose
+    explaining what each search field covers. Putting the loader in the
+    conditional block left About with a container and nothing to fill it.
 
-    Injected rather than templated because Material offers no block for adding
-    a header item, and copying partials/header.html would pin this repo to one
-    Material release. If Material renames the class, the link simply does not
-    appear -- nothing breaks.
-
-    The href is root-relative so it is identical in production and in
-    scripts/preview-versioned-site.sh. It is skipped on the search page itself.
+    Assets come from /pagefind/, written by scripts/build-search-index.sh.
+    Root-relative, so this behaves identically in production and in
+    scripts/preview-versioned-site.sh.
   #}
+  <link rel="stylesheet" href="/pagefind/pagefind-ui.css">
+  <script src="/pagefind/pagefind-ui.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var inner = document.querySelector(".md-header__inner");
-      if (!inner || window.location.pathname.replace(/\/+$/, "") === "/find") return;
-      var a = document.createElement("a");
-      a.href = "/find/";
-      a.className = "md-header__button md-icon";
-      a.title = "Search all documentation";
-      a.setAttribute("aria-label", "Search all documentation");
-      a.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
-        '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2c1.2 0 2.3 1.5 2.9 3.7' +
-        'A18 18 0 0 0 12 8c-1 0-2 .1-2.9.3C9.7 5.5 10.8 4 12 4M6.6 6.2A15 15 0 0 0 7.3 ' +
-        '8.6a15 15 0 0 0-2.4.7 8 8 0 0 1 1.7-3.1M12 20c-1.2 0-2.3-1.5-2.9-3.7 1 .2 1.9.3 ' +
-        '2.9.3s1.9-.1 2.9-.3C14.3 18.5 13.2 20 12 20m0-5.4c-1.1 0-2.2-.1-3.2-.4a15 15 0 0 ' +
-        '1 0-4.4c1 .3 2.1.4 3.2.4s2.2-.1 3.2-.4a15 15 0 0 1 0 4.4c-1 .3-2.1.4-3.2.4Z"/>' +
-        "</svg>";
-      inner.appendChild(a);
+    window.addEventListener("DOMContentLoaded", function () {
+      var bar = document.querySelector(".ossum-fullsearch");
+      var mount = document.getElementById("ossum-fullsearch")
+               || document.getElementById("pagefind-search");
+      if (!mount) return;
+
+      if (typeof PagefindUI === "undefined") {
+        // The index is missing or not built yet. Hide the bar rather than
+        // leave a search field that silently does nothing, and show the
+        // explanatory note on the About page.
+        if (bar) bar.hidden = true;
+        var warn = document.getElementById("pagefind-unavailable");
+        if (warn) warn.hidden = false;
+        return;
+      }
+
+      new PagefindUI({
+        element: "#" + mount.id,
+        showSubResults: true,
+        showImages: false,
+        resetStyles: false,
+      });
+      var input = mount.querySelector("input");
+      if (input && mount.id === "ossum-fullsearch") {
+        input.id = "ossum-fullsearch-input";
+      }
     });
   </script>
+{% endblock %}
+
+{#
+  "Full Search" -- cross-site search, ADDITIVE to Material's own.
+
+  Material's title-bar box stays exactly as it is and keeps searching the site
+  AND VERSION being read: each sub-site builds its own index, which is what
+  makes it precise (on the 1.31 pages it returns 1.31 answers). This field sits
+  below it and queries the Pagefind index, built over the published HTML of
+  every product, so it finds what the title-bar box cannot.
+
+  WHY `hero` AND NOT A PARTIAL OVERRIDE:
+  `navigation.tabs.sticky` is enabled (sites/common.yml), so Material renders
+  the tabs row inside partials/header.html and base.html's `tabs` block emits
+  nothing. That makes `hero` -- an empty, officially supported block -- sit
+  directly beneath the WHOLE sticky header. Copying partials/search.html to get
+  the same placement would pin this repo to one Material release for no gain.
+#}
+{% block hero %}
+  {# About hosts its own copy, in context with the explanation of what each
+     field covers, so the bar is suppressed there to avoid two identical inputs
+     on one page. The product sites have no about/ page, so this is never true
+     for them. #}
+  {% if page.url != "about/" %}
+  <div class="ossum-fullsearch" data-pagefind-ignore>
+    <div class="ossum-fullsearch__inner md-grid">
+      <label class="ossum-fullsearch__label" for="ossum-fullsearch-input">
+        Full Search
+      </label>
+      <div id="ossum-fullsearch" class="ossum-fullsearch__ui"></div>
+      <noscript>
+        <span class="ossum-fullsearch__note">
+          Full Search needs JavaScript. The title-bar search still works.
+        </span>
+      </noscript>
+    </div>
+  </div>
+  {% endif %}
 {% endblock %}

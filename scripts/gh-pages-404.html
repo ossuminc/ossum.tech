@@ -49,6 +49,31 @@
       var segs = path.split("/").filter(Boolean);
       if (!segs.length) return;
 
+      // The IDE docs left the versioned riddl site and split two ways: three
+      // tool pages became the unversioned /ide-help/, while authoring-riddl --
+      // a language style guide, not tool documentation -- stayed versioned and
+      // moved under the RIDDL author guides. So the mapping is per FILENAME,
+      // not per directory.
+      function fromOSS(tail) {
+        tail = tail.replace(/index\.html$/, "").replace(/\.html$/, "/");
+        if (tail && !/\/$/.test(tail)) tail += "/";
+        if (/^authoring-riddl(\/|$)/.test(tail)) {
+          return "/riddl/latest/guides/authors/authoring-riddl/";
+        }
+        return "/ide-help/" + tail;
+      }
+
+      // /riddl/<version>/OSS/... was live only briefly, between the split and
+      // this reorganisation, but it was live -- and the loop guard below would
+      // otherwise swallow it. Handled before the guard for that reason.
+      var versionedOSS = path.match(/^riddl\/[^/]+\/OSS\/(.*)$/);
+      if (versionedOSS) {
+        window.location.replace(
+          fromOSS(versionedOSS[1]) + window.location.search + window.location.hash
+        );
+        return;
+      }
+
       // GUARD AGAINST A REWRITE LOOP. "riddl" is both a current prefix and a
       // former top-level section, so a real 404 inside /riddl/latest/ would
       // otherwise be rewritten to /riddl/latest/latest/... Leave anything that
@@ -72,16 +97,35 @@
       } else if (rest === "MCP" || rest.indexOf("MCP/") === 0) {
         // The MCP client guides travel with riddlg.
         prefix = "riddlg";
+      } else if (rest.indexOf("riddl/OSS/") === 0) {
+        // Shape 2 nested it under riddl/. Must be tested BEFORE the generic
+        // "riddl/" branch below, which would otherwise claim it and produce
+        // /riddl/<version>/OSS/... -- a path that no longer exists.
+        window.location.replace(
+          fromOSS(rest.slice("riddl/OSS/".length)) +
+          window.location.search + window.location.hash
+        );
+        return;
       } else if (rest === "OSS" || rest.indexOf("OSS/") === 0) {
-        prefix = "riddl";
+        window.location.replace(
+          fromOSS(rest === "OSS" ? "" : rest.slice("OSS/".length)) +
+          window.location.search + window.location.hash
+        );
+        return;
       } else if (rest === "riddl" || rest.indexOf("riddl/") === 0) {
         prefix = "riddl";
         rest = rest === "riddl" ? "" : rest.slice("riddl/".length);
       } else if (rest === "synapify" || rest.indexOf("synapify/") === 0) {
         prefix = "synapify";
         rest = rest === "synapify" ? "" : rest.slice("synapify/".length);
-      } else if (/^(about|coming-soon|assets|stylesheets|javascripts|search)(\/|$)/.test(rest)) {
+      } else if (/^(about|assets|stylesheets|javascripts|search)(\/|$)/.test(rest)) {
         // The unversioned shell. No prefix and no version segment.
+        //
+        // `coming-soon` is deliberately NOT in this list. That page was deleted,
+        // so mapping it would send /coming-soon/ to /coming-soon/ -- the same
+        // URL -- and window.location.replace would reload forever. It falls
+        // through to the not-found message instead, which is the honest answer:
+        // the page is gone, not moved.
         prefix = "";
       } else if (rest === "index.html") {
         window.location.replace("/");

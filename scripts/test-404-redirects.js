@@ -42,10 +42,27 @@ const cases = [
   ['/riddl/concepts/entity.html',            '/riddl/latest/concepts/entity/'],
   ['/riddl/index.html',                      '/riddl/latest/'],
   ['/MCP/gemini.html',                       '/riddlg/latest/MCP/gemini/'],
-  ['/OSS/authoring-riddl.html',              '/riddl/latest/OSS/authoring-riddl/'],
+  // The OSS directory split two ways: the tool pages became the unversioned
+  // /ide-help/, while authoring-riddl stayed versioned under the RIDDL guides.
+  ['/OSS/authoring-riddl.html',              '/riddl/latest/guides/authors/authoring-riddl/'],
+  ['/OSS/vscode-extension/index.html',       '/ide-help/vscode-extension/'],
+  ['/OSS/intellij-plugin/index.html',        '/ide-help/intellij-plugin/'],
+  ['/OSS/index.html',                        '/ide-help/'],
+  ['/latest/OSS/vscode-extension.html',      '/ide-help/vscode-extension/'],
+  ['/latest/riddl/OSS/authoring-riddl.html', '/riddl/latest/guides/authors/authoring-riddl/'],
+  // Briefly live between the split and the reorganisation. The loop guard must
+  // not swallow these.
+  ['/riddl/latest/OSS/authoring-riddl/',     '/riddl/latest/guides/authors/authoring-riddl/'],
+  ['/riddl/2.0/OSS/vscode-extension/',       '/ide-help/vscode-extension/'],
+
+  // Coming Soon was DELETED, not moved. It must fall through to the not-found
+  // message: mapping it to itself would make replace() reload forever.
+  ['/coming-soon/',                          null],
+  ['/latest/coming-soon/index.html',         null],
+  ['/find/',                                 null],
   ['/synapify/generation.html',              '/synapify/latest/generation/'],
   ['/about/privacy-policy.html',             '/about/privacy-policy/'],
-  ['/coming-soon/index.html',                '/coming-soon/'],
+  ['/coming-soon/index.html',                null],   // page deleted, not moved
   ['/riddl/tools/riddlg/installation.html',  '/riddlg/latest/installation/'],
 
   // shape 2: one version axis for the whole site, version segment first

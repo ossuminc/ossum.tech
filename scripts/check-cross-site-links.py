@@ -78,8 +78,14 @@ def main() -> int:
             # `riddl`, and its links into riddlg or Synapify point at content
             # published from `main`. Those cannot be checked from here, and
             # calling them broken would be wrong.
+            # Presence is judged by the site's mkdocs.yml, which is tracked and
+            # therefore branch-accurate. NOT by its docs/ directory: shared
+            # assets are copied into sites/*/docs/ and gitignored, so those
+            # directories survive a branch switch and would make a sub-site
+            # this branch does not build look present -- turning every link
+            # into it into a false failure.
             tsite = label.split(":")[0]
-            if not (REPO / "sites" / tsite / "docs").is_dir():
+            if not (REPO / "sites" / tsite / "mkdocs.yml").is_file():
                 unverifiable[tsite] = unverifiable.get(tsite, 0) + 1
                 continue
             checked += 1

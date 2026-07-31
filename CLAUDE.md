@@ -117,8 +117,8 @@ stamped `2.0`. Each product now deploys under its own prefix with its own
 
 | Deployed at | Source | Published from |
 |---|---|---|
-| `/` | `sites/shell/` — landing page, About, Coming Soon | `main`, **unversioned** |
-| `/riddl/<ver>/` | `sites/riddl/` — language docs plus `OSS/` | `main` (2.0), `docs/1.x` (1.31) |
+| `/` | `sites/shell/` — landing, About, **IDE help** | `main`, **unversioned** |
+| `/riddl/<ver>/` | `sites/riddl/` — the language docs | `main` (2.0), `docs/1.x` (1.31) |
 | `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | `main` |
 | `/synapify/<ver>/` | `sites/synapify/` | `main` |
 
@@ -137,12 +137,27 @@ Shared logos and CSS live once in `common/` and are copied into each site by
 `scripts/sync-shared-assets.sh` — **run it before any build**, or every page
 loses its stylesheet. The copies are gitignored.
 
-### Search: two layers, on purpose
+### Search: two fields, on purpose
 
-| Layer | Covers | Built by |
+| Field | Covers | Built by |
 |---|---|---|
-| Each site's header search box | that site only | Material, per build |
-| `/find/` | **all products at once** | Pagefind, `scripts/build-search-index.sh` |
+| The box in the title bar | that site **and version** only | Material, per build |
+| **Full Search**, directly below it | **all products at once** | Pagefind, `scripts/build-search-index.sh` |
+
+The second is **additive** — Material's box is untouched, so version-scoped
+search still works. An earlier design replaced it, which would have meant a
+reader on the 1.31 pages getting 2.0 answers with no way to search 1.31.
+
+Full Search is rendered from `overrides/main.html` into Material's
+`{% block hero %}`. That block is empty and officially supported, and because
+`navigation.tabs.sticky` is on, Material renders the tabs inside the header
+partial and leaves `{% block tabs %}` emitting nothing — so `hero` lands
+directly beneath the *whole* sticky header. Getting the same placement by
+copying `partials/search.html` would pin this repo to one Material release.
+
+The Pagefind loader lives in `extrahead`, not in `hero`, because there are two
+mount points: the bar, and the About page's own copy which sits with the prose
+explaining what each field covers. The bar is suppressed on About.
 
 Material builds one search index per MkDocs project, so its search can never
 span the four sites — a reader in the RIDDL docs searching "Synapify" gets
@@ -152,7 +167,8 @@ care how many projects produced the tree. It runs last, over the assembled
 
 Two things about the index that are deliberate:
 
-- **It covers each product's `latest` alias only**, plus the shell pages. mike
+- **It covers each product's `latest` alias only**, plus the shell pages (Home,
+  About, IDE help). mike
   deploys aliases as full *copies*, so indexing everything would return each
   page three or four times. Following the alias rather than a pinned version
   means no edit is needed when 2.0 is promoted.

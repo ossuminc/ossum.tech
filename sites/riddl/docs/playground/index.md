@@ -98,12 +98,12 @@ While the playground is under development, you can try RIDDL using:
 
 ### VS Code Extension
 
-Install the [RIDDL VS Code extension](../OSS/vscode-extension/index.md) for
+Install the [RIDDL VS Code extension](/ide-help/vscode-extension/) for
 local editing with syntax highlighting and validation.
 
 ### IntelliJ Plugin
 
-Install the [RIDDL IntelliJ plugin](../OSS/intellij-plugin/index.md) for
+Install the [RIDDL IntelliJ plugin](/ide-help/intellij-plugin/) for
 JetBrains IDE support.
 
 ### AI Assistant
