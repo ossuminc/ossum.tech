@@ -5,6 +5,10 @@ description: "Using RIDDL to design user interfaces with Epics and Applications"
 
 # User Interface Modeling
 
+<!-- riddl-prelude
+  result OrderDetails is { total: Currency(USD) }
+-->
+
 RIDDL provides two main constructs for modeling user interfaces:
 [Epics](../../../concepts/epic.md) and
 [Applications](../../../concepts/application.md).
@@ -51,6 +55,11 @@ interaction.
 domain ECommerce is {
   user Shopper is "A customer browsing and purchasing products"
 
+  application context StoreFront is { ??? }
+  context Inventory is { ??? }
+  context Orders is { ??? }
+  context Payments is { ??? }
+
   epic ShoppingCartJourney is {
     user Shopper wants to "shop" so that "they receive the products they need"
 
@@ -58,25 +67,28 @@ domain ECommerce is {
       user Shopper wants to "browse products and complete a purchase"
         so that "they can receive desired items"
 
-      // Step 1: Browse products
-      step from user Shopper "views product catalog"
-           to context StoreFront "displays products"
+      // The shopper only ever touches StoreFront, the application...
+      step from user Shopper "views the product catalog"
+           to context StoreFront
 
-      // Step 2: Add to cart
-      step from user Shopper "selects items"
-           to context Inventory "reserves items"
+      // ...which reaches into the domain on their behalf
+      step from context StoreFront "reserves the selected items"
+           to context Inventory
 
-      // Step 3: Checkout
       step from user Shopper "initiates checkout"
-           to context Orders "creates order"
+           to context StoreFront
 
-      // Step 4: Payment
-      step from user Shopper "provides payment"
-           to context Payments "processes payment"
+      step from context StoreFront "creates the order"
+           to context Orders
 
-      // Step 5: Confirmation
-      step from context Orders "confirms order"
-           to user Shopper "receives confirmation"
+      step from context Orders "requests payment capture"
+           to context Payments
+
+      step from context Orders "reports the order is confirmed"
+           to context StoreFront
+
+      step from context StoreFront "shows the confirmation"
+           to user Shopper
     }
   }
 }
@@ -123,9 +135,12 @@ Applications are composed of:
 
 Inputs are manipulated by the user and send messages to the application:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
+  command SearchProducts is { text: String }
+  command FilterByCategory is { category: String }
+
   group ProductSearch is {
     input SearchField acquires command SearchProducts
     input CategoryFilter acquires command FilterByCategory
@@ -137,9 +152,12 @@ application context StoreFront is {
 
 Outputs receive messages from the application and present them to the user:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
+  result ProductSearchResults is { matches: Natural }
+  result ProductInfo is { name: String }
+
   group ProductDisplay is {
     output ProductList presents result ProductSearchResults
     output ProductDetails presents result ProductInfo
@@ -154,6 +172,7 @@ Navigation occurs when user input causes the UI to change what it presents:
 <!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
+  type CartId is UUID
   command NavigateToCheckout is { cartId: CartId }
 
   group Navigation is {
@@ -176,6 +195,10 @@ to system components:
 <!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
+  command PlaceOrder is { cartId: UUID }
+  command CreateOrder is { cartId: UUID }
+  outlet OrdersOut is command CreateOrder
+
   handler OrderHandler is {
     on command PlaceOrder {
       send command CreateOrder to outlet OrdersOut
@@ -322,7 +345,7 @@ RIDDL recognizes that UX is an art and science of its own. Applications do not
 model the look, feel, or sensory aspects of user interfaces. Instead, they use
 the `shown by` syntax to link to external UX artifacts:
 
-<!-- riddl: in-application -->
+<!-- riddl: in-app-context -->
 ```riddl
 group CheckoutForm is {
   output OrderSummary presents result OrderDetails
@@ -343,6 +366,25 @@ domain ECommerce is {
   user Shopper is "a customer using the store"
 
   application context StoreFront is {
+
+    // The vocabulary the UI elements and handlers exchange
+    command SearchProducts is { text: String }
+    command RemoveFromCart is { item: String }
+    command UpdateItemQuantity is { item: String, quantity: Natural }
+    command StartCheckout is { cartId: UUID }
+    command SetShippingAddress is { address: String }
+    command ProcessPayment is { amount: Currency(USD) }
+    command ChargePayment is { amount: Currency(USD) }
+    command RemoveCartItem is { item: String }
+    query FindProducts is { text: String }
+    result ProductList is { matches: Natural }
+    result ProductDetails is { name: String }
+    result CartItems is { count: Natural }
+    result OrderConfirmed is { orderId: UUID }
+
+    outlet CatalogOut is query FindProducts
+    outlet CartOut is command RemoveCartItem
+    outlet PaymentsOut is command ChargePayment
 
     // Product browsing
     group ProductCatalog is {
@@ -372,13 +414,13 @@ domain ECommerce is {
         send query FindProducts to outlet CatalogOut
       }
       on result ProductList {
-        put result ProductList to output ProductGrid
+        put result ProductList(matches = ProductList.matches) to output ProductGrid
       }
     }
 
     handler CartHandler is {
       on command RemoveFromCart {
-        send command RemoveItem to outlet CartOut
+        send command RemoveCartItem to outlet CartOut
       }
     }
 
