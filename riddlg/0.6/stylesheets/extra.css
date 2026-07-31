@@ -70,3 +70,87 @@
   /* Errors - red */
   .err { color: #a31515; }
 }
+
+/* ---------------------------------------------------------------------------
+   "Full Search" bar -- cross-site search, rendered by overrides/main.html into
+   Material's `hero` block so it sits directly below the sticky header.
+
+   It is ADDITIVE: Material's own title-bar search is untouched and still
+   searches the current site and version. This searches every product.
+
+   The results panel is absolutely positioned. Pagefind renders its results as
+   a sibling of the input, so without this the whole page would jump downwards
+   on every keystroke.
+   --------------------------------------------------------------------------- */
+.ossum-fullsearch {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--md-default-bg-color);
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.ossum-fullsearch__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.8rem;
+}
+
+.ossum-fullsearch__label {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--md-default-fg-color--light);
+  white-space: nowrap;
+}
+
+.ossum-fullsearch__ui {
+  position: relative;   /* containing block for the overlay below */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Pagefind puts its results in .pagefind-ui__drawer next to the input. Lift it
+   out of the flow so it hangs over the page instead of displacing it. */
+.ossum-fullsearch__ui .pagefind-ui__drawer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 4;
+  padding: 0 0.8rem 0.8rem;
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-top: none;
+  box-shadow: var(--md-shadow-z2);
+}
+
+/* Empty drawers still carry the border, which reads as a stray line. */
+.ossum-fullsearch__ui .pagefind-ui__drawer:empty,
+.ossum-fullsearch__ui .pagefind-ui__drawer--hidden {
+  display: none;
+}
+
+.ossum-fullsearch__note {
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Narrow screens: the label costs more than it explains. */
+@media screen and (max-width: 44.9375em) {
+  .ossum-fullsearch__label { display: none; }
+}
+
+/* Match Pagefind's own controls to the Material palette in both schemes. */
+.ossum-fullsearch,
+#pagefind-search {
+  --pagefind-ui-scale: 0.75;
+  --pagefind-ui-primary: var(--md-primary-fg-color);
+  --pagefind-ui-text: var(--md-typeset-color);
+  --pagefind-ui-background: var(--md-default-bg-color);
+  --pagefind-ui-border: var(--md-default-fg-color--lightest);
+  --pagefind-ui-tag: var(--md-default-fg-color--lightest);
+}
