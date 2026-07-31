@@ -83,6 +83,9 @@ The source links point to `riddl-models` (not `riddl-examples`).
 ### Local Development
 
 ```bash
+# Install build dependencies (mkdocs-material, mike)
+pip install -r requirements.txt
+
 # Install the RIDDL lexer for syntax highlighting
 pip install -e .
 
@@ -90,13 +93,229 @@ pip install -e .
 mkdocs serve
 
 # Build static site
-mkdocs build
+mkdocs build --strict
 
-# Deploy to GitHub Pages
-mkdocs gh-deploy
+# Preview the versioned site as deployed
+mike serve
 ```
 
 The site will be available at `http://localhost:8000` when serving locally.
+
+**Do not run `mkdocs gh-deploy`.** The site is versioned with `mike`; a
+`gh-deploy` would flatten the version structure. CI runs
+`mike deploy --push --update-aliases` instead.
+
+---
+
+## Documentation Versioning
+
+**The site is four MkDocs projects, not one.** `mike` versions a whole project,
+so a single project meant every product carried RIDDL's version number — the
+privacy policy existed once per RIDDL version, and the Synapify docs were
+stamped `2.0`. Each product now deploys under its own prefix with its own
+`versions.json` and its own version selector.
+
+| Deployed at | Source | Published from |
+|---|---|---|
+| `/` | `sites/shell/` — landing page, About, Coming Soon | `main`, **unversioned** |
+| `/riddl/<ver>/` | `sites/riddl/` — language docs plus `OSS/` | `main` (2.0), `docs/1.x` (1.31) |
+| `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | `main` |
+| `/synapify/<ver>/` | `sites/synapify/` | `main` |
+
+One documentation version per product **minor** version, never per patch.
+
+The MCP guides live with riddlg, not with the language docs, because 21 of
+their 22 outbound links point at riddlg — they document the server riddlg
+drives, so they version with it.
+
+`docs-version.yml` is where a branch declares what it publishes; the
+release-time alias flip is an edit there, not a workflow change. **Only `main`
+and `docs/1.x` publish**, so work branches can be pushed freely.
+
+Shared theme config lives in `sites/common.yml`, pulled in with `INHERIT`.
+Shared logos and CSS live once in `common/` and are copied into each site by
+`scripts/sync-shared-assets.sh` — **run it before any build**, or every page
+loses its stylesheet. The copies are gitignored.
+
+### Search: two layers, on purpose
+
+| Layer | Covers | Built by |
+|---|---|---|
+| Each site's header search box | that site only | Material, per build |
+| `/find/` | **all products at once** | Pagefind, `scripts/build-search-index.sh` |
+
+Material builds one search index per MkDocs project, so its search can never
+span the four sites — a reader in the RIDDL docs searching "Synapify" gets
+nothing. Pagefind indexes **built HTML** instead of sources, so it does not
+care how many projects produced the tree. It runs last, over the assembled
+`gh-pages` content, and writes `/pagefind/` at the root.
+
+Two things about the index that are deliberate:
+
+- **It covers each product's `latest` alias only**, plus the shell pages. mike
+  deploys aliases as full *copies*, so indexing everything would return each
+  page three or four times. Following the alias rather than a pinned version
+  means no edit is needed when 2.0 is promoted.
+- **Older versions are therefore not globally searchable.** That is the
+  trade-off, not an oversight; each version's own search box still works.
+
+Material's `toc.permalink` pilcrow is excluded, or every sub-result reads
+"Purpose¶". The header link to `/find/` is injected from `overrides/main.html`
+because Material has no block for adding a header item and copying
+`partials/header.html` would pin the repo to one Material release.
+
+### Crawlers and duplicate versions
+
+`robots.txt` is **generated** at deploy time by `scripts/build-robots-txt.sh`,
+because its job is to list the sitemaps and the set of them changes with every
+release: each build writes its own `sitemap.xml` inside its own version
+directory, and nothing at the root references them.
+
+It blocks nothing except `/pagefind/`. Version/alias duplication is handled by
+**`rel=canonical`**, not by hiding pages: each build is built once with its own
+version's `site_url`, so the pages inside an alias copy carry a canonical
+pointing at the real version directory — `/riddl/next/…` canonicalises to
+`/riddl/2.0/…`. Alias sitemaps are skipped because a copied sitemap is
+byte-identical to the one already listed.
+
+This relies on `DOCS_SITE_URL` being set per deploy. Without it every build
+would claim `https://ossum.tech/` as its canonical and the site would tell
+crawlers that every version of every page is the same URL.
+
+### Things that will bite
+
+- **`mike` aliases must be `--alias-type copy`.** The default is `symlink`, and
+  GitHub Pages does not serve symlinked content, so `/riddl/latest/…` 404s in
+  production. A local `python -m http.server` rehearsal DOES follow symlinks
+  and so cannot catch it. The workflow passes the flag; keep it.
+- **Never run `mike set-default` without `--deploy-prefix`.** Without one it
+  writes a redirect over `gh-pages/index.html`, which is the shell's landing
+  page.
+- **Two branches must never declare the same prefix AND alias.** See the
+  release section below.
+- **`mkdocs build --strict` does NOT fail on dangling intra-page anchors.** It
+  reports them at INFO level and exits 0. Always verify with:
+  ```bash
+  mkdocs build --strict -f sites/<site>/mkdocs.yml 2>&1 | grep -E 'anchor|WARNING|ERROR'
+  ```
+- **`--strict` says nothing about cross-site links.** They are absolute, so
+  MkDocs treats them as external and never checks them. `scripts/check-cross-site-links.py`
+  covers them; run it alongside the strict builds.
+- **`pagefind[bin]`, not `pagefind`.** The bare package is only the Python API
+  wrapper and fails at run time with "Could not find pagefind binary".
+- **A broken `--8<--` include renders as NOTHING, silently**, and `--strict`
+  stays quiet. The EBNF grammar page shipped completely empty this way.
+  `check_paths: true` in `sites/common.yml` makes it fail loudly — keep it on.
+- **Live URLs are directory-style** (`/riddl/latest/concepts/entity/`). The
+  `offline` plugin, which forced `use_directory_urls: false`, has been removed.
+  `scripts/gh-pages-404.html` maps the two older URL shapes onto the current
+  one; it lives at the `gh-pages` root, which mike does not manage.
+- **The 404 handler cannot be verified with `curl`.** GitHub Pages serves it
+  with a 404 status and the rewrite happens in the browser, so every legacy URL
+  looks like a failure from the command line either way. Use
+  `node scripts/test-404-redirects.js`.
+- **`overrides/` is `custom_dir` for all four sites.** Anything product-specific
+  hard-coded there appears on every site — that is how the Synapify docs briefly
+  announced themselves as a preview of RIDDL 2.0. The outdated banner's wording
+  comes from `extra.outdated_banner` per site.
+- **mermaid loads from a CDN** (`unpkg.com`); Material does not bundle it. A
+  diagram can only be verified in a real browser, never by a build check.
+- **This machine has mkdocs-material Insiders; CI installs the community
+  edition.** Do not use Insiders-only features.
+- **`sbt extractGrammar` resolves the *published* riddl library.** Until RIDDL
+  2.0 is published it would overwrite the 2.0 grammar with a 1.x one. See the
+  warning at the task in `build.sbt`.
+
+### When RIDDL 2.0 ships final
+
+`latest` currently points at **1.31**, which is correct while 2.0 is a release
+candidate. Promoting it is a short procedure with one landmine, written up in
+**`scripts/promote-2.0-to-latest.md`**.
+
+The landmine, because it is worth knowing even without opening the file:
+**two branches must never both declare `latest`.** The workflow deploys with
+`--update-aliases`, which *moves* the alias to the most recent deploy — so if
+`docs/1.x` still declares `latest` after 2.0 is promoted, any later push to
+that branch silently drags the site's default back to 1.x. Months later, from
+an unrelated typo fix, with no error. Remove `latest` from `docs/1.x` **before**
+adding it to `main`.
+
+### Migrating gh-pages
+
+Two migrations, both one-time and supervised, both rehearsed against a
+throwaway clone before being run — that is how `CNAME`/`.nojekyll` survival was
+confirmed rather than assumed.
+
+- `scripts/migrate-gh-pages-to-mike.md` — **historical, already executed.** It
+  describes the flat-to-versioned move and still documents `.html` URLs. Do not
+  follow it; it is kept for the record.
+- `scripts/migrate-to-per-product-versioning.md` — the current layout. Read its
+  landmines section before touching deployment.
+
+### Verifying RIDDL code blocks
+
+`scripts/check-riddl-blocks.py` scans every ` ```riddl ` fence for retired 1.x
+constructs. It is advisory (exit 0 unless `--strict`), because many fences are
+deliberate fragments.
+
+```bash
+python3 scripts/check-riddl-blocks.py docs
+```
+
+Counter-examples are suppressed by a trailing comment on the offending line —
+`// fails to parse`, `// invalid`, `// deprecated` — so a page can teach a rule
+by showing what it forbids.
+
+### Compiling RIDDL examples
+
+`scripts/validate-riddl-examples.py` runs each ` ```riddl ` fence through a
+**real riddlc**, which is the only way to know an example works. Unlike the
+checker above it is a **gate**: it exits non-zero on failure.
+
+```bash
+# 2.0 (this branch) -- the release/2 build
+python3 scripts/validate-riddl-examples.py ../bin/riddlc docs/riddl/quickstart.md
+
+# 1.31 (docs/1.x branch) -- the riddlc on PATH
+python3 scripts/validate-riddl-examples.py "$(which riddlc)" docs/riddl/quickstart.md
+```
+
+Most fences are **fragments** and cannot validate as written, so each declares
+how to be made whole with an HTML comment above it. HTML comments do not
+render, so readers never see them:
+
+| Directive | Wraps the fence in |
+|-----------|--------------------|
+| `<!-- riddl: standalone -->` | nothing — a complete model (the default) |
+| `<!-- riddl: in-domain -->` | `domain Example is { … }` |
+| `<!-- riddl: in-context -->` | a domain and a context |
+| `<!-- riddl: in-entity -->` | a domain, context and entity |
+| `<!-- riddl: skip -->` | not validated |
+
+A page may declare a `<!-- riddl-prelude ... -->` block of definitions that its
+fragments reference but do not show.
+
+`--auto` tries every wrapping and reports a fence only if none works. It is a
+*measurement* mode for pages that do not yet carry directives — not a
+substitute for them.
+
+**Status**: `quickstart.md` is fully annotated and validates clean on both
+branches. The ~50 concept pages are not yet annotated; with `--auto`, 99 of
+their 120 fences still fail, dominated by fragments that reference definitions
+they deliberately do not show and so need a per-page prelude. That is a
+known gap, not a claim that those examples are wrong.
+
+**Version differences that matter for examples** (verified against both
+compilers):
+
+| Construct | 1.31 | 2.0 |
+|-----------|------|-----|
+| `state S of record R` | ✅ | ✅ — use this in both |
+| `do "..."` | ✅ | ✅ — use this in both |
+| `option is X` in `with { }` | ✅ | ✅ — never in the body |
+| `initial state` / `initial handler` | ❌ | ✅ |
+| query response | `reply` | `yield` (`reply` deprecated) |
+| outlet on an entity | ❌ — put it on a `source` | ✅ |
 
 ### RIDDL Syntax Highlighting
 
@@ -353,52 +572,36 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 
 ## Quick Reference
 
+There is **no `mkdocs.yml` at the repo root** — every command needs
+`-f sites/<site>/mkdocs.yml`, where `<site>` is `shell`, `riddl`, `riddlg` or
+`synapify`. Run `sync-shared-assets.sh` first or pages build without CSS.
+
 | Task | Command |
 |------|---------|
 | Install deps | `pip install -r requirements.txt && pip install -e .` |
-| Start dev server | `mkdocs serve` |
-| Build site | `mkdocs build --strict` |
-| Check links **and anchors** | `mkdocs build --strict 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
-| Validate RIDDL examples | `python3 scripts/validate-riddl-examples.py $RIDDLC_131 docs/riddl/quickstart.md` |
-| Preview versioned site | `scripts/preview-versioned-site.sh` |
-| Deploy | push to `main` or `docs/1.x`; CI runs `mike deploy` |
+| **Sync shared assets** (before any build) | `./scripts/sync-shared-assets.sh` |
+| Start dev server | `mkdocs serve -f sites/riddl/mkdocs.yml` |
+| Build one site | `mkdocs build --strict -f sites/riddl/mkdocs.yml` |
+| Check links **and anchors** | `mkdocs build --strict -f sites/riddl/mkdocs.yml 2>&1 \| grep -E 'anchor\|WARNING\|ERROR'` |
+| Check **cross-site** links | `python3 scripts/check-cross-site-links.py` |
+| Check the 404 redirect map | `node scripts/test-404-redirects.js` |
+| Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
+| Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
+| Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
+| Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
+| Preview the whole site | `scripts/preview-versioned-site.sh` |
+| Deploy | push to `main` or `docs/1.x`; CI loops over `docs-version.yml` |
 
-!!! danger "This branch currently owns the `latest` alias"
-    `docs-version.yml` here declares `1.31` with the `latest` alias, so this
-    branch controls the site's default version.
+Build every site before concluding a change is clean — a cross-site link edit
+can only break the site at the *other* end:
 
-    When RIDDL 2.0 ships final, `latest` moves to `main` — and **`latest` must
-    be removed from THIS file first**. The workflow deploys with
-    `--update-aliases`, which moves the alias to the most recent deploy, so
-    while both branches declare it, any push here silently drags the site's
-    default back to 1.x. Months later, from an unrelated typo fix, with no
-    error.
-
-    Procedure: `scripts/promote-2.0-to-latest.md`.
-
-!!! danger "Do NOT use `$(which riddlc)` on this branch"
-    Examples here must validate against **1.31**, but `riddlc` on `PATH` is no
-    longer 1.31. The RIDDL 2.0 release-candidate formula (`riddlc-rc`) declares
-    `conflicts_with "riddlc"` — both install a binary called `riddlc` — so
-    installing the RC takes over the symlink.
-
-    Use the Cellar path directly:
-
-    ```bash
-    export RIDDLC_131=/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc
-    python3 scripts/validate-riddl-examples.py "$RIDDLC_131" docs/riddl/quickstart.md
-    ```
-
-    This is not theoretical. The Quickstart reports **0 failures** against real
-    1.31 and **3** against 2.0.0-rc.1 — the 2.0 compiler flags `source`,
-    `reply` and the state introducer as deprecated, which is correct for 2.0
-    and wrong for this branch. Validating with the PATH binary would send you
-    "fixing" 1.x docs into 2.0 syntax.
-
-    Confirm which binary you have with `riddlc version`.
-
-    `mkdocs build --strict` does NOT fail on dangling intra-page anchors; it
-    reports them at INFO and exits 0. Grep the output as shown above.
+```bash
+./scripts/sync-shared-assets.sh
+for s in shell riddl riddlg synapify; do
+  mkdocs build --strict -f sites/$s/mkdocs.yml 2>&1 | grep -E 'anchor|WARNING|ERROR'
+done
+python3 scripts/check-cross-site-links.py
+```
 
 ---
 

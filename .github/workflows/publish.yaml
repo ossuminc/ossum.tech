@@ -110,6 +110,12 @@ jobs:
           # nothing to indicate the index had gone stale.
           "$GITHUB_WORKSPACE/scripts/build-search-index.sh" /tmp/ghp
 
+          # robots.txt is generated for the same reason: each build writes its
+          # own sitemap.xml inside its own version directory, and nothing at the
+          # root references them. A hand-written file would stop listing new
+          # versions the day after it was written.
+          "$GITHUB_WORKSPACE/scripts/build-robots-txt.sh" /tmp/ghp
+
           cd /tmp/ghp
           git add -A
           if git diff --cached --quiet; then
