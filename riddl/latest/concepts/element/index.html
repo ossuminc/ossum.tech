@@ -3183,34 +3183,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../case/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Case
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../conditional/" class="md-nav__link">
         
   
@@ -5250,8 +5222,8 @@ User Interface elements<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1<
 in traditional user interfaces. Groups can contain other elements including
 nested groups, enabling hierarchical organization of the user interface.</p>
 <p>Groups have many aliases in RIDDL to accommodate different UI paradigms:
-<code>group</code>, <code>page</code>, <code>pane</code>, <code>dialog</code>, <code>menu</code>, <code>popup</code>, <code>frame</code>, <code>column</code>, <code>row</code>,
-<code>stack</code>, <code>panel</code>, <code>form</code>, and <code>section</code>.</p>
+<code>group</code>, <code>page</code>, <code>pane</code>, <code>dialog</code>, <code>menu</code>, <code>popup</code>, <code>frame</code>, <code>column</code>,
+<code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code> and <code>block</code>.</p>
 <table>
 <thead>
 <tr>
@@ -5296,9 +5268,23 @@ different group of elements, enabling navigation within the application.</p>
 <li><a href="../group/">Group</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<p><em>Element</em> is <strong>abstract</strong> — a class name in the AST, like <em>Node</em>, not a RIDDL
+keyword you can write. Nothing is "an element" in source; a thing <em>is</em> a
+<a href="../group/">Group</a>, an <a href="../input/">Input</a> or an <a href="../output/">Output</a>.</p>
+<p>So the relationship below is <em>is-a</em>, not containment:</p>
+<pre class="mermaid"><code>classDiagram
+    class Element {
+        &amp;lt;&amp;lt;abstract&amp;gt;&amp;gt;
+    }
+    Element &lt;|-- Group
+    Element &lt;|-- Input
+    Element &lt;|-- Output</code></pre>
+<p>Of the three, only <a href="../group/">Group</a> contains anything:</p>
 <ul>
-<li><a href="../group/">Group</a> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.82 15.42-2.5 4.33c-.49.86-1.4 1.31-2.32 1.25h-2v2l-2.5-4.5L15 14v2h2.82l-2.22-3.85 4.33-2.5 1.8 3.12c.52.77.59 1.8.09 2.65M9.21 3.06h5c.98 0 1.83.57 2.24 1.39l1 1.74 1.73-1-2.64 4.41-5.15.09 1.73-1-1.41-2.45-2.21 3.85-4.34-2.5 1.8-3.12c.41-.83 1.26-1.41 2.25-1.41m-4.16 16.7-2.5-4.33c-.49-.85-.42-1.87.09-2.64l1-1.73-1.73-1 5.14.08 2.65 4.42-1.73-1L6.56 16H11v5H7.4a2.51 2.51 0 0 1-2.35-1.24"/></svg></span></li>
-<li><a href="../handler/">Handlers</a></li>
+<li><a href="../group/">Group</a> — nested groups, <a href="../input/">Inputs</a> and
+  <a href="../output/">Outputs</a></li>
+<li><a href="../input/">Input</a> and <a href="../output/">Output</a> — each <strong>references</strong> a
+  <a href="../type/">type</a> rather than containing one</li>
 </ul>
 <div class="footnote">
 <hr />
