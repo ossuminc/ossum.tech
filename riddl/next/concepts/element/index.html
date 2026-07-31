@@ -5461,7 +5461,7 @@ an <strong>acquisition verb</strong>, and the type acquired:</p>
 <p>The acquisition verbs are interchangeable — pick whichever reads best:</p>
 <p><code>acquires</code>, <code>reads</code>, <code>takes</code>, <code>accepts</code>, <code>admits</code>, <code>enters</code>, <code>provides</code>,
 <code>selects</code>, <code>chooses</code>, <code>picks</code>, <code>initiates</code>, <code>submits</code>, <code>triggers</code>,
-<code>activates</code>, <code>starts</code></p>
+<code>activate</code>, <code>activates</code>, <code>starts</code></p>
 <h3 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h3>
 <p>An output presents data <em>to</em> the user, written as an output alias, a name, a
 <strong>presentation verb</strong>, and what is presented:</p>
@@ -5474,13 +5474,8 @@ whose acquisition verb conveys the action — most naturally a <code>button</cod
 <!-- riddl: skip reason="illustrative fragment; references types this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="nb">Boolean</span>
 </span></code></pre></div>
-<div class="admonition note">
-<p class="admonition-title"><code>activate</code> vs <code>activates</code></p>
-<p>Only the third-person form <code>activates</code> parses today; the bare <code>activate</code> is
-rejected. Adding it is
-<a href="https://github.com/ossuminc/riddl">requested of the compiler</a> — until it
-ships, write <code>activates</code>.</p>
-</div>
+<p>Both <code>activate</code> and <code>activates</code> are accepted, as are the other acquisition
+verbs — pick whichever reads best at the call site.</p>
 <h2 id="occurs-in">Occurs In<a class="headerlink" href="#occurs-in" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../group/">Group</a></li>
