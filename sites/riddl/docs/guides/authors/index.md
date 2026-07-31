@@ -7,6 +7,26 @@ weight: 5
 
 # Author's Guide
 
+<!-- riddl-prelude
+  entity Inventory is { ??? }
+  type Money is Currency(USD)
+  type OrderId is String
+  type CartId is String
+  type PaymentInfo is String
+  type OrderStatus is any of { Pending, Confirmed, Cancelled }
+  outlet Events is event ItemAdded
+  outlet Commands is command ReserveItems
+  event ItemAdded is { note is String }
+  event OrderCancelled is { note is String }
+  command ReserveItems is { note is String }
+  command ReleaseReservation is { note is String }
+  command ProcessPayment is { note is String }
+  command RefundPayment is { note is String }
+  command CreateOrder is { note is String }
+  command CancelOrder is { note is String }
+-->
+
+
 This guide is for those who author RIDDL models. Authors are typically domain
 experts who understand the business domain being modeled and collaborate with
 AI assistants to express that understanding in RIDDL syntax. You don't need to
@@ -145,6 +165,7 @@ Entities are the heart of your model. They represent things with identity
 that persist over time and respond to messages. Each entity should model
 a single business concept.
 
+<!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
   entity Product is {
@@ -180,10 +201,8 @@ context Catalog is {
     }
 
     // State - what the entity remembers
-    state Active is {
-      fields {
-        info is Product
-      }
+    record ActiveData is { info is Product }
+    state Active of record ActiveData is {
       handler ActiveHandler is {
         on command UpdatePrice {
           if "price is different from current" then {
@@ -204,20 +223,21 @@ context Catalog is {
 Handlers specify what happens when messages are received. They contain
 on clauses that match message types and execute statements.
 
+<!-- riddl: in-context -->
 ```riddl
 handler CartHandler is {
   on command AddItem {
-    if "item not already in cart" then {
-      "add the item to the cart with quantity 1"
+    when "item not already in cart" then {
+      do "add the item to the cart with quantity 1"
     } else {
-      "increment the quantity of the existing item"
-    }
+      do "increment the quantity of the existing item"
+    } end
     send event ItemAdded to outlet Events
   }
 
   on command RemoveItem {
     if "item exists in cart" then {
-      "remove the item from the cart"
+      do "remove the item from the cart"
       send event ItemRemoved to outlet Events
     } else {
       error "Item not found in cart"
@@ -246,9 +266,7 @@ your model supports required use cases.
 
 ```riddl
 domain OnlineRetail is {
-  user Customer is {
-    briefly "A person shopping on the website"
-  }
+  user Customer is "A person shopping on the website"
 
   epic BrowseAndPurchase is {
     user Customer wants to "find and buy products"
@@ -370,14 +388,13 @@ context Catalog is {
 
 Use the `term` definition to establish your ubiquitous language:
 
+<!-- riddl: in-domain -->
 ```riddl
 context Shopping is {
   term SKU is {
-    briefly "Stock Keeping Unit"
-    described as {
-      |A unique identifier for a product variant. Each SKU represents
-      |a specific combination of product attributes (size, color, etc.).
-    }
+    |Stock Keeping Unit -- a unique identifier for a product variant. Each
+    |SKU represents a specific combination of product attributes (size,
+    |color, etc.).
   }
 
   term Abandonment is {
@@ -394,6 +411,7 @@ context Shopping is {
 
 When you know something needs to be defined but aren't ready to detail it:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Product is {
   ??? // TODO: Define product entity
@@ -402,6 +420,7 @@ entity Product is {
 
 Or for partially complete definitions:
 
+<!-- riddl: in-context -->
 ```riddl
 handler OrderHandler is {
   on command CreateOrder {
@@ -409,7 +428,7 @@ handler OrderHandler is {
   }
 
   on command CancelOrder {
-    "validate order can be cancelled"
+    do "validate order can be cancelled"
     set field status to OrderStatus.Cancelled
     send event OrderCancelled to outlet Events
   }
@@ -422,6 +441,7 @@ handler OrderHandler is {
 
 Commands request changes; events record that changes happened:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Account is {
   command Deposit is { amount is Money }
@@ -430,16 +450,16 @@ entity Account is {
   event Deposited is { amount is Money, balance is Money, at is TimeStamp }
   event Withdrawn is { amount is Money, balance is Money, at is TimeStamp }
 
-  state Active is {
-    fields { balance is Money }
+  record ActiveData is { balance is Money }
+  state Active of record ActiveData is {
     handler ActiveHandler is {
       on command Deposit {
-        "add amount to balance"
+        do "add amount to balance"
         send event Deposited to outlet Events
       }
       on command Withdraw {
         if "sufficient balance" then {
-          "subtract amount from balance"
+          do "subtract amount from balance"
           send event Withdrawn to outlet Events
         } else {
           error "Insufficient funds"
@@ -454,6 +474,7 @@ entity Account is {
 
 Entities can morph between states to model lifecycles:
 
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   record PendingData is { orderId is OrderId }
@@ -502,32 +523,27 @@ entity Order is {
 
 For multi-step processes that need compensation on failure:
 
+<!-- riddl: in-context -->
 ```riddl
 saga PlaceOrder is {
-  input is { cartId is CartId, paymentMethod is PaymentInfo }
+  requires { cartId is CartId, paymentMethod is PaymentInfo }
 
   step ReserveInventory is {
-    send command ReserveItems to context Inventory
-    briefly "Reserve items in warehouse"
-    reverted by {
-      send command ReleaseReservation to context Inventory
-    }
+    send command ReserveItems to outlet Commands
+  } reverted by {
+    send command ReleaseReservation to outlet Commands
   }
 
   step ChargePayment is {
-    send command ProcessPayment to context Payments
-    briefly "Charge customer's payment method"
-    reverted by {
-      send command RefundPayment to context Payments
-    }
+    send command ProcessPayment to outlet Commands
+  } reverted by {
+    send command RefundPayment to outlet Commands
   }
 
-  step CreateOrder is {
-    send command CreateOrder to entity Order
-    briefly "Create the order record"
-    reverted by {
-      send command CancelOrder to entity Order
-    }
+  step PlaceTheOrder is {
+    send command CreateOrder to outlet Commands
+  } reverted by {
+    send command CancelOrder to outlet Commands
   }
 } with {
   briefly "Orchestrates the order placement process"
