@@ -33,6 +33,7 @@ changes are bundled, reviewed, and published simultaneously.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type MenuItemId is Id(MenuManagement.MenuItem) with {
   briefly "Menu item identifier"
@@ -105,6 +106,7 @@ ingredients list.
 
 The `MenuItem` entity manages individual menu items:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity MenuItem is {
 
@@ -173,6 +175,7 @@ providing all fields every time.
 The `MenuRelease` entity is the key innovation — it bundles
 menu changes into an atomic release:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity MenuRelease is {
 
@@ -230,6 +233,7 @@ update, remove, or price-change.
 
 The `ReleasePublished` event is the key moment:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 event ReleasePublished is {
   menuReleaseId is MenuReleaseId
@@ -248,6 +252,7 @@ event ReleasePublished is {
 
 ## Repositories
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository MenuItemRepository is {
   schema MenuItemData is relational
@@ -269,6 +274,7 @@ repository MenuReleaseRepository is {
 
 Menu Management has an outbound adaptor for distributing menus:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor ToRestaurants to context Restaurant.FrontOfHouse is {
   handler MenuDistribution is {

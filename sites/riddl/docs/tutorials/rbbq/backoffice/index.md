@@ -12,6 +12,7 @@ system integrations.
 
 ## Domain Definition
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 domain BackOffice is {
 

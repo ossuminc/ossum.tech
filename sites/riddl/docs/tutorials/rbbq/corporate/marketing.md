@@ -32,6 +32,7 @@ connecting marketing efforts directly to customer retention.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type CampaignId is Id(Marketing.Campaign) with {
   briefly "Campaign identifier"
@@ -91,6 +92,7 @@ applies to.
 
 The `Campaign` entity has a 5-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity Campaign is {
 
@@ -167,6 +169,7 @@ awareness campaigns.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository CampaignRepository is {
   schema CampaignData is relational

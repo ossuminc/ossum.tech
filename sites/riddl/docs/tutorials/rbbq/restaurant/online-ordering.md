@@ -37,6 +37,7 @@ online menu.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type OnlineOrderId is Id(OnlineOrdering.OnlineOrder) with {
   briefly "Online order identifier"
@@ -102,6 +103,7 @@ fulfillment tracking.
 
 The `OnlineOrder` entity has a 6-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity OnlineOrder is {
 
@@ -183,6 +185,7 @@ the model.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository OnlineOrderRepository is {
   schema OnlineOrderData is relational
@@ -201,6 +204,7 @@ already."
 
 Online Ordering has three outbound adaptors:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor ToKitchen to context Restaurant.Kitchen is {
   handler OnlineKitchenRouting is {

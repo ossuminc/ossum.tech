@@ -29,6 +29,7 @@ OnlineOrdering, Scheduling, Inventory) that emit events.
 
 ## SalesReport Projector
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 projector SalesReport is {
 
@@ -66,6 +67,7 @@ channel.
 
 ## LaborReport Projector
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 projector LaborReport is {
 
@@ -98,6 +100,7 @@ shift cancellation rates.
 
 ## InventoryReport Projector
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 projector InventoryReport is {
 

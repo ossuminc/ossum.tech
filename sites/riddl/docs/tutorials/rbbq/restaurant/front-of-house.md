@@ -35,6 +35,7 @@ reservations). Key pain points addressed:
 The context defines shared types for reservations, orders, and
 payments:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type ReservationId is Id(FrontOfHouse.Reservation) with {
   briefly "Reservation identifier"
@@ -100,6 +101,7 @@ boundaries.
 
 The context also defines record types for structured data:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type MenuItemInfo is {
   itemCode is String(1, 50) with {
@@ -169,6 +171,7 @@ type PaymentInfo is {
 The `Reservation` entity models the full lifecycle from request
 through confirmation, seating, or cancellation:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity Reservation is {
 
@@ -255,6 +258,7 @@ The handler follows the same pattern — `morph` on creation,
 
 Two repositories persist the entity data:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository ReservationRepository is {
   schema ReservationData is relational
@@ -283,6 +287,7 @@ The `ReservationBoard` projector provides a real-time read
 model for the host's seating display, replacing the paper
 backup system:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 projector ReservationBoard is {
   updates repository ReservationRepository
@@ -322,6 +327,7 @@ host's display screen.
 Front of House has three outbound adaptors that route messages
 to other contexts:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor ToKitchen to context Restaurant.Kitchen is {
   handler KitchenRouting is {

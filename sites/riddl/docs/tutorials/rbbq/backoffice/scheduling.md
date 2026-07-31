@@ -20,6 +20,7 @@ or cancellations.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type ShiftId is Id(Scheduling.Shift) with {
   briefly "Shift identifier"
@@ -64,6 +65,7 @@ Dishwasher and Manager.
 
 The `Shift` entity has a 6-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity Shift is {
 
@@ -149,6 +151,7 @@ assigned. This matters for labor compliance and reporting.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository ShiftRepository is {
   schema ShiftData is relational

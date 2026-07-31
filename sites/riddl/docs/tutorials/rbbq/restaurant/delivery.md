@@ -33,6 +33,7 @@ and synced when connectivity resumes.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type DeliveryId is Id(Delivery.DeliveryOrder) with {
   briefly "Delivery identifier"
@@ -88,6 +89,7 @@ interview.
 The `DeliveryOrder` entity has a 7-command lifecycle — the
 longest of any entity in the model:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity DeliveryOrder is {
 
@@ -166,6 +168,7 @@ delivery continues.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository DeliveryRepository is {
   schema DeliveryData is relational
@@ -184,6 +187,7 @@ app dashboard.
 
 Delivery has a single inbound adaptor:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor FromOnlineOrdering from context Restaurant.OnlineOrdering is {
   handler OnlineDeliveryIntake is {

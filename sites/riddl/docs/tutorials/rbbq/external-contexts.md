@@ -17,6 +17,7 @@ third-party system without modeling its internals. The context
 specifies the commands you can send and the events you expect to
 receive, but the implementation is someone else's responsibility.
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context PaymentGateway is {
   // Define the interface...
@@ -35,6 +36,7 @@ boundary definition only.
 
 ### PaymentGateway
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context PaymentGateway is {
 
@@ -74,6 +76,7 @@ authorization holds the funds, capture completes the transfer.
 
 ### NotificationService
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context NotificationService is {
 
@@ -105,6 +108,7 @@ of new orders.
 
 ### HRSystem
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context HRSystem is {
 
@@ -134,6 +138,7 @@ contact information.
 
 ### AccountingSystem
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context AccountingSystem is {
 
@@ -165,6 +170,7 @@ financial reporting.
 
 ### PrintingService
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context PrintingService is {
 
@@ -193,6 +199,7 @@ distributed to all locations.
 
 ### PhotographyService
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context PhotographyService is {
 

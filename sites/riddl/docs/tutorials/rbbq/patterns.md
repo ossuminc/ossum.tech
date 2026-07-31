@@ -15,6 +15,7 @@ Every entity follows the same structure: commands trigger state
 transitions, events record what happened, state captures the
 current data, and a handler wires it together.
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity KitchenTicket is {
   // Commands define what can happen
@@ -58,6 +59,7 @@ RIDDL provides a rich type system for modeling domain data:
 
 ### Id Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type ReservationId is Id(FrontOfHouse.Reservation)
 ```
@@ -67,6 +69,7 @@ compile-time validation of cross-context references.
 
 ### Enumerations
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type DeliveryStatus is any of {
   DeliveryPending,
@@ -82,6 +85,7 @@ Each value is a constant.
 
 ### Records
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type GeoLocation is {
   latitude is Decimal(9, 6)
@@ -97,6 +101,7 @@ strings like `String(1, 200)`.
 
 ### Collections
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 ticketItems is many TicketItem
 deliveryAddress is optional DeliveryAddress
@@ -114,6 +119,7 @@ comprehensive type catalog and
 
 Repositories define persistence schemas with indexes:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository KitchenTicketRepository is {
   schema KitchenTicketData is relational
@@ -143,6 +149,7 @@ an example with stock-level indexing.
 
 Projectors build read-optimized views from events:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 projector ReservationBoard is {
   updates repository ReservationRepository
@@ -186,6 +193,7 @@ Adaptors bridge bounded contexts. There are two directions:
 
 ### Outbound (`to`)
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor ToKitchen to context Restaurant.Kitchen is {
   handler KitchenRouting is {
@@ -200,6 +208,7 @@ Outbound adaptors send messages from this context to another.
 
 ### Inbound (`from`)
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor FromFrontOfHouse from context Restaurant.FrontOfHouse is {
   handler FrontOfHouseIntake is {
@@ -224,6 +233,7 @@ knowing about the consumer.
 
 External contexts model third-party system boundaries:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 context PaymentGateway is {
   command AuthorizePayment is { ... }
@@ -248,6 +258,7 @@ AccountingSystem, PrintingService, PhotographyService.
 
 Epics capture user journeys across contexts:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 epic KitchenWorkflow is {
   user Chef wants "to manage kitchen tickets digitally"

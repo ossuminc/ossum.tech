@@ -29,6 +29,7 @@ context formalizes this process with tracked purchase orders.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type PurchaseOrderId is Id(SupplyChain.PurchaseOrder) with {
   briefly "Purchase order identifier"
@@ -71,6 +72,7 @@ accepted.
 
 The `PurchaseOrder` entity has a 5-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity PurchaseOrder is {
 
@@ -148,6 +150,7 @@ resolution process with the vendor.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository PurchaseOrderRepository is {
   schema PurchaseOrderData is relational

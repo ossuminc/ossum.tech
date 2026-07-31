@@ -33,6 +33,7 @@ The `NotifyServerDrinksReady` command and its
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type DrinkOrderId is Id(Bar.DrinkOrder) with {
   briefly "Drink order identifier"
@@ -64,6 +65,7 @@ type DrinkItem is {
 
 The `DrinkOrder` entity has a 5-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity DrinkOrder is {
 
@@ -131,6 +133,7 @@ entity DrinkOrder is {
 The lifecycle: **Receive → Prepare → Mark Ready → Notify Server
 → Complete**. The key event is `ServerNotifiedDrinksReady`:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 event ServerNotifiedDrinksReady is {
   drinkOrderId is DrinkOrderId
@@ -147,6 +150,7 @@ event ServerNotifiedDrinksReady is {
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository DrinkOrderRepository is {
   schema DrinkOrderData is relational
@@ -160,6 +164,7 @@ repository DrinkOrderRepository is {
 
 Bar has a single inbound adaptor from Front of House:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor FromFrontOfHouse from context Restaurant.FrontOfHouse is {
   handler DrinkIntake is {

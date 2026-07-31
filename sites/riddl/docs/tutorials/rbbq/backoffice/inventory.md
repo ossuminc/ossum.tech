@@ -20,6 +20,7 @@ stock runs low.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type InventoryItemId is Id(Inventory.InventoryItem) with {
   briefly "Inventory item identifier"
@@ -70,6 +71,7 @@ compliance.
 
 The `InventoryItem` entity has a 5-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity InventoryItem is {
 
@@ -153,6 +155,7 @@ querying the entity directly.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository InventoryItemRepository is {
   schema InventoryItemData is relational
@@ -170,6 +173,7 @@ low-stock and out-of-stock items.
 The most interesting part of the Inventory context is its
 cross-context integration with the Kitchen:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor FromKitchen from context Restaurant.Kitchen is {
   handler KitchenConsumptionIntake is {

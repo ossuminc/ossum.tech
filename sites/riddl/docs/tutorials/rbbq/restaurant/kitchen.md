@@ -35,6 +35,7 @@ a persistent, legible, digital ticket queue.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type KitchenTicketId is Id(Kitchen.KitchenTicket) with {
   briefly "Kitchen ticket identifier"
@@ -87,6 +88,7 @@ adaptors and may have different preparation priorities.
 The `KitchenTicket` entity has a 6-command lifecycle with event
 sourcing:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity KitchenTicket is {
 
@@ -169,6 +171,7 @@ orders.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository KitchenTicketRepository is {
   schema KitchenTicketData is relational
@@ -188,6 +191,7 @@ grill tickets.
 The KitchenDisplay projector provides the real-time screen that
 replaces printed and handwritten tickets:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 projector KitchenDisplay is {
   updates repository KitchenTicketRepository
@@ -229,6 +233,7 @@ projector KitchenDisplay is {
 Kitchen has two inbound adaptors — one for dine-in orders from
 Front of House, one for online orders:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor FromFrontOfHouse from context Restaurant.FrontOfHouse is {
   handler FrontOfHouseIntake is {

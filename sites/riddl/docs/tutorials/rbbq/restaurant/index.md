@@ -14,6 +14,7 @@ bounded contexts and two external system integrations.
 The Restaurant domain includes its contexts via RIDDL's `include`
 mechanism, keeping each context in its own file for maintainability:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 domain Restaurant is {
 

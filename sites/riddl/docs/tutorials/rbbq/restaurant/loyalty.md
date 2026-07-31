@@ -39,6 +39,7 @@ those events.
 
 ## Types
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 type LoyaltyAccountId is Id(Loyalty.LoyaltyAccount) with {
   briefly "Loyalty account identifier"
@@ -77,6 +78,7 @@ it can be positive for accruals or negative for redemptions.
 
 The `LoyaltyAccount` entity has a 5-command lifecycle:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 entity LoyaltyAccount is {
 
@@ -149,6 +151,7 @@ downstream systems know the current balance without querying.
 
 ## Repository
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 repository LoyaltyAccountRepository is {
   schema LoyaltyAccountData is relational
@@ -167,6 +170,7 @@ enrollment to prevent duplicate accounts.
 Loyalty has two inbound adaptors — one for dine-in payments,
 one for online payments:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 adaptor FromPayment from context Restaurant.FrontOfHouse is {
   handler DineInLoyaltyIntake is {

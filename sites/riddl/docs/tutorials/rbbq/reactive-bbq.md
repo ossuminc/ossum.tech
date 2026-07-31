@@ -16,6 +16,7 @@ The `ReactiveBBQ` domain defines the entire enterprise. It includes
 an author, stakeholder personas as `user` definitions, key user
 journeys as `epic` definitions, and three subdomain includes:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 domain ReactiveBBQ is {
 
@@ -114,6 +115,7 @@ The domain defines four key user journeys as `epic` definitions.
 Each epic contains `case` definitions with `step` sequences that
 trace the flow across contexts:
 
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 ```riddl
 epic DineInExperience is {
   user Host wants "to seat guests quickly"
