@@ -114,8 +114,14 @@
 
 /* --- in the header, on the primary colour ------------------------------- */
 
+/* Transparent, NOT a colour of its own: this sits inside .md-header, which
+   this stylesheet paints #272740 a few rules above, so letting the header show
+   through keeps the strip indistinguishable from the rows above and below it.
+   Setting var(--md-primary-fg-color) here made it a bright blue band across an
+   otherwise dark header. Hard-coding #272740 would work too, but would be a
+   second place to update whenever the header colour changes. */
 .ossum-fullsearch--in-header {
-  background: var(--md-primary-fg-color);
+  background: transparent;
   color: var(--md-primary-bg-color);
   border-bottom: none;
   width: 100%;
