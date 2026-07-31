@@ -5713,10 +5713,14 @@ too, and often does — that is how it publishes its events into a stream.</p>
 <li>Any other processor body</li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Streamlet(["Streamlet"]) --&gt; Inlet
+    Streamlet --&gt; Outlet
+    Streamlet --&gt; PC["Processor contents"]</code></pre>
 <ul>
-<li><a href="../inlet/">Inlets</a></li>
-<li><a href="../outlet/">Outlets</a></li>
-<li><a href="../handler/">Handlers</a></li>
+<li><a href="../inlet/">Inlet</a> and <a href="../outlet/">Outlet</a> — its stream ports, in the number its shape requires</li>
+<li>Everything a <a href="../processor/">processor</a> may contain: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="./">Streamlet</a>, nested <a href="../processor/">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
+<li><a href="../include/">Include</a></li>
 </ul>
 
 

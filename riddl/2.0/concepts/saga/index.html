@@ -5516,8 +5516,17 @@ functions and includes.</p>
 <li><a href="../module/">Modules</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Saga(["Saga"]) --&gt; Step["Saga Step"]
+    Saga --&gt; Inlet
+    Saga --&gt; Outlet
+    Saga --&gt; Function
+    Step --&gt; Statement</code></pre>
 <ul>
-<li><a href="../sagastep/">SagaStep</a></li>
+<li><a href="../sagastep/">Saga Step</a> — the forward action and its compensation</li>
+<li><a href="../inlet/">Inlet</a> and <a href="../outlet/">Outlet</a> — a saga bears stream ports even though it is not a <a href="../processor/">processor</a></li>
+<li><a href="../function/">Function</a></li>
+<li><a href="../include/">Include</a></li>
 </ul>
 
 

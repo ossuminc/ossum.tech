@@ -5435,13 +5435,13 @@ it does not answer queries. Queries are served by the
 <li><a href="../module/">Modules</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Projector(["Projector"]) --&gt; Updates["updates"]
+    Projector --&gt; PC["Processor contents"]</code></pre>
 <ul>
-<li><code>updates</code> — the target repository</li>
-<li><a href="../field/">Fields</a></li>
-<li><a href="../handler/">Handlers</a></li>
-<li><a href="../inlet/">Inlets</a> and <a href="../outlet/">Outlets</a></li>
-<li><a href="../version/">Versions</a> and <a href="../copyright/">Copyrights</a></li>
-<li><a href="../include/">Includes</a></li>
+<li><code>updates</code> — the <a href="../repository/">repository</a> this projector maintains</li>
+<li>Everything a <a href="../processor/">processor</a> may contain: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="../streamlet/">Streamlet</a>, nested <a href="../processor/">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
+<li><a href="../include/">Include</a></li>
 </ul>
 
 

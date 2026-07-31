@@ -5893,17 +5893,15 @@ events into a stream:</p>
 <li><a href="../module/">Modules</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Entity(["Entity"]) --&gt; State
+    Entity --&gt; PC["Processor contents"]
+    State --&gt; Handler
+    State --&gt; Invariant</code></pre>
 <ul>
-<li><a href="../copyright/">Copyrights</a> - the applicable legal notice</li>
-<li><a href="../function/">Functions</a> - named definitions of processing</li>
-<li><a href="../handler/">Handlers</a> - how to handle messages sent to an entity</li>
-<li><a href="../include/">Includes</a> - inclusion of entity content from a file</li>
-<li><a href="../inlet/">Inlets</a> and <a href="../outlet/">Outlets</a> - stream ports</li>
-<li><a href="../invariant/">Invariants</a> - logical expressions that must always
-  hold true</li>
-<li><a href="../state/">States</a> - the data an entity holds, each typed by a record</li>
-<li><a href="../type/">Types</a> - the definition of a type of information</li>
-<li><a href="../version/">Versions</a> - one component of the version coordinate</li>
+<li><a href="../state/">State</a> — the data the entity holds, each typed by a record</li>
+<li>Everything a <a href="../processor/">processor</a> may contain: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="../streamlet/">Streamlet</a>, nested <a href="../processor/">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
+<li><a href="../include/">Include</a></li>
 </ul>
 
 

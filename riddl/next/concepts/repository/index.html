@@ -5515,13 +5515,14 @@ available.</p>
 <li><a href="../module/">Module</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Repository(["Repository"]) --&gt; Schema
+    Repository --&gt; PC["Processor contents"]
+    Schema --&gt; SchemaParts["data · link · index"]</code></pre>
 <ul>
-<li>Schemas</li>
-<li><a href="../type/">Types</a></li>
-<li><a href="../message/">Messages</a></li>
-<li><a href="../handler/">Handler</a></li>
-<li><a href="../inlet/">Inlets</a> and <a href="../outlet/">Outlets</a></li>
-<li><a href="../version/">Versions</a> and <a href="../copyright/">Copyrights</a></li>
+<li><code>schema</code> — its kind, data, links and indices</li>
+<li>Everything a <a href="../processor/">processor</a> may contain: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="../streamlet/">Streamlet</a>, nested <a href="../processor/">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
+<li><a href="../include/">Include</a></li>
 </ul>
 
 

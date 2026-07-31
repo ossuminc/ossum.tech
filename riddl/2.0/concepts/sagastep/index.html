@@ -5647,8 +5647,13 @@ be set in a step's <code>with { }</code> block.</p>
 <li><a href="../saga/">Sagas</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Step(["Saga Step"]) --&gt; Forward["forward action"]
+    Step --&gt; Reverted["reverted by"]
+    Forward --&gt; Statement
+    Reverted --&gt; Statement</code></pre>
 <ul>
-<li><a href="../statement/">Statements</a> within the forward and <code>reverted by</code> blocks</li>
+<li><a href="../statement/">Statements</a> in <strong>both</strong> blocks: the forward action and the <code>reverted by</code> compensation</li>
 </ul>
 
 

@@ -5513,24 +5513,21 @@ its own.</p>
 <li><a href="../module/">Modules</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Context(["Context"]) --&gt; Entity
+    Context --&gt; Adaptor
+    Context --&gt; Projector
+    Context --&gt; Repository
+    Context --&gt; Saga
+    Context --&gt; Streamlet
+    Context --&gt; Connector
+    Context -.-&gt;|application intention| Group
+    Context --&gt; PC["Processor contents"]</code></pre>
 <ul>
-<li><a href="../adaptor/">Adaptors</a></li>
-<li><a href="../connector/">Connectors</a></li>
-<li><a href="../constant/">Constants</a></li>
-<li><a href="../copyright/">Copyrights</a></li>
-<li><a href="../entity/">Entities</a></li>
-<li><a href="../function/">Functions</a></li>
-<li><a href="../group/">Groups</a> — only in an <code>application</code> context</li>
-<li><a href="../handler/">Handlers</a></li>
-<li><a href="../include/">Includes</a></li>
-<li><a href="../inlet/">Inlets</a> and <a href="../outlet/">Outlets</a></li>
-<li><a href="../invariant/">Invariants</a></li>
-<li><a href="../processor/">Processors</a></li>
-<li><a href="../projector/">Projectors</a></li>
-<li><a href="../repository/">Repositories</a></li>
-<li><a href="../saga/">Sagas</a></li>
-<li><a href="../type/">Types</a></li>
-<li><a href="../version/">Versions</a></li>
+<li><a href="../entity/">Entity</a>, <a href="../adaptor/">Adaptor</a>, <a href="../projector/">Projector</a>, <a href="../repository/">Repository</a>, <a href="../saga/">Saga</a>, <a href="../streamlet/">Streamlet</a>, <a href="../connector/">Connector</a></li>
+<li><a href="../group/">Group</a> — only in a context with the <code>application</code> <a href="./#intention">intention</a></li>
+<li>Everything a <a href="../processor/">processor</a> may contain: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="../streamlet/">Streamlet</a>, nested <a href="../processor/">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
+<li><a href="../include/">Include</a> and <code>import</code> directives</li>
 </ul>
 
 

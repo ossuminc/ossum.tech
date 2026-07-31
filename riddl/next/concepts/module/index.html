@@ -5582,8 +5582,16 @@ that cannot follow includes.</p>
 <li>Another Module</li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
-<p>Any top-level definition, plus <a href="../version/">versions</a>,
-<a href="../copyright/">copyrights</a>, <code>include</code> and <code>import</code>.</p>
+<pre class="mermaid"><code>flowchart TD
+    Module(["Module"]) --&gt; Domain
+    Module --&gt; Context
+    Module --&gt; Others["any other top-level definition"]
+    Module --&gt;|nested| Module</code></pre>
+<ul>
+<li><em>Any</em> top-level definition, flat and unordered: <a href="../domain/">Domain</a>, <a href="../context/">Context</a>, <a href="../entity/">Entity</a>, <a href="../adaptor/">Adaptor</a>, <a href="../projector/">Projector</a>, <a href="../repository/">Repository</a>, <a href="../saga/">Saga</a>, <a href="../streamlet/">Streamlet</a>, <a href="../epic/">Epic</a>, <a href="../function/">Function</a>, <a href="../type/">Type</a>, <a href="../user/">User</a>, <a href="../author/">Author</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../connector/">Connector</a>, Relationship</li>
+<li>Nested <a href="./">Modules</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a></li>
+<li><a href="../include/">Include</a> and <code>import</code> directives</li>
+</ul>
 
 
 

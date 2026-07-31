@@ -5647,13 +5647,17 @@ by AsyncAPI generation.</p>
 <li>Any other processor body</li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Processor(["Processor"]) --&gt; PC["Processor contents"]
+    PC --&gt; Handler
+    PC --&gt; Function
+    PC --&gt;|nested| Processor
+    PC --&gt; Connector
+    PC --&gt; Ports["Inlet · Outlet · Relationship"]
+    PC --&gt; Leaves["Type · Constant · Invariant&lt;br/&gt;Version · Copyright · Comment"]</code></pre>
 <ul>
-<li><a href="../inlet/">Inlets</a></li>
-<li><a href="../outlet/">Outlets</a></li>
-<li><a href="../handler/">Handlers</a></li>
-<li><a href="../function/">Functions</a>, <a href="../type/">Types</a>, <a href="../constant/">Constants</a>,
-  <a href="../invariant/">Invariants</a></li>
-<li><a href="../version/">Versions</a> and <a href="../copyright/">Copyrights</a></li>
+<li>Everything in the shared processor bundle: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="../streamlet/">Streamlet</a>, nested <a href="./">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
+<li><a href="../include/">Include</a></li>
 </ul>
 
 

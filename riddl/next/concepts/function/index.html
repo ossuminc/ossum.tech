@@ -5457,17 +5457,16 @@ a pure function's result would otherwise be discarded:</p>
 <li><a href="../module/">Modules</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Function(["Function"]) --&gt; Statement
+    Function --&gt;|nested| Function
+    Function --&gt; Defs["Type · Comment · Include"]</code></pre>
 <ul>
-<li><a href="../field/">Fields</a></li>
-<li><a href="../statement/">Statements</a></li>
-<li><a href="./">Functions</a> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.82 15.42-2.5 4.33c-.49.86-1.4 1.31-2.32 1.25h-2v2l-2.5-4.5L15 14v2h2.82l-2.22-3.85 4.33-2.5 1.8 3.12c.52.77.59 1.8.09 2.65M9.21 3.06h5c.98 0 1.83.57 2.24 1.39l1 1.74 1.73-1-2.64 4.41-5.15.09 1.73-1-1.41-2.45-2.21 3.85-4.34-2.5 1.8-3.12c.41-.83 1.26-1.41 2.25-1.41m-4.16 16.7-2.5-4.33c-.49-.85-.42-1.87.09-2.64l1-1.73-1.73-1 5.14.08 2.65 4.42-1.73-1L6.56 16H11v5H7.4a2.51 2.51 0 0 1-2.35-1.24"/></svg></span></li>
+<li><a href="../statement/">Statement</a> — the pseudocode body</li>
+<li><a href="./">Function</a> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.82 15.42-2.5 4.33c-.49.86-1.4 1.31-2.32 1.25h-2v2l-2.5-4.5L15 14v2h2.82l-2.22-3.85 4.33-2.5 1.8 3.12c.52.77.59 1.8.09 2.65M9.21 3.06h5c.98 0 1.83.57 2.24 1.39l1 1.74 1.73-1-2.64 4.41-5.15.09 1.73-1-1.41-2.45-2.21 3.85-4.34-2.5 1.8-3.12c.41-.83 1.26-1.41 2.25-1.41m-4.16 16.7-2.5-4.33c-.49-.85-.42-1.87.09-2.64l1-1.73-1.73-1 5.14.08 2.65 4.42-1.73-1L6.56 16H11v5H7.4a2.51 2.51 0 0 1-2.35-1.24"/></svg></span> — nested helper functions</li>
+<li><a href="../type/">Type</a>, <a href="../comment/">Comment</a>, <a href="../include/">Include</a></li>
+<li>Its input and output are declared in the signature, not contained</li>
 </ul>
-<div class="admonition info">
-<p class="admonition-title">A Function is not a Processor</p>
-<p>A Function extends the <a href="../vital/">vital definition</a> base rather than
-<a href="../processor/">Processor</a>, so it bears no <a href="../inlet/">ports</a>, no
-<a href="../version/">version</a> and no <a href="../copyright/">copyright</a>.</p>
-</div>
 
 
 

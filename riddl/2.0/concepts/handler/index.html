@@ -5658,9 +5658,13 @@ record is the new state's data.</p>
 <li><a href="../state/">State</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Handler(["Handler"]) --&gt; OnClause["On Clause"]
+    Handler --&gt; Comment
+    OnClause --&gt; Statement</code></pre>
 <ul>
-<li><a href="../onclause/">On Clauses</a> - a specification of how to 
-  handle an event</li>
+<li><a href="../onclause/">On Clause</a> — one per kind of message the handler reacts to</li>
+<li><a href="../comment/">Comment</a></li>
 </ul>
 
 

@@ -5665,8 +5665,14 @@ translatability prediction above is anticipating.</p>
 <li><a href="../epic/">Epics</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Case(["Use Case"]) --&gt; Interaction
+    Case --&gt; Comment
+    Interaction --&gt; Nested["parallel · optional&lt;br/&gt;sequence · step"]</code></pre>
 <ul>
-<li><a href="../interaction/">Interactions</a> — the individual steps in the use case</li>
+<li><a href="../interaction/">Interaction</a> — the steps, which may nest as <code>parallel</code>, <code>optional</code> or <code>sequence</code> groupings</li>
+<li><a href="../comment/">Comment</a></li>
+<li>Its user story is required and is part of the case's declaration</li>
 </ul>
 
 
