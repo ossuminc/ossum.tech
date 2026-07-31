@@ -14,6 +14,7 @@ readers.
     <!-- riddl: in-handler -->        wrap deep enough to be inside an on-clause
     <!-- riddl: in-clauses -->        wrap in a handler (for `on ...` clause fragments)
     <!-- riddl: in-usecase -->        wrap in an epic + use case (for interaction steps)
+    <!-- riddl: in-app-context --> wrap in an `application` context (for groups)
     <!-- riddl: in-application -->    as in-handler, but an `application` context (for `put`)
     <!-- riddl: in-function -->       wrap in a function body (for `return`)
     <!-- riddl: in-record -->         wrap in a record (for a bare field declaration)
@@ -132,6 +133,17 @@ def wrap(kind: str, body: str, prelude: str) -> str:
             "      requires FnInput returns FnInput\n"
             + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
+        )
+    if kind == "in-app-context":
+        # Groups, inputs and outputs are context-level definitions, and RIDDL
+        # 2.0 only allows them in a context with the `application` intention.
+        # in-application is NOT the same thing: it wraps in an on-clause, so a
+        # group lands where only statements are legal.
+        return (
+            "domain Example is {\n" + AUTHOR +
+            "  user Shopper is \"a customer using the store\"\n"
+            "  application context Example is {\n" + pre + "\n"
+            + ind(body, 4) + "\n  }\n}\n"
         )
     if kind == "in-application":
         # `put ... to output` is legal only in an application/context handler.
@@ -282,7 +294,7 @@ def main() -> int:
                 # measure how many fences are genuinely wrong on pages that
                 # do not yet carry directives.
                 ok, detail = False, ""
-                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record", "in-clauses", "in-usecase"):
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-app-context", "in-application", "in-function", "in-record", "in-clauses", "in-usecase"):
                     ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude))
                     if ok:
                         break
