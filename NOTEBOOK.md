@@ -15,6 +15,8 @@ to the task file and note completion in this notebook.
 
 **Tasks A–F are all closed.** What is still open:
 
+- **TASK G — fold `docs/1.x` into `main` as a directory.** Written up below; the
+  biggest structural win available here.
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
 - The ~50 concept pages still lack per-fence directives. 28 fences fail
@@ -22,9 +24,74 @@ to the task file and note completion in this notebook.
   is a known gap, not a regression.
 - Promoting RIDDL 2.0 to `latest` when it ships final:
   `scripts/promote-2.0-to-latest.md`. Read the two-branches-one-alias landmine
-  before touching it.
+  before touching it. **TASK G would dissolve that landmine entirely** — do them
+  in that order if both are on the table.
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### TASK G — fold `docs/1.x` into `main` as a directory ⬅ **PROPOSED**
+
+**The problem, measured (2026-07-31).** `docs/1.x` has 17 commits since the
+merge base. **Twelve of them are pure replication** — "Carry the header Full
+Search field onto the 1.x line", "Match the Full Search strip colour on the 1.x
+line", "Apply the navigation rework to the 1.x line", "Carry robots.txt
+generation onto docs/1.x", and so on. Only about four are real 1.31 content
+work.
+
+That tax is not theoretical: the clickable-search-row change (TASK E) shipped to
+`main` and silently did **not** reach `/riddl/latest/`, which is 1.31 and is
+where most readers land. It was caught only by checking the deployed site, not
+by any build or link check. Nothing in CI can catch it, because each branch
+builds correctly *on its own terms*.
+
+**Why a branch is not actually required.** mike versions the **output**
+directory in `gh-pages`; it has no opinion about the source and simply takes
+`-F <config>`. The branch exists only because both lines build the same config
+*path*, `sites/riddl/mkdocs.yml`, and one checkout cannot hold two contents at
+one path. A second directory solves that just as well.
+
+**The shape.** Move the 1.x content to `sites/riddl-1x/` on `main`, with its own
+`mkdocs.yml`, and add an entry to `docs-version.yml`:
+
+```yaml
+  - prefix: riddl
+    config: sites/riddl-1x/mkdocs.yml
+    version: "1.31"
+    aliases: [latest]
+```
+
+**What it buys:**
+
+- The "carry onto the 1.x line" class of commit stops existing.
+- `overrides/` and `common/stylesheets/` are already `custom_dir` and shared
+  assets for every site, so chrome changes reach 1.31 automatically. Today's
+  divergence becomes structurally impossible rather than merely noticed.
+- **The two-branches-one-alias landmine disappears.** One branch declaring both
+  entries cannot race itself, and promoting 2.0 becomes a one-file edit instead
+  of an ordered cross-branch sequence.
+
+**Cost:** `main` carries ~5,000 more lines of maintenance-line docs, and a fifth
+entry under `sites/`.
+
+**Genuine divergence, for scope.** 178 files exist on both branches; **89 differ**
+(~5,000 lines). That is the RIDDL documentation itself — 1.31 and 2.0 are
+different languages (`reply` vs `yield`, no `initial state`, and the rest). None
+of that can be shared, and none of it needs to be: it just moves.
+
+**Two things to get right, both already known traps:**
+
+- `sites/riddl-1x/` must validate against the **1.31** compiler, not the 2.0 one
+  on PATH — `/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc`. `docs/1.x` already
+  carries a commit fixing exactly this ("Stop telling this branch to validate
+  with the wrong compiler"), and the RC formula has since taken over the PATH
+  symlink.
+- `scripts/check-cross-site-links.py` keys off tracked `mkdocs.yml` files to
+  decide which sub-sites exist, so it needs to learn about the new one.
+
+**Do not delete `docs/1.x` until the directory build is verified deployed.** It
+is the only copy of the 1.31 content.
 
 ### TASK F — build on sbt 2 / riddl 2.0.0-rc.5 ✅ **DONE 2026-07-31**
 
