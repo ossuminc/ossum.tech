@@ -5801,12 +5801,12 @@ definition's closing curly bracket and is preceded using keywords as
 detailed in the subsections below</p>
 <h3 id="single-literal-string">Single Literal String<a class="headerlink" href="#single-literal-string" title="Permanent link">&para;</a></h3>
 <p>Pretty simple, like this:
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Stuff about engineering&quot;</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">domain</span> <span class="n">SomeDomain</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">explained</span> <span class="kp">as</span> <span class="s2">&quot;Too vague to have a good name&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Stuff about engineering&quot;</span> <span class="p">}</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">domain</span> <span class="n">SomeDomain</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">explained</span> <span class="kp">as</span> <span class="s2">&quot;Too vague to have a good name&quot;</span> <span class="p">}</span>
 </span></code></pre></div></p>
 <h3 id="documentation-block">Documentation Block<a class="headerlink" href="#documentation-block" title="Permanent link">&para;</a></h3>
 <p>Allowing markdown syntax, like this:
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">domain</span> <span class="n">SomeDomain</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">explained</span> <span class="kp">as</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">domain</span> <span class="n">SomeDomain</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">explained</span> <span class="kp">as</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="sd">|## Overview</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="sd">|This domain is rather vague, it has no content.</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  <span class="sd">|## Utility</span>
@@ -5814,28 +5814,33 @@ detailed in the subsections below</p>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="sd">|* It has no content</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  <span class="sd">|* Its name is not useful</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  <span class="sd">|* It is only an example of RIDDL syntax</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span> <span class="p">}</span>
 </span></code></pre></div></p>
 <h3 id="file-reference">File Reference<a class="headerlink" href="#file-reference" title="Permanent link">&para;</a></h3>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">described</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">&quot;engineering.md&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">&quot;engineering.md&quot;</span> <span class="p">}</span>
 </span></code></pre></div>
 <h3 id="url">URL<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
 <p>or
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">described</span> <span class="kp">at</span> <span class="n">https</span><span class="p">:</span><span class="c1">//en.wikipedia.org/wiki/Engineering</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">at</span> <span class="n">https</span><span class="p">:</span><span class="c1">//en.wikipedia.org/wiki/Engineering }</span>
 </span></code></pre></div></p>
 <h2 id="definitions-may-have-brief-descriptions">Definitions May Have Brief Descriptions<a class="headerlink" href="#definitions-may-have-brief-descriptions" title="Permanent link">&para;</a></h2>
 <p>Every definition in RIDDL can have a <code>briefly</code> or <code>brief</code> suffix that in one
 short string describes the definition, such as:
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">briefly</span> <span class="s2">&quot;The discipline of using natural science, mathematics,</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="s2"> and design processes to create or improve systems that solve technical problems, </span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="s2"> or increase efficiency and productivity.&quot;</span> 
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;The discipline of using natural science, mathematics, and design</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="s2"> processes to create or improve systems that solve technical problems, or</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="s2"> increase efficiency and productivity.&quot;</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <p>Brief descriptions should be short and concise, like a dictionary, and useful
 in a glossary of terms. Brief descriptions must precede the other kinds of descriptions,
 like this:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">briefly</span> <span class="s2">&quot;The discipline of using natural science, mathematics,</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="s2"> and design processes to create or improve systems that solve technical problems, </span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="s2"> or increase efficiency and productivity.&quot;</span> <span class="kr">described</span> <span class="kp">at</span> <span class="n">https</span><span class="p">:</span><span class="c1">//en.wikipedia.org/wiki/Engineering </span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;The discipline of using natural science, mathematics, and design</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="s2"> processes to create or improve systems that solve technical problems, or</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="s2"> increase efficiency and productivity.&quot;</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  <span class="kr">described</span> <span class="kp">at</span> <span class="n">https</span><span class="p">:</span><span class="c1">//en.wikipedia.org/wiki/Engineering</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="definitions-and-references">Definitions And References<a class="headerlink" href="#definitions-and-references" title="Permanent link">&para;</a></h3>
 <p>A definition introduces a named instance of some RIDDL concept (such as <code>domain</code>, 
@@ -5919,9 +5924,11 @@ prevents fragments of definitions from being separated across files.</p>
 <p>The following features are planned but not yet available in RIDDL.</p>
 </div>
 <p><strong>Directives</strong> will allow preprocessor-style commands:</p>
+<!-- riddl: skip reason="a proposed future directive; not RIDDL syntax today" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="err">#</span><span class="n">define</span> <span class="n">COMPANY_NAME</span> <span class="o">=</span> <span class="s2">&quot;Acme Corp&quot;</span>
 </span></code></pre></div>
 <p><strong>Substitutions</strong> will allow variable replacement:</p>
+<!-- riddl: skip reason="a proposed future substitution; not RIDDL syntax today" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">author</span> <span class="n">Company</span> <span class="kp">is</span> <span class="p">{</span> <span class="kr">name</span><span class="p">:</span> <span class="err">$</span><span class="n">COMPANY_NAME</span> <span class="p">}</span>
 </span></code></pre></div>
 <p>These features may be added in future versions of RIDDL.</p>
