@@ -17,7 +17,12 @@ weight: 5
   outlet Events is event ItemAdded
   outlet Commands is command ReserveItems
   event ItemAdded is { note is String }
+  event ItemRemoved is { note is String }
   event OrderCancelled is { note is String }
+  command AddItem is { note is String }
+  command RemoveItem is { note is String }
+  query GetCartContents is { note is String }
+  result CartContents is { note is String }
   command ReserveItems is { note is String }
   command ReleaseReservation is { note is String }
   command ProcessPayment is { note is String }
@@ -168,6 +173,10 @@ a single business concept.
 <!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
+  type Money is Currency(USD)
+  type ProductId is UUID
+  type CategoryId is UUID
+
   entity Product is {
     // Commands - requests to change state
     command CreateProduct is {
@@ -198,7 +207,12 @@ context Catalog is {
     }
 
     // State - what the entity remembers
-    record ActiveData is { info is Product }
+    record ActiveData is {
+      id is ProductId,
+      name is String,
+      price is Money,
+      category is CategoryId
+    }
     state Active of record ActiveData is {
       handler ActiveHandler is {
         on command UpdatePrice {
@@ -211,7 +225,6 @@ context Catalog is {
     }
   } with {
     briefly "A product in the catalog"
-  } with {
     option is aggregate
     option is event-sourced
   }
