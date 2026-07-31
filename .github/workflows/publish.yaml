@@ -9,6 +9,21 @@ on:
       - docs/1.x    # RIDDL 1.x maintenance line only
 permissions:
   contents: write
+
+# Both publishing branches commit to the same gh-pages branch, so two runs at
+# once race: whichever pushes second is rejected with "fetch first" and its
+# deploy is lost. That is exactly what happened when main and docs/1.x were
+# pushed seconds apart.
+#
+# A single queue fixes it. cancel-in-progress is deliberately FALSE -- these
+# runs publish; cancelling one would drop a deploy rather than defer it.
+#
+# Do NOT reach for mike's --ignore-remote-status as a workaround. It does not
+# serialise anything; it just overwrites whatever the other run published.
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
