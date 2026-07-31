@@ -283,7 +283,7 @@ Document this decision clearly:
 event MembersAdded is {
   id: OrganizationId,
   addedMembers: MemberId+ // Only newly added members, not full list
-} briefly "Contains only the members that were added in this operation"
+} with { briefly "Contains only the members that were added in this operation" }
 ```
 
 ## Pattern Selection Guide

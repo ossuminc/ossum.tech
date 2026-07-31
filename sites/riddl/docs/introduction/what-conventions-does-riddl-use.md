@@ -100,14 +100,14 @@ detailed in the subsections below
 ### Single Literal String
 Pretty simple, like this:
 ```riddl
-domain Engineering is { ??? } described by "Stuff about engineering"
-domain SomeDomain is { ??? } explained as "Too vague to have a good name"
+domain Engineering is { ??? } with { described by "Stuff about engineering" }
+domain SomeDomain is { ??? } with { explained as "Too vague to have a good name" }
 ```
 
 ### Documentation Block
 Allowing markdown syntax, like this:
 ```riddl
-domain SomeDomain is { ??? } explained as {
+domain SomeDomain is { ??? } with { explained as {
   |## Overview
   |This domain is rather vague, it has no content.
   |## Utility
@@ -115,27 +115,29 @@ domain SomeDomain is { ??? } explained as {
   |* It has no content
   |* Its name is not useful
   |* It is only an example of RIDDL syntax
-}
+} }
 ```
 ### File Reference
 
 ```riddl
-domain Engineering is { ??? } described in file "engineering.md"
+domain Engineering is { ??? } with { described in file "engineering.md" }
 ```
 
 ### URL
 or
 ```riddl
-domain Engineering is { ??? } described at https://en.wikipedia.org/wiki/Engineering
+domain Engineering is { ??? } with { described at https://en.wikipedia.org/wiki/Engineering }
 ```
 
 ## Definitions May Have Brief Descriptions
 Every definition in RIDDL can have a `briefly` or `brief` suffix that in one
 short string describes the definition, such as:
 ```riddl
-domain Engineering is { ??? } briefly "The discipline of using natural science, mathematics,
- and design processes to create or improve systems that solve technical problems, 
- or increase efficiency and productivity." 
+domain Engineering is { ??? } with {
+  briefly "The discipline of using natural science, mathematics, and design
+ processes to create or improve systems that solve technical problems, or
+ increase efficiency and productivity."
+}
 ```
 
 Brief descriptions should be short and concise, like a dictionary, and useful
@@ -143,9 +145,12 @@ in a glossary of terms. Brief descriptions must precede the other kinds of descr
 like this:
 
 ```riddl
-domain Engineering is { ??? } briefly "The discipline of using natural science, mathematics,
- and design processes to create or improve systems that solve technical problems, 
- or increase efficiency and productivity." described at https://en.wikipedia.org/wiki/Engineering 
+domain Engineering is { ??? } with {
+  briefly "The discipline of using natural science, mathematics, and design
+ processes to create or improve systems that solve technical problems, or
+ increase efficiency and productivity."
+  described at https://en.wikipedia.org/wiki/Engineering
+}
 ```
 
 
@@ -252,12 +257,14 @@ domain OnlineRetail is {
 
 **Directives** will allow preprocessor-style commands:
 
+<!-- riddl: skip reason="a proposed future directive; not RIDDL syntax today" -->
 ```riddl
 #define COMPANY_NAME = "Acme Corp"
 ```
 
 **Substitutions** will allow variable replacement:
 
+<!-- riddl: skip reason="a proposed future substitution; not RIDDL syntax today" -->
 ```riddl
 author Company is { name: $COMPANY_NAME }
 ```
