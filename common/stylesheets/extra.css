@@ -235,3 +235,43 @@
 .ossum-fullsearch--in-header .pagefind-ui__result-link {
   color: var(--md-primary-fg-color);
 }
+
+/* --- clickable result rows ----------------------------------------------- */
+
+/* The whole row navigates (delegated in overrides/main.html). Previously only
+   the title was a link, which readers did not discover -- the excerpt beneath
+   it looked like part of the same target and did nothing. The cursor and the
+   hover wash are what make the enlarged target visible; without them the
+   behaviour is there but unadvertised, which is barely better. */
+/* No padding is set here on purpose. Pagefind writes its own row padding as
+   `.pagefind-ui__result.svelte-XXXX.svelte-XXXX` -- it repeats the hash to
+   raise specificity -- and pagefind-ui.css loads from `extrahead`, i.e. AFTER
+   this file. Overriding it would mean a four-class selector carrying a
+   build-specific hash, for a purely cosmetic inset. The hover wash spans the
+   full row either way, which is what actually signals the target. */
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result,
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result-nested {
+  cursor: pointer;
+  border-radius: 0.1rem;
+}
+
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:hover,
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result-nested:hover {
+  background: var(--md-default-fg-color--lightest);
+}
+
+/* Sub-results sit inside their parent result, so hovering one would otherwise
+   light up both rows and make it unclear which would open. `:has` is not
+   universally supported; where it is missing both simply highlight, which is
+   untidy rather than broken. */
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:has(.pagefind-ui__result-nested:hover),
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:has(.pagefind-ui__result-nested:focus-within) {
+  background: transparent;
+}
+
+/* The anchor is still the keyboard-navigable element, so its focus ring has to
+   read as "this row", matching what the mouse target implies. */
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:focus-within,
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result-nested:focus-within {
+  background: var(--md-default-fg-color--lightest);
+}
