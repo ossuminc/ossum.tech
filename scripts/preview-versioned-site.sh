@@ -145,6 +145,9 @@ cp "$REPO/scripts/gh-pages-404.html" "$SERVE/404.html"
 # preview exercises the real thing rather than an approximation.
 "$REPO/scripts/build-search-index.sh" "$SERVE"
 
+# robots.txt, generated from the deployed tree exactly as CI does it.
+"$REPO/scripts/build-robots-txt.sh" "$SERVE"
+
 echo
 for p in riddl riddlg synapify; do
   [ -f "$SERVE/$p/versions.json" ] && printf '%-10s %s\n' "$p" "$(cat "$SERVE/$p/versions.json")"

@@ -164,6 +164,24 @@ Material's `toc.permalink` pilcrow is excluded, or every sub-result reads
 because Material has no block for adding a header item and copying
 `partials/header.html` would pin the repo to one Material release.
 
+### Crawlers and duplicate versions
+
+`robots.txt` is **generated** at deploy time by `scripts/build-robots-txt.sh`,
+because its job is to list the sitemaps and the set of them changes with every
+release: each build writes its own `sitemap.xml` inside its own version
+directory, and nothing at the root references them.
+
+It blocks nothing except `/pagefind/`. Version/alias duplication is handled by
+**`rel=canonical`**, not by hiding pages: each build is built once with its own
+version's `site_url`, so the pages inside an alias copy carry a canonical
+pointing at the real version directory — `/riddl/next/…` canonicalises to
+`/riddl/2.0/…`. Alias sitemaps are skipped because a copied sitemap is
+byte-identical to the one already listed.
+
+This relies on `DOCS_SITE_URL` being set per deploy. Without it every build
+would claim `https://ossum.tech/` as its canonical and the site would tell
+crawlers that every version of every page is the same URL.
+
 ### Things that will bite
 
 - **`mike` aliases must be `--alias-type copy`.** The default is `symlink`, and
@@ -568,6 +586,7 @@ There is **no `mkdocs.yml` at the repo root** — every command needs
 | Check **cross-site** links | `python3 scripts/check-cross-site-links.py` |
 | Check the 404 redirect map | `node scripts/test-404-redirects.js` |
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
+| Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
 | Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
