@@ -55,6 +55,11 @@ const cases = [
   ['/riddl/latest/OSS/authoring-riddl/',     '/riddl/latest/guides/authors/authoring-riddl/'],
   ['/riddl/2.0/OSS/vscode-extension/',       '/ide-help/vscode-extension/'],
 
+  // concepts/case was removed as a duplicate of concepts/use-case.
+  ['/riddl/2.0/concepts/case/',              '/riddl/2.0/concepts/use-case/'],
+  ['/riddl/1.31/concepts/case.html',         '/riddl/1.31/concepts/use-case/'],
+  ['/riddl/2.0/concepts/use-case/',          null],   // must not loop
+
   // Coming Soon was DELETED, not moved. It must fall through to the not-found
   // message: mapping it to itself would make replace() reload forever.
   ['/coming-soon/',                          null],

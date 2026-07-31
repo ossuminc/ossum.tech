@@ -41,14 +41,24 @@ the ones whose "Contains" describes syntax rather than definitions
 too: the grammar has `inlet = "inlet" identifier is type_ref`, so a type is
 **referenced**, not contained, and a diagram would assert something false.
 
-**Two content problems found, NOT fixed — they need an editorial decision:**
+**Both content problems resolved (2026-07-31, decided with Reid):**
 
-- **`case.md` duplicates `use-case.md`.** Both document the same `case`
-  construct, and `case.md` says it contains Statements where the grammar says
-  `use_case` → `interactions`. One of them should go.
-- **`element.md`** claims to contain Group and Handlers, but there is no
-  `element` production in the grammar at all. The UI concepts are group, input
-  and output.
+- **`case.md` deleted**, `use-case.md` is the keeper. It was not merely a
+  duplicate: its step table documented retired 1.x keywords (`publish`,
+  `subscribe`, `arbitrary`, `provide`, `present`), none of which exist in the
+  2.0 grammar. Old URLs redirect to `use-case`.
+- **`element.md` kept** — "element" is an umbrella term for Group, Input and
+  Output, not a grammar production, so the page is legitimate. Its `## Contains`
+  now says so instead of claiming it holds Handlers. Its group-alias list was
+  also wrong: it listed `row`, `stack`, `panel` and `form`, none of which are
+  group aliases (`form` is an *input* alias).
+
+**Still questionable on `element.md`, not changed:** its "Element Types" table
+(Give / Select / View / Activate) and its "Activate" section do not match the
+grammar's `input_aliases`, `output_aliases`, `acquisition_aliases` or
+`presentation_aliases`. There is no `activate` definition; `activates` is one
+of fifteen acquisition verbs. Left alone as a content rewrite rather than a
+containment fix.
 
 ---
 

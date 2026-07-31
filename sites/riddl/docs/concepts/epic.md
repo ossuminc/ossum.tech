@@ -24,7 +24,7 @@ which have these three ideas:
 
 A RIDDL Epic also provides a set of use cases that relate the story to
 other RIDDL components through the steps taken for each
-[case](case.md). Each case specifies a set of
+[case](use-case.md). Each case specifies a set of
 `interactions` that define and label the interactions between other RIDDL
 definitions such as
 [elements](element.md),

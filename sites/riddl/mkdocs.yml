@@ -109,7 +109,6 @@ nav:
     - Group: concepts/group.md
     - Input: concepts/input.md
     - Output: concepts/output.md
-    - Case: concepts/case.md
     - Conditional: concepts/conditional.md
     - Statement: concepts/statement.md
     - Include: concepts/include.md

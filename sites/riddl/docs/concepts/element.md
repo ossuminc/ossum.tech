@@ -24,8 +24,8 @@ in traditional user interfaces. Groups can contain other elements including
 nested groups, enabling hierarchical organization of the user interface.
 
 Groups have many aliases in RIDDL to accommodate different UI paradigms:
-`group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`, `row`,
-`stack`, `panel`, `form`, and `section`.
+`group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
+`window`, `section`, `tab`, `flow` and `block`.
 
 | UI Element | RIDDL    | Description                                  |
 |------------|----------|----------------------------------------------|
@@ -46,6 +46,23 @@ different group of elements, enabling navigation within the application.
 * [Group](group.md)
 
 ## Contains
-* [Group](group.md) :material-recycle:
-* [Handlers](handler.md)
+
+*Element* is an umbrella term rather than a RIDDL keyword: it names the three
+definitions that make up a user interface. Only [Group](group.md) contains
+anything.
+
+```mermaid
+flowchart TD
+    Element(["Element (umbrella term)"]) --> Group
+    Element --> Input
+    Element --> Output
+    Group -->|nested| Group
+    Group --> Input
+    Group --> Output
+```
+
+* [Group](group.md) — the only one that contains other elements: nested groups,
+  [Inputs](input.md) and [Outputs](output.md)
+* [Input](input.md) and [Output](output.md) — each **references** a
+  [type](type.md) rather than containing one
 
