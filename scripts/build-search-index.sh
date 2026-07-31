@@ -45,15 +45,38 @@ echo "==> Indexing $ROOT"
 
 # A Pagefind run over a tree where nothing matched still exits 0 and writes an
 # empty index, which looks exactly like success and fails silently in the
-# browser. Assert every source actually contributed.
-echo "==> Verifying the index spans all four sources"
+# browser. Assert that what IS deployed actually contributed.
+#
+# A product is judged present by its versions.json, not by a hard-coded list.
+# Products deploy from different branches, so during a migration -- or any
+# first deploy of a new product -- whichever branch runs first legitimately
+# sees the others as absent. Failing on that would make the first deploy of the
+# split impossible. A product that has been deployed but whose default alias
+# has no HTML is a real fault and still fails.
+echo "==> Verifying the index"
 missing=0
-for want in riddl/latest riddlg/latest synapify/latest; do
-  if ! find "$ROOT/$want" -name '*.html' -print -quit 2>/dev/null | grep -q .; then
-    echo "  MISSING SOURCE: $want has no HTML -- was it deployed?" >&2
+found=0
+for versions in "$ROOT"/*/versions.json; do
+  [ -e "$versions" ] || continue
+  prefix="$(basename "$(dirname "$versions")")"
+  if find "$ROOT/$prefix/latest" -name '*.html' -print -quit 2>/dev/null | grep -q .; then
+    echo "  ok: $prefix/latest"
+    found=$((found + 1))
+  else
+    echo "  BROKEN: $prefix is deployed but $prefix/latest has no HTML" >&2
     missing=1
   fi
 done
+
+for expected in riddl riddlg synapify; do
+  [ -f "$ROOT/$expected/versions.json" ] || \
+    echo "  note: $expected not deployed yet -- expected only mid-migration" >&2
+done
+
+if [ "$found" -eq 0 ]; then
+  echo "  no product contributed to the index at all" >&2
+  missing=1
+fi
 if [ ! -f "$ROOT/pagefind/pagefind.js" ]; then
   echo "  pagefind.js was not produced" >&2
   missing=1
