@@ -4,19 +4,22 @@ Run this when RIDDL **2.0 final** ships. Until then, `latest` points at 1.31 —
 which is correct, because `latest` must name the newest *released* version and
 2.0 has been a release candidate.
 
-Current state (as of the 2026-07-30 migration):
+Current state (as of the 2026-07-30 per-product split):
 
 ```
-2.0  [next]      published from main
-1.31 [latest]    published from docs/1.x
+riddl/2.0  [next]      published from main
+riddl/1.31 [latest]    published from docs/1.x
 ```
 
 Target state:
 
 ```
-2.0  [latest]    published from main
-1.31             published from docs/1.x, no alias
+riddl/2.0  [latest]    published from main
+riddl/1.31             published from docs/1.x, no alias
 ```
+
+Only the **riddl** prefix is involved. riddlg and Synapify have their own
+version axes and their own `latest`; nothing here touches them.
 
 ---
 
@@ -50,8 +53,11 @@ git checkout docs/1.x
 Edit `docs-version.yml` to publish 1.31 with **no** alias:
 
 ```yaml
-version: "1.31"
-aliases: []
+sites:
+  - prefix: riddl
+    config: sites/riddl/mkdocs.yml
+    version: "1.31"
+    aliases: []
 ```
 
 ```bash
@@ -69,12 +75,15 @@ delete the alias.
 git checkout main
 ```
 
-Edit `docs-version.yml`:
+Edit `docs-version.yml` — change **only** the `riddl` entry, leaving the
+riddlg and synapify entries alone:
 
 ```yaml
-version: "2.0"
-aliases:
-  - latest
+  - prefix: riddl
+    config: sites/riddl/mkdocs.yml
+    version: "2.0"
+    aliases:
+      - latest
 ```
 
 ```bash
@@ -92,31 +101,35 @@ will still be sitting in the version selector.
 ```bash
 git fetch origin
 git branch -f gh-pages "$(git rev-parse origin/gh-pages)"   # mike refuses if stale
-mike delete --push next
+# --deploy-prefix picks the right versions.json; -F is needed too, because
+# mike reads mkdocs.yml from the working directory to resolve the branch and
+# there is no config at the repo root any more.
+mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next
 ```
 
 ### 4. Reword the outdated banner on main
 
-`overrides/main.html` on `main` currently reads *"This is a preview of the
-RIDDL 2.0 documentation. RIDDL 2.0 has not been released yet."*
+`sites/riddl/mkdocs.yml` on `main` currently declares *"This is a preview of
+the RIDDL 2.0 documentation. RIDDL 2.0 has not been released yet."*
 
 Material shows that banner only when the build is **not** `latest`, so it
 vanishes on its own the moment 2.0 is promoted — but it is baked into the
 build, so it will reappear, wrong, the day 2.1 takes `latest`. Fix it now
 while you are here:
 
-```jinja
-{% block outdated %}
-  You are reading documentation for an older release of RIDDL.
-  <a href="{{ '../' ~ base_url }}">
-    <strong>Go to the latest version.</strong>
-  </a>
-{% endblock %}
+```yaml
+extra:
+  outdated_banner: >-
+    You are reading documentation for an older release of RIDDL.
 ```
+
+It belongs in the site's own config, **not** in `overrides/main.html`: that
+directory is `custom_dir` for every sub-site, so a message hard-coded there
+appears on Synapify and riddlg too.
 
 ### 5. Update the release-candidate install section
 
-`docs/riddl/tools/riddlc/installation.md` says *"RIDDL 2.0 is being released
+`sites/riddl/docs/tools/riddlc/installation.md` says *"RIDDL 2.0 is being released
 through a series of release candidates."* Keep the section — there will be
 2.1 candidates — but reword the opening so it is not specific to 2.0, and
 check that the "Once RIDDL 2.0 ships as a final release…" paragraph still
@@ -127,15 +140,19 @@ reads correctly.
 ## Verify
 
 ```bash
-curl -sS https://ossum.tech/versions.json                       # 2.0 [latest], 1.31 bare
-curl -sS https://ossum.tech/ | grep -o 'replace' -A2            # root -> latest/
-curl -sSo /dev/null -w '%{http_code}\n' https://ossum.tech/latest/riddl/quickstart.html
-curl -sSo /dev/null -w '%{http_code}\n' https://ossum.tech/next/riddl/quickstart.html   # expect 404
+curl -sS https://ossum.tech/riddl/versions.json                  # 2.0 [latest], 1.31 bare
+curl -sS https://ossum.tech/riddl/ | grep -o 'replace' -A2       # prefix root -> latest/
+curl -sSo /dev/null -w '%{http_code}\n' https://ossum.tech/riddl/latest/quickstart/
+curl -sSo /dev/null -w '%{http_code}\n' https://ossum.tech/riddl/next/quickstart/   # expect 404
+
+# The other products must be untouched by this.
+curl -sS https://ossum.tech/riddlg/versions.json                 # unchanged
+curl -sS https://ossum.tech/synapify/versions.json               # unchanged
 ```
 
-Then in a browser, confirm the selector lists `2.0 latest` and `1.31`, that
-`/latest/` serves 2.0 content (`yield`, `initial state`), and that the 1.31
-pages show the "older release" banner.
+Then in a browser, confirm the RIDDL selector lists `2.0 latest` and `1.31`,
+that `/riddl/latest/` serves 2.0 content (`yield`, `initial state`), and that
+the 1.31 pages show the "older release" banner.
 
 GitHub Pages rebuilds `gh-pages` in roughly 30 seconds; there is no long wait.
 
@@ -165,5 +182,10 @@ The same procedure generalises. When 2.1 ships:
 3. Whichever branch publishes the newest release owns `latest`, and **only**
    that branch may declare it.
 
-Related: `scripts/migrate-gh-pages-to-mike.md` (the one-time restructure,
-already done) and the Documentation Versioning section of `CLAUDE.md`.
+4. Aliases belong to ONE prefix. `riddl/latest` and `riddlg/latest` are
+   different aliases in different `versions.json` files and never interact.
+
+Related: `scripts/migrate-to-per-product-versioning.md` (the current layout)
+and the Documentation Versioning section of `CLAUDE.md`.
+`scripts/migrate-gh-pages-to-mike.md` describes the earlier flat-to-versioned
+move and is kept only for the record.

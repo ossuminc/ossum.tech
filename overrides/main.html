@@ -2,15 +2,21 @@
 
 {#
   Shown by Material only when this build is NOT the version aliased `latest`.
-  Each publishing branch words it for its own situation, because each is a
-  separate build: this branch documents RIDDL 2.0, which is unreleased, so the
-  banner announces a preview. The docs/1.x branch says the opposite -- that a
-  newer release exists. When 2.0 ships and becomes `latest`, this stops showing
-  on its own.
+
+  The wording comes from `extra.outdated_banner` in each site's mkdocs.yml,
+  NOT from this file. This directory is `custom_dir` for all four sub-sites, so
+  a message hard-coded here appears on every one of them -- which is how the
+  Synapify docs briefly announced themselves as a preview of RIDDL 2.0.
+
+  The link target is deliberately `'../' ~ base_url`. base_url resolves to the
+  version root (e.g. /riddl/2.0/), so one level above it is the product prefix
+  root (/riddl/), whose index.html mike points at that product's default alias.
+  This holds for both index and deep pages, and survived the change to
+  directory-style URLs -- verified by reading the rendered href on both.
 #}
 {% block outdated %}
-  This is a preview of the RIDDL 2.0 documentation. RIDDL 2.0 has not been
-  released yet.
+  {{ config.extra.outdated_banner
+     | default("You are reading documentation for an older release.") }}
   <a href="{{ '../' ~ base_url }}">
     <strong>Go to the current release.</strong>
   </a>
@@ -20,4 +26,42 @@
   <link rel="icon" sizes="192x192" href="{{ 'assets/images/favicon-192.jpg' | url }}" type="image/jpeg"/>
   <link rel="shortcut icon" href="{{ 'assets/images/favicon.jpg' | url }}" type="image/jpeg"/>
   <link rel="apple-touch-icon" href="{{ 'assets/images/apple-touch-icon.jpg' | url }}" type="image/jpeg"/>
+
+  {#
+    "Search all docs" link in the header, on every sub-site.
+
+    Each site's own search box covers only that site, because Material builds
+    one search index per project and the docs are four projects. This points at
+    the Pagefind index, which is built over the deployed HTML and spans them
+    all -- so a reader in the RIDDL docs looking for Synapify has somewhere to
+    go instead of an empty result list.
+
+    Injected rather than templated because Material offers no block for adding
+    a header item, and copying partials/header.html would pin this repo to one
+    Material release. If Material renames the class, the link simply does not
+    appear -- nothing breaks.
+
+    The href is root-relative so it is identical in production and in
+    scripts/preview-versioned-site.sh. It is skipped on the search page itself.
+  #}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var inner = document.querySelector(".md-header__inner");
+      if (!inner || window.location.pathname.replace(/\/+$/, "") === "/find") return;
+      var a = document.createElement("a");
+      a.href = "/find/";
+      a.className = "md-header__button md-icon";
+      a.title = "Search all documentation";
+      a.setAttribute("aria-label", "Search all documentation");
+      a.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
+        '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2c1.2 0 2.3 1.5 2.9 3.7' +
+        'A18 18 0 0 0 12 8c-1 0-2 .1-2.9.3C9.7 5.5 10.8 4 12 4M6.6 6.2A15 15 0 0 0 7.3 ' +
+        '8.6a15 15 0 0 0-2.4.7 8 8 0 0 1 1.7-3.1M12 20c-1.2 0-2.3-1.5-2.9-3.7 1 .2 1.9.3 ' +
+        '2.9.3s1.9-.1 2.9-.3C14.3 18.5 13.2 20 12 20m0-5.4c-1.1 0-2.2-.1-3.2-.4a15 15 0 0 ' +
+        '1 0-4.4c1 .3 2.1.4 3.2.4s2.2-.1 3.2-.4a15 15 0 0 1 0 4.4c-1 .3-2.1.4-3.2.4Z"/>' +
+        "</svg>";
+      inner.appendChild(a);
+    });
+  </script>
 {% endblock %}

@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <!--
-  Root 404 handler for the versioned ossum.tech site.
+  Root 404 handler for ossum.tech.
 
-  Before versioning, every page lived at an unversioned path such as
-  /riddl/concepts/entity.html. After the move to `mike` those pages live under
-  a version prefix (/latest/riddl/concepts/entity.html), so every inbound link
-  and search result pointing at the old shape would otherwise 404. This file
-  rewrites them to the default version instead.
+  The site has had three URL shapes. This file forwards the first two to the
+  third so old links and search results keep working:
+
+    1. pre-versioning     /riddl/concepts/entity.html
+    2. site-wide versions /latest/riddl/concepts/entity.html
+    3. per-product (now)  /riddl/latest/concepts/entity/
+
+  Shape 3 moved the product into the FIRST path segment and the version into
+  the second, dropped the .html suffix (the `offline` plugin, which forced
+  use_directory_urls: false, has been removed), and split the single site into
+  an unversioned shell plus one versioned sub-site per product.
 
   It lives at the ROOT of the gh-pages branch. mike manages only the version
-  directories, versions.json, and the root index.html, so a file placed here
-  survives every subsequent deploy. It is NOT built by mkdocs -- copy it into
-  place as part of the gh-pages migration (see migrate-gh-pages-to-mike.md).
+  directories under each prefix and their versions.json; the shell deploy
+  copies this file in last, after the shell build has emitted its own 404.html.
 
-  The redirect is whitelist-driven: only a first path segment that was a
-  top-level section of the old flat site is rewritten. Anything else -- an
-  unknown path, or a genuine 404 inside a version -- falls through to the
-  message below, so there is no way to construct a redirect loop.
+  The rewrite is whitelist-driven: only a first path segment that was a
+  top-level section of an older site is rewritten. Anything else -- including a
+  genuine 404 inside a current sub-site -- falls through to the message below.
 -->
 <html lang="en">
 <head>
@@ -38,31 +42,75 @@
   </style>
   <script>
     (function () {
-      // Top-level sections of the pre-versioning site. A path starting with
-      // one of these is a legacy link and gets the default version prefix.
-      var LEGACY_SECTIONS = [
-        "riddl", "synapify", "MCP", "OSS", "about", "coming-soon",
-        "assets", "stylesheets", "javascripts", "search"
-      ];
-      var DEFAULT_VERSION = "latest";
+      var PREFIXES = ["riddl", "riddlg", "synapify"];
+      var VERSION = /^(latest|next|\d+(\.\d+)*)$/;
 
       var path = window.location.pathname.replace(/^\/+/, "");
-      var first = path.split("/")[0];
+      var segs = path.split("/").filter(Boolean);
+      if (!segs.length) return;
 
-      if (LEGACY_SECTIONS.indexOf(first) !== -1) {
-        window.location.replace(
-          "/" + DEFAULT_VERSION + "/" + path +
-          window.location.search + window.location.hash
-        );
+      // GUARD AGAINST A REWRITE LOOP. "riddl" is both a current prefix and a
+      // former top-level section, so a real 404 inside /riddl/latest/ would
+      // otherwise be rewritten to /riddl/latest/latest/... Leave anything that
+      // already has the current shape alone.
+      if (PREFIXES.indexOf(segs[0]) !== -1 && VERSION.test(segs[1] || "")) return;
+
+      // Shape 2 put the version first. Shape 1 had no version at all.
+      var version = "latest";
+      if (VERSION.test(segs[0])) {
+        version = segs.shift();
       }
+      if (!segs.length) { window.location.replace("/"); return; }
+
+      var rest = segs.join("/");
+      var prefix = null;
+
+      if (rest.indexOf("riddl/tools/riddlg/") === 0) {
+        // riddlg was promoted out of the RIDDL tools section.
+        prefix = "riddlg";
+        rest = rest.slice("riddl/tools/riddlg/".length);
+      } else if (rest === "MCP" || rest.indexOf("MCP/") === 0) {
+        // The MCP client guides travel with riddlg.
+        prefix = "riddlg";
+      } else if (rest === "OSS" || rest.indexOf("OSS/") === 0) {
+        prefix = "riddl";
+      } else if (rest === "riddl" || rest.indexOf("riddl/") === 0) {
+        prefix = "riddl";
+        rest = rest === "riddl" ? "" : rest.slice("riddl/".length);
+      } else if (rest === "synapify" || rest.indexOf("synapify/") === 0) {
+        prefix = "synapify";
+        rest = rest === "synapify" ? "" : rest.slice("synapify/".length);
+      } else if (/^(about|coming-soon|assets|stylesheets|javascripts|search)(\/|$)/.test(rest)) {
+        // The unversioned shell. No prefix and no version segment.
+        prefix = "";
+      } else if (rest === "index.html") {
+        window.location.replace("/");
+        return;
+      } else {
+        return;  // unknown -- show the message rather than guess
+      }
+
+      // A version token from shape 2 was always RIDDL's. It means nothing to
+      // riddlg or Synapify, which have their own numbering, so those go to
+      // their own default rather than to a version that does not exist.
+      if (prefix !== "riddl") version = "latest";
+
+      rest = rest.replace(/index\.html$/, "").replace(/\.html$/, "/");
+      if (rest && !/\/$/.test(rest) && !/\.[a-z0-9]+$/i.test(rest)) rest += "/";
+
+      var target = prefix ? "/" + prefix + "/" + version + "/" + rest : "/" + rest;
+      window.location.replace(
+        target.replace(/\/{2,}/g, "/") +
+        window.location.search + window.location.hash
+      );
     })();
   </script>
 </head>
 <body>
   <h1>Page not found</h1>
   <p>
-    The documentation is now versioned, so pages live under a version prefix
-    such as <code>/latest/</code>.
+    The documentation is versioned per product, so pages live under a product
+    and version prefix such as <code>/riddl/latest/</code>.
   </p>
   <p><a href="/">Go to the documentation home page</a></p>
 </body>
