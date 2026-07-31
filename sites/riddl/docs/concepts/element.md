@@ -38,7 +38,7 @@ The acquisition verbs are interchangeable — pick whichever reads best:
 
 `acquires`, `reads`, `takes`, `accepts`, `admits`, `enters`, `provides`,
 `selects`, `chooses`, `picks`, `initiates`, `submits`, `triggers`,
-`activates`, `starts`
+`activate`, `activates`, `starts`
 
 ### Output
 
@@ -60,11 +60,8 @@ whose acquisition verb conveys the action — most naturally a `button` with
 button Checkout activates type Boolean
 ```
 
-!!! note "`activate` vs `activates`"
-    Only the third-person form `activates` parses today; the bare `activate` is
-    rejected. Adding it is
-    [requested of the compiler](https://github.com/ossuminc/riddl) — until it
-    ships, write `activates`.
+Both `activate` and `activates` are accepted, as are the other acquisition
+verbs — pick whichever reads best at the call site.
 
 ## Occurs In
 * [Group](group.md)

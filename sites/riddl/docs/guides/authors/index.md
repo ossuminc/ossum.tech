@@ -169,9 +169,6 @@ a single business concept.
 ```riddl
 context Catalog is {
   entity Product is {
-    option aggregate
-    option event-sourced
-
     // Commands - requests to change state
     command CreateProduct is {
       name is String,
@@ -214,6 +211,9 @@ context Catalog is {
     }
   } with {
     briefly "A product in the catalog"
+  } with {
+    option is aggregate
+    option is event-sourced
   }
 }
 ```

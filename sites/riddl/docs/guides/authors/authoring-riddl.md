@@ -74,11 +74,10 @@ Always identify who created or maintains a definition:
 ```riddl
 domain Ordering is {
   author Reid is {
-    name: "Reid Spencer"
-    email: "reid@ossuminc.com"
+    name is "Reid Spencer"
+    email is "reid@ossuminc.com"
   }
   // domain contents
-} with {
 }
 ```
 
@@ -88,13 +87,21 @@ For collaborative definitions, list all contributors:
 
 <!-- riddl: in-domain -->
 ```riddl
-context Payments is {
-  // context contents
-} with {
-  by author Reid
+domain Ordering is {
+  author Reid is {
+    name is "Reid Spencer"
+    email is "reid@ossuminc.com"
+  }
   author James is {
-    name: "James Lovett"
-    email: "james@ossuminc.com"
+    name is "James Lovett"
+    email is "james@ossuminc.com"
+  }
+
+  context Payments is {
+    // context contents
+  } with {
+    by author Reid
+    by author James
   }
 }
 ```
@@ -288,9 +295,6 @@ result CartContents is {
 <!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
 ```riddl
 entity Cart is {
-  option aggregate
-  option event-sourced
-
   // Identity
   type CartId is Id(Cart)
 
@@ -319,6 +323,9 @@ entity Cart is {
       // state update logic
     }
   }
+} with {
+  option is aggregate
+  option is event-sourced
 }
 ```
 
@@ -433,9 +440,6 @@ entity Order is {
 <!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
 ```riddl
 entity Account is {
-  option aggregate
-  option event-sourced
-
   type AccountId is Id(Account)
 
   record State is {
@@ -467,6 +471,9 @@ entity Account is {
       set field State.balance to "balance - amount"
     }
   }
+} with {
+  option is aggregate
+  option is event-sourced
 }
 ```
 
