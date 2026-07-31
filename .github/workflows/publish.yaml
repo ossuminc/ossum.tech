@@ -109,8 +109,22 @@ jobs:
           SHELL_CFG=$(python -c "import yaml;c=yaml.safe_load(open('docs-version.yml'));print((c.get('shell') or {}).get('config',''))")
           if [ -n "$SHELL_CFG" ]; then
             DOCS_SITE_URL=https://ossum.tech/ mkdocs build -f "$SHELL_CFG" -d /tmp/shell
-            cp -r /tmp/shell/. /tmp/ghp/
-            # Copied last, deliberately: the shell build emits its own 404.html
+            # rsync --delete, NOT cp. `cp -r` only ever adds, so a page deleted
+            # from the shell stayed on gh-pages forever -- /coming-soon/ and
+            # /find/ both kept serving 200 after being removed from the source.
+            #
+            # The excludes are what make --delete safe at the site root: they
+            # cover everything the shell does NOT own -- the product prefixes
+            # published by mike, the generated search index and robots.txt, the
+            # 404 handler copied in below, and the worktree's own .git file.
+            # Getting this list wrong deletes another product's entire site,
+            # so add a new prefix here whenever one is added to docs-version.yml.
+            rsync -a --delete \
+              --exclude '/riddl/' --exclude '/riddlg/' --exclude '/synapify/' \
+              --exclude '/pagefind/' --exclude '/robots.txt' \
+              --exclude '/404.html' --exclude '/.nojekyll' --exclude '/.git' \
+              /tmp/shell/ /tmp/ghp/
+            # Copied after, deliberately: the shell build emits its own 404.html
             # and this one -- which redirects legacy unversioned links -- wins.
             cp scripts/gh-pages-404.html /tmp/ghp/404.html
           else
