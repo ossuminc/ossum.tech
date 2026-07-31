@@ -27,6 +27,18 @@ do not show. It is injected into the wrapper alongside the fence body.
     record Thing is { a is String }
     -->
 
+A fence that DEFINES a name the prelude also supplies collides with it --
+same context, duplicate content names. Such a fence names what it owns:
+
+    <!-- riddl: in-context no-prelude=Cart -->
+    <!-- riddl: in-context no-prelude=Cart,Order -->
+
+Only those entries are withheld; the rest of the page vocabulary still
+reaches the fence. A bare `no-prelude` withholds everything, which is
+rarely what you want -- a fence that defines `Cart` usually still needs the
+`CartItem` and `Money` around it, and dropping the lot just trades one
+error for a pile of unresolved paths.
+
 Usage:
     scripts/validate-riddl-examples.py <riddlc> <file.md> [file.md ...]
 
@@ -48,6 +60,35 @@ FENCE = re.compile(
 )
 DIRECTIVE = re.compile(r"<!--\s*riddl:\s*(?P<what>[a-z-]+)(?P<rest>[^>]*)-->", re.IGNORECASE)
 PRELUDE = re.compile(r"<!--\s*riddl-prelude\s*\n(?P<body>.*?)-->", re.DOTALL | re.IGNORECASE)
+NO_PRELUDE = re.compile(r"no-prelude(?:=(?P<names>[A-Za-z0-9_,]+))?")
+# The head of a top-level prelude entry: a keyword and the name it defines.
+PRELUDE_ENTRY = re.compile(
+    r"^\s*(?:entity|context|type|record|command|event|query|result|outlet|inlet"
+    r"|function|repository|projector|saga|adaptor|streamlet|source|sink|flow"
+    r"|merge|split|router|connector|constant|invariant|handler)\s+(?P<name>\w+)\b"
+)
+
+
+def strip_from_prelude(prelude: str, names: set[str]) -> str:
+    """Drop the named top-level definitions from a prelude.
+
+    A fence that DEFINES `Cart` must not also receive the prelude's `Cart`,
+    or the two collide as duplicate content names -- but it still needs the
+    rest of the page vocabulary, so dropping the whole prelude trades one
+    error for a pile of unresolved paths. Entries are tracked by brace depth
+    so a multi-line definition is removed whole.
+    """
+    out, depth, dropping = [], 0, False
+    for line in prelude.split("\n"):
+        if depth == 0:
+            m = PRELUDE_ENTRY.match(line)
+            dropping = bool(m and m.group("name") in names)
+        if not dropping:
+            out.append(line)
+        depth += line.count("{") - line.count("}")
+        if depth <= 0:
+            depth, dropping = 0, False
+    return "\n".join(out)
 
 
 def directive_for(text: str, fence_start: int) -> tuple[str, str]:
@@ -218,6 +259,17 @@ def main() -> int:
         for fm in FENCE.finditer(text):
             line = text[: fm.start()].count("\n") + 1
             kind, rest = directive_for(text, fm.start())
+            # A fence that defines what the prelude also supplies must not
+            # receive it, or the two collide as duplicate content names.
+            np = NO_PRELUDE.search(rest)
+            if not np:
+                fence_prelude = prelude
+            elif np.group("names"):
+                fence_prelude = strip_from_prelude(
+                    prelude, set(np.group("names").split(","))
+                )
+            else:
+                fence_prelude = ""
             if auto and kind == "standalone":
                 kind = "auto"
             if kind == "skip":
@@ -231,11 +283,11 @@ def main() -> int:
                 # do not yet carry directives.
                 ok, detail = False, ""
                 for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-application", "in-function", "in-record", "in-clauses", "in-usecase"):
-                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), prelude))
+                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude))
                     if ok:
                         break
             else:
-                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), prelude))
+                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), fence_prelude))
             if not ok:
                 failed += 1
                 print(f"\nFAIL {md}:{line}  (riddl: {kind})")
