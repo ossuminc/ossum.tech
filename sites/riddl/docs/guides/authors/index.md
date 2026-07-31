@@ -205,10 +205,10 @@ context Catalog is {
     state Active of record ActiveData is {
       handler ActiveHandler is {
         on command UpdatePrice {
-          if "price is different from current" then {
+          when "price is different from current" then {
             set field info.price to @UpdatePrice.newPrice
             send event PriceUpdated to outlet Events
-          }
+          } end
         }
       }
     }
@@ -236,12 +236,12 @@ handler CartHandler is {
   }
 
   on command RemoveItem {
-    if "item exists in cart" then {
+    when "item exists in cart" then {
       do "remove the item from the cart"
       send event ItemRemoved to outlet Events
     } else {
       error "Item not found in cart"
-    }
+    } end
   }
 
   on query GetCartContents {
@@ -458,12 +458,12 @@ entity Account is {
         send event Deposited to outlet Events
       }
       on command Withdraw {
-        if "sufficient balance" then {
+        when "sufficient balance" then {
           do "subtract amount from balance"
           send event Withdrawn to outlet Events
         } else {
           error "Insufficient funds"
-        }
+        } end
       }
     }
   }

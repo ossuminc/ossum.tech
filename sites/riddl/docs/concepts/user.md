@@ -21,20 +21,11 @@ Users serve to:
 
 ```riddl
 domain Marketplace is {
-  user Buyer is {
-    |A person who browses products and makes purchases.
-    |May or may not have a registered account.
-  }
+  user Buyer is "A person who browses products and makes purchases. May or may not have a registered account."
 
-  user Seller is {
-    |A merchant who lists products for sale and fulfills orders.
-    |Must have an approved seller account.
-  }
+  user Seller is "A merchant who lists products for sale and fulfills orders. Must have an approved seller account."
 
-  user Administrator is {
-    |Internal staff who manage the platform, resolve disputes,
-    |and maintain system configuration.
-  }
+  user Administrator is "Internal staff who manage the platform, resolve disputes, and maintain system configuration."
 }
 ```
 
@@ -44,13 +35,9 @@ Users are the protagonists of epics and use cases:
 
 ```riddl
 domain ECommerce is {
-  user Customer is {
-    |A registered user who can browse, purchase, and review products.
-  }
+  user Customer is "A registered user who can browse, purchase, and review products."
 
-  user Guest is {
-    |An unregistered visitor who can browse but must register to purchase.
-  }
+  user Guest is "An unregistered visitor who can browse but must register to purchase."
 
   epic CheckoutFlow is {
     user Customer wants to "complete a purchase"
@@ -89,9 +76,7 @@ Users interact *with* the system; entities are *part of* the system.
 ```riddl
 domain Banking is {
   // User: External actor
-  user AccountHolder is {
-    |A customer who owns one or more bank accounts.
-  }
+  user AccountHolder is "A customer who owns one or more bank accounts."
 
   context Accounts is {
     // Entity: Internal system component
@@ -142,13 +127,9 @@ Avoid:
 
 ```riddl
 // System actors are users too
-user PaymentWebhook is {
-  |External payment processor calling back with transaction results.
-}
+user PaymentWebhook is "External payment processor calling back with transaction results."
 
-user NightlyBatchJob is {
-  |Scheduled process that reconciles accounts and generates reports.
-}
+user NightlyBatchJob is "Scheduled process that reconciles accounts and generates reports."
 ```
 
 ## Occurs In

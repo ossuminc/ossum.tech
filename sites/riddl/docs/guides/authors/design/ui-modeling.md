@@ -49,8 +49,10 @@ interaction.
 
 ```riddl
 domain ECommerce is {
+  user Shopper is "A customer browsing and purchasing products"
+
   epic ShoppingCartJourney is {
-    user Shopper is "A customer browsing and purchasing products"
+    user Shopper wants to "shop" so that "they receive the products they need"
 
     case BrowseAndPurchase is {
       user Shopper wants to "browse products and complete a purchase"
@@ -149,6 +151,7 @@ application context StoreFront is {
 
 Navigation occurs when user input causes the UI to change what it presents:
 
+<!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
   command NavigateToCheckout is { cartId: CartId }
@@ -170,11 +173,12 @@ application context StoreFront is {
 Control of the underlying system occurs when the application sends messages
 to system components:
 
+<!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
   handler OrderHandler is {
     on command PlaceOrder {
-      send command CreateOrder to context Orders
+      send command CreateOrder to outlet OrdersOut
     }
   }
 }
@@ -318,6 +322,7 @@ RIDDL recognizes that UX is an art and science of its own. Applications do not
 model the look, feel, or sensory aspects of user interfaces. Instead, they use
 the `shown by` syntax to link to external UX artifacts:
 
+<!-- riddl: in-application -->
 ```riddl
 group CheckoutForm is {
   output OrderSummary presents result OrderDetails
@@ -335,9 +340,9 @@ This separation allows:
 
 ```riddl
 domain ECommerce is {
+  user Shopper is "a customer using the store"
+
   application context StoreFront is {
-    // Define user
-    user Shopper is "a customer using the store"
 
     // Product browsing
     group ProductCatalog is {
@@ -364,7 +369,7 @@ domain ECommerce is {
     // Handlers
     handler ProductHandler is {
       on command SearchProducts {
-        send query FindProducts to context Catalog
+        send query FindProducts to outlet CatalogOut
       }
       on result ProductList {
         show result ProductList on output ProductGrid
@@ -373,7 +378,7 @@ domain ECommerce is {
 
     handler CartHandler is {
       on command RemoveFromCart {
-        send command RemoveItem to context Cart
+        send command RemoveItem to outlet CartOut
       }
     }
 
@@ -382,7 +387,7 @@ domain ECommerce is {
         focus on group CheckoutFlow
       }
       on command ProcessPayment {
-        send command ChargePayment to context Payments
+        send command ChargePayment to outlet PaymentsOut
       }
     }
   }

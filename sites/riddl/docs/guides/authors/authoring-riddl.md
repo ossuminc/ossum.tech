@@ -375,7 +375,7 @@ handler OrderCommands is {
 | `tell` | Send a message to a processor | `tell command X to context Y` |
 | `do` | Describe an action in prose | `do "recompute the totals"` |
 | `error` | Signal error | `error "error message"` |
-| `if/then/else` | Conditional | `if "condition" then { } else { }` |
+| `when/then/else/end` | Conditional | `when "condition" then { } else { } end` |
 | `morph` | Transform state | `morph entity X to state Y` |
 | `become` | Change handler | `become handler NewHandler` |
 | `return` | Return value | `return "result expression"` |
@@ -446,16 +446,16 @@ entity Account is {
 
   handler Commands is {
     on command Deposit {
-      if "amount is positive" then {
+      when "amount is positive" then {
         send event MoneyDeposited to outlet Events
-      }
+      } end
     }
     on command Withdraw {
-      if "balance >= amount" then {
+      when "balance >= amount" then {
         send event MoneyWithdrawn to outlet Events
       } else {
         error "Insufficient funds"
-      }
+      } end
     }
   }
 
