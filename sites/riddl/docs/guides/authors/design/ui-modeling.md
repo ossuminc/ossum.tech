@@ -60,7 +60,7 @@ domain ECommerce is {
 
       // Step 1: Browse products
       step from user Shopper "views product catalog"
-           to application StoreFront "displays products"
+           to context StoreFront "displays products"
 
       // Step 2: Add to cart
       step from user Shopper "selects items"
@@ -157,12 +157,12 @@ application context StoreFront is {
   command NavigateToCheckout is { cartId: CartId }
 
   group Navigation is {
-    input CheckoutButton directs user Shopper with command NavigateToCheckout
+    button CheckoutButton activates command NavigateToCheckout
   }
 
   handler NavigationHandler is {
     on command NavigateToCheckout {
-      focus on group CheckoutFlow
+      do "move the user to the CheckoutFlow group"
     }
   }
 }
@@ -326,7 +326,7 @@ the `shown by` syntax to link to external UX artifacts:
 ```riddl
 group CheckoutForm is {
   output OrderSummary presents result OrderDetails
-    shown by "https://figma.com/checkout-summary-design"
+  shown by { https://figma.com/checkout-summary-design }
 }
 ```
 
@@ -356,7 +356,7 @@ domain ECommerce is {
       output CartContents presents result CartItems
       input RemoveItem acquires command RemoveFromCart
       input UpdateQuantity acquires command UpdateItemQuantity
-      input CheckoutButton directs user Shopper with command StartCheckout
+      button CheckoutButton activates command StartCheckout
     }
 
     // Checkout flow
@@ -372,7 +372,7 @@ domain ECommerce is {
         send query FindProducts to outlet CatalogOut
       }
       on result ProductList {
-        show result ProductList on output ProductGrid
+        put result ProductList to output ProductGrid
       }
     }
 
@@ -384,7 +384,7 @@ domain ECommerce is {
 
     handler CheckoutHandler is {
       on command StartCheckout {
-        focus on group CheckoutFlow
+        do "move the user to the CheckoutFlow group"
       }
       on command ProcessPayment {
         send command ChargePayment to outlet PaymentsOut
