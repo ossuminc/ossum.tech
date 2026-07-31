@@ -10,17 +10,19 @@
       
       
       
-        <link rel="canonical" href="https://ossum.tech/riddl/2.0/OSS/authoring-riddl/">
+        <link rel="canonical" href="https://ossum.tech/riddl/2.0/guides/authors/authoring-riddl/">
       
       
-        <link rel="prev" href="../vscode-extension/">
+        <link rel="prev" href="../">
       
+      
+        <link rel="next" href="../design/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.jpg">
+      <link rel="icon" href="../../../assets/images/favicon.jpg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
@@ -29,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
   
@@ -121,9 +123,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -139,29 +141,40 @@
 
     
     
-  <link rel="icon" sizes="192x192" href="../../assets/images/favicon-192.jpg" type="image/jpeg"/>
-  <link rel="shortcut icon" href="../../assets/images/favicon.jpg" type="image/jpeg"/>
-  <link rel="apple-touch-icon" href="../../assets/images/apple-touch-icon.jpg" type="image/jpeg"/>
+  <link rel="icon" sizes="192x192" href="../../../assets/images/favicon-192.jpg" type="image/jpeg"/>
+  <link rel="shortcut icon" href="../../../assets/images/favicon.jpg" type="image/jpeg"/>
+  <link rel="apple-touch-icon" href="../../../assets/images/apple-touch-icon.jpg" type="image/jpeg"/>
 
   
+  <link rel="stylesheet" href="/pagefind/pagefind-ui.css">
+  <script src="/pagefind/pagefind-ui.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var inner = document.querySelector(".md-header__inner");
-      if (!inner || window.location.pathname.replace(/\/+$/, "") === "/find") return;
-      var a = document.createElement("a");
-      a.href = "/find/";
-      a.className = "md-header__button md-icon";
-      a.title = "Search all documentation";
-      a.setAttribute("aria-label", "Search all documentation");
-      a.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
-        '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2c1.2 0 2.3 1.5 2.9 3.7' +
-        'A18 18 0 0 0 12 8c-1 0-2 .1-2.9.3C9.7 5.5 10.8 4 12 4M6.6 6.2A15 15 0 0 0 7.3 ' +
-        '8.6a15 15 0 0 0-2.4.7 8 8 0 0 1 1.7-3.1M12 20c-1.2 0-2.3-1.5-2.9-3.7 1 .2 1.9.3 ' +
-        '2.9.3s1.9-.1 2.9-.3C14.3 18.5 13.2 20 12 20m0-5.4c-1.1 0-2.2-.1-3.2-.4a15 15 0 0 ' +
-        '1 0-4.4c1 .3 2.1.4 3.2.4s2.2-.1 3.2-.4a15 15 0 0 1 0 4.4c-1 .3-2.1.4-3.2.4Z"/>' +
-        "</svg>";
-      inner.appendChild(a);
+    window.addEventListener("DOMContentLoaded", function () {
+      var bar = document.querySelector(".ossum-fullsearch");
+      var mount = document.getElementById("ossum-fullsearch")
+               || document.getElementById("pagefind-search");
+      if (!mount) return;
+
+      if (typeof PagefindUI === "undefined") {
+        // The index is missing or not built yet. Hide the bar rather than
+        // leave a search field that silently does nothing, and show the
+        // explanatory note on the About page.
+        if (bar) bar.hidden = true;
+        var warn = document.getElementById("pagefind-unavailable");
+        if (warn) warn.hidden = false;
+        return;
+      }
+
+      new PagefindUI({
+        element: "#" + mount.id,
+        showSubResults: true,
+        showImages: false,
+        resetStyles: false,
+      });
+      var input = mount.querySelector("input");
+      if (input && mount.id === "ossum-fullsearch") {
+        input.id = "ossum-fullsearch-input";
+      }
     });
   </script>
 
@@ -199,12 +212,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   This is a preview of the RIDDL 2.0 documentation. RIDDL 2.0 has not been released yet.
-  <a href="../../..">
+  <a href="../../../..">
     <strong>Go to the current release.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -216,10 +229,10 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="RIDDL Documentation" class="md-header__button md-logo" aria-label="RIDDL Documentation" data-md-component="logo">
+    <a href="../../.." title="RIDDL Documentation" class="md-header__button md-logo" aria-label="RIDDL Documentation" data-md-component="logo">
       <!-- Logo -->
 
-<img src="../../assets/images/ossum_logo_and_name-01.png" alt="logo" width="322" height="117" title="Ossum Inc."/>
+<img src="../../../assets/images/ossum_logo_and_name-01.png" alt="logo" width="322" height="117" title="Ossum Inc."/>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -358,7 +371,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -377,7 +390,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../quickstart/" class="md-tabs__link">
+      <a href="../../../quickstart/" class="md-tabs__link">
         
   
   
@@ -396,7 +409,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../migration/1.x-to-2.0/" class="md-tabs__link">
+      <a href="../../../migration/1.x-to-2.0/" class="md-tabs__link">
         
   
   
@@ -417,7 +430,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../tutorials/" class="md-tabs__link">
+        <a href="../../../tutorials/" class="md-tabs__link">
           
   
   
@@ -437,7 +450,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../introduction/" class="md-tabs__link">
+        <a href="../../../introduction/" class="md-tabs__link">
           
   
   
@@ -457,7 +470,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../concepts/" class="md-tabs__link">
+        <a href="../../../concepts/" class="md-tabs__link">
           
   
   
@@ -473,11 +486,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../guides/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
           
   
   
@@ -495,7 +510,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../examples/" class="md-tabs__link">
+      <a href="../../../examples/" class="md-tabs__link">
         
   
   
@@ -514,7 +529,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../playground/" class="md-tabs__link">
+      <a href="../../../playground/" class="md-tabs__link">
         
   
   
@@ -535,7 +550,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../references/" class="md-tabs__link">
+        <a href="../../../references/" class="md-tabs__link">
           
   
   
@@ -555,33 +570,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../tools/" class="md-tabs__link">
+        <a href="../../../tools/" class="md-tabs__link">
           
   
   
   Tools
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-    
-  
-  
-    
-    
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
-          
-  
-  
-  IDE Support
 
         </a>
       </li>
@@ -598,6 +591,23 @@
     
     <div class="md-container" data-md-component="container">
       
+  
+  
+  <div class="ossum-fullsearch" data-pagefind-ignore>
+    <div class="ossum-fullsearch__inner md-grid">
+      <label class="ossum-fullsearch__label" for="ossum-fullsearch-input">
+        Full Search
+      </label>
+      <div id="ossum-fullsearch" class="ossum-fullsearch__ui"></div>
+      <noscript>
+        <span class="ossum-fullsearch__note">
+          Full Search needs JavaScript. The title-bar search still works.
+        </span>
+      </noscript>
+    </div>
+  </div>
+  
+
       
         
       
@@ -617,10 +627,10 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="RIDDL Documentation" class="md-nav__button md-logo" aria-label="RIDDL Documentation" data-md-component="logo">
+    <a href="../../.." title="RIDDL Documentation" class="md-nav__button md-logo" aria-label="RIDDL Documentation" data-md-component="logo">
       <!-- Logo -->
 
-<img src="../../assets/images/ossum_logo_and_name-01.png" alt="logo" width="322" height="117" title="Ossum Inc."/>
+<img src="../../../assets/images/ossum_logo_and_name-01.png" alt="logo" width="322" height="117" title="Ossum Inc."/>
 
     </a>
     RIDDL Documentation
@@ -647,7 +657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -674,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../quickstart/" class="md-nav__link">
+      <a href="../../../quickstart/" class="md-nav__link">
         
   
   
@@ -701,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../migration/1.x-to-2.0/" class="md-nav__link">
+      <a href="../../../migration/1.x-to-2.0/" class="md-nav__link">
         
   
   
@@ -778,7 +788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/" class="md-nav__link">
+      <a href="../../../tutorials/" class="md-nav__link">
         
   
   
@@ -806,7 +816,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/basics/" class="md-nav__link">
+      <a href="../../../tutorials/basics/" class="md-nav__link">
         
   
   
@@ -884,7 +894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/" class="md-nav__link">
         
   
   
@@ -912,7 +922,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/scenario/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/scenario/" class="md-nav__link">
         
   
   
@@ -940,7 +950,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/reactive-bbq/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/reactive-bbq/" class="md-nav__link">
         
   
   
@@ -1018,7 +1028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/" class="md-nav__link">
         
   
   
@@ -1046,7 +1056,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/front-of-house/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/front-of-house/" class="md-nav__link">
         
   
   
@@ -1074,7 +1084,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/kitchen/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/kitchen/" class="md-nav__link">
         
   
   
@@ -1102,7 +1112,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/bar/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/bar/" class="md-nav__link">
         
   
   
@@ -1130,7 +1140,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/online-ordering/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/online-ordering/" class="md-nav__link">
         
   
   
@@ -1158,7 +1168,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/delivery/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/delivery/" class="md-nav__link">
         
   
   
@@ -1186,7 +1196,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/restaurant/loyalty/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/restaurant/loyalty/" class="md-nav__link">
         
   
   
@@ -1272,7 +1282,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/backoffice/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/backoffice/" class="md-nav__link">
         
   
   
@@ -1300,7 +1310,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/backoffice/scheduling/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/backoffice/scheduling/" class="md-nav__link">
         
   
   
@@ -1328,7 +1338,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/backoffice/inventory/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/backoffice/inventory/" class="md-nav__link">
         
   
   
@@ -1356,7 +1366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/backoffice/reporting/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/backoffice/reporting/" class="md-nav__link">
         
   
   
@@ -1442,7 +1452,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/corporate/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/corporate/" class="md-nav__link">
         
   
   
@@ -1470,7 +1480,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/corporate/menu-management/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/corporate/menu-management/" class="md-nav__link">
         
   
   
@@ -1498,7 +1508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/corporate/supply-chain/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/corporate/supply-chain/" class="md-nav__link">
         
   
   
@@ -1526,7 +1536,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/corporate/marketing/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/corporate/marketing/" class="md-nav__link">
         
   
   
@@ -1562,7 +1572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/external-contexts/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/external-contexts/" class="md-nav__link">
         
   
   
@@ -1590,7 +1600,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/patterns/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/patterns/" class="md-nav__link">
         
   
   
@@ -1668,7 +1678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/" class="md-nav__link">
         
   
   
@@ -1696,7 +1706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/ceo/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/ceo/" class="md-nav__link">
         
   
   
@@ -1724,7 +1734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/head-chef/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/head-chef/" class="md-nav__link">
         
   
   
@@ -1752,7 +1762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/host/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/host/" class="md-nav__link">
         
   
   
@@ -1780,7 +1790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/server/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/server/" class="md-nav__link">
         
   
   
@@ -1808,7 +1818,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/bartender/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/bartender/" class="md-nav__link">
         
   
   
@@ -1836,7 +1846,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/chef/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/chef/" class="md-nav__link">
         
   
   
@@ -1864,7 +1874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/cook/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/cook/" class="md-nav__link">
         
   
   
@@ -1892,7 +1902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/delivery-driver/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/delivery-driver/" class="md-nav__link">
         
   
   
@@ -1920,7 +1930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/rbbq/personas/online-customer/" class="md-nav__link">
+      <a href="../../../tutorials/rbbq/personas/online-customer/" class="md-nav__link">
         
   
   
@@ -2021,7 +2031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/" class="md-nav__link">
+      <a href="../../../introduction/" class="md-nav__link">
         
   
   
@@ -2049,7 +2059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/what-is-riddl/" class="md-nav__link">
+      <a href="../../../introduction/what-is-riddl/" class="md-nav__link">
         
   
   
@@ -2077,7 +2087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/why-is-riddl-needed/" class="md-nav__link">
+      <a href="../../../introduction/why-is-riddl-needed/" class="md-nav__link">
         
   
   
@@ -2105,7 +2115,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/what-can-riddl-do/" class="md-nav__link">
+      <a href="../../../introduction/what-can-riddl-do/" class="md-nav__link">
         
   
   
@@ -2133,7 +2143,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/what-is-riddl-based-on/" class="md-nav__link">
+      <a href="../../../introduction/what-is-riddl-based-on/" class="md-nav__link">
         
   
   
@@ -2161,7 +2171,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/what-conventions-does-riddl-use/" class="md-nav__link">
+      <a href="../../../introduction/what-conventions-does-riddl-use/" class="md-nav__link">
         
   
   
@@ -2189,7 +2199,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/who-can-benefit-from-riddl/" class="md-nav__link">
+      <a href="../../../introduction/who-can-benefit-from-riddl/" class="md-nav__link">
         
   
   
@@ -2217,7 +2227,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/who-made-riddl-possible/" class="md-nav__link">
+      <a href="../../../introduction/who-made-riddl-possible/" class="md-nav__link">
         
   
   
@@ -2245,7 +2255,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../introduction/how-can-i-get-help/" class="md-nav__link">
+      <a href="../../../introduction/how-can-i-get-help/" class="md-nav__link">
         
   
   
@@ -2330,7 +2340,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/" class="md-nav__link">
+      <a href="../../../concepts/" class="md-nav__link">
         
   
   
@@ -2358,7 +2368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/root/" class="md-nav__link">
+      <a href="../../../concepts/root/" class="md-nav__link">
         
   
   
@@ -2386,7 +2396,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/module/" class="md-nav__link">
+      <a href="../../../concepts/module/" class="md-nav__link">
         
   
   
@@ -2414,7 +2424,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/domain/" class="md-nav__link">
+      <a href="../../../concepts/domain/" class="md-nav__link">
         
   
   
@@ -2442,7 +2452,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/context/" class="md-nav__link">
+      <a href="../../../concepts/context/" class="md-nav__link">
         
   
   
@@ -2470,7 +2480,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/entity/" class="md-nav__link">
+      <a href="../../../concepts/entity/" class="md-nav__link">
         
   
   
@@ -2498,7 +2508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/repository/" class="md-nav__link">
+      <a href="../../../concepts/repository/" class="md-nav__link">
         
   
   
@@ -2526,7 +2536,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/projector/" class="md-nav__link">
+      <a href="../../../concepts/projector/" class="md-nav__link">
         
   
   
@@ -2554,7 +2564,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/saga/" class="md-nav__link">
+      <a href="../../../concepts/saga/" class="md-nav__link">
         
   
   
@@ -2582,7 +2592,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/sagastep/" class="md-nav__link">
+      <a href="../../../concepts/sagastep/" class="md-nav__link">
         
   
   
@@ -2610,7 +2620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/streamlet/" class="md-nav__link">
+      <a href="../../../concepts/streamlet/" class="md-nav__link">
         
   
   
@@ -2638,7 +2648,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/adaptor/" class="md-nav__link">
+      <a href="../../../concepts/adaptor/" class="md-nav__link">
         
   
   
@@ -2666,7 +2676,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/application/" class="md-nav__link">
+      <a href="../../../concepts/application/" class="md-nav__link">
         
   
   
@@ -2694,7 +2704,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/epic/" class="md-nav__link">
+      <a href="../../../concepts/epic/" class="md-nav__link">
         
   
   
@@ -2722,7 +2732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/use-case/" class="md-nav__link">
+      <a href="../../../concepts/use-case/" class="md-nav__link">
         
   
   
@@ -2750,7 +2760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/user/" class="md-nav__link">
+      <a href="../../../concepts/user/" class="md-nav__link">
         
   
   
@@ -2778,7 +2788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/interaction/" class="md-nav__link">
+      <a href="../../../concepts/interaction/" class="md-nav__link">
         
   
   
@@ -2806,7 +2816,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/handler/" class="md-nav__link">
+      <a href="../../../concepts/handler/" class="md-nav__link">
         
   
   
@@ -2834,7 +2844,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/onclause/" class="md-nav__link">
+      <a href="../../../concepts/onclause/" class="md-nav__link">
         
   
   
@@ -2862,7 +2872,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/function/" class="md-nav__link">
+      <a href="../../../concepts/function/" class="md-nav__link">
         
   
   
@@ -2890,7 +2900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/type/" class="md-nav__link">
+      <a href="../../../concepts/type/" class="md-nav__link">
         
   
   
@@ -2918,7 +2928,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/field/" class="md-nav__link">
+      <a href="../../../concepts/field/" class="md-nav__link">
         
   
   
@@ -2946,7 +2956,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/state/" class="md-nav__link">
+      <a href="../../../concepts/state/" class="md-nav__link">
         
   
   
@@ -2974,7 +2984,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/constant/" class="md-nav__link">
+      <a href="../../../concepts/constant/" class="md-nav__link">
         
   
   
@@ -3002,7 +3012,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/invariant/" class="md-nav__link">
+      <a href="../../../concepts/invariant/" class="md-nav__link">
         
   
   
@@ -3030,7 +3040,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/message/" class="md-nav__link">
+      <a href="../../../concepts/message/" class="md-nav__link">
         
   
   
@@ -3058,7 +3068,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/inlet/" class="md-nav__link">
+      <a href="../../../concepts/inlet/" class="md-nav__link">
         
   
   
@@ -3086,7 +3096,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/outlet/" class="md-nav__link">
+      <a href="../../../concepts/outlet/" class="md-nav__link">
         
   
   
@@ -3114,7 +3124,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/connector/" class="md-nav__link">
+      <a href="../../../concepts/connector/" class="md-nav__link">
         
   
   
@@ -3142,7 +3152,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/standard-module/" class="md-nav__link">
+      <a href="../../../concepts/standard-module/" class="md-nav__link">
         
   
   
@@ -3170,7 +3180,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/group/" class="md-nav__link">
+      <a href="../../../concepts/group/" class="md-nav__link">
         
   
   
@@ -3198,7 +3208,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/input/" class="md-nav__link">
+      <a href="../../../concepts/input/" class="md-nav__link">
         
   
   
@@ -3226,7 +3236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/output/" class="md-nav__link">
+      <a href="../../../concepts/output/" class="md-nav__link">
         
   
   
@@ -3254,7 +3264,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/case/" class="md-nav__link">
+      <a href="../../../concepts/case/" class="md-nav__link">
         
   
   
@@ -3282,7 +3292,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/conditional/" class="md-nav__link">
+      <a href="../../../concepts/conditional/" class="md-nav__link">
         
   
   
@@ -3310,7 +3320,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/statement/" class="md-nav__link">
+      <a href="../../../concepts/statement/" class="md-nav__link">
         
   
   
@@ -3338,7 +3348,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/include/" class="md-nav__link">
+      <a href="../../../concepts/include/" class="md-nav__link">
         
   
   
@@ -3366,7 +3376,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/author/" class="md-nav__link">
+      <a href="../../../concepts/author/" class="md-nav__link">
         
   
   
@@ -3394,7 +3404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/version/" class="md-nav__link">
+      <a href="../../../concepts/version/" class="md-nav__link">
         
   
   
@@ -3422,7 +3432,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/copyright/" class="md-nav__link">
+      <a href="../../../concepts/copyright/" class="md-nav__link">
         
   
   
@@ -3450,7 +3460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/term/" class="md-nav__link">
+      <a href="../../../concepts/term/" class="md-nav__link">
         
   
   
@@ -3478,7 +3488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/comment/" class="md-nav__link">
+      <a href="../../../concepts/comment/" class="md-nav__link">
         
   
   
@@ -3506,7 +3516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/description/" class="md-nav__link">
+      <a href="../../../concepts/description/" class="md-nav__link">
         
   
   
@@ -3534,7 +3544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/metadata/" class="md-nav__link">
+      <a href="../../../concepts/metadata/" class="md-nav__link">
         
   
   
@@ -3562,7 +3572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/option/" class="md-nav__link">
+      <a href="../../../concepts/option/" class="md-nav__link">
         
   
   
@@ -3590,7 +3600,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/element/" class="md-nav__link">
+      <a href="../../../concepts/element/" class="md-nav__link">
         
   
   
@@ -3618,7 +3628,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/definition/" class="md-nav__link">
+      <a href="../../../concepts/definition/" class="md-nav__link">
         
   
   
@@ -3646,7 +3656,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/value/" class="md-nav__link">
+      <a href="../../../concepts/value/" class="md-nav__link">
         
   
   
@@ -3674,7 +3684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/vital/" class="md-nav__link">
+      <a href="../../../concepts/vital/" class="md-nav__link">
         
   
   
@@ -3702,7 +3712,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/processor/" class="md-nav__link">
+      <a href="../../../concepts/processor/" class="md-nav__link">
         
   
   
@@ -3710,1419 +3720,6 @@
     
   
     Processor
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Guides
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Guides
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    For Authors
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    For Authors
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/authors/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Author's Guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_7_2_2" id="__nav_7_2_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Design Guide
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Design Guide
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/authors/design/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Design Guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/authors/design/contexts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Bounded Contexts
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/authors/design/command-event-patterns/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Command-Event Patterns
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/authors/design/ui-modeling/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    UI Modeling
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    For Domain Experts
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    For Domain Experts
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/domain-experts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Domain Expert's Guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/domain-experts/duties/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Duties
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/domain-experts/relating-to-riddl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Relating to RIDDL
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    For Implementors
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    For Implementors
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/implementors/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Index
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/implementors/ways-to-use-riddl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Ways to Use RIDDL
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    For Developers
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    For Developers
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/developers/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Developers Guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/developers/principles/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Design Principles
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/developers/releasing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Releasing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../examples/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Examples
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../playground/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Playground
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
-        
-          
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    References
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    References
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../references/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../references/cheat-sheet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Cheat Sheet
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../references/standard-highlighting/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Standard Highlighting
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../references/language-reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Language Reference
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../references/ebnf-grammar/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    EBNF Grammar
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../licenses/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Third-Party Licenses
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
-        
-          
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Tools
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Tools
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Tools
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_11_2" id="__nav_11_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    riddlc
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_11_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    riddlc
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddlc/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    riddlc - The RIDDL Compiler
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddlc/installation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddlc/command-reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Command Reference
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddlc/configuration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Configuration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddlc/compilation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compilation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddlc/github-actions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    GitHub Actions
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/sbt-riddl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    sbt-riddl
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddl-mcp-server/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    MCP Server
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/riddl-idea-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    IntelliJ Plugin
   
 
     
@@ -5166,17 +3763,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    IDE Support
+    Guides
   
 
     
@@ -5187,12 +3784,92 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_12">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
-    IDE Support
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For Authors
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    For Authors
   
 
           </label>
@@ -5212,63 +3889,7 @@
   <span class="md-ellipsis">
     
   
-    IDE Support
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../intellij-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    IntelliJ IDEA Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vscode-extension/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    VS Code Extension
+    Author's Guide
   
 
     
@@ -5790,6 +4411,1256 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2_3" id="__nav_7_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/contexts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bounded Contexts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/command-event-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command-Event Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/ui-modeling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Modeling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For Domain Experts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    For Domain Experts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../domain-experts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain Expert's Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../domain-experts/duties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Duties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../domain-experts/relating-to-riddl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Relating to RIDDL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For Implementors
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    For Implementors
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../implementors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../implementors/ways-to-use-riddl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ways to Use RIDDL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For Developers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    For Developers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developers Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developers/principles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developers/releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../playground/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playground
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references/cheat-sheet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cheat Sheet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references/standard-highlighting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard Highlighting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references/language-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references/ebnf-grammar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EBNF Grammar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../licenses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Third-Party Licenses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_11_2" id="__nav_11_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    riddlc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_11_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    riddlc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddlc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    riddlc - The RIDDL Compiler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddlc/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddlc/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddlc/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddlc/compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddlc/github-actions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Actions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/sbt-riddl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sbt-riddl
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddl-mcp-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tools/riddl-idea-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IntelliJ Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -6273,7 +6144,7 @@
 
 
   
-    <a href="https://github.com/ossuminc/ossum.tech/edit/main/sites/riddl/docs/OSS/authoring-riddl.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/ossuminc/ossum.tech/edit/main/sites/riddl/docs/guides/authors/authoring-riddl.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -6786,15 +6657,15 @@ as markdown when generating documentation.</p>
 <h2 id="keyboard-shortcuts-summary">Keyboard Shortcuts Summary<a class="headerlink" href="#keyboard-shortcuts-summary" title="Permanent link">&para;</a></h2>
 <p>See the specific IDE documentation for shortcuts:</p>
 <ul>
-<li><a href="../intellij-plugin/#tool-window-actions">IntelliJ Plugin Shortcuts</a></li>
-<li><a href="../vscode-extension/#keyboard-shortcuts">VS Code Extension Shortcuts</a></li>
+<li><a href="/ide-help/intellij-plugin/#tool-window-actions">IntelliJ Plugin Shortcuts</a></li>
+<li><a href="/ide-help/vscode-extension/#keyboard-shortcuts">VS Code Extension Shortcuts</a></li>
 </ul>
 <hr />
 <h2 id="further-reading">Further Reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../../references/language-reference/">RIDDL Language Reference</a></li>
-<li><a href="../../references/ebnf-grammar/">EBNF Grammar</a></li>
-<li><a href="../../concepts/">Concept Guide</a></li>
+<li><a href="../../../references/language-reference/">RIDDL Language Reference</a></li>
+<li><a href="../../../references/ebnf-grammar/">EBNF Grammar</a></li>
+<li><a href="../../../concepts/">Concept Guide</a></li>
 </ul>
 
 
@@ -6827,7 +6698,7 @@ as markdown when generating documentation.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../vscode-extension/" class="md-footer__link md-footer__link--prev" aria-label="Previous: VS Code Extension">
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Author&#39;s Guide">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -6837,11 +6708,27 @@ as markdown when generating documentation.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                VS Code Extension
+                Author's Guide
               </div>
             </div>
           </a>
         
+        
+          
+          <a href="../design/" class="md-footer__link md-footer__link--next" aria-label="Next: Design Guide">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Design Guide
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
         
       </nav>
     
@@ -6975,10 +6862,10 @@ as markdown when generating documentation.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
