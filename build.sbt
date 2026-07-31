@@ -17,27 +17,37 @@ lazy val root = Root(
   startYr = 2025,
   devs = developers
 ).configure(
-  With.Scala3.configure(version = Some("3.8.4")),
-  With.Riddl.library(version = "1.29.0", nonJVMDependency = false)
+  // 3.9.0-RC4, not the org-standard 3.8.4, because that is what riddl
+  // publishes 2.0.0-rc.5 with. An RC compiler emits EXPERIMENTAL TASTy
+  // (28.9-experimental-1), which only the exact compiler that produced it can
+  // read -- 3.8.4 accepts 28.0 to 28.8 and fails to load every riddl class.
+  // Keep these two lines in step: bumping the riddl version may require
+  // bumping this one to whatever riddl built with.
+  With.Scala3.configure(version = Some("3.9.0-RC4")),
+  With.Riddl.library(version = "2.0.0-rc.5", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
   // Extract RIDDL grammar by compiling and running ExtractGrammar.
   //
-  // CAUTION on this branch: the grammar in docs/ is RIDDL 2.0's, taken
-  // directly from riddl's release/2 branch at
-  //   language/src/main/resources/riddl/grammar/ebnf-grammar.ebnf
-  // because RIDDL 2.0 is not published yet and `With.Riddl.library` above
-  // still resolves 1.29.0. Running this task now would silently overwrite the
-  // 2.0 grammar with a 1.x one. Bump the library version to 2.0.0 first, then
-  // this task is once again the way to keep the grammar in sync.
-  extractGrammar := {
+  // The library above now resolves 2.0.0-rc.5, so this task once again
+  // produces the grammar the docs actually describe -- the hand-copy from
+  // riddl's release/2 branch that the 1.29.0 pin forced is no longer needed.
+  // Re-run it whenever the riddl version here is bumped.
+  // Def.uncached because sbt 2 caches task results by hashing their inputs,
+  // and this task has no hashable result: it shells out and writes a file as
+  // a side effect. Caching it would skip the extraction on a second run.
+  extractGrammar := Def.uncached {
     (Compile / compile).value
     val log = streams.value.log
+    // sbt 2 hands back HashedVirtualFileRef, not File, so the classpath has
+    // to go through the build's FileConverter to become real paths.
+    val converter = fileConverter.value
     val cp = (Runtime / fullClasspathAsJars).value
-      .map(_.data.getAbsolutePath)
+      .map(entry => converter.toPath(entry.data).toAbsolutePath.toString)
       .mkString(java.io.File.pathSeparator)
-    val target = baseDirectory.value / "docs" / "riddl" / "references" / "riddl-grammar.ebnf"
+    val target =
+      baseDirectory.value / "sites" / "riddl" / "docs" / "references" / "riddl-grammar.ebnf"
     val script = baseDirectory.value / "tools" / "extract-grammar.sh"
     log.info("Extracting RIDDL grammar...")
     val exitCode = scala.sys.process.Process(
