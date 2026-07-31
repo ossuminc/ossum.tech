@@ -5,10 +5,19 @@
   entity Order is { ??? }
   entity Account is { ??? }
   entity Product is { ??? }
+  entity Customer is { ??? }
   type ProductId is Id(Product)
   type Money is Currency(USD)
   record CartItem is { product: ProductId, quantity: Natural }
+  record Transaction is { amount: Money, at: TimeStamp }
   command PlaceOrder is { cartId: Id(Cart) }
+  command AddItemToCart is { cartId: Id(Cart), quantity: Natural }
+  command RemoveItemFromCart is { cartId: Id(Cart) }
+  command Deposit is { amount: Money }
+  command Withdraw is { amount: Money }
+  event ItemAddedToCart is { cartId: Id(Cart), quantity: Natural }
+  event MoneyDeposited is { amount: Money }
+  event MoneyWithdrawn is { amount: Money }
   event OrderCompleted is { orderId: Id(Order) }
   event OrderFailed is { orderId: Id(Order), reason: String }
 -->
@@ -85,7 +94,7 @@ domain Ordering is {
 
 For collaborative definitions, list all contributors:
 
-<!-- riddl: in-domain -->
+<!-- riddl: standalone -->
 ```riddl
 domain Ordering is {
   author Reid is {
@@ -128,7 +137,7 @@ domain ECommerce is {
 
 Add a one-line description to any definition:
 
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=Cart -->
 ```riddl
 entity Cart is {
   // entity contents
@@ -181,15 +190,36 @@ RIDDL provides many built-in types:
 
 | Category | Types |
 |----------|-------|
-| **Text** | `String`, `Id`, `UUID`, `Pattern` |
-| **Numbers** | `Integer`, `Number`, `Decimal`, `Natural`, `Whole`, `Real` |
-| **Temporal** | `Date`, `Time`, `DateTime`, `Timestamp`, `Duration` |
-| **Logical** | `Boolean`, `Nothing`, `Abstract` |
-| **Collections** | `List`, `Set`, `Map`, `Sequence`, `Mapping` |
-| **Ranges** | `Range` |
-| **Binary** | `Blob`, `Length`, `Location` |
-| **Currency** | `Currency`, `Money` |
-| **Identity** | `UserId`, `UUID`, `URL` |
+| **Text** | `String`, `String(min,max)`, `Pattern("regex")` |
+| **Numbers** | `Integer`, `Natural`, `Whole`, `Number`, `Real`, `Decimal(w,f)` |
+| **Measures** | `Current`, `Length`, `Luminosity`, `Mass`, `Mole`, `Temperature` |
+| **Temporal** | `Date`, `Time`, `DateTime`, `TimeStamp`, `Duration` |
+| **Zoned** | `ZonedDate(zone)`, `ZonedDateTime(zone)` |
+| **Logical** | `Boolean`, `Nothing`, `Anything` |
+| **Identity** | `Id(Entity)`, `UUID`, `UserId`, `URL` |
+| **Currency** | `Currency(USD)` |
+| **Other** | `Location` |
+
+!!! warning "`TimeStamp` has a capital S"
+    It is the one predefined type whose spelling regularly catches people
+    out. `Timestamp` does not resolve.
+
+Collections are **not** predefined type names — they are type *expressions*
+built with keywords, so there is no `List`, `Set` or `Map` to reference:
+
+| Form | Meaning |
+|------|---------|
+| `many CartItem` | one or more |
+| `many optional CartItem` | zero or more |
+| `optional CartItem` | zero or one |
+| `sequence of CartItem` | an ordered sequence |
+| `set of CartItem` | an unordered set with no duplicates |
+| `mapping from ProductId to CartItem` | a key-to-value mapping |
+| `range(1,10)` | a bounded integer range |
+
+!!! note "`Abstract` is deprecated"
+    It still parses, but as the old spelling of `Anything`, and the compiler
+    emits a `[deprecated]` message. Use `Anything`.
 
 ### Custom Types
 
@@ -239,7 +269,7 @@ type LineItem is {
 
 Commands represent requests that may change state:
 
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=AddItemToCart -->
 ```riddl
 command AddItemToCart is {
   cartId: Id(Cart),
@@ -252,13 +282,13 @@ command AddItemToCart is {
 
 Events record things that happened:
 
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=ItemAddedToCart -->
 ```riddl
 event ItemAddedToCart is {
   cartId: Id(Cart),
   productId: Id(Product),
   quantity: Natural,
-  addedAt: Timestamp
+  addedAt: TimeStamp
 }
 ```
 
@@ -281,7 +311,7 @@ Results return data from queries:
 ```riddl
 result CartContents is {
   cartId: Id(Cart),
-  items: List of CartItem,
+  items: sequence of CartItem,
   total: Money
 }
 ```
@@ -292,7 +322,7 @@ result CartContents is {
 
 ### Basic Entity Structure
 
-<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
+<!-- riddl: in-context no-prelude=Cart -->
 ```riddl
 entity Cart is {
   // Identity
@@ -302,9 +332,9 @@ entity Cart is {
   record State is {
     id: CartId,
     customerId: Id(Customer),
-    items: List of CartItem,
-    createdAt: Timestamp,
-    updatedAt: Timestamp
+    items: sequence of CartItem,
+    createdAt: TimeStamp,
+    updatedAt: TimeStamp
   }
 
   // Commands it handles
@@ -360,7 +390,7 @@ handler OrderCommands is {
       // Produce an event
       send event OrderPlaced to outlet Events
       // Update state
-      set field State.status to OrderStatus.Confirmed
+      set field State.status to "Confirmed"
     } else {
       // Return an error
       error "Insufficient inventory for order"
@@ -413,21 +443,23 @@ domain Example is {
 
 Use markdown lines for rich documentation:
 
-<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
+<!-- riddl: in-context no-prelude=Order -->
 ```riddl
 entity Order is {
-  |## Order Entity
-  |
-  |Represents a customer order in the system.
-  |
-  |### Lifecycle
-  |
-  |1. Created when customer checks out
-  |2. Confirmed after payment
-  |3. Shipped when inventory allocated
-  |4. Completed on delivery
-
   // entity definition continues
+} with {
+  described by {
+    |## Order Entity
+    |
+    |Represents a customer order in the system.
+    |
+    |### Lifecycle
+    |
+    |1. Created when customer checks out
+    |2. Confirmed after payment
+    |3. Shipped when inventory allocated
+    |4. Completed on delivery
+  }
 }
 ```
 
@@ -437,7 +469,7 @@ entity Order is {
 
 ### Aggregate with Event Sourcing
 
-<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
+<!-- riddl: in-context no-prelude=Account -->
 ```riddl
 entity Account is {
   type AccountId is Id(Account)
@@ -445,7 +477,7 @@ entity Account is {
   record State is {
     id: AccountId,
     balance: Money,
-    transactions: List of Transaction
+    transactions: sequence of Transaction
   }
 
   handler Commands is {
