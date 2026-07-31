@@ -151,9 +151,30 @@
   <script>
     window.addEventListener("DOMContentLoaded", function () {
       var bar = document.querySelector(".ossum-fullsearch");
-      var mount = document.getElementById("ossum-fullsearch")
-               || document.getElementById("pagefind-search");
+      var mount = document.getElementById("ossum-fullsearch");
       if (!mount) return;
+
+      // Move the bar INTO the header, between the title row and the tabs, so
+      // it reads as part of the site chrome. It was originally rendered below
+      // the header and was missed completely -- it looked like page content.
+      //
+      // Relocated rather than templated because with navigation.tabs.sticky
+      // Material renders the tabs inside partials/header.html, so there is no
+      // block between the title row and the tabs to hook. Copying that partial
+      // would pin this repo to one Material release.
+      //
+      // If Material renames these classes the move simply does not happen and
+      // the bar stays where the template put it -- visually worse, still
+      // working. That is why the markup lives in `hero` and not in this script.
+      if (bar) {
+        var header = document.querySelector(".md-header");
+        var tabs = header && header.querySelector(".md-tabs");
+        if (header) {
+          bar.classList.add("ossum-fullsearch--in-header");
+          if (tabs) header.insertBefore(bar, tabs);
+          else header.appendChild(bar);
+        }
+      }
 
       if (typeof PagefindUI === "undefined") {
         // The index is missing or not built yet. Hide the bar rather than
@@ -172,9 +193,7 @@
         resetStyles: false,
       });
       var input = mount.querySelector("input");
-      if (input && mount.id === "ossum-fullsearch") {
-        input.id = "ossum-fullsearch-input";
-      }
+      if (input) input.id = "ossum-fullsearch-input";
     });
   </script>
 
@@ -567,8 +586,6 @@
     
     <div class="md-container" data-md-component="container">
       
-  
-  
   <div class="ossum-fullsearch" data-pagefind-ignore>
     <div class="ossum-fullsearch__inner md-grid">
       <label class="ossum-fullsearch__label" for="ossum-fullsearch-input">
@@ -582,7 +599,6 @@
       </noscript>
     </div>
   </div>
-  
 
       
         
