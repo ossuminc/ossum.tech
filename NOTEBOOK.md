@@ -11,7 +11,20 @@ to the task file and note completion in this notebook.
 
 ---
 
-## RESUME HERE — open work as of 2026-07-31
+## RESUME HERE — as of 2026-07-31
+
+**Tasks A–F are all closed.** What is still open:
+
+- `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
+  see the note at the end of TASK C.
+- The ~50 concept pages still lack per-fence directives. 28 fences fail
+  site-wide, but no file is above three, which is the agreed threshold — this
+  is a known gap, not a regression.
+- Promoting RIDDL 2.0 to `latest` when it ships final:
+  `scripts/promote-2.0-to-latest.md`. Read the two-branches-one-alias landmine
+  before touching it.
+
+The sections below are kept as the record of how the current state was reached.
 
 ### TASK F — build on sbt 2 / riddl 2.0.0-rc.5 ✅ **DONE 2026-07-31**
 
@@ -38,19 +51,40 @@ Two sbt 2 API breaks fixed in `extractGrammar`: `fullClasspathAsJars` yields
 results by hashing inputs, so a side-effecting task needs `Def.uncached`.
 Its output path also still pointed at the pre-split `docs/riddl/references/`.
 
-`release/2` in THIS repo is fully merged into `main` (0 commits ahead, last
-touched 2026-07-29) — a stale branch, safe to delete.
+`release/2` in THIS repo was fully merged into `main` (0 commits ahead) and has
+been **deleted**, locally and on the remote.
 
-### TASK E — clickable search result rows ⬅ **NEXT**
+### TASK E — clickable search result rows ✅ **DONE 2026-07-31**
 
-(A and B are done, so this is the top of the queue.)
+Delegated from the mount in `overrides/main.html`, not by restyling the anchor:
+the excerpt is a *sibling* of `a.pagefind-ui__result-link`, so an anchor
+stretched over the row would swallow the sub-results and their own links. The
+listener is on the mount because Pagefind destroys and rebuilds the drawer on
+every keystroke.
 
-In the Full Search results, only the **title** is a link, which is not obvious.
-The whole result row should be clickable. Pagefind renders each hit as
-`.pagefind-ui__result` containing a `.pagefind-ui__result-link`; making the row
-a link means either restyling that anchor to fill the row or delegating clicks
-on the row to it. Sub-results have their own links, so a naive row-level handler
-must not hijack those.
+**Sub-results are tested before their parent** — they are nested inside it, so
+checking `.pagefind-ui__result` first sends every sub-result to the top of the
+page instead of its own anchor. That was the trap this task flagged in advance.
+
+Three behaviours preserved on purpose: a click landing on a real anchor falls
+through, a click that ends a text selection does not navigate, and cmd/ctrl-click
+still opens a new tab.
+
+**No row padding.** Pagefind writes its own as
+`.pagefind-ui__result.svelte-XXXX.svelte-XXXX` — it repeats the hash to raise
+specificity — and `pagefind-ui.css` loads from `extrahead`, i.e. *after*
+`extra.css`. Beating it needs four classes including a build-specific hash, for
+a cosmetic inset. Don't; the hover wash spans the row anyway. (The input-sizing
+rules above it hit the same wall — this is a recurring trap, not a one-off.)
+
+**Verifying this needs a browser** — no build check can see it. What worked:
+build shell + riddl into a scratch tree (`-d <tmp>/riddl/latest`), run
+`scripts/build-search-index.sh` over it, serve with `python3 -m http.server`.
+`preview-versioned-site.sh` **clones the repo**, so it only ever sees *committed*
+state — useless for checking work in progress. Two snags: `build-search-index.sh`
+reports "no product contributed" because the scratch tree has no `versions.json`
+(harmless), and Material's cookie-consent overlay intercepts clicks until
+accepted.
 
 ---
 
