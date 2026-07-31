@@ -166,6 +166,14 @@ too, and often does — that is how it publishes its events into a stream.
 
 ## Contains
 
-* [Inlets](inlet.md)
-* [Outlets](outlet.md)
-* [Handlers](handler.md)
+```mermaid
+flowchart TD
+    Streamlet(["Streamlet"]) --> Inlet
+    Streamlet --> Outlet
+    Streamlet --> PC["Processor contents"]
+```
+
+* [Inlet](inlet.md) and [Outlet](outlet.md) — its stream ports, in the number its shape requires
+* Everything a [processor](processor.md) may contain: [Type](type.md), [Constant](constant.md), [Invariant](invariant.md), [Function](function.md), [Handler](handler.md), [Streamlet](streamlet.md), nested [Processor](processor.md), [Connector](connector.md), Relationship, [Inlet](inlet.md), [Outlet](outlet.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md)
+

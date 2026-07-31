@@ -134,8 +134,14 @@ these models so neither context needs to know about the other's terminology.
 * [Modules](module.md)
 
 ## Contains
-* [Handlers](handler.md)
-* [Functions](function.md), [Types](type.md), [Constants](constant.md),
-  [Invariants](invariant.md)
-* [Inlets](inlet.md) and [Outlets](outlet.md)
-* [Versions](version.md) and [Copyrights](copyright.md)
+
+```mermaid
+flowchart TD
+    Adaptor(["Adaptor"]) --> Handler
+    Adaptor --> PC["Processor contents"]
+```
+
+* [Handler](handler.md) — the translation rules
+* Everything a [processor](processor.md) may contain: [Type](type.md), [Constant](constant.md), [Invariant](invariant.md), [Function](function.md), [Handler](handler.md), [Streamlet](streamlet.md), nested [Processor](processor.md), [Connector](connector.md), Relationship, [Inlet](inlet.md), [Outlet](outlet.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md)
+

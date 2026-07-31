@@ -202,4 +202,13 @@ The prefixes allowed have a similar meaning to the suffixes:
 All [Vital Definitions](vital.md) 
 
 ## Contains
-* [Fields](field.md) (in aggregations only)
+
+```mermaid
+flowchart TD
+    Type(["Type"]) --> Field
+    Field --> TypeExpr["a type expression"]
+```
+
+* [Field](field.md) — but only when the type is an aggregation (`record`, `command`, `event`, `query`, `result`, `graph`, `table`)
+* Other type expressions contain no definitions
+

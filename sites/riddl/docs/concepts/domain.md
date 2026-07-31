@@ -68,22 +68,21 @@ with `by author Name`. A domain may also declare a [version](version.md) and a
 
 ## Contains
 
-Within a domain, you can define these things:
+```mermaid
+flowchart TD
+    Domain(["Domain"]) --> Context
+    Domain --> Epic
+    Domain --> Saga
+    Domain -->|nested| Domain
+    Domain -.->|spans contexts| Repository
+    Domain -.->|spans contexts| Connector
+    Domain --> Defs["Type · User · Author<br/>Version · Copyright<br/>Comment · Include · Import"]
+```
 
-* [Users](user.md) - someone or thing that uses the domain
-* [Authors](author.md) - who defined the domain
-* [Connectors](connector.md) - when the two ends are in different contexts
-* [Contexts](context.md) - a precisely defined bounded context
-  within the domain, including [application](application.md) contexts
-* [Copyrights](copyright.md) - the applicable legal notice
-* [Domains](domain.md) :material-recycle: - domains
-  can have nested domains (subdomains)
-* [Epics](epic.md) - a story about external entities
-  interacting with the domain
-* [Includes](include.md) and `import` directives
-* [Repositories](repository.md) - when they synthesize across contexts
-* [Sagas](saga.md) - multi-step atomic processes
-* [Types](type.md) - information definitions used throughout
-  the domain
-* [Versions](version.md) - one component of the version coordinate
+* [Context](context.md) — the bounded contexts of the domain
+* [Domain](domain.md) :material-recycle: — nested subdomains
+* [Epic](epic.md) and [Saga](saga.md)
+* [Repository](repository.md) and [Connector](connector.md) — *only* when they genuinely span several contexts
+* [Type](type.md), [User](user.md), [Author](author.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md) and `import` directives
 

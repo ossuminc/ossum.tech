@@ -124,5 +124,15 @@ what it imported.
 
 ## Contains
 
-Any top-level definition, plus [versions](version.md),
-[copyrights](copyright.md), `include` and `import`.
+```mermaid
+flowchart TD
+    Module(["Module"]) --> Domain
+    Module --> Context
+    Module --> Others["any other top-level definition"]
+    Module -->|nested| Module
+```
+
+* *Any* top-level definition, flat and unordered: [Domain](domain.md), [Context](context.md), [Entity](entity.md), [Adaptor](adaptor.md), [Projector](projector.md), [Repository](repository.md), [Saga](saga.md), [Streamlet](streamlet.md), [Epic](epic.md), [Function](function.md), [Type](type.md), [User](user.md), [Author](author.md), [Constant](constant.md), [Invariant](invariant.md), [Connector](connector.md), Relationship
+* Nested [Modules](module.md), [Version](version.md), [Copyright](copyright.md)
+* [Include](include.md) and `import` directives
+

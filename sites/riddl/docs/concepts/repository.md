@@ -102,10 +102,15 @@ available.
 * [Module](module.md)
 
 ## Contains
-* Schemas
-* [Types](type.md)
-* [Messages](message.md)
-* [Handler](handler.md)
-* [Inlets](inlet.md) and [Outlets](outlet.md)
-* [Versions](version.md) and [Copyrights](copyright.md)
+
+```mermaid
+flowchart TD
+    Repository(["Repository"]) --> Schema
+    Repository --> PC["Processor contents"]
+    Schema --> SchemaParts["data · link · index"]
+```
+
+* `schema` — its kind, data, links and indices
+* Everything a [processor](processor.md) may contain: [Type](type.md), [Constant](constant.md), [Invariant](invariant.md), [Function](function.md), [Handler](handler.md), [Streamlet](streamlet.md), nested [Processor](processor.md), [Connector](connector.md), Relationship, [Inlet](inlet.md), [Outlet](outlet.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md)
 

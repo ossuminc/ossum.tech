@@ -165,4 +165,11 @@ updates, not by the projector itself.
 All [Vital Definitions](vital.md)
 
 ## Contains
-[Fields](field.md)
+
+```mermaid
+flowchart TD
+    Message(["Message"]) --> Field
+```
+
+* [Field](field.md) — a message is an aggregation, so it holds fields
+

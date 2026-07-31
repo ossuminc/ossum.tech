@@ -68,11 +68,16 @@ Arguments are positional first, then named, and are bound to the function's
 * [Modules](module.md)
 
 ## Contains
-* [Fields](field.md)
-* [Statements](statement.md)
-* [Functions](function.md) :material-recycle:
 
-!!! info "A Function is not a Processor"
-    A Function extends the [vital definition](vital.md) base rather than
-    [Processor](processor.md), so it bears no [ports](inlet.md), no
-    [version](version.md) and no [copyright](copyright.md).
+```mermaid
+flowchart TD
+    Function(["Function"]) --> Statement
+    Function -->|nested| Function
+    Function --> Defs["Type · Comment · Include"]
+```
+
+* [Statement](statement.md) — the pseudocode body
+* [Function](function.md) :material-recycle: — nested helper functions
+* [Type](type.md), [Comment](comment.md), [Include](include.md)
+* Its input and output are declared in the signature, not contained
+

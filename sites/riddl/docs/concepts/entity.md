@@ -181,13 +181,15 @@ entity Order is {
 
 ## Contains
 
-* [Copyrights](copyright.md) - the applicable legal notice
-* [Functions](function.md) - named definitions of processing
-* [Handlers](handler.md) - how to handle messages sent to an entity
-* [Includes](include.md) - inclusion of entity content from a file
-* [Inlets](inlet.md) and [Outlets](outlet.md) - stream ports
-* [Invariants](invariant.md) - logical expressions that must always
-  hold true
-* [States](state.md) - the data an entity holds, each typed by a record
-* [Types](type.md) - the definition of a type of information
-* [Versions](version.md) - one component of the version coordinate
+```mermaid
+flowchart TD
+    Entity(["Entity"]) --> State
+    Entity --> PC["Processor contents"]
+    State --> Handler
+    State --> Invariant
+```
+
+* [State](state.md) — the data the entity holds, each typed by a record
+* Everything a [processor](processor.md) may contain: [Type](type.md), [Constant](constant.md), [Invariant](invariant.md), [Function](function.md), [Handler](handler.md), [Streamlet](streamlet.md), nested [Processor](processor.md), [Connector](connector.md), Relationship, [Inlet](inlet.md), [Outlet](outlet.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md)
+

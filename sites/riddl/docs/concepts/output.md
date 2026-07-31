@@ -65,5 +65,13 @@ it to the frame that depicts it.
 * [Group](group.md)
 
 ## Contains
-* [Type](type.md)
-* [Message](message.md)
+
+```mermaid
+flowchart TD
+    Output(["Output"]) -->|nested| Output
+    Output --> TypeRef["a type or constant reference"]
+```
+
+* [Output](output.md) :material-recycle: — nested outputs
+* Its data [type](type.md), constant or literal is **referenced**, not contained
+

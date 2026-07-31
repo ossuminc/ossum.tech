@@ -124,9 +124,17 @@ by AsyncAPI generation.
 
 ## Contains
 
-* [Inlets](inlet.md)
-* [Outlets](outlet.md)
-* [Handlers](handler.md)
-* [Functions](function.md), [Types](type.md), [Constants](constant.md),
-  [Invariants](invariant.md)
-* [Versions](version.md) and [Copyrights](copyright.md)
+```mermaid
+flowchart TD
+    Processor(["Processor"]) --> PC["Processor contents"]
+    PC --> Handler
+    PC --> Function
+    PC -->|nested| Processor
+    PC --> Connector
+    PC --> Ports["Inlet · Outlet · Relationship"]
+    PC --> Leaves["Type · Constant · Invariant<br/>Version · Copyright · Comment"]
+```
+
+* Everything in the shared processor bundle: [Type](type.md), [Constant](constant.md), [Invariant](invariant.md), [Function](function.md), [Handler](handler.md), [Streamlet](streamlet.md), nested [Processor](processor.md), [Connector](connector.md), Relationship, [Inlet](inlet.md), [Outlet](outlet.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md)
+

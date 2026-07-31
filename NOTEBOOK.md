@@ -13,6 +13,45 @@ to the task file and note completion in this notebook.
 
 ## RESUME HERE — open work as of 2026-07-30
 
+### TASK E — clickable search result rows ⬅ **QUEUED** (after A and B)
+
+In the Full Search results, only the **title** is a link, which is not obvious.
+The whole result row should be clickable. Pagefind renders each hit as
+`.pagefind-ui__result` containing a `.pagefind-ui__result-link`; making the row
+a link means either restyling that anchor to fill the row or delegating clicks
+on the row to it. Sub-results have their own links, so a naive row-level handler
+must not hijack those.
+
+---
+
+### TASK A — concept `## Contains` diagrams ✅ **stage 2 done**
+
+23 concept pages now carry a per-scope mermaid diagram plus a linked list. The
+diagram gives the shape; the list stays because mermaid cannot carry links
+without `click` directives, and losing them would make the pages harder to use.
+
+Every entry was taken from `riddl-grammar.ebnf`, not from the prose it replaced
+— those had drifted: `entity.md` omitted Constant, Connector, Relationship and
+nested Processor; `saga.md` omitted Inlet, Outlet, Function and Include.
+
+**Pages deliberately left as prose:** the 10 leaves that contain nothing, and
+the ones whose "Contains" describes syntax rather than definitions
+(`statement.md`, `value.md`, `option.md`, `metadata.md`, `description.md`,
+`conditional.md`, `include.md`, `author.md`). `inlet.md`/`outlet.md` kept prose
+too: the grammar has `inlet = "inlet" identifier is type_ref`, so a type is
+**referenced**, not contained, and a diagram would assert something false.
+
+**Two content problems found, NOT fixed — they need an editorial decision:**
+
+- **`case.md` duplicates `use-case.md`.** Both document the same `case`
+  construct, and `case.md` says it contains Statements where the grammar says
+  `use_case` → `interactions`. One of them should go.
+- **`element.md`** claims to contain Group and Handlers, but there is no
+  `element` production in the grammar at all. The UI concepts are group, input
+  and output.
+
+---
+
 ### TASK D — navigation and content rework ✅ **DEPLOYED 2026-07-31**
 
 Top menu carries RIDDL / riddlg / Synapify (root-relative, into each product's

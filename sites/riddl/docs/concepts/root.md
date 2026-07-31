@@ -28,9 +28,15 @@ is the unit of reuse and of compiled output.
 At the file root of the first file `riddlc` reads. 
 
 ## Contains
-* [Domains](domain.md)
-* [Modules](module.md)
-* [Authors](author.md)
-* [Versions](version.md) and [Copyrights](copyright.md)
-* [Comments](comment.md)
-* [Includes](include.md) and `import` directives
+
+```mermaid
+flowchart TD
+    Root(["Root"]) --> Domain
+    Root --> Module
+    Root --> Defs["Author · Version · Copyright<br/>Comment · Include · Import"]
+```
+
+* [Domain](domain.md) and [Module](module.md) — the two containers a model starts from
+* [Author](author.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md) and `import` directives
+

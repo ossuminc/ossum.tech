@@ -93,6 +93,15 @@ on ship: command ShipOrder {
 * [Entities](entity.md)
 
 ## Contains
-* [Handlers](handler.md)
-* [Invariants](invariant.md)
-* [Comments](comment.md)
+
+```mermaid
+flowchart TD
+    State(["State"]) --> Handler
+    State --> Invariant
+    State --> Comment
+```
+
+* [Handler](handler.md) — how the entity behaves while in this state
+* [Invariant](invariant.md) — conditions that must hold in this state
+* [Comment](comment.md)
+

@@ -82,6 +82,13 @@ to the frame that depicts it.
 * [Group](group.md)
 
 ## Contains
-* [Type](type.md)
-* [Message](message.md)
+
+```mermaid
+flowchart TD
+    Input(["Input"]) -->|nested| Input
+    Input --> TypeRef["a type reference"]
+```
+
+* [Input](input.md) :material-recycle: — nested inputs
+* Its data [type](type.md) is **referenced**, not contained
 

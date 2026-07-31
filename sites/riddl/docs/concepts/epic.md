@@ -79,4 +79,14 @@ The `to` after the verb remains optional, as it always was.
 
 ## Contains
 
-* [Cases](use-case.md)
+```mermaid
+flowchart TD
+    Epic(["Epic"]) --> Case
+    Epic --> Defs["Type · Comment<br/>shown by · Include"]
+    Case --> Interaction
+```
+
+* [Use Case](use-case.md) — each a named path through the story
+* [Type](type.md), [Comment](comment.md), `shown by`, [Include](include.md)
+* Its user story is part of the epic's own declaration, not a contained definition
+

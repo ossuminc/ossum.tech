@@ -88,4 +88,18 @@ functions and includes.
 * [Modules](module.md)
 
 ## Contains
-* [SagaStep](sagastep.md)
+
+```mermaid
+flowchart TD
+    Saga(["Saga"]) --> Step["Saga Step"]
+    Saga --> Inlet
+    Saga --> Outlet
+    Saga --> Function
+    Step --> Statement
+```
+
+* [Saga Step](sagastep.md) — the forward action and its compensation
+* [Inlet](inlet.md) and [Outlet](outlet.md) — a saga bears stream ports even though it is not a [processor](processor.md)
+* [Function](function.md)
+* [Include](include.md)
+

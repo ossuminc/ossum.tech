@@ -58,7 +58,16 @@ page Checkout is { ??? } with {
 * [Group](group.md)
 
 ## Contains
-* [Group](group.md) :material-recycle:
-* [Type](type.md)
-* [Input](input.md)
-* [Output](output.md)
+
+```mermaid
+flowchart TD
+    Group(["Group"]) -->|nested| Group
+    Group --> Input
+    Group --> Output
+    Group --> Defs["contains · shown by · Comment"]
+```
+
+* [Group](group.md) :material-recycle: — nested groups, and `contains` references to groups defined elsewhere
+* [Input](input.md) and [Output](output.md)
+* `shown by`, [Comment](comment.md)
+

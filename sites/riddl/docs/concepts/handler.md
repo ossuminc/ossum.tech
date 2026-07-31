@@ -134,5 +134,14 @@ record is the new state's data.
 * [State](state.md)
 
 ## Contains
-* [On Clauses](onclause.md) - a specification of how to 
-  handle an event
+
+```mermaid
+flowchart TD
+    Handler(["Handler"]) --> OnClause["On Clause"]
+    Handler --> Comment
+    OnClause --> Statement
+```
+
+* [On Clause](onclause.md) — one per kind of message the handler reacts to
+* [Comment](comment.md)
+

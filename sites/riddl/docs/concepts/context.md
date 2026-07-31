@@ -123,20 +123,22 @@ its own.
 * [Modules](module.md)
 
 ## Contains
-* [Adaptors](adaptor.md)
-* [Connectors](connector.md)
-* [Constants](constant.md)
-* [Copyrights](copyright.md)
-* [Entities](entity.md)
-* [Functions](function.md)
-* [Groups](group.md) — only in an `application` context
-* [Handlers](handler.md)
-* [Includes](include.md)
-* [Inlets](inlet.md) and [Outlets](outlet.md)
-* [Invariants](invariant.md)
-* [Processors](processor.md)
-* [Projectors](projector.md)
-* [Repositories](repository.md)
-* [Sagas](saga.md)
-* [Types](type.md)
-* [Versions](version.md)
+
+```mermaid
+flowchart TD
+    Context(["Context"]) --> Entity
+    Context --> Adaptor
+    Context --> Projector
+    Context --> Repository
+    Context --> Saga
+    Context --> Streamlet
+    Context --> Connector
+    Context -.->|application intention| Group
+    Context --> PC["Processor contents"]
+```
+
+* [Entity](entity.md), [Adaptor](adaptor.md), [Projector](projector.md), [Repository](repository.md), [Saga](saga.md), [Streamlet](streamlet.md), [Connector](connector.md)
+* [Group](group.md) — only in a context with the `application` [intention](context.md#intention)
+* Everything a [processor](processor.md) may contain: [Type](type.md), [Constant](constant.md), [Invariant](invariant.md), [Function](function.md), [Handler](handler.md), [Streamlet](streamlet.md), nested [Processor](processor.md), [Connector](connector.md), Relationship, [Inlet](inlet.md), [Outlet](outlet.md), [Version](version.md), [Copyright](copyright.md), [Comment](comment.md)
+* [Include](include.md) and `import` directives
+

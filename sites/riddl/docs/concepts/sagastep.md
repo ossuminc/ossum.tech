@@ -131,4 +131,13 @@ A saga step's blocks admit `send`, `tell`, `yield`, `put`, `do` and `error`.
 
 ## Contains
 
-* [Statements](statement.md) within the forward and `reverted by` blocks
+```mermaid
+flowchart TD
+    Step(["Saga Step"]) --> Forward["forward action"]
+    Step --> Reverted["reverted by"]
+    Forward --> Statement
+    Reverted --> Statement
+```
+
+* [Statements](statement.md) in **both** blocks: the forward action and the `reverted by` compensation
+

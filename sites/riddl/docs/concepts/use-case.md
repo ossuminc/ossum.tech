@@ -166,4 +166,14 @@ translatability prediction above is anticipating.
 
 ## Contains
 
-* [Interactions](interaction.md) — the individual steps in the use case
+```mermaid
+flowchart TD
+    Case(["Use Case"]) --> Interaction
+    Case --> Comment
+    Interaction --> Nested["parallel · optional<br/>sequence · step"]
+```
+
+* [Interaction](interaction.md) — the steps, which may nest as `parallel`, `optional` or `sequence` groupings
+* [Comment](comment.md)
+* Its user story is required and is part of the case's declaration
+

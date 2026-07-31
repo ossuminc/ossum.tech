@@ -115,5 +115,11 @@ clause's metadata.
 
 ## Contains
 
-* [Statement](statement.md) — specifies what should happen when the message
-  arrives
+```mermaid
+flowchart TD
+    OnClause(["On Clause"]) --> Statement
+    Statement --> More["the pseudocode body"]
+```
+
+* [Statement](statement.md) — the pseudocode run when the message arrives
+
