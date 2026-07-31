@@ -58,9 +58,13 @@ published docs. `OSS/`, `synapify/` and `about/` were byte-identical to
 3. **Reply to `task/publish-riddl-license-page.md`** once deployed — riddl must
    change **three** places to `https://ossum.tech/riddl/2.0/licenses/`, not the
    one the task file mentions. Results section already written.
-4. **Deferred, agreed:** a `robots.txt`, which has never existed — the
-   unreleased 2.0 docs are fully indexable and compete with 1.31 in search
-   results.
+✅ **`robots.txt` is done** (2026-07-30). Generated at deploy time by
+`scripts/build-robots-txt.sh`, because its job is listing the sitemaps and that
+set changes every release. It blocks nothing but `/pagefind/` — version/alias
+duplication is handled by `rel=canonical`, which works only because
+`DOCS_SITE_URL` is now set per deploy. Before that hook, every build claimed
+`https://ossum.tech/` as its canonical, telling crawlers every version of every
+page was the same URL.
 
 ✅ **Cross-site search is done** (2026-07-30). `/find/` on the shell searches
 all products at once via Pagefind, which indexes built HTML and so spans the
