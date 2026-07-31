@@ -85,7 +85,7 @@ With those clarifying simplifications, here's the hierarchy:
 |-----------|-------------|
 | [**Root**](root.md) | [Domain](domain.md) |
 | [**Domain**](domain.md) | [Type](type.md), [Epic](epic.md), [Context](context.md) |
-| [**Epic**](epic.md) | [Case](case.md) → [Statement](statement.md) |
+| [**Epic**](epic.md) | [Case](use-case.md) → [Interaction](interaction.md) |
 | [**Context**](context.md) | [Type](type.md), [Entity](entity.md), [Projector](projector.md), [Saga](saga.md), [Adaptor](adaptor.md), [Processor](processor.md), [Function](function.md), [Streamlet](streamlet.md), [Handler](handler.md), [Group](element.md#group) |
 | [**Entity**](entity.md) | [Type](type.md), [State](state.md), [Function](function.md), [Handler](handler.md), [Invariant](invariant.md) |
 | [**State**](state.md) | [Type](type.md), [Field](field.md), [Handler](handler.md) |

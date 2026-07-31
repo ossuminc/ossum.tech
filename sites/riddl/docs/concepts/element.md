@@ -24,8 +24,8 @@ in traditional user interfaces. Groups can contain other elements including
 nested groups, enabling hierarchical organization of the user interface.
 
 Groups have many aliases in RIDDL to accommodate different UI paradigms:
-`group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`, `row`,
-`stack`, `panel`, `form`, and `section`.
+`group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
+`window`, `section`, `tab`, `flow` and `block`.
 
 | UI Element | RIDDL    | Description                                  |
 |------------|----------|----------------------------------------------|
@@ -46,6 +46,27 @@ different group of elements, enabling navigation within the application.
 * [Group](group.md)
 
 ## Contains
-* [Group](group.md) :material-recycle:
-* [Handlers](handler.md)
+
+*Element* is **abstract** — a class name in the AST, like *Node*, not a RIDDL
+keyword you can write. Nothing is "an element" in source; a thing *is* a
+[Group](group.md), an [Input](input.md) or an [Output](output.md).
+
+So the relationship below is *is-a*, not containment:
+
+```mermaid
+classDiagram
+    class Element {
+        &lt;&lt;abstract&gt;&gt;
+    }
+    Element <|-- Group
+    Element <|-- Input
+    Element <|-- Output
+```
+
+Of the three, only [Group](group.md) contains anything:
+
+* [Group](group.md) — nested groups, [Inputs](input.md) and
+  [Outputs](output.md)
+* [Input](input.md) and [Output](output.md) — each **references** a
+  [type](type.md) rather than containing one
 

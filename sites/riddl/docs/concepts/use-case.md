@@ -91,4 +91,4 @@ a test scenario that verifies the system behaves as specified.
 
 ## Contains
 
-* [Steps/Interactions](case.md) - the individual steps in the use case
+* [Steps/Interactions](interaction.md) - the individual steps in the use case

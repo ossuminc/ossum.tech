@@ -236,6 +236,13 @@ crawlers that every version of every page is the same URL.
   comes from `extra.outdated_banner` per site.
 - **mermaid loads from a CDN** (`unpkg.com`); Material does not bundle it. A
   diagram can only be verified in a real browser, never by a build check.
+- **A rendered mermaid diagram is INVISIBLE to page JavaScript.** Material puts
+  the SVG in a *closed* shadow root (`r.attachShadow({mode:"closed"})`), so
+  `document.querySelector(".mermaid svg")` returns null and `.textContent`
+  returns `""` **even when the diagram is rendering perfectly**. Verify with a
+  screenshot, or by the element's height — an unrendered block is ~0px. Do not
+  conclude from an empty query that mermaid is broken; that reads as a
+  site-wide regression and is not one.
 - **This machine has mkdocs-material Insiders; CI installs the community
   edition.** Do not use Insiders-only features.
 - **`sbt extractGrammar` resolves the *published* riddl library.** Until RIDDL
