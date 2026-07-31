@@ -5475,6 +5475,7 @@ offline resilience. The driver's app can cache the order details
 locally, and location updates and issue reports can be queued
 and synced when connectivity resumes.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">DeliveryId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Delivery</span><span class="p">.</span><span class="n">DeliveryOrder</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Delivery identifier&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a delivery.&quot;</span>
@@ -5525,6 +5526,7 @@ interview.</p>
 <h2 id="entity-deliveryorder">Entity: DeliveryOrder<a class="headerlink" href="#entity-deliveryorder" title="Permanent link">&para;</a></h2>
 <p>The <code>DeliveryOrder</code> entity has a 7-command lifecycle — the
 longest of any entity in the model:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">DeliveryOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">CreateDelivery</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5598,6 +5600,7 @@ during a delivery, building up a GPS trail. The
 doesn't end the delivery — it records the issue while the
 delivery continues.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">DeliveryRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">DeliveryData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">deliveries</span> <span class="kp">as</span> <span class="n">DeliveryOrder</span>
@@ -5611,6 +5614,7 @@ deliveries for a specific driver — essential for the driver's
 app dashboard.</p>
 <h2 id="adaptor">Adaptor<a class="headerlink" href="#adaptor" title="Permanent link">&para;</a></h2>
 <p>Delivery has a single inbound adaptor:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">adaptor</span> <span class="n">FromOnlineOrdering</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">OnlineOrdering</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">handler</span> <span class="n">OnlineDeliveryIntake</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">OnlineOrdering</span><span class="p">.</span><span class="n">OnlineOrder</span><span class="p">.</span><span class="n">FulfillmentSelected</span> <span class="p">{</span>

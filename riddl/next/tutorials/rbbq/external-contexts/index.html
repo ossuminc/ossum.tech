@@ -5584,6 +5584,7 @@ to signal that the implementation is outside the model boundary.</p>
 third-party system without modeling its internals. The context
 specifies the commands you can send and the events you expect to
 receive, but the implementation is someone else's responsibility.</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">context</span> <span class="n">PaymentGateway</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="c1">// Define the interface...</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
@@ -5597,6 +5598,7 @@ generators that this context won't be implemented — it's a
 boundary definition only.</p>
 <h2 id="restaurant-domain-external-contexts">Restaurant Domain — External Contexts<a class="headerlink" href="#restaurant-domain-external-contexts" title="Permanent link">&para;</a></h2>
 <h3 id="paymentgateway">PaymentGateway<a class="headerlink" href="#paymentgateway" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">context</span> <span class="n">PaymentGateway</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">AuthorizePayment</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5632,6 +5634,7 @@ flow used by credit card processors. The two-step process
 (authorize, then capture) is standard in payment processing —
 authorization holds the funds, capture completes the transfer.</p>
 <h3 id="notificationservice">NotificationService<a class="headerlink" href="#notificationservice" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">context</span> <span class="n">NotificationService</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">command</span> <span class="n">SendPushNotification</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5658,6 +5661,7 @@ when drinks are ready. It's also available for the
 of new orders.</p>
 <h2 id="backoffice-domain-external-contexts">BackOffice Domain — External Contexts<a class="headerlink" href="#backoffice-domain-external-contexts" title="Permanent link">&para;</a></h2>
 <h3 id="hrsystem">HRSystem<a class="headerlink" href="#hrsystem" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">context</span> <span class="n">HRSystem</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="kd">command</span> <span class="n">SyncEmployeeData</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5683,6 +5687,7 @@ of new orders.</p>
 pull current employee records — roles, availability, and
 contact information.</p>
 <h3 id="accountingsystem">AccountingSystem<a class="headerlink" href="#accountingsystem" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">context</span> <span class="n">AccountingSystem</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="kd">command</span> <span class="n">PostTransaction</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5709,6 +5714,7 @@ inventory purchases are posted to the general ledger for
 financial reporting.</p>
 <h2 id="corporate-domain-external-contexts">Corporate Domain — External Contexts<a class="headerlink" href="#corporate-domain-external-contexts" title="Permanent link">&para;</a></h2>
 <h3 id="printingservice">PrintingService<a class="headerlink" href="#printingservice" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">context</span> <span class="n">PrintingService</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  <span class="kd">command</span> <span class="n">PrintMenus</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5733,6 +5739,7 @@ financial reporting.</p>
 sending the updated menu to the printer for physical copies
 distributed to all locations.</p>
 <h3 id="photographyservice">PhotographyService<a class="headerlink" href="#photographyservice" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">context</span> <span class="n">PhotographyService</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  <span class="kd">command</span> <span class="n">SchedulePhotoShoot</span> <span class="kp">is</span> <span class="p">{</span>

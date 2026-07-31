@@ -5499,6 +5499,7 @@ interviews:</p>
 <p>The KitchenDisplay projector solves both problems by providing
 a persistent, legible, digital ticket queue.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">KitchenTicketId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Kitchen ticket identifier&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a kitchen ticket.&quot;</span>
@@ -5546,6 +5547,7 @@ adaptors and may have different preparation priorities.</p>
 <h2 id="entity-kitchenticket">Entity: KitchenTicket<a class="headerlink" href="#entity-kitchenticket" title="Permanent link">&para;</a></h2>
 <p>The <code>KitchenTicket</code> entity has a 6-command lifecycle with event
 sourcing:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">ReceiveTicket</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5624,6 +5626,7 @@ and event sourcing means the complete ticket history survives
 crashes. This directly addresses the Chef's concern about lost
 orders.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">KitchenTicketRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">KitchenTicketData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">tickets</span> <span class="kp">as</span> <span class="n">KitchenTicket</span>
@@ -5638,6 +5641,7 @@ grill tickets.</p>
 <h2 id="projector-kitchendisplay">Projector: KitchenDisplay<a class="headerlink" href="#projector-kitchendisplay" title="Permanent link">&para;</a></h2>
 <p>The KitchenDisplay projector provides the real-time screen that
 replaces printed and handwritten tickets:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">projector</span> <span class="n">KitchenDisplay</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">KitchenTicketRepository</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
@@ -5675,6 +5679,7 @@ replaces printed and handwritten tickets:</p>
 <h2 id="adaptors">Adaptors<a class="headerlink" href="#adaptors" title="Permanent link">&para;</a></h2>
 <p>Kitchen has two inbound adaptors — one for dine-in orders from
 Front of House, one for online orders:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">adaptor</span> <span class="n">FromFrontOfHouse</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">handler</span> <span class="n">FrontOfHouseIntake</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">TableOrder</span><span class="p">.</span><span class="n">OrderSubmitted</span> <span class="p">{</span>

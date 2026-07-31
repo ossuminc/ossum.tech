@@ -5449,6 +5449,7 @@ receipt, and issue reporting.</p>
 ingredients and manage supplier relationships. The Supply Chain
 context formalizes this process with tracked purchase orders.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">PurchaseOrderId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Purchase order identifier&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a purchase order.&quot;</span>
@@ -5486,6 +5487,7 @@ issues, the purchase order can be disputed rather than simply
 accepted.</p>
 <h2 id="entity-purchaseorder">Entity: PurchaseOrder<a class="headerlink" href="#entity-purchaseorder" title="Permanent link">&para;</a></h2>
 <p>The <code>PurchaseOrder</code> entity has a 5-command lifecycle:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">PurchaseOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">CreateBulkOrder</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5558,6 +5560,7 @@ Report Issue</strong>.</p>
 changes the order status to <code>PoDisputed</code>, initiating a
 resolution process with the vendor.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">PurchaseOrderRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">PurchaseOrderData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">purchaseOrders</span> <span class="kp">as</span> <span class="n">PurchaseOrder</span>

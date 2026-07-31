@@ -5449,6 +5449,7 @@ CQRS pattern — the Reporting context is the "query" side. The
 "command" sides are the production contexts (FrontOfHouse,
 OnlineOrdering, Scheduling, Inventory) that emit events.</p>
 <h2 id="salesreport-projector">SalesReport Projector<a class="headerlink" href="#salesreport-projector" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">projector</span> <span class="n">SalesReport</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">record</span> <span class="n">SalesReportEntry</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5482,6 +5483,7 @@ contexts</strong> — FrontOfHouse (dine-in) and OnlineOrdering (online).
 It aggregates them into a unified view with breakdowns by
 channel.</p>
 <h2 id="laborreport-projector">LaborReport Projector<a class="headerlink" href="#laborreport-projector" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">projector</span> <span class="n">LaborReport</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">record</span> <span class="n">LaborReportEntry</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5510,6 +5512,7 @@ BackOffice domain. It calculates hours worked by comparing
 <code>ClockedIn</code> and <code>ClockedOut</code> event timestamps and tracks
 shift cancellation rates.</p>
 <h2 id="inventoryreport-projector">InventoryReport Projector<a class="headerlink" href="#inventoryreport-projector" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">projector</span> <span class="n">InventoryReport</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">record</span> <span class="n">InventoryReportEntry</span> <span class="kp">is</span> <span class="p">{</span>

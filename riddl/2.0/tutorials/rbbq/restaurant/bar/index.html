@@ -5474,6 +5474,7 @@ that their order is ready."</p>
 <p>The <code>NotifyServerDrinksReady</code> command and its
 <code>ServerNotifiedDrinksReady</code> event directly solve this problem.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">DrinkOrderId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Bar</span><span class="p">.</span><span class="n">DrinkOrder</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Drink order identifier&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a drink order.&quot;</span>
@@ -5501,6 +5502,7 @@ that their order is ready."</p>
 </span></code></pre></div>
 <h2 id="entity-drinkorder">Entity: DrinkOrder<a class="headerlink" href="#entity-drinkorder" title="Permanent link">&para;</a></h2>
 <p>The <code>DrinkOrder</code> entity has a 5-command lifecycle:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">DrinkOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">ReceiveDrinkOrder</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5565,6 +5567,7 @@ that their order is ready."</p>
 </span></code></pre></div>
 <p>The lifecycle: <strong>Receive → Prepare → Mark Ready → Notify Server
 → Complete</strong>. The key event is <code>ServerNotifiedDrinksReady</code>:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">event</span> <span class="n">ServerNotifiedDrinksReady</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="n">drinkOrderId</span> <span class="kp">is</span> <span class="n">DrinkOrderId</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="n">drinkTableNumber</span> <span class="kp">is</span> <span class="nb">Natural</span>
@@ -5578,6 +5581,7 @@ that their order is ready."</p>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">repository</span> <span class="n">DrinkOrderRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kr">schema</span> <span class="n">DrinkOrderData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="kp">of</span> <span class="n">drinkOrders</span> <span class="kp">as</span> <span class="n">DrinkOrder</span>
@@ -5587,6 +5591,7 @@ that their order is ready."</p>
 </span></code></pre></div>
 <h2 id="adaptor">Adaptor<a class="headerlink" href="#adaptor" title="Permanent link">&para;</a></h2>
 <p>Bar has a single inbound adaptor from Front of House:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">adaptor</span> <span class="n">FromFrontOfHouse</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">handler</span> <span class="n">DrinkIntake</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">TableOrder</span><span class="p">.</span><span class="n">OrderSubmitted</span> <span class="p">{</span>

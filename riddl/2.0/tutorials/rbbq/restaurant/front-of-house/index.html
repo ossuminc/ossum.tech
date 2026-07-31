@@ -5521,6 +5521,7 @@ reservations). Key pain points addressed:</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
 <p>The context defines shared types for reservations, orders, and
 payments:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">ReservationId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">Reservation</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Reservation identifier&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a reservation.&quot;</span>
@@ -5582,6 +5583,7 @@ an identifier <em>for</em> the <code>Reservation</code> entity. This gives the
 compiler enough information to enforce type safety across context
 boundaries.</p>
 <p>The context also defines record types for structured data:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span> <span class="n">MenuItemInfo</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="n">itemCode</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="kr">briefly</span> <span class="s2">&quot;Item code&quot;</span>
@@ -5647,6 +5649,7 @@ boundaries.</p>
 <h2 id="reservation-entity">Reservation Entity<a class="headerlink" href="#reservation-entity" title="Permanent link">&para;</a></h2>
 <p>The <code>Reservation</code> entity models the full lifecycle from request
 through confirmation, seating, or cancellation:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">entity</span> <span class="n">Reservation</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">command</span> <span class="n">MakeReservation</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5753,6 +5756,7 @@ full dine-in order flow:</p>
 <code>tell</code> for subsequent state transitions.</p>
 <h2 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">&para;</a></h2>
 <p>Two repositories persist the entity data:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">repository</span> <span class="n">ReservationRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kr">schema</span> <span class="n">ReservationData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="kp">of</span> <span class="n">reservations</span> <span class="kp">as</span> <span class="n">Reservation</span>
@@ -5776,6 +5780,7 @@ reservations by guest name or time.</p>
 <p>The <code>ReservationBoard</code> projector provides a real-time read
 model for the host's seating display, replacing the paper
 backup system:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">projector</span> <span class="n">ReservationBoard</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">ReservationRepository</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
@@ -5810,6 +5815,7 @@ host's display screen.</p>
 <h2 id="adaptors">Adaptors<a class="headerlink" href="#adaptors" title="Permanent link">&para;</a></h2>
 <p>Front of House has three outbound adaptors that route messages
 to other contexts:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">adaptor</span> <span class="n">ToKitchen</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Kitchen</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="kd">handler</span> <span class="n">KitchenRouting</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span><span class="p">.</span><span class="n">ReceiveTicket</span> <span class="p">{</span>

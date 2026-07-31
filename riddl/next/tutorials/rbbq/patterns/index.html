@@ -5614,6 +5614,7 @@ and links to where it appears in the model.</p>
 <p>Every entity follows the same structure: commands trigger state
 transitions, events record what happened, state captures the
 current data, and a handler wires it together.</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="c1">// Commands define what can happen</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">command</span> <span class="n">ReceiveTicket</span> <span class="kp">is</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
@@ -5650,11 +5651,13 @@ canonical example.</p>
 <h2 id="type-system">Type System<a class="headerlink" href="#type-system" title="Permanent link">&para;</a></h2>
 <p>RIDDL provides a rich type system for modeling domain data:</p>
 <h3 id="id-types">Id Types<a class="headerlink" href="#id-types" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span> <span class="n">ReservationId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">Reservation</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Typed identifiers link to specific entities, enabling
 compile-time validation of cross-context references.</p>
 <h3 id="enumerations">Enumerations<a class="headerlink" href="#enumerations" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">type</span> <span class="n">DeliveryStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="n">DeliveryPending</span><span class="p">,</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="n">DriverAssignedStatus</span><span class="p">,</span>
@@ -5666,6 +5669,7 @@ compile-time validation of cross-context references.</p>
 <p>Enumerations use <code>any of</code> to define a fixed set of values.
 Each value is a constant.</p>
 <h3 id="records">Records<a class="headerlink" href="#records" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">type</span> <span class="n">GeoLocation</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="n">latitude</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">9</span><span class="p">,</span> <span class="m">6</span><span class="p">)</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="n">longitude</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">9</span><span class="p">,</span> <span class="m">6</span><span class="p">)</span>
@@ -5677,6 +5681,7 @@ like <code>Decimal(9, 6)</code>, <code>TimeStamp</code>, <code>Date</code>, <cod
 <code>Boolean</code>, <code>Natural</code>, <code>Integer</code>, <code>UUID</code>, and constrained
 strings like <code>String(1, 200)</code>.</p>
 <h3 id="collections">Collections<a class="headerlink" href="#collections" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">ticketItems</span> <span class="kp">is</span> <span class="kr">many</span> <span class="n">TicketItem</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">deliveryAddress</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="n">DeliveryAddress</span>
 </span></code></pre></div>
@@ -5688,6 +5693,7 @@ comprehensive type catalog and
 <a href="../restaurant/delivery/">Delivery</a> for <code>GeoLocation</code>.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
 <p>Repositories define persistence schemas with indexes:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">repository</span> <span class="n">KitchenTicketRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="kr">schema</span> <span class="n">KitchenTicketData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="kp">of</span> <span class="n">tickets</span> <span class="kp">as</span> <span class="n">KitchenTicket</span>
@@ -5711,6 +5717,7 @@ projectors). See <a href="../backoffice/inventory/">Inventory</a> for
 an example with stock-level indexing.</p>
 <h2 id="projector-cqrs">Projector / CQRS<a class="headerlink" href="#projector-cqrs" title="Permanent link">&para;</a></h2>
 <p>Projectors build read-optimized views from events:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">projector</span> <span class="n">ReservationBoard</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">ReservationRepository</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
@@ -5748,6 +5755,7 @@ at any time.</p>
 <h2 id="adaptor-communication">Adaptor Communication<a class="headerlink" href="#adaptor-communication" title="Permanent link">&para;</a></h2>
 <p>Adaptors bridge bounded contexts. There are two directions:</p>
 <h3 id="outbound-to">Outbound (<code>to</code>)<a class="headerlink" href="#outbound-to" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">adaptor</span> <span class="n">ToKitchen</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Kitchen</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="kd">handler</span> <span class="n">KitchenRouting</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span><span class="p">.</span><span class="n">ReceiveTicket</span> <span class="p">{</span>
@@ -5758,6 +5766,7 @@ at any time.</p>
 </span></code></pre></div>
 <p>Outbound adaptors send messages from this context to another.</p>
 <h3 id="inbound-from">Inbound (<code>from</code>)<a class="headerlink" href="#inbound-from" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">adaptor</span> <span class="n">FromFrontOfHouse</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  <span class="kd">handler</span> <span class="n">FrontOfHouseIntake</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">TableOrder</span><span class="p">.</span><span class="n">OrderSubmitted</span> <span class="p">{</span>
@@ -5776,6 +5785,7 @@ most elegant use — consuming events without the source
 knowing about the consumer.</p>
 <h2 id="external-contexts">External Contexts<a class="headerlink" href="#external-contexts" title="Permanent link">&para;</a></h2>
 <p>External contexts model third-party system boundaries:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">context</span> <span class="n">PaymentGateway</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  <span class="kd">command</span> <span class="n">AuthorizePayment</span> <span class="kp">is</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  <span class="kd">event</span> <span class="n">PaymentAuthorized</span> <span class="kp">is</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
@@ -5794,6 +5804,7 @@ PaymentGateway, NotificationService, HRSystem,
 AccountingSystem, PrintingService, PhotographyService.</p>
 <h2 id="epics-use-cases">Epics / Use Cases<a class="headerlink" href="#epics-use-cases" title="Permanent link">&para;</a></h2>
 <p>Epics capture user journeys across contexts:</p>
+<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">epic</span> <span class="n">KitchenWorkflow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kd">user</span> <span class="n">Chef</span> <span class="kp">wants</span> <span class="s2">&quot;to manage kitchen tickets digitally&quot;</span>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;no orders are lost and cooks can read tickets clearly&quot;</span>
