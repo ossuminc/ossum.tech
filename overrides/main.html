@@ -28,13 +28,8 @@
   <link rel="apple-touch-icon" href="{{ 'assets/images/apple-touch-icon.jpg' | url }}" type="image/jpeg"/>
 
   {#
-    Cross-site search assets, loaded on every page.
-
-    The LOADER lives here rather than in the `hero` block below because there
-    are two possible mount points and only one of them is in `hero`: the About
-    page suppresses the bar and hosts its own container alongside the prose
-    explaining what each search field covers. Putting the loader in the
-    conditional block left About with a container and nothing to fill it.
+    Cross-site search assets, plus the script that mounts the Full Search field
+    and moves it into the header. See the `hero` block below for the markup.
 
     Assets come from /pagefind/, written by scripts/build-search-index.sh.
     Root-relative, so this behaves identically in production and in
@@ -45,9 +40,30 @@
   <script>
     window.addEventListener("DOMContentLoaded", function () {
       var bar = document.querySelector(".ossum-fullsearch");
-      var mount = document.getElementById("ossum-fullsearch")
-               || document.getElementById("pagefind-search");
+      var mount = document.getElementById("ossum-fullsearch");
       if (!mount) return;
+
+      // Move the bar INTO the header, between the title row and the tabs, so
+      // it reads as part of the site chrome. It was originally rendered below
+      // the header and was missed completely -- it looked like page content.
+      //
+      // Relocated rather than templated because with navigation.tabs.sticky
+      // Material renders the tabs inside partials/header.html, so there is no
+      // block between the title row and the tabs to hook. Copying that partial
+      // would pin this repo to one Material release.
+      //
+      // If Material renames these classes the move simply does not happen and
+      // the bar stays where the template put it -- visually worse, still
+      // working. That is why the markup lives in `hero` and not in this script.
+      if (bar) {
+        var header = document.querySelector(".md-header");
+        var tabs = header && header.querySelector(".md-tabs");
+        if (header) {
+          bar.classList.add("ossum-fullsearch--in-header");
+          if (tabs) header.insertBefore(bar, tabs);
+          else header.appendChild(bar);
+        }
+      }
 
       if (typeof PagefindUI === "undefined") {
         // The index is missing or not built yet. Hide the bar rather than
@@ -66,9 +82,7 @@
         resetStyles: false,
       });
       var input = mount.querySelector("input");
-      if (input && mount.id === "ossum-fullsearch") {
-        input.id = "ossum-fullsearch-input";
-      }
+      if (input) input.id = "ossum-fullsearch-input";
     });
   </script>
 {% endblock %}
@@ -82,19 +96,19 @@
   below it and queries the Pagefind index, built over the published HTML of
   every product, so it finds what the title-bar box cannot.
 
-  WHY `hero` AND NOT A PARTIAL OVERRIDE:
-  `navigation.tabs.sticky` is enabled (sites/common.yml), so Material renders
-  the tabs row inside partials/header.html and base.html's `tabs` block emits
-  nothing. That makes `hero` -- an empty, officially supported block -- sit
-  directly beneath the WHOLE sticky header. Copying partials/search.html to get
-  the same placement would pin this repo to one Material release for no gain.
+  WHY IT IS RENDERED HERE AND THEN MOVED:
+  it belongs inside the header, between the title row and the tabs. With
+  navigation.tabs.sticky Material renders the tabs inside partials/header.html,
+  so no template block exists at that point -- reaching it would mean copying
+  that partial and pinning this repo to one Material release. Rendering into
+  `hero` (an empty, officially supported block just below the header) and
+  relocating with a few lines of script gets the same placement, and degrades
+  to a working-but-lower bar if Material ever renames the classes.
+
+  It is site chrome, so it renders on EVERY page including About, which
+  explains what the two fields cover but carries no duplicate input.
 #}
 {% block hero %}
-  {# About hosts its own copy, in context with the explanation of what each
-     field covers, so the bar is suppressed there to avoid two identical inputs
-     on one page. The product sites have no about/ page, so this is never true
-     for them. #}
-  {% if page.url != "about/" %}
   <div class="ossum-fullsearch" data-pagefind-ignore>
     <div class="ossum-fullsearch__inner md-grid">
       <label class="ossum-fullsearch__label" for="ossum-fullsearch-input">
@@ -108,5 +122,4 @@
       </noscript>
     </div>
   </div>
-  {% endif %}
 {% endblock %}
