@@ -151,9 +151,30 @@
   <script>
     window.addEventListener("DOMContentLoaded", function () {
       var bar = document.querySelector(".ossum-fullsearch");
-      var mount = document.getElementById("ossum-fullsearch")
-               || document.getElementById("pagefind-search");
+      var mount = document.getElementById("ossum-fullsearch");
       if (!mount) return;
+
+      // Move the bar INTO the header, between the title row and the tabs, so
+      // it reads as part of the site chrome. It was originally rendered below
+      // the header and was missed completely -- it looked like page content.
+      //
+      // Relocated rather than templated because with navigation.tabs.sticky
+      // Material renders the tabs inside partials/header.html, so there is no
+      // block between the title row and the tabs to hook. Copying that partial
+      // would pin this repo to one Material release.
+      //
+      // If Material renames these classes the move simply does not happen and
+      // the bar stays where the template put it -- visually worse, still
+      // working. That is why the markup lives in `hero` and not in this script.
+      if (bar) {
+        var header = document.querySelector(".md-header");
+        var tabs = header && header.querySelector(".md-tabs");
+        if (header) {
+          bar.classList.add("ossum-fullsearch--in-header");
+          if (tabs) header.insertBefore(bar, tabs);
+          else header.appendChild(bar);
+        }
+      }
 
       if (typeof PagefindUI === "undefined") {
         // The index is missing or not built yet. Hide the bar rather than
@@ -172,9 +193,7 @@
         resetStyles: false,
       });
       var input = mount.querySelector("input");
-      if (input && mount.id === "ossum-fullsearch") {
-        input.id = "ossum-fullsearch-input";
-      }
+      if (input) input.id = "ossum-fullsearch-input";
     });
   </script>
 
@@ -476,8 +495,19 @@
     
     <div class="md-container" data-md-component="container">
       
-  
-  
+  <div class="ossum-fullsearch" data-pagefind-ignore>
+    <div class="ossum-fullsearch__inner md-grid">
+      <label class="ossum-fullsearch__label" for="ossum-fullsearch-input">
+        Full Search
+      </label>
+      <div id="ossum-fullsearch" class="ossum-fullsearch__ui"></div>
+      <noscript>
+        <span class="ossum-fullsearch__note">
+          Full Search needs JavaScript. The title-bar search still works.
+        </span>
+      </noscript>
+    </div>
+  </div>
 
       
         
@@ -1294,14 +1324,14 @@ Older releases are deliberately left out: each product publishes several
 versions and every alias is a full copy, so including them would return the same
 page three or four times. To search within an older release, open it and use the
 title-bar box.</p>
-<div id="pagefind-search" data-pagefind-ignore></div>
-
+<p>Both fields are at the top of every page: the title-bar box on the first row,
+<strong>Full Search</strong> on the band directly beneath it.</p>
 <div hidden="hidden" id="pagefind-unavailable">
 <div class="admonition warning">
 <p class="admonition-title">Search index unavailable</p>
-<p>The full-site search index could not be loaded. It is rebuilt after the
-documentation is published, so it may be briefly missing after a release.
-The title-bar box is unaffected.</p>
+<p>The full-site search index could not be loaded, so the Full Search field is
+hidden. It is rebuilt after the documentation is published, so it may be
+briefly missing after a release. The title-bar box is unaffected.</p>
 </div>
 </div>
 
