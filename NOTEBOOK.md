@@ -56,12 +56,19 @@ too: the grammar has `inlet = "inlet" identifier is type_ref`, so a type is
   also wrong: it listed `row`, `stack`, `panel` and `form`, none of which are
   group aliases (`form` is an *input* alias).
 
-**Still questionable on `element.md`, not changed:** its "Element Types" table
-(Give / Select / View / Activate) and its "Activate" section do not match the
-grammar's `input_aliases`, `output_aliases`, `acquisition_aliases` or
-`presentation_aliases`. There is no `activate` definition; `activates` is one
-of fifteen acquisition verbs. Left alone as a content rewrite rather than a
-containment fix.
+**`element.md` fully corrected (2026-07-31).** Its "Element Types" table
+invented four keywords that never existed — `Give`, `Select`, `View` and
+`Activate` as *definitions*. It now documents the real input and output
+aliases and their acquisition and presentation verbs, taken from the grammar.
+
+Navigation is not a definition: it is an input whose verb conveys the action,
+e.g. `button Checkout activates type Boolean`.
+
+**Measured, not assumed:** against riddlc 2.0.0-rc.1, `activates` parses and
+bare `activate` is **rejected** at the verb position. Reid asked for `activate`
+to be allowed, so `riddl/task/add-activate-acquisition-verb.md` requests it and
+the page carries a note saying only `activates` parses today. Remove that note
+when riddl confirms.
 
 ---
 

@@ -27,20 +27,44 @@ Groups have many aliases in RIDDL to accommodate different UI paradigms:
 `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
 `window`, `section`, `tab`, `flow` and `block`.
 
-| UI Element | RIDDL    | Description                                  |
-|------------|----------|----------------------------------------------|
-| Input      | Give     | input of data items to fill an aggregate     |
-| Input      | Select   | select item(s) from a list                   |
-| Output     | View     | presents a data value for consideration      |
-| Navigation | Activate | cause the application to change its context  |
-| Container  | Group    | groups elements together                     |
+### Input
 
+An input takes data *from* the user. It is written as an input alias, a name,
+an **acquisition verb**, and the type acquired:
 
+`input`, `form`, `text`, `button`, `picklist`, `selector`, `item`
 
-## Activate
+The acquisition verbs are interchangeable — pick whichever reads best:
 
-An Activate definition instructs the application to change context to a
-different group of elements, enabling navigation within the application.
+`acquires`, `reads`, `takes`, `accepts`, `admits`, `enters`, `provides`,
+`selects`, `chooses`, `picks`, `initiates`, `submits`, `triggers`,
+`activates`, `starts`
+
+### Output
+
+An output presents data *to* the user, written as an output alias, a name, a
+**presentation verb**, and what is presented:
+
+`output`, `document`, `list`, `table`, `graph`, `animation`, `picture`
+
+Presentation verbs: `presents`, `shows`, `displays`, `writes`, `emits`
+
+## Navigation
+
+There is **no** `activate` definition. Navigation is expressed as an input
+whose acquisition verb conveys the action — most naturally a `button` with
+`activates` or `triggers`:
+
+<!-- riddl: skip reason="illustrative fragment; references types this page does not define" -->
+```riddl
+button Checkout activates type Boolean
+```
+
+!!! note "`activate` vs `activates`"
+    Only the third-person form `activates` parses today; the bare `activate` is
+    rejected. Adding it is
+    [requested of the compiler](https://github.com/ossuminc/riddl) — until it
+    ships, write `activates`.
 
 ## Occurs In
 * [Group](group.md)
