@@ -356,7 +356,7 @@ handler OrderCommands is {
     let orderId = "new OrderId"
 
     // Validate with conditional
-    when "inventory is available" then {
+    when prompt("inventory is available") then {
       // Produce an event
       send event OrderPlaced to outlet Events
       // Update state
@@ -382,7 +382,7 @@ handler OrderCommands is {
 | `tell` | Send a message to a processor | `tell command X to context Y` |
 | `do` | Describe an action in prose | `do "recompute the totals"` |
 | `error` | Signal error | `error "error message"` |
-| `when/then/else/end` | Conditional | `when "condition" then { } else { } end` |
+| `when/then/else/end` | Conditional | `when prompt("condition") then { } else { } end` |
 | `morph` | Transform state | `morph entity X to state Y` |
 | `become` | Change handler | `become handler NewHandler` |
 | `return` | Return value | `return "result expression"` |
@@ -450,12 +450,12 @@ entity Account is {
 
   handler Commands is {
     on command Deposit {
-      when "amount is positive" then {
+      when prompt("amount is positive") then {
         send event MoneyDeposited to outlet Events
       } end
     }
     on command Withdraw {
-      when "balance >= amount" then {
+      when prompt("balance >= amount") then {
         send event MoneyWithdrawn to outlet Events
       } else {
         error "Insufficient funds"

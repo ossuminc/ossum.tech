@@ -1071,7 +1071,7 @@ A bare reference is resolved and checked to be Boolean-typed; a clearly
 non-Boolean condition is an Error.
 
 !!! warning "A bare string condition is deprecated"
-    `when "the user is authenticated" then` still parses but draws a
+    `when prompt("the user is authenticated") then` still parses but draws a
     `[deprecated]` message. Write `when prompt("…")` instead.
 
     The reason is consistency: everywhere else in RIDDL a bare quoted string

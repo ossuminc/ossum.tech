@@ -25,7 +25,7 @@ Evaluating the condition is left to code generation.
 !!! warning "The bare-string form is deprecated"
     <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
     ```riddl
-    when "user is authenticated" then { ??? } end   // deprecated
+    when prompt("user is authenticated") then { ??? } end   // deprecated
     ```
 
     It still parses, but draws a `[deprecated]` message. Everywhere else in
@@ -63,7 +63,7 @@ Numeric expressions involve comparisons and arithmetic:
 
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
-when "order.total > 100" then {
+when prompt("order.total > 100") then {
   // apply discount
 } end
 ```
@@ -82,7 +82,7 @@ Boolean expressions combine conditions using logical operators:
 
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
-when "user.isVerified AND order.total > 0" then {
+when prompt("user.isVerified AND order.total > 0") then {
   // process order
 } end
 ```

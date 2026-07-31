@@ -72,6 +72,49 @@ when riddl confirms.
 
 ---
 
+### TASK B — RIDDL example fences ⬅ **IN PROGRESS, 5/5/5**
+
+Metric is **errors fixed**, not fences failing: a fence carries several stacked
+errors, so the count only drops when its *last* one clears. Target is ≤3 per
+file (Reid: "0,1,2,3 are good enough").
+
+| File | Start | Now |
+|---|---|---|
+| `guides/authors/index.md` | 9 | **5** |
+| `guides/authors/authoring-riddl.md` | 18 | **5** |
+| `guides/authors/design/ui-modeling.md` | 5 | **5** |
+| everything else | — | ≤3 already |
+
+Site total 142 → 47. **~65 real errors fixed.**
+
+**riddlc 2.0.0-rc.5** changes nothing for these fences (same 48 as rc.1) — they
+are documentation errors, not compiler gaps. It *does* accept bare `activate`,
+so element.md now documents it.
+
+**Adding briefs/descriptions will not help.** The remaining failures are all
+`[error]` and `[deprecated]`; the validator gates on those only, never on
+missing-brief warnings. Checked before acting on it.
+
+**Error classes already swept site-wide (all now zero outside the tutorial):**
+bare-string `when` conditions (use `when prompt("...")` — the compiler says so
+in its own message), `if/then/else`, `user X is { }`, `send ... to context X`,
+bare `option X` in a body, pre-2.0 trailing metadata, `state X is { fields }`.
+
+**The five left on each file are individually distinct**, no longer a class:
+
+- `index.md`: a use-case body that still will not take `step from ... to ...`
+  after the story; a `yield`-related fence; two unlabelled; one deprecated saga
+  `requires { }` whose message I could not reproduce standalone.
+- Use this to see the exact line: load `scripts/validate-riddl-examples.py` as a
+  module, call `v.wrap(kind, body, prelude)` and print numbered lines — the
+  reported positions are into the *wrapped* source, not the markdown.
+
+**Trap that cost time:** a fixer script that asserts *before* writing loses
+every earlier fix when a later assert fails. Write unconditionally, report
+misses.
+
+---
+
 ### TASK D — navigation and content rework ✅ **DEPLOYED 2026-07-31**
 
 Top menu carries RIDDL / riddlg / Synapify (root-relative, into each product's

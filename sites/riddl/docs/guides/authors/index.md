@@ -202,8 +202,8 @@ context Catalog is {
     state Active of record ActiveData is {
       handler ActiveHandler is {
         on command UpdatePrice {
-          when "price is different from current" then {
-            set field info.price to @UpdatePrice.newPrice
+          when prompt("price is different from current") then {
+            set field info.price to UpdatePrice.newPrice
             send event PriceUpdated to outlet Events
           } end
         }
@@ -227,7 +227,7 @@ on clauses that match message types and execute statements.
 ```riddl
 handler CartHandler is {
   on command AddItem {
-    when "item not already in cart" then {
+    when prompt("item not already in cart") then {
       do "add the item to the cart with quantity 1"
     } else {
       do "increment the quantity of the existing item"
@@ -236,7 +236,7 @@ handler CartHandler is {
   }
 
   on command RemoveItem {
-    when "item exists in cart" then {
+    when prompt("item exists in cart") then {
       do "remove the item from the cart"
       send event ItemRemoved to outlet Events
     } else {
@@ -245,7 +245,7 @@ handler CartHandler is {
   }
 
   on query GetCartContents {
-    yield result CartContents with { items: @fields.items }
+    yield result CartContents
   }
 } with {
   briefly "Handles shopping cart operations"
@@ -273,10 +273,12 @@ domain OnlineRetail is {
     so that "they can receive goods they need"
 
     case BrowseProducts is {
-      user Customer "opens the product catalog"
-      then user Customer "searches for a product"
-      then Catalog.Product "returns matching products"
-      then user Customer "views product details"
+      user Customer wants to "browse the catalogue"
+      so that "they can find a product worth buying"
+
+      step from user Customer "opens the product catalog" to context Catalog "shows the catalogue"
+      step from user Customer "searches for a product" to context Catalog "returns matching products"
+      step from context Catalog "presents the details" to user Customer "views product details"
     }
 
     case AddToCart is {
@@ -391,6 +393,8 @@ Use the `term` definition to establish your ubiquitous language:
 <!-- riddl: in-domain -->
 ```riddl
 context Shopping is {
+  ???
+} with {
   term SKU is {
     |Stock Keeping Unit -- a unique identifier for a product variant. Each
     |SKU represents a specific combination of product attributes (size,
@@ -398,11 +402,9 @@ context Shopping is {
   }
 
   term Abandonment is {
-    briefly "When a customer leaves without completing purchase"
-    described as {
-      |Cart abandonment occurs when a customer adds items to their
-      |cart but exits without completing the checkout process.
-    }
+    |When a customer leaves without completing purchase. Cart abandonment
+    |occurs when a customer adds items to their cart but exits without
+    |completing the checkout process.
   }
 }
 ```
@@ -414,7 +416,8 @@ When you know something needs to be defined but aren't ready to detail it:
 <!-- riddl: in-context -->
 ```riddl
 entity Product is {
-  ??? // TODO: Define product entity
+  // TODO: Define product entity
+  ???
 }
 ```
 
@@ -429,7 +432,7 @@ handler OrderHandler is {
 
   on command CancelOrder {
     do "validate order can be cancelled"
-    set field status to OrderStatus.Cancelled
+    do "mark the order cancelled"
     send event OrderCancelled to outlet Events
   }
 }
@@ -458,7 +461,7 @@ entity Account is {
         send event Deposited to outlet Events
       }
       on command Withdraw {
-        when "sufficient balance" then {
+        when prompt("sufficient balance") then {
           do "subtract amount from balance"
           send event Withdrawn to outlet Events
         } else {
@@ -486,12 +489,12 @@ entity Order is {
     handler PendingHandler is {
       on command ConfirmPayment {
         morph entity Order to state Paid
-          with command ConfirmPayment
+          with record PaidData
         send event PaymentConfirmed to outlet Events
       }
       on command Cancel {
         morph entity Order to state Cancelled
-          with command Cancel
+          with record CancelledData
         send event OrderCancelled to outlet Events
       }
     }
@@ -501,7 +504,7 @@ entity Order is {
     handler PaidHandler is {
       on command Ship {
         morph entity Order to state Shipped
-          with command Ship
+          with record ShipData
         send event OrderShipped to outlet Events
       }
     }
