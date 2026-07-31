@@ -9,15 +9,25 @@
 #
 #   branch      publishes
 #   ----------  ----------------------------------------------------------
-#   main        the shell, riddl 2.0, riddlg 0.6, synapify 0.17
-#   docs/1.x    riddl 1.31 only -- see docs-version.yml on that branch
+#   main        EVERYTHING: the shell, riddl 1.31 + 2.0, riddlg 0.6,
+#               synapify 0.17
 #
-# DANGER: two branches must never declare the same prefix AND the same alias.
-# The workflow deploys with --update-aliases, which MOVES an alias to the most
-# recent deploy. If docs/1.x still declared riddl + latest after 2.0 was
-# promoted, any later push to it would silently drag the site default back to
-# 1.x -- months later, from an unrelated typo fix, with no error at all. See
-# scripts/promote-2.0-to-latest.md.
+# `main` is the only publishing branch (2026-07-31, TASK G). The RIDDL 1.x line
+# used to publish from a `docs/1.x` branch; it is now sites/riddl-1x/ here, so
+# both RIDDL versions build from one tree and share one copy of the chrome.
+#
+# That also RETIRES the old danger note, which warned that two branches must
+# never declare the same prefix AND alias -- because --update-aliases MOVES an
+# alias to the most recent deploy, a later push to the wrong branch could
+# silently drag the site default back to 1.x. One branch cannot race itself, so
+# promoting 2.0 is now an edit to this file alone: move `latest` from the 1.31
+# entry to the 2.0 entry, in one commit. See scripts/promote-2.0-to-latest.md.
+#
+# Two entries share the `riddl` prefix on purpose. Each becomes its own mike
+# deploy at its own version, and they coexist in one <prefix>/versions.json.
+# Order matters for one thing only: `mike set-default` runs per entry, so the
+# LAST riddl entry decides where /riddl/ redirects. Keep the entry holding
+# `latest` last.
 
 # The unversioned part of the site: landing page, About, Coming Soon. Deployed
 # to the gh-pages root, without mike, because none of it tracks a product
@@ -26,13 +36,22 @@ shell:
   config: sites/shell/mkdocs.yml
 
 sites:
-  # `latest` deliberately stays on 1.31, published from docs/1.x, until RIDDL
-  # 2.0 ships final. Promoting it is scripts/promote-2.0-to-latest.md.
   - prefix: riddl
     config: sites/riddl/mkdocs.yml
     version: "2.0"
     aliases:
       - next
+
+  # `latest` deliberately stays on 1.31 until RIDDL 2.0 ships final. Promoting
+  # it is scripts/promote-2.0-to-latest.md -- now a single edit to this file.
+  #
+  # MUST stay after the 2.0 entry: `mike set-default` runs once per entry, so
+  # the last `riddl` entry is the one that decides where /riddl/ redirects.
+  - prefix: riddl
+    config: sites/riddl-1x/mkdocs.yml
+    version: "1.31"
+    aliases:
+      - latest
 
   - prefix: riddlg
     config: sites/riddlg/mkdocs.yml

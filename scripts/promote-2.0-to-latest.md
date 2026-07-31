@@ -4,18 +4,18 @@ Run this when RIDDL **2.0 final** ships. Until then, `latest` points at 1.31 —
 which is correct, because `latest` must name the newest *released* version and
 2.0 has been a release candidate.
 
-Current state (as of the 2026-07-30 per-product split):
+Current state (since TASK G, 2026-07-31 — everything publishes from `main`):
 
 ```
-riddl/2.0  [next]      published from main
-riddl/1.31 [latest]    published from docs/1.x
+riddl/2.0  [next]      sites/riddl/       docs-version.yml entry 1
+riddl/1.31 [latest]    sites/riddl-1x/    docs-version.yml entry 2
 ```
 
 Target state:
 
 ```
-riddl/2.0  [latest]    published from main
-riddl/1.31             published from docs/1.x, no alias
+riddl/2.0  [latest]    sites/riddl/       entry 2  <- note the swap
+riddl/1.31             sites/riddl-1x/    entry 1, no alias
 ```
 
 Only the **riddl** prefix is involved. riddlg and Synapify have their own
@@ -23,62 +23,41 @@ version axes and their own `latest`; nothing here touches them.
 
 ---
 
-## Read this first: the silent revert
+## This used to be dangerous. It is not any more.
 
-**Two branches must never both declare `latest`.** The workflow deploys with
-`--update-aliases`, which *moves* an alias to whatever version was deployed
-most recently. So if `docs/1.x` still declares `latest` after you promote 2.0:
+**Historical note, so nobody reintroduces the old dance.** When 1.31 published
+from a `docs/1.x` branch, the two branches could both declare `latest`, and
+because the workflow deploys with `--update-aliases` — which *moves* an alias
+to whatever was deployed most recently — a later push to the wrong branch would
+silently revert the site default months afterwards, with no error. The old
+procedure therefore had a mandatory ordering: strip the alias from one branch,
+push, then add it to the other.
 
-```
-flip main            ->  2.0 [latest, next]   1.31
-someone fixes a typo
-   on docs/1.x       ->  2.0 [next]           1.31 [latest]   <-- reverted
-```
+Both entries now live in one file on one branch, so **there is no ordering
+constraint and no race.** The promotion is a single commit.
 
-The site silently goes back to serving 1.x as its default, months later,
-triggered by an unrelated change. There is no error and nothing fails.
-
-**Therefore: remove `latest` from `docs/1.x` BEFORE adding it to `main`.**
+**The one rule that survives:** `mike set-default` runs once per entry, so the
+**last `riddl` entry** in `docs-version.yml` decides where `/riddl/` redirects.
+Swap the order of the two entries as well as the alias, or `/riddl/` will keep
+redirecting to whatever the last entry names.
 
 ---
 
 ## Procedure
 
-### 1. Take `latest` off docs/1.x — do this first
+### 1. Move the alias — one commit
 
-```bash
-git checkout docs/1.x
-```
-
-Edit `docs-version.yml` to publish 1.31 with **no** alias:
+Edit `docs-version.yml`: move `latest` from the 1.31 entry to the 2.0 entry,
+**and put the 2.0 entry last**. Leave riddlg and synapify alone.
 
 ```yaml
 sites:
   - prefix: riddl
-    config: sites/riddl/mkdocs.yml
+    config: sites/riddl-1x/mkdocs.yml
     version: "1.31"
     aliases: []
-```
 
-```bash
-git commit -am "Release 1.31's claim on the latest alias, ahead of promoting 2.0"
-git push origin docs/1.x
-```
-
-CI redeploys 1.31 without the alias. `latest` still exists and still points at
-1.31 at this moment — nothing breaks, because removing a declaration does not
-delete the alias.
-
-### 2. Give `latest` to main
-
-```bash
-git checkout main
-```
-
-Edit `docs-version.yml` — change **only** the `riddl` entry, leaving the
-riddlg and synapify entries alone:
-
-```yaml
+  # Last riddl entry wins `mike set-default`, so /riddl/ -> latest -> 2.0
   - prefix: riddl
     config: sites/riddl/mkdocs.yml
     version: "2.0"
@@ -86,12 +65,22 @@ riddlg and synapify entries alone:
       - latest
 ```
 
+Update `VERSION_SOURCE` in `scripts/check-cross-site-links.py` in the same
+commit, so `latest` resolves against `sites/riddl/` rather than
+`sites/riddl-1x/`:
+
+```python
+"1.31": "riddl-1x",
+"latest": "riddl",     # was riddl-1x
+```
+
 ```bash
 git commit -am "Promote RIDDL 2.0 to the latest alias"
 git push origin main
 ```
 
-CI moves `latest` to 2.0. **The site's default is now 2.0.**
+CI moves `latest` to 2.0 and redeploys 1.31 without an alias. **The site's
+default is now 2.0.**
 
 ### 3. Retire the `next` alias
 
@@ -166,9 +155,8 @@ The pre-versioning backup is still on the remote:
 git push --force origin gh-pages-preversioning:gh-pages
 ```
 
-To undo only the promotion, reverse steps 1 and 2 — put `latest` back on
-`docs/1.x`, remove it from `main`, and push `docs/1.x` **last** so it wins the
-alias.
+To undo only the promotion, revert the single commit and push. There is no
+branch ordering to get right any more.
 
 ---
 
@@ -176,13 +164,16 @@ alias.
 
 The same procedure generalises. When 2.1 ships:
 
-1. Remove `latest` from `main`'s `docs-version.yml` if 2.1 publishes from a
-   different branch; otherwise just bump `version:` and keep the alias.
+1. Add a `sites/riddl-2x/`-style entry only if 2.0 must stay maintained
+   separately; otherwise bump `version:` on the existing entry and keep the
+   alias.
 2. One mike version per RIDDL **minor** release, never per patch.
-3. Whichever branch publishes the newest release owns `latest`, and **only**
-   that branch may declare it.
-
-4. Aliases belong to ONE prefix. `riddl/latest` and `riddlg/latest` are
+3. Whichever entry names the newest release owns `latest`, and it must be the
+   **last** entry for its prefix so `set-default` lands on it.
+4. Keep `VERSION_SOURCE` in `scripts/check-cross-site-links.py` in step with
+   this file — it maps each version and alias to the source tree that builds
+   it, and nothing else enforces the correspondence.
+5. Aliases belong to ONE prefix. `riddl/latest` and `riddlg/latest` are
    different aliases in different `versions.json` files and never interact.
 
 Related: `scripts/migrate-to-per-product-versioning.md` (the current layout)

@@ -2,21 +2,22 @@ name: publishing
 on:
   push:
     branches:
-      # Each publishing branch declares what it publishes in docs-version.yml.
-      # Work branches are deliberately absent: work in progress must not
-      # refresh the production site.
-      - main        # the shell, RIDDL 2.0, riddlg, Synapify
-      - docs/1.x    # RIDDL 1.x maintenance line only
+      # `main` is the ONLY publishing branch. It declares everything it
+      # publishes in docs-version.yml, including the RIDDL 1.x maintenance
+      # line, which lives in sites/riddl-1x/ rather than on a branch of its own
+      # (TASK G, 2026-07-31). Work branches are deliberately absent: work in
+      # progress must not refresh the production site.
+      - main
 permissions:
   contents: write
 
-# Both publishing branches commit to the same gh-pages branch, so two runs at
-# once race: whichever pushes second is rejected with "fetch first" and its
-# deploy is lost. That is exactly what happened when main and docs/1.x were
-# pushed seconds apart.
+# Kept even though only one branch publishes now. Two pushes to main in quick
+# succession still start two runs, both committing to gh-pages, and the second
+# would be rejected with "fetch first" -- its deploy silently lost. That
+# happened for real when main and docs/1.x were pushed seconds apart.
 #
-# A single queue fixes it. cancel-in-progress is deliberately FALSE -- these
-# runs publish; cancelling one would drop a deploy rather than defer it.
+# cancel-in-progress is deliberately FALSE: these runs publish, so cancelling
+# one drops a deploy rather than deferring it.
 #
 # Do NOT reach for mike's --ignore-remote-status as a workaround. It does not
 # serialise anything; it just overwrites whatever the other run published.

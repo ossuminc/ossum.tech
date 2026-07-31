@@ -23,12 +23,6 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRATCH="${TMPDIR:-/tmp}/ossum-tech-preview"
 SERVE="$SCRATCH/site"
 
-# The RIDDL 1.x line is published from its own branch, so it has to be deployed
-# from there. Everything else comes from the current branch's docs-version.yml.
-# Overridable so a not-yet-merged branch can be rehearsed:
-#   V1_BRANCH=restructure/docs-1.x scripts/preview-versioned-site.sh
-V1_BRANCH="${V1_BRANCH:-docs/1.x}"; V1_VERSION="1.31"; V1_ALIAS="latest"
-
 command -v mike >/dev/null || { echo "mike not installed: pip install -r requirements.txt" >&2; exit 1; }
 
 # Read docs-version.yml with the SAME interpreter mkdocs is installed under.
@@ -55,8 +49,6 @@ git branch --quiet -f "$SRC_BRANCH" "$(git -C "$REPO" rev-parse HEAD)" 2>/dev/nu
 if git rev-parse --verify --quiet origin/gh-pages >/dev/null; then
   git branch --quiet -f gh-pages "$(git rev-parse origin/gh-pages)"
 fi
-git rev-parse --verify --quiet "origin/$V1_BRANCH" >/dev/null \
-  && git branch --quiet -f "$V1_BRANCH" "origin/$V1_BRANCH"
 git remote remove origin
 
 echo "==> Clearing the previous layout from the gh-pages root"
@@ -94,20 +86,10 @@ deploy() {  # prefix config version aliases...
   fi
 }
 
-# RIDDL 1.31 from its own branch. That branch must already carry the sites/
-# layout; if it does not, this step is skipped rather than deploying the old
-# shape into the new tree.
-if git rev-parse --verify --quiet "$V1_BRANCH" >/dev/null; then
-  git checkout --quiet "$V1_BRANCH"
-  if [ -f sites/riddl/mkdocs.yml ]; then
-    ./scripts/sync-shared-assets.sh >/dev/null
-    deploy riddl sites/riddl/mkdocs.yml "$V1_VERSION" "$V1_ALIAS"
-  else
-    echo "==> SKIPPING $V1_BRANCH: not yet restructured into sites/"
-  fi
-  git checkout --quiet "$SRC_BRANCH"
-  ./scripts/sync-shared-assets.sh >/dev/null
-fi
+# RIDDL 1.31 no longer needs a branch checkout: it is sites/riddl-1x/ on this
+# branch and comes through the ordinary loop below like every other entry
+# (TASK G, 2026-07-31). The previous version of this script checked out
+# docs/1.x here, deployed it, and switched back.
 
 # Everything this branch declares.
 while IFS='|' read -r prefix config version aliases; do

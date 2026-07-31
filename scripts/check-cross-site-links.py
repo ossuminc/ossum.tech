@@ -29,6 +29,23 @@ SITES = {"riddl", "riddlg", "synapify"}  # prefixed sites; shell is at the root
 # so these are real paths on the deployed site, not just names.
 ALIASES = {"latest", "next"}
 
+# A URL prefix is not always one source directory. TWO trees publish under
+# `riddl` -- sites/riddl is 2.0, sites/riddl-1x is the 1.31 maintenance line --
+# so which tree a link resolves against depends on the VERSION segment.
+# Without this, every /riddl/1.31/... link would be checked against the 2.0
+# sources and reported broken wherever the two lines differ.
+#
+# Mirrors docs-version.yml; keep the two in step. When 2.0 is promoted,
+# `latest` moves to "riddl" here in the same commit that moves it there.
+VERSION_SOURCE = {
+    "riddl": {
+        "2.0": "riddl",
+        "next": "riddl",
+        "1.31": "riddl-1x",
+        "latest": "riddl-1x",
+    },
+}
+
 LINK = re.compile(r"\]\((/[^)\s]*?)(#[^)\s]*)?\)")
 
 
@@ -46,6 +63,14 @@ def doc_for(url: str) -> tuple[Path, str] | None:
         if version not in ALIASES and not re.fullmatch(r"\d+(\.\d+)*", version):
             return None
         rest = rest[1:]
+        # Resolve against the tree that actually publishes this version.
+        # An unmapped version is a dead link, not a pass: it names a version
+        # the site does not deploy.
+        if site in VERSION_SOURCE:
+            source = VERSION_SOURCE[site].get(version)
+            if source is None:
+                return None
+            site = source
     else:
         site, rest = "shell", parts
 

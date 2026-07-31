@@ -115,12 +115,24 @@ privacy policy existed once per RIDDL version, and the Synapify docs were
 stamped `2.0`. Each product now deploys under its own prefix with its own
 `versions.json` and its own version selector.
 
-| Deployed at | Source | Published from |
+| Deployed at | Source | Version |
 |---|---|---|
-| `/` | `sites/shell/` — landing, About, **IDE help** | `main`, **unversioned** |
-| `/riddl/<ver>/` | `sites/riddl/` — the language docs | `main` (2.0), `docs/1.x` (1.31) |
-| `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | `main` |
-| `/synapify/<ver>/` | `sites/synapify/` | `main` |
+| `/` | `sites/shell/` — landing, About, **IDE help** | **unversioned** |
+| `/riddl/2.0/` | `sites/riddl/` — the 2.0 language docs | 2.0 · `next` |
+| `/riddl/1.31/` | `sites/riddl-1x/` — the 1.x maintenance line | 1.31 · `latest` |
+| `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | 0.6 · `latest` |
+| `/synapify/<ver>/` | `sites/synapify/` | 0.17 · `latest` |
+
+**Everything publishes from `main`.** Two source trees share the `riddl`
+prefix, which is why the 1.x line is a *directory* and not a branch: as
+`docs/1.x` it needed every change to the shared chrome replicated by hand, and
+12 of that branch's 17 commits were exactly that. Forgetting was invisible —
+each branch built correctly on its own terms, so nothing in CI could catch it.
+See TASK G in NOTEBOOK.md.
+
+Order in `docs-version.yml` matters for one thing: `mike set-default` runs per
+entry, so the **last `riddl` entry decides where `/riddl/` redirects**. Keep
+the entry holding `latest` last.
 
 One documentation version per product **minor** version, never per patch.
 
@@ -128,9 +140,9 @@ The MCP guides live with riddlg, not with the language docs, because 21 of
 their 22 outbound links point at riddlg — they document the server riddlg
 drives, so they version with it.
 
-`docs-version.yml` is where a branch declares what it publishes; the
-release-time alias flip is an edit there, not a workflow change. **Only `main`
-and `docs/1.x` publish**, so work branches can be pushed freely.
+`docs-version.yml` is where `main` declares what it publishes; the release-time
+alias flip is an edit there, not a workflow change. **Only `main` publishes**,
+so work branches can be pushed freely.
 
 Shared theme config lives in `sites/common.yml`, pulled in with `INHERIT`.
 Shared logos and CSS live once in `common/` and are copied into each site by
@@ -255,13 +267,17 @@ crawlers that every version of every page is the same URL.
 candidate. Promoting it is a short procedure with one landmine, written up in
 **`scripts/promote-2.0-to-latest.md`**.
 
-The landmine, because it is worth knowing even without opening the file:
-**two branches must never both declare `latest`.** The workflow deploys with
-`--update-aliases`, which *moves* the alias to the most recent deploy — so if
-`docs/1.x` still declares `latest` after 2.0 is promoted, any later push to
-that branch silently drags the site's default back to 1.x. Months later, from
-an unrelated typo fix, with no error. Remove `latest` from `docs/1.x` **before**
-adding it to `main`.
+**The old landmine is gone.** It used to be that two branches must never both
+declare `latest`, because `--update-aliases` *moves* the alias to the most
+recent deploy — so a later push to `docs/1.x` could silently drag the site's
+default back to 1.x, months later, from an unrelated typo fix, with no error.
+Since both RIDDL lines publish from `main` (TASK G), one branch cannot race
+itself: promotion is moving `latest` from the 1.31 entry to the 2.0 entry in
+`docs-version.yml`, in a single commit.
+
+The one ordering rule that remains: `mike set-default` runs once per entry, so
+the **last `riddl` entry** in that file decides where `/riddl/` redirects. Move
+the entries, not just the alias, if you want `/riddl/` to follow.
 
 ### Migrating gh-pages
 
@@ -295,12 +311,19 @@ by showing what it forbids.
 **real riddlc**, which is the only way to know an example works. Unlike the
 checker above it is a **gate**: it exits non-zero on failure.
 
-```bash
-# 2.0 (this branch) -- the release/2 build
-python3 scripts/validate-riddl-examples.py ../bin/riddlc docs/riddl/quickstart.md
+**Point each tree at its own compiler.** Both live on `main` now, so nothing
+about the checkout tells you which one is meant — and the 2.0 RC formula owns
+the `riddlc` symlink on PATH, so the wrong pairing reports confident nonsense.
 
-# 1.31 (docs/1.x branch) -- the riddlc on PATH
-python3 scripts/validate-riddl-examples.py "$(which riddlc)" docs/riddl/quickstart.md
+```bash
+# 2.0 -- sites/riddl/, validated by the riddlc on PATH (2.0.0-rc.5)
+python3 scripts/validate-riddl-examples.py "$(which riddlc)" \
+  sites/riddl/docs/quickstart.md
+
+# 1.31 -- sites/riddl-1x/, validated by the 1.31 build, NOT the one on PATH
+python3 scripts/validate-riddl-examples.py \
+  /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc \
+  sites/riddl-1x/docs/quickstart.md
 ```
 
 Most fences are **fragments** and cannot validate as written, so each declares
@@ -596,8 +619,9 @@ Refer to the parent `../CLAUDE.md` for cross-project coordination guidance.
 ## Quick Reference
 
 There is **no `mkdocs.yml` at the repo root** — every command needs
-`-f sites/<site>/mkdocs.yml`, where `<site>` is `shell`, `riddl`, `riddlg` or
-`synapify`. Run `sync-shared-assets.sh` first or pages build without CSS.
+`-f sites/<site>/mkdocs.yml`, where `<site>` is `shell`, `riddl`, `riddl-1x`,
+`riddlg` or `synapify`. Run `sync-shared-assets.sh` first or pages build
+without CSS.
 
 | Task | Command |
 |------|---------|
@@ -611,16 +635,17 @@ There is **no `mkdocs.yml` at the repo root** — every command needs
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py "$(which riddlc)" sites/riddl/docs/quickstart.md` |
+| Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
-| Deploy | push to `main` or `docs/1.x`; CI loops over `docs-version.yml` |
+| Deploy | push to `main`; CI loops over `docs-version.yml` |
 
 Build every site before concluding a change is clean — a cross-site link edit
 can only break the site at the *other* end:
 
 ```bash
 ./scripts/sync-shared-assets.sh
-for s in shell riddl riddlg synapify; do
+for s in shell riddl riddl-1x riddlg synapify; do
   mkdocs build --strict -f sites/$s/mkdocs.yml 2>&1 | grep -E 'anchor|WARNING|ERROR'
 done
 python3 scripts/check-cross-site-links.py
