@@ -9,22 +9,6 @@
          <lastmod>2026-07-31</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/OSS/</loc>
-         <lastmod>2026-07-31</lastmod>
-    </url>
-    <url>
-         <loc>https://ossum.tech/riddl/1.31/OSS/authoring-riddl/</loc>
-         <lastmod>2026-07-31</lastmod>
-    </url>
-    <url>
-         <loc>https://ossum.tech/riddl/1.31/OSS/intellij-plugin/</loc>
-         <lastmod>2026-07-31</lastmod>
-    </url>
-    <url>
-         <loc>https://ossum.tech/riddl/1.31/OSS/vscode-extension/</loc>
-         <lastmod>2026-07-31</lastmod>
-    </url>
-    <url>
          <loc>https://ossum.tech/riddl/1.31/concepts/</loc>
          <lastmod>2026-07-31</lastmod>
     </url>
@@ -218,6 +202,10 @@
     </url>
     <url>
          <loc>https://ossum.tech/riddl/1.31/guides/authors/</loc>
+         <lastmod>2026-07-31</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/1.31/guides/authors/authoring-riddl/</loc>
          <lastmod>2026-07-31</lastmod>
     </url>
     <url>
