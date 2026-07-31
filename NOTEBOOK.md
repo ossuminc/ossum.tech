@@ -11,9 +11,39 @@ to the task file and note completion in this notebook.
 
 ---
 
-## RESUME HERE — open work as of 2026-07-30
+## RESUME HERE — open work as of 2026-07-31
 
-### TASK E — clickable search result rows ⬅ **QUEUED** (after A and B)
+### TASK F — build on sbt 2 / riddl 2.0.0-rc.5 ✅ **DONE 2026-07-31**
+
+`build.sbt` was pinned at riddl **1.29.0**, which forced the 2.0 grammar to be
+hand-copied out of riddl's `release/2`. Now on **sbt 2.0.2**, **sbt-ossuminc
+3.1.0**, **riddl 2.0.0-rc.5**, and `sbt extractGrammar` works again — its first
+run differed from the hand-copy by exactly one token (`activate`), which is the
+evidence the extraction path is correct.
+
+**Scala is 3.9.0-RC4 here, not the org-standard 3.8.4**, because that is what
+riddl publishes 2.0.0-rc.5 with. An RC compiler emits *experimental* TASTy
+(28.9-experimental-1), readable only by the exact compiler that produced it;
+3.8.4 accepts 28.0–28.8 and failed to load every riddl class. The
+`asTerm called on not-a-Term` crash that surfaced is dotty falling over after
+those loads fail — **not** a source error, and a day-waster if read as one.
+Keep the two versions in step when bumping riddl.
+
+**This affects every riddl consumer**, and final 2.0.0 should not ship built on
+an RC compiler — it would force all of them onto that exact RC. Not filed as a
+riddl task (Reid's call, 2026-07-31); noted here so it is not rediscovered.
+
+Two sbt 2 API breaks fixed in `extractGrammar`: `fullClasspathAsJars` yields
+`HashedVirtualFileRef` (route through `fileConverter`), and sbt 2 caches task
+results by hashing inputs, so a side-effecting task needs `Def.uncached`.
+Its output path also still pointed at the pre-split `docs/riddl/references/`.
+
+`release/2` in THIS repo is fully merged into `main` (0 commits ahead, last
+touched 2026-07-29) — a stale branch, safe to delete.
+
+### TASK E — clickable search result rows ⬅ **NEXT**
+
+(A and B are done, so this is the top of the queue.)
 
 In the Full Search results, only the **title** is a link, which is not obvious.
 The whole result row should be clickable. Pagefind renders each hit as
@@ -72,46 +102,73 @@ when riddl confirms.
 
 ---
 
-### TASK B — RIDDL example fences ⬅ **IN PROGRESS, 5/5/5**
+### TASK B — RIDDL example fences ✅ **all three files at zero (2026-07-31)**
 
-Metric is **errors fixed**, not fences failing: a fence carries several stacked
-errors, so the count only drops when its *last* one clears. Target is ≤3 per
-file (Reid: "0,1,2,3 are good enough").
+| File | Start | Now | Fences checked |
+|---|---|---|---|
+| `guides/authors/index.md` | 9 | **0** | 13 |
+| `guides/authors/authoring-riddl.md` | 18 | **0** | 18 (was 15) |
+| `guides/authors/design/ui-modeling.md` | 5 | **0** | 9 (was 7) |
+| everything else | — | ≤3 | — |
 
-| File | Start | Now |
-|---|---|---|
-| `guides/authors/index.md` | 9 | **5** |
-| `guides/authors/authoring-riddl.md` | 18 | **5** |
-| `guides/authors/design/ui-modeling.md` | 5 | **5** |
-| everything else | — | ≤3 already |
+**Site-wide: 142 fences validated, 28 failing, no file above 3.** Coverage rose
+while the count fell — five fences that were `skip`ped to dodge harness
+limitations are now genuinely under test.
 
-Site total 142 → 47. **~65 real errors fixed.**
+**Two harness gaps fixed**, both of which had been papered over with `skip`:
 
-**riddlc 2.0.0-rc.5** changes nothing for these fences (same 48 as rc.1) — they
-are documentation errors, not compiler gaps. It *does* accept bare `activate`,
-so element.md now documents it.
+- `no-prelude=<Name>` — a page prelude was injected into *every* fence, so a
+  fence DEFINING one of those names collided with it. It now names what it
+  owns and keeps the rest of the vocabulary. Selective on purpose: a bare
+  `no-prelude` was tried first and traded one duplicate-name error for a pile
+  of unresolved paths.
+- `in-app-context` — groups/inputs/outputs are legal only in a context with the
+  `application` intention. `in-context` gives a plain context (group = hard
+  error) and `in-application`, despite the name, wraps in an *on-clause*.
 
-**Adding briefs/descriptions will not help.** The remaining failures are all
-`[error]` and `[deprecated]`; the validator gates on those only, never on
-missing-brief warnings. Checked before acting on it.
+**Two content faults worth remembering**, both cases of a page contradicting
+itself:
 
-**Error classes already swept site-wide (all now zero outside the tutorial):**
-bare-string `when` conditions (use `when prompt("...")` — the compiler says so
-in its own message), `if/then/else`, `user X is { }`, `send ... to context X`,
-bare `option X` in a body, pre-2.0 trailing metadata, `state X is { fields }`.
+- `authoring-riddl.md`'s Predefined Types table invented `Blob` and `Money`,
+  kept the deprecated `Abstract`, misspelled `TimeStamp`, and listed `List`,
+  `Set`, `Map`, `Sequence`, `Mapping` as type *names*. They are type
+  **expressions** (`sequence of X`, `set of X`, `mapping from K to V`, `many X`).
+  The fences using `List of X` were downstream of the table, so the table was
+  corrected against the grammar rather than patched around.
+- Both `ui-modeling.md` and `index.md` had epics running the user straight into
+  domain contexts — the exact thing `ui-modeling.md` documents as an error 180
+  lines further down. Both now route through an application context.
 
-**The five left on each file are individually distinct**, no longer a class:
+**Grammar facts that cost time** (all measured against riddlc 2.0.0-rc.5):
 
-- `index.md`: a use-case body that still will not take `step from ... to ...`
-  after the story; a `yield`-related fence; two unlabelled; one deprecated saga
-  `requires { }` whose message I could not reproduce standalone.
-- Use this to see the exact line: load `scripts/validate-riddl-examples.py` as a
-  module, call `v.wrap(kind, body, prelude)` and print numbered lines — the
-  reported positions are into the *wrapped* source, not the markdown.
+- `arbitrary_step` takes **one** literal string, *before* the target ref. Both
+  pages supplied a second one after it.
+- `put` takes a *value*; a bare message ref is not one, and neither is an
+  integer literal — `put result R(f = R.f) to output O` is what validates.
+- `option_name` is `/[a-z0-9_-]*/`: `option is finite state machine` must be
+  `finite-state-machine`.
+- A saga body admits only function/include/inlet/outlet/requires/returns/step
+  — no `record`.
+- Every state needs a handler, final states included (`handler H is { ??? }`).
+- `in-domain` and `standalone` fences receive **no prelude** by design, so they
+  must define what they use.
 
-**Trap that cost time:** a fixer script that asserts *before* writing loses
-every earlier fix when a later assert fails. Write unconditionally, report
-misses.
+**Error classes swept site-wide earlier** (still zero outside the tutorial):
+bare-string `when` conditions (use `when prompt("...")`), `if/then/else`,
+`user X is { }`, `send ... to context X`, bare `option X` in a body, pre-2.0
+trailing metadata, `state X is { fields }`.
+
+**To see the exact failing line:** load `scripts/validate-riddl-examples.py` as
+a module and reproduce `wrap()` with the fence's directive — reported positions
+are into the *wrapped* source, not the markdown. Mirror the prelude logic too,
+or the diagnosis will disagree with the validator.
+
+**Two traps that cost time:**
+
+- A fixer script that asserts *before* writing loses every earlier fix when a
+  later assert fails. Write unconditionally, report misses.
+- `re.subn` returns `(string, count)`. Getting them backwards writes an int and
+  throws — silently discarding every edit in that script run.
 
 ---
 
