@@ -6474,7 +6474,7 @@ as markdown when generating documentation.</p>
 </span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="k">let</span> <span class="n">orderId</span> <span class="o">=</span> <span class="s2">&quot;new OrderId&quot;</span>
 </span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
 </span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="c1">// Validate with conditional</span>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">when</span> <span class="s2">&quot;inventory is available&quot;</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;inventory is available&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>      <span class="c1">// Produce an event</span>
 </span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>      <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
 </span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>      <span class="c1">// Update state</span>
@@ -6532,7 +6532,7 @@ as markdown when generating documentation.</p>
 <tr>
 <td><code>when/then/else/end</code></td>
 <td>Conditional</td>
-<td><code>when "condition" then { } else { } end</code></td>
+<td><code>when prompt("condition") then { } else { } end</code></td>
 </tr>
 <tr>
 <td><code>morph</code></td>
@@ -6598,12 +6598,12 @@ as markdown when generating documentation.</p>
 </span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>
 </span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>  <span class="kd">handler</span> <span class="n">Commands</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Deposit</span> <span class="p">{</span>
-</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>      <span class="k">when</span> <span class="s2">&quot;amount is positive&quot;</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>      <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;amount is positive&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">MoneyDeposited</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
 </span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>      <span class="p">}</span> <span class="kr">end</span>
 </span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>    <span class="p">}</span>
 </span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
-</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>      <span class="k">when</span> <span class="s2">&quot;balance &gt;= amount&quot;</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>      <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;balance &gt;= amount&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">MoneyWithdrawn</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
 </span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>        <span class="k">error</span> <span class="s2">&quot;Insufficient funds&quot;</span>

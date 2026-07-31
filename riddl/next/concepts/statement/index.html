@@ -5951,7 +5951,7 @@ category; <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> and <code>&gt
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">A bare string condition is deprecated</p>
-<p><code>when "the user is authenticated" then</code> parses but draws a <code>[deprecated]</code>
+<p><code>when prompt("the user is authenticated") then</code> parses but draws a <code>[deprecated]</code>
 message; write <code>when prompt("…")</code>. Everywhere else a bare string is a
 <strong>literal</strong>, while <code>prompt(…)</code> marks a value an AI decides — and a
 natural-language condition is the latter.</p>

@@ -8962,7 +8962,7 @@ handlers:</p>
 non-Boolean condition is an Error.</p>
 <div class="admonition warning">
 <p class="admonition-title">A bare string condition is deprecated</p>
-<p><code>when "the user is authenticated" then</code> still parses but draws a
+<p><code>when prompt("the user is authenticated") then</code> still parses but draws a
 <code>[deprecated]</code> message. Write <code>when prompt("…")</code> instead.</p>
 <p>The reason is consistency: everywhere else in RIDDL a bare quoted string
 denotes a <strong>literal value</strong>, while <code>prompt(…)</code> marks something an AI
