@@ -85,6 +85,22 @@ hooks:
   - ../../scripts/site_url_hook.py
 
 extra:
+  # The logo links to the SITE root, not the sub-site root.
+  #
+  # Material's default is `nav.homepage.url`, which is the root of the MkDocs
+  # project being built -- so on /riddl/latest/concepts/entity/ the logo
+  # rendered as href="../.." and went to /riddl/latest/. With four projects
+  # deployed under one domain that left no way back out to the landing page
+  # except the browser's back button.
+  #
+  # `/` rather than https://ossum.tech/ so this is also correct under
+  # scripts/preview-versioned-site.sh and any other host. Material feeds it
+  # through MkDocs' `url` filter, which passes a root-relative path through
+  # untouched.
+  #
+  # Applies to both logo anchors -- the header one and the drawer one in
+  # partials/nav.html -- because both read this same value.
+  homepage: /
   analytics:
     provider: google
     property: G-97Q04B6XCX
