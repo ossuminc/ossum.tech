@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://ossum.tech/about/">
       
       
-        <link rel="prev" href="../coming-soon/">
+        <link rel="prev" href="../ide-help/vscode-extension/">
       
       
         <link rel="next" href="privacy-policy/">
@@ -146,24 +146,35 @@
   <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.jpg" type="image/jpeg"/>
 
   
+  <link rel="stylesheet" href="/pagefind/pagefind-ui.css">
+  <script src="/pagefind/pagefind-ui.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var inner = document.querySelector(".md-header__inner");
-      if (!inner || window.location.pathname.replace(/\/+$/, "") === "/find") return;
-      var a = document.createElement("a");
-      a.href = "/find/";
-      a.className = "md-header__button md-icon";
-      a.title = "Search all documentation";
-      a.setAttribute("aria-label", "Search all documentation");
-      a.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
-        '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2c1.2 0 2.3 1.5 2.9 3.7' +
-        'A18 18 0 0 0 12 8c-1 0-2 .1-2.9.3C9.7 5.5 10.8 4 12 4M6.6 6.2A15 15 0 0 0 7.3 ' +
-        '8.6a15 15 0 0 0-2.4.7 8 8 0 0 1 1.7-3.1M12 20c-1.2 0-2.3-1.5-2.9-3.7 1 .2 1.9.3 ' +
-        '2.9.3s1.9-.1 2.9-.3C14.3 18.5 13.2 20 12 20m0-5.4c-1.1 0-2.2-.1-3.2-.4a15 15 0 0 ' +
-        '1 0-4.4c1 .3 2.1.4 3.2.4s2.2-.1 3.2-.4a15 15 0 0 1 0 4.4c-1 .3-2.1.4-3.2.4Z"/>' +
-        "</svg>";
-      inner.appendChild(a);
+    window.addEventListener("DOMContentLoaded", function () {
+      var bar = document.querySelector(".ossum-fullsearch");
+      var mount = document.getElementById("ossum-fullsearch")
+               || document.getElementById("pagefind-search");
+      if (!mount) return;
+
+      if (typeof PagefindUI === "undefined") {
+        // The index is missing or not built yet. Hide the bar rather than
+        // leave a search field that silently does nothing, and show the
+        // explanatory note on the About page.
+        if (bar) bar.hidden = true;
+        var warn = document.getElementById("pagefind-unavailable");
+        if (warn) warn.hidden = false;
+        return;
+      }
+
+      new PagefindUI({
+        element: "#" + mount.id,
+        showSubResults: true,
+        showImages: false,
+        resetStyles: false,
+      });
+      var input = mount.querySelector("input");
+      if (input && mount.id === "ossum-fullsearch") {
+        input.id = "ossum-fullsearch-input";
+      }
     });
   </script>
 
@@ -363,13 +374,13 @@
   
   
     <li class="md-tabs__item">
-      <a href="../find/" class="md-tabs__link">
+      <a href="/riddl/latest/" class="md-tabs__link">
         
   
   
     
   
-  Search All Docs
+  RIDDL
 
       </a>
     </li>
@@ -382,16 +393,55 @@
   
   
     <li class="md-tabs__item">
-      <a href="../coming-soon/" class="md-tabs__link">
+      <a href="/riddlg/latest/" class="md-tabs__link">
         
   
   
     
   
-  Coming Soon
+  riddlg
 
       </a>
     </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="/synapify/latest/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Synapify
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ide-help/" class="md-tabs__link">
+          
+  
+  
+  IDE help
+
+        </a>
+      </li>
+    
   
 
       
@@ -426,6 +476,9 @@
     
     <div class="md-container" data-md-component="container">
       
+  
+  
+
       
         
       
@@ -502,14 +555,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../find/" class="md-nav__link">
+      <a href="/riddl/latest/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Search All Docs
+    RIDDL
   
 
     
@@ -529,14 +582,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../coming-soon/" class="md-nav__link">
+      <a href="/riddlg/latest/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Coming Soon
+    riddlg
   
 
     
@@ -545,6 +598,174 @@
   
 
       </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/synapify/latest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Synapify
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDE help
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IDE help
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ide-help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDE Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ide-help/intellij-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IntelliJ IDEA Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ide-help/vscode-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VS Code Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -572,10 +793,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -593,8 +814,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -758,6 +979,17 @@
     <span class="md-ellipsis">
       
         Legal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-all-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search all documentation
       
     </span>
   </a>
@@ -928,6 +1160,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#search-all-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search all documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -984,13 +1227,15 @@ domain, not just those who can write code.</p>
 <h3 id="open-source">Open Source<a class="headerlink" href="#open-source" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong><a href="/riddl/latest/">RIDDL</a></strong> – The specification language and compiler</li>
-<li><strong><a href="/riddl/latest/OSS/">IDE Extensions</a></strong> – VS Code and IntelliJ support</li>
-<li><strong><a href="/synapify/latest/">Synapify</a></strong> – Professional modeling workbench with
-  visual editing, simulation, and code generation</li>
+<li><strong><a href="../ide-help/">IDE help</a></strong> – VS Code and IntelliJ support</li>
 </ul>
 <h3 id="commercial">Commercial<a class="headerlink" href="#commercial" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong><a href="/riddlg/latest/MCP/">MCP Server</a></strong> – AI assistant integration</li>
+<li><strong><a href="/riddlg/latest/">riddlg</a></strong> – The generator: documentation, API
+  specifications, schemas, catalogs and code from a validated model, with
+  <a href="/riddlg/latest/MCP/">AI assistant integration</a> over MCP</li>
+<li><strong><a href="/synapify/latest/">Synapify</a></strong> – Professional modeling workbench with
+  visual editing, simulation, and code generation</li>
 </ul>
 <hr />
 <h2 id="the-team">The Team<a class="headerlink" href="#the-team" title="Permanent link">&para;</a></h2>
@@ -1015,6 +1260,50 @@ for the full list of contributors and the foundational work RIDDL builds upon.</
 <ul>
 <li><a href="privacy-policy/">Privacy Policy</a></li>
 </ul>
+<hr />
+<h2 id="search-all-documentation">Search all documentation<a class="headerlink" href="#search-all-documentation" title="Permanent link">&para;</a></h2>
+<p>There are <strong>two</strong> search fields, and they cover different things.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Searches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The box in the title bar</td>
+<td>only the site <strong>and version</strong> you are reading</td>
+</tr>
+<tr>
+<td><strong>Full Search</strong>, just below it</td>
+<td>every product at once</td>
+</tr>
+</tbody>
+</table>
+<p>The reason for two is that the documentation is published as several
+independent sites — one per product, each with its own versions — and each site
+builds its own search index. That per-site index is what makes the title-bar box
+precise: on the RIDDL 1.31 pages it returns 1.31 answers, not answers from a
+release you are not reading.</p>
+<p>Full Search is built separately, over the published pages of every product, so
+it can find things the title-bar box cannot — searching for "Synapify" from
+inside the RIDDL documentation, for instance.</p>
+<p>It covers <strong>the current release of each product</strong>, plus the pages on this site.
+Older releases are deliberately left out: each product publishes several
+versions and every alias is a full copy, so including them would return the same
+page three or four times. To search within an older release, open it and use the
+title-bar box.</p>
+<div id="pagefind-search" data-pagefind-ignore></div>
+
+<div hidden="hidden" id="pagefind-unavailable">
+<div class="admonition warning">
+<p class="admonition-title">Search index unavailable</p>
+<p>The full-site search index could not be loaded. It is rebuilt after the
+documentation is published, so it may be briefly missing after a release.
+The title-bar box is unaffected.</p>
+</div>
+</div>
 
 
 
@@ -1049,7 +1338,7 @@ for the full list of contributors and the foundational work RIDDL builds upon.</
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../coming-soon/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Coming Soon">
+          <a href="../ide-help/vscode-extension/" class="md-footer__link md-footer__link--prev" aria-label="Previous: VS Code Extension">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1059,7 +1348,7 @@ for the full list of contributors and the foundational work RIDDL builds upon.</
                 Previous
               </span>
               <div class="md-ellipsis">
-                Coming Soon
+                VS Code Extension
               </div>
             </div>
           </a>
