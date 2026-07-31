@@ -194,6 +194,45 @@
       });
       var input = mount.querySelector("input");
       if (input) input.id = "ossum-fullsearch-input";
+
+      // Make the WHOLE result row clickable, not just its title.
+      //
+      // Pagefind renders each hit as a `.pagefind-ui__result` holding one
+      // `a.pagefind-ui__result-link`, with the excerpt as a SIBLING of that
+      // anchor -- so the anchor cannot simply be stretched to fill the row
+      // without also swallowing the sub-results, which carry their own links.
+      // Delegating the click is the option that leaves that markup alone.
+      //
+      // Bound to the mount rather than the drawer: Pagefind destroys and
+      // rebuilds the drawer on every keystroke, so a listener on it would be
+      // thrown away with the first character typed.
+      mount.addEventListener("click", function (ev) {
+        // Never hijack a real link. This is what keeps the sub-result links,
+        // and any link inside an excerpt, behaving normally.
+        if (ev.target.closest("a")) return;
+
+        // A click that finishes selecting text is not a request to navigate.
+        var sel = window.getSelection();
+        if (sel && !sel.isCollapsed) return;
+
+        // Sub-results are nested INSIDE the parent result, so they must be
+        // tested first -- otherwise every sub-result would open the top of
+        // the page instead of its own anchor.
+        var row = ev.target.closest(".pagefind-ui__result-nested") ||
+                  ev.target.closest(".pagefind-ui__result");
+        if (!row) return;
+
+        var link = row.querySelector("a.pagefind-ui__result-link");
+        if (!link) return;
+
+        // Honour the usual "open in a new tab" chord, which a bare
+        // location assignment would silently swallow.
+        if (ev.metaKey || ev.ctrlKey) {
+          window.open(link.href, "_blank", "noopener");
+        } else {
+          window.location.href = link.href;
+        }
+      });
     });
   </script>
 
@@ -5619,7 +5658,7 @@ consume the comments as content and never reach the marker.</p>
 </span><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369" href="#__codelineno-0-369"></a><span class="k">output_aliases </span><span class="o">=</span> <span class="s2">&quot;output&quot;</span> <span class="p">|</span> <span class="s2">&quot;document&quot;</span> <span class="p">|</span> <span class="s2">&quot;list&quot;</span> <span class="p">|</span> <span class="s2">&quot;table&quot;</span> <span class="p">|</span> <span class="s2">&quot;graph&quot;</span> <span class="p">|</span> <span class="s2">&quot;animation&quot;</span> <span class="p">|</span> <span class="s2">&quot;picture&quot;</span> <span class="p">;</span>
 </span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370" href="#__codelineno-0-370"></a><span class="k">input_aliases </span><span class="o">=</span> <span class="s2">&quot;input&quot;</span> <span class="p">|</span> <span class="s2">&quot;form&quot;</span> <span class="p">|</span> <span class="s2">&quot;text&quot;</span> <span class="p">|</span> <span class="s2">&quot;button&quot;</span> <span class="p">|</span> <span class="s2">&quot;picklist&quot;</span> <span class="p">|</span> <span class="s2">&quot;selector&quot;</span> <span class="p">|</span> <span class="s2">&quot;item&quot;</span> <span class="p">;</span>
 </span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371" href="#__codelineno-0-371"></a><span class="k">presentation_aliases </span><span class="o">=</span> <span class="s2">&quot;presents&quot;</span> <span class="p">|</span> <span class="s2">&quot;shows&quot;</span> <span class="p">|</span> <span class="s2">&quot;displays&quot;</span> <span class="p">|</span> <span class="s2">&quot;writes&quot;</span> <span class="p">|</span> <span class="s2">&quot;emits&quot;</span> <span class="p">;</span>
-</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372" href="#__codelineno-0-372"></a><span class="k">acquisition_aliases </span><span class="o">=</span> <span class="s2">&quot;acquires&quot;</span> <span class="p">|</span> <span class="s2">&quot;reads&quot;</span> <span class="p">|</span> <span class="s2">&quot;takes&quot;</span> <span class="p">|</span> <span class="s2">&quot;accepts&quot;</span> <span class="p">|</span> <span class="s2">&quot;admits&quot;</span> <span class="p">|</span> <span class="s2">&quot;enters&quot;</span> <span class="p">|</span> <span class="s2">&quot;provides&quot;</span> <span class="p">|</span> <span class="s2">&quot;selects&quot;</span> <span class="p">|</span> <span class="s2">&quot;chooses&quot;</span> <span class="p">|</span> <span class="s2">&quot;picks&quot;</span> <span class="p">|</span> <span class="s2">&quot;initiates&quot;</span> <span class="p">|</span> <span class="s2">&quot;submits&quot;</span> <span class="p">|</span> <span class="s2">&quot;triggers&quot;</span> <span class="p">|</span> <span class="s2">&quot;activates&quot;</span> <span class="p">|</span> <span class="s2">&quot;starts&quot;</span> <span class="p">;</span>
+</span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372" href="#__codelineno-0-372"></a><span class="k">acquisition_aliases </span><span class="o">=</span> <span class="s2">&quot;acquires&quot;</span> <span class="p">|</span> <span class="s2">&quot;reads&quot;</span> <span class="p">|</span> <span class="s2">&quot;takes&quot;</span> <span class="p">|</span> <span class="s2">&quot;accepts&quot;</span> <span class="p">|</span> <span class="s2">&quot;admits&quot;</span> <span class="p">|</span> <span class="s2">&quot;enters&quot;</span> <span class="p">|</span> <span class="s2">&quot;provides&quot;</span> <span class="p">|</span> <span class="s2">&quot;selects&quot;</span> <span class="p">|</span> <span class="s2">&quot;chooses&quot;</span> <span class="p">|</span> <span class="s2">&quot;picks&quot;</span> <span class="p">|</span> <span class="s2">&quot;initiates&quot;</span> <span class="p">|</span> <span class="s2">&quot;submits&quot;</span> <span class="p">|</span> <span class="s2">&quot;triggers&quot;</span> <span class="p">|</span> <span class="s2">&quot;activates&quot;</span> <span class="p">|</span> <span class="s2">&quot;activate&quot;</span> <span class="p">|</span> <span class="s2">&quot;starts&quot;</span> <span class="p">;</span>
 </span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373" href="#__codelineno-0-373"></a>
 </span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374" href="#__codelineno-0-374"></a><span class="cm">(* Repository-related *)</span>
 </span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375" href="#__codelineno-0-375"></a><span class="k">repository </span><span class="o">=</span> <span class="s2">&quot;repository&quot;</span> <span class="k">identifier </span><span class="p">[</span><span class="k">as_shape</span><span class="p">]</span> <span class="k">is </span><span class="s2">&quot;{&quot;</span> <span class="k">repository_body </span><span class="s2">&quot;}&quot;</span> <span class="p">[</span><span class="k">with_metadata</span><span class="p">]</span> <span class="p">;</span>

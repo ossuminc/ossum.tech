@@ -194,6 +194,45 @@
       });
       var input = mount.querySelector("input");
       if (input) input.id = "ossum-fullsearch-input";
+
+      // Make the WHOLE result row clickable, not just its title.
+      //
+      // Pagefind renders each hit as a `.pagefind-ui__result` holding one
+      // `a.pagefind-ui__result-link`, with the excerpt as a SIBLING of that
+      // anchor -- so the anchor cannot simply be stretched to fill the row
+      // without also swallowing the sub-results, which carry their own links.
+      // Delegating the click is the option that leaves that markup alone.
+      //
+      // Bound to the mount rather than the drawer: Pagefind destroys and
+      // rebuilds the drawer on every keystroke, so a listener on it would be
+      // thrown away with the first character typed.
+      mount.addEventListener("click", function (ev) {
+        // Never hijack a real link. This is what keeps the sub-result links,
+        // and any link inside an excerpt, behaving normally.
+        if (ev.target.closest("a")) return;
+
+        // A click that finishes selecting text is not a request to navigate.
+        var sel = window.getSelection();
+        if (sel && !sel.isCollapsed) return;
+
+        // Sub-results are nested INSIDE the parent result, so they must be
+        // tested first -- otherwise every sub-result would open the top of
+        // the page instead of its own anchor.
+        var row = ev.target.closest(".pagefind-ui__result-nested") ||
+                  ev.target.closest(".pagefind-ui__result");
+        if (!row) return;
+
+        var link = row.querySelector("a.pagefind-ui__result-link");
+        if (!link) return;
+
+        // Honour the usual "open in a new tab" chord, which a bare
+        // location assignment would silently swallow.
+        if (ev.metaKey || ev.ctrlKey) {
+          window.open(link.href, "_blank", "noopener");
+        } else {
+          window.location.href = link.href;
+        }
+      });
     });
   </script>
 
@@ -6146,10 +6185,19 @@
   entity Order is { ??? }
   entity Account is { ??? }
   entity Product is { ??? }
+  entity Customer is { ??? }
   type ProductId is Id(Product)
   type Money is Currency(USD)
   record CartItem is { product: ProductId, quantity: Natural }
+  record Transaction is { amount: Money, at: TimeStamp }
   command PlaceOrder is { cartId: Id(Cart) }
+  command AddItemToCart is { cartId: Id(Cart), quantity: Natural }
+  command RemoveItemFromCart is { cartId: Id(Cart) }
+  command Deposit is { amount: Money }
+  command Withdraw is { amount: Money }
+  event ItemAddedToCart is { cartId: Id(Cart), quantity: Natural }
+  event MoneyDeposited is { amount: Money }
+  event MoneyWithdrawn is { amount: Money }
   event OrderCompleted is { orderId: Id(Order) }
   event OrderFailed is { orderId: Id(Order), reason: String }
 -->
@@ -6205,7 +6253,7 @@ This metadata provides important context about the definition.</p>
 </span></code></pre></div>
 <h3 id="multiple-authors">Multiple Authors<a class="headerlink" href="#multiple-authors" title="Permanent link">&para;</a></h3>
 <p>For collaborative definitions, list all contributors:</p>
-<!-- riddl: in-domain -->
+<!-- riddl: standalone -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">domain</span> <span class="n">Ordering</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">author</span> <span class="n">Reid</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="kr">name</span> <span class="kp">is</span> <span class="s2">&quot;Reid Spencer&quot;</span>
@@ -6240,7 +6288,7 @@ This metadata provides important context about the definition.</p>
 </span></code></pre></div>
 <h3 id="brief-descriptions">Brief Descriptions<a class="headerlink" href="#brief-descriptions" title="Permanent link">&para;</a></h3>
 <p>Add a one-line description to any definition:</p>
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=Cart -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">entity</span> <span class="n">Cart</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="c1">// entity contents</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
@@ -6292,42 +6340,92 @@ as markdown when generating documentation.</p>
 <tbody>
 <tr>
 <td><strong>Text</strong></td>
-<td><code>String</code>, <code>Id</code>, <code>UUID</code>, <code>Pattern</code></td>
+<td><code>String</code>, <code>String(min,max)</code>, <code>Pattern("regex")</code></td>
 </tr>
 <tr>
 <td><strong>Numbers</strong></td>
-<td><code>Integer</code>, <code>Number</code>, <code>Decimal</code>, <code>Natural</code>, <code>Whole</code>, <code>Real</code></td>
+<td><code>Integer</code>, <code>Natural</code>, <code>Whole</code>, <code>Number</code>, <code>Real</code>, <code>Decimal(w,f)</code></td>
+</tr>
+<tr>
+<td><strong>Measures</strong></td>
+<td><code>Current</code>, <code>Length</code>, <code>Luminosity</code>, <code>Mass</code>, <code>Mole</code>, <code>Temperature</code></td>
 </tr>
 <tr>
 <td><strong>Temporal</strong></td>
-<td><code>Date</code>, <code>Time</code>, <code>DateTime</code>, <code>Timestamp</code>, <code>Duration</code></td>
+<td><code>Date</code>, <code>Time</code>, <code>DateTime</code>, <code>TimeStamp</code>, <code>Duration</code></td>
+</tr>
+<tr>
+<td><strong>Zoned</strong></td>
+<td><code>ZonedDate(zone)</code>, <code>ZonedDateTime(zone)</code></td>
 </tr>
 <tr>
 <td><strong>Logical</strong></td>
-<td><code>Boolean</code>, <code>Nothing</code>, <code>Abstract</code></td>
-</tr>
-<tr>
-<td><strong>Collections</strong></td>
-<td><code>List</code>, <code>Set</code>, <code>Map</code>, <code>Sequence</code>, <code>Mapping</code></td>
-</tr>
-<tr>
-<td><strong>Ranges</strong></td>
-<td><code>Range</code></td>
-</tr>
-<tr>
-<td><strong>Binary</strong></td>
-<td><code>Blob</code>, <code>Length</code>, <code>Location</code></td>
-</tr>
-<tr>
-<td><strong>Currency</strong></td>
-<td><code>Currency</code>, <code>Money</code></td>
+<td><code>Boolean</code>, <code>Nothing</code>, <code>Anything</code></td>
 </tr>
 <tr>
 <td><strong>Identity</strong></td>
-<td><code>UserId</code>, <code>UUID</code>, <code>URL</code></td>
+<td><code>Id(Entity)</code>, <code>UUID</code>, <code>UserId</code>, <code>URL</code></td>
+</tr>
+<tr>
+<td><strong>Currency</strong></td>
+<td><code>Currency(USD)</code></td>
+</tr>
+<tr>
+<td><strong>Other</strong></td>
+<td><code>Location</code></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title"><code>TimeStamp</code> has a capital S</p>
+<p>It is the one predefined type whose spelling regularly catches people
+out. <code>Timestamp</code> does not resolve.</p>
+</div>
+<p>Collections are <strong>not</strong> predefined type names — they are type <em>expressions</em>
+built with keywords, so there is no <code>List</code>, <code>Set</code> or <code>Map</code> to reference:</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>many CartItem</code></td>
+<td>one or more</td>
+</tr>
+<tr>
+<td><code>many optional CartItem</code></td>
+<td>zero or more</td>
+</tr>
+<tr>
+<td><code>optional CartItem</code></td>
+<td>zero or one</td>
+</tr>
+<tr>
+<td><code>sequence of CartItem</code></td>
+<td>an ordered sequence</td>
+</tr>
+<tr>
+<td><code>set of CartItem</code></td>
+<td>an unordered set with no duplicates</td>
+</tr>
+<tr>
+<td><code>mapping from ProductId to CartItem</code></td>
+<td>a key-to-value mapping</td>
+</tr>
+<tr>
+<td><code>range(1,10)</code></td>
+<td>a bounded integer range</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title"><code>Abstract</code> is deprecated</p>
+<p>It still parses, but as the old spelling of <code>Anything</code>, and the compiler
+emits a <code>[deprecated]</code> message. Use <code>Anything</code>.</p>
+</div>
 <h3 id="custom-types">Custom Types<a class="headerlink" href="#custom-types" title="Permanent link">&para;</a></h3>
 <p>Define domain-specific types:</p>
 <!-- riddl: in-context -->
@@ -6364,7 +6462,7 @@ as markdown when generating documentation.</p>
 <h2 id="messages-commands-events-queries-and-results">Messages: Commands, Events, Queries, and Results<a class="headerlink" href="#messages-commands-events-queries-and-results" title="Permanent link">&para;</a></h2>
 <h3 id="commands-requests-for-action">Commands (Requests for Action)<a class="headerlink" href="#commands-requests-for-action" title="Permanent link">&para;</a></h3>
 <p>Commands represent requests that may change state:</p>
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=AddItemToCart -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">command</span> <span class="n">AddItemToCart</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  <span class="n">cartId</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Cart</span><span class="p">),</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  <span class="n">productId</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Product</span><span class="p">),</span>
@@ -6373,12 +6471,12 @@ as markdown when generating documentation.</p>
 </span></code></pre></div>
 <h3 id="events-facts-that-occurred">Events (Facts That Occurred)<a class="headerlink" href="#events-facts-that-occurred" title="Permanent link">&para;</a></h3>
 <p>Events record things that happened:</p>
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=ItemAddedToCart -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">event</span> <span class="n">ItemAddedToCart</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="n">cartId</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Cart</span><span class="p">),</span>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  <span class="n">productId</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Product</span><span class="p">),</span>
 </span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="n">quantity</span><span class="p">:</span> <span class="nb">Natural</span><span class="p">,</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  <span class="n">addedAt</span><span class="p">:</span> <span class="nb">Timestamp</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  <span class="n">addedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
 </span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="queries-information-requests">Queries (Information Requests)<a class="headerlink" href="#queries-information-requests" title="Permanent link">&para;</a></h3>
@@ -6393,14 +6491,14 @@ as markdown when generating documentation.</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">result</span> <span class="n">CartContents</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="n">cartId</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Cart</span><span class="p">),</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  <span class="kr">items</span><span class="p">:</span> <span class="nb">List</span> <span class="kp">of</span> <span class="n">CartItem</span><span class="p">,</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  <span class="kr">items</span><span class="p">:</span> <span class="kr">sequence</span> <span class="kp">of</span> <span class="n">CartItem</span><span class="p">,</span>
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>  <span class="n">total</span><span class="p">:</span> <span class="n">Money</span>
 </span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="entity-design">Entity Design<a class="headerlink" href="#entity-design" title="Permanent link">&para;</a></h2>
 <h3 id="basic-entity-structure">Basic Entity Structure<a class="headerlink" href="#basic-entity-structure" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
+<!-- riddl: in-context no-prelude=Cart -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">entity</span> <span class="n">Cart</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  <span class="c1">// Identity</span>
 </span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  <span class="kd">type</span> <span class="n">CartId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Cart</span><span class="p">)</span>
@@ -6409,9 +6507,9 @@ as markdown when generating documentation.</p>
 </span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  <span class="kd">record</span> <span class="n">State</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="n">id</span><span class="p">:</span> <span class="n">CartId</span><span class="p">,</span>
 </span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="n">customerId</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Customer</span><span class="p">),</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="kr">items</span><span class="p">:</span> <span class="nb">List</span> <span class="kp">of</span> <span class="n">CartItem</span><span class="p">,</span>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="n">createdAt</span><span class="p">:</span> <span class="nb">Timestamp</span><span class="p">,</span>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="n">updatedAt</span><span class="p">:</span> <span class="nb">Timestamp</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="kr">items</span><span class="p">:</span> <span class="kr">sequence</span> <span class="kp">of</span> <span class="n">CartItem</span><span class="p">,</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="n">createdAt</span><span class="p">:</span> <span class="nb">TimeStamp</span><span class="p">,</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="n">updatedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
 </span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>  <span class="p">}</span>
 </span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>
 </span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>  <span class="c1">// Commands it handles</span>
@@ -6478,7 +6576,7 @@ as markdown when generating documentation.</p>
 </span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>      <span class="c1">// Produce an event</span>
 </span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>      <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
 </span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>      <span class="c1">// Update state</span>
-</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">status</span> <span class="kp">to</span> <span class="n">OrderStatus</span><span class="p">.</span><span class="n">Confirmed</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">status</span> <span class="kp">to</span> <span class="s2">&quot;Confirmed&quot;</span>
 </span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>      <span class="c1">// Return an error</span>
 </span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>      <span class="k">error</span> <span class="s2">&quot;Insufficient inventory for order&quot;</span>
@@ -6567,33 +6665,35 @@ as markdown when generating documentation.</p>
 </span></code></pre></div>
 <h3 id="documentation-strings">Documentation Strings<a class="headerlink" href="#documentation-strings" title="Permanent link">&para;</a></h3>
 <p>Use markdown lines for rich documentation:</p>
-<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
+<!-- riddl: in-context no-prelude=Order -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  <span class="sd">|## Order Entity</span>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  <span class="sd">|</span>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  <span class="sd">|Represents a customer order in the system.</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>  <span class="sd">|</span>
-</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>  <span class="sd">|### Lifecycle</span>
-</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>  <span class="sd">|</span>
-</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>  <span class="sd">|1. Created when customer checks out</span>
-</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>  <span class="sd">|2. Confirmed after payment</span>
-</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>  <span class="sd">|3. Shipped when inventory allocated</span>
-</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>  <span class="sd">|4. Completed on delivery</span>
-</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
-</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>  <span class="c1">// entity definition continues</span>
-</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="p">}</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  <span class="c1">// entity definition continues</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="sd">|## Order Entity</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    <span class="sd">|</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    <span class="sd">|Represents a customer order in the system.</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>    <span class="sd">|</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>    <span class="sd">|### Lifecycle</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>    <span class="sd">|</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>    <span class="sd">|1. Created when customer checks out</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>    <span class="sd">|2. Confirmed after payment</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>    <span class="sd">|3. Shipped when inventory allocated</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>    <span class="sd">|4. Completed on delivery</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>  <span class="p">}</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="common-patterns">Common Patterns<a class="headerlink" href="#common-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="aggregate-with-event-sourcing">Aggregate with Event Sourcing<a class="headerlink" href="#aggregate-with-event-sourcing" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="defines an entity the page prelude also supplies for the message examples above; the two cannot share a context" -->
+<!-- riddl: in-context no-prelude=Account -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  <span class="kd">type</span> <span class="n">AccountId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Account</span><span class="p">)</span>
 </span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
 </span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  <span class="kd">record</span> <span class="n">State</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="n">id</span><span class="p">:</span> <span class="n">AccountId</span><span class="p">,</span>
 </span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="n">balance</span><span class="p">:</span> <span class="n">Money</span><span class="p">,</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    <span class="n">transactions</span><span class="p">:</span> <span class="nb">List</span> <span class="kp">of</span> <span class="n">Transaction</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    <span class="n">transactions</span><span class="p">:</span> <span class="kr">sequence</span> <span class="kp">of</span> <span class="n">Transaction</span>
 </span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>  <span class="p">}</span>
 </span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>
 </span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>  <span class="kd">handler</span> <span class="n">Commands</span> <span class="kp">is</span> <span class="p">{</span>
