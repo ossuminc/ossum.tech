@@ -1,26 +1,40 @@
-# Which documentation version this branch publishes as.
+# What this branch publishes.
 #
-# Read by .github/workflows/publish.yaml, which runs:
-#     mike deploy --push --update-aliases <version> <aliases...>
+# Read by .github/workflows/publish.yaml. Each `sites` entry becomes one
+#     mike deploy --deploy-prefix <prefix> -F <config> <version> <aliases...>
 #
 # This is the docs/1.x branch: the RIDDL 1.x maintenance line. It is LIVE, not
-# frozen -- when RIDDL 1.32 ships, update the language documentation here and
-# change `version` below to "1.32". 1.31 stays deployed as its own entry, so
-# readers on either release keep working documentation.
+# frozen -- when RIDDL 1.32 ships, update the documentation here and change
+# `version` below to "1.32". 1.31 stays deployed as its own entry, so readers
+# on either release keep working documentation.
 #
-# One entry per RIDDL MINOR version -- patch releases do not get their own
-# documentation version.
+# It publishes the `riddl` sub-site and NOTHING ELSE. There is deliberately no
+# `shell:` key here, and no riddlg, MCP or Synapify entry:
 #
-#   branch      version   aliases    role
-#   ----------  --------  ---------  ---------------------------------------
-#   docs/1.x    1.31      latest     RIDDL 1.x maintenance line  <-- this one
-#   main        2.0       next       RIDDL 2.0 (becomes `latest` when 2.0 ships)
+#   - The shell (landing page, About, Coming Soon) is unversioned and publishes
+#     from `main` alone. Publishing it from here too would put two branches in
+#     a race to overwrite the same files at the gh-pages root.
+#   - riddlg and Synapify release on their own cadence and are not tied to the
+#     RIDDL language version. Their `main` documentation supersedes the older
+#     copies that used to live on this branch.
 #
-# `latest` is the site default (`mike set-default latest`) and must point at the
-# newest RELEASED version. RIDDL 2.0 is not released yet, which is why it lives
-# here for now. When 2.0 ships, drop `latest` from this file and add it to
-# main's -- the alias moves, this branch keeps publishing 1.31 as itself.
+#   branch      prefix   version   aliases
+#   ----------  -------  --------  --------
+#   docs/1.x    riddl    1.31      latest    <-- this one
+#   main        riddl    2.0       next
+#   main        riddlg   0.6       latest
+#   main        synapify 0.17      latest
+#
+# DANGER: `latest` is the default readers land on, and the workflow deploys
+# with --update-aliases, which MOVES an alias to the most recent deploy. When
+# RIDDL 2.0 ships, `latest` must be removed from THIS file *before* it is added
+# to main's. Otherwise any later push to this branch -- months later, from an
+# unrelated typo fix, with no error -- silently drags the site default back to
+# 1.x. See scripts/promote-2.0-to-latest.md.
 
-version: "1.31"
-aliases:
-  - latest
+sites:
+  - prefix: riddl
+    config: sites/riddl/mkdocs.yml
+    version: "1.31"
+    aliases:
+      - latest
