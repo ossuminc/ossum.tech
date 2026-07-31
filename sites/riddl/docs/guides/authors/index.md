@@ -281,6 +281,12 @@ your model supports required use cases.
 domain OnlineRetail is {
   user Customer is "A person shopping on the website"
 
+  // The customer reaches the system only through Storefront, the
+  // application; it reaches Catalog and Shopping on their behalf.
+  application context Storefront is { ??? }
+  context Catalog is { ??? }
+  context Shopping is { ??? }
+
   epic BrowseAndPurchase is {
     user Customer wants to "find and buy products"
     so that "they can receive goods they need"
@@ -289,15 +295,18 @@ domain OnlineRetail is {
       user Customer wants to "browse the catalogue"
       so that "they can find a product worth buying"
 
-      step from user Customer "opens the product catalog" to context Catalog "shows the catalogue"
-      step from user Customer "searches for a product" to context Catalog "returns matching products"
-      step from context Catalog "presents the details" to user Customer "views product details"
+      step from user Customer "opens the product catalog" to context Storefront
+      step from context Storefront "fetches the matching products" to context Catalog
+      step from context Storefront "presents the details" to user Customer
     }
 
     case AddToCart is {
-      user Customer "selects a product to purchase"
-      then Shopping.Cart "adds the item"
-      then Shopping.Cart "confirms item added"
+      user Customer wants to "add a product to their cart"
+      so that "they can buy it at checkout"
+
+      step from user Customer "selects a product to purchase" to context Storefront
+      step from context Storefront "adds the item to the cart" to context Shopping
+      step from context Storefront "confirms the item was added" to user Customer
     }
   } with {
     briefly "Customer browses catalog and makes purchases"
@@ -490,9 +499,16 @@ entity Account is {
 
 Entities can morph between states to model lifecycles:
 
-<!-- riddl: in-context -->
+<!-- riddl: in-context no-prelude=OrderStatus -->
 ```riddl
 entity Order is {
+  command ConfirmPayment is { orderId is OrderId }
+  command Cancel is { orderId is OrderId }
+  command Ship is { orderId is OrderId }
+
+  event PaymentConfirmed is { orderId is OrderId }
+  event OrderShipped is { orderId is OrderId }
+
   record PendingData is { orderId is OrderId }
   record PaidData is { orderId is OrderId, paidAt is TimeStamp }
   record ShippedData is { orderId is OrderId, shippedAt is TimeStamp }
@@ -517,7 +533,7 @@ entity Order is {
     handler PaidHandler is {
       on command Ship {
         morph entity Order to state Shipped
-          with record ShipData
+          with record ShippedData
         send event OrderShipped to outlet Events
       }
     }
@@ -525,13 +541,15 @@ entity Order is {
 
   state Shipped of record ShippedData is {
     // Final state - no transitions out
+    handler ShippedHandler is { ??? }
   }
 
   state Cancelled of record CancelledData is {
     // Final state - no transitions out
+    handler CancelledHandler is { ??? }
   }
 } with {
-  option is finite state machine
+  option is finite-state-machine
 }
 ```
 
@@ -541,8 +559,13 @@ For multi-step processes that need compensation on failure:
 
 <!-- riddl: in-context -->
 ```riddl
+record PlaceOrderInput is {
+  cartId is CartId,
+  paymentMethod is PaymentInfo
+}
+
 saga PlaceOrder is {
-  requires { cartId is CartId, paymentMethod is PaymentInfo }
+  requires PlaceOrderInput
 
   step ReserveInventory is {
     send command ReserveItems to outlet Commands
