@@ -13,6 +13,40 @@ to the task file and note completion in this notebook.
 
 ## RESUME HERE — open work as of 2026-07-30
 
+### TASK D — navigation and content rework ✅ **DEPLOYED 2026-07-31**
+
+Top menu carries RIDDL / riddlg / Synapify (root-relative, into each product's
+`latest`) plus **IDE help** and About. The old "OSS" label is gone: the three
+IDE-tool pages are now unversioned at `/ide-help/`, while `authoring-riddl.md`
+stayed version-tracked and moved to the RIDDL author guides — it teaches the
+language, not a tool. Coming Soon and `/find/` are deleted.
+
+**Search is two fields, deliberately additive.** Material's title-bar box still
+searches the current site *and version*; a **Full Search** field directly below
+it queries Pagefind across all products. An earlier design replaced the
+title-bar box, which would have cost version-scoped search; that was rejected.
+Rendered from `overrides/main.html` into Material's `{% block hero %}`, which
+sits below the whole sticky header — no partial override, so no pinning to a
+Material release.
+
+**Three faults this turned up, all fixed:**
+
+- The shell deploy used `cp -r`, which only adds — so `/coming-soon/` and
+  `/find/` kept serving 200 after deletion. Now `rsync --delete` with an
+  exclude list covering everything the shell does not own. That list is
+  load-bearing: getting it wrong deletes a whole product site, so it was tested
+  against a tree containing all three prefixes before being pushed.
+- **Two publishing branches racing.** Pushing `main` and `docs/1.x` seconds
+  apart ran both workflows at once and `main`'s deploy was rejected with
+  "fetch first" — silently lost. A `concurrency` group now queues them;
+  `cancel-in-progress: false`, because cancelling a publish drops a deploy.
+- `check-cross-site-links.py` judged sub-site presence by the `docs/` directory,
+  which survives branch switches because shared assets are copied there and
+  gitignored. On `docs/1.x` that made all 15 cross-branch links look broken.
+  It now keys off the tracked `mkdocs.yml`.
+
+---
+
 ### TASK C — per-product versioning split ✅ **DEPLOYED 2026-07-31**
 
 Live. The site is four MkDocs projects, each product independently versioned.
