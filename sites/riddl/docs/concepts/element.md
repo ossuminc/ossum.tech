@@ -47,22 +47,27 @@ different group of elements, enabling navigation within the application.
 
 ## Contains
 
-*Element* is an umbrella term rather than a RIDDL keyword: it names the three
-definitions that make up a user interface. Only [Group](group.md) contains
-anything.
+*Element* is **abstract** — a class name in the AST, like *Node*, not a RIDDL
+keyword you can write. Nothing is "an element" in source; a thing *is* a
+[Group](group.md), an [Input](input.md) or an [Output](output.md), and those
+three are what the term covers.
+
+So the relationship below is *is-a*, not containment:
 
 ```mermaid
-flowchart TD
-    Element(["Element (umbrella term)"]) --> Group
-    Element --> Input
-    Element --> Output
-    Group -->|nested| Group
-    Group --> Input
-    Group --> Output
+classDiagram
+    class Element {
+        &lt;&lt;abstract&gt;&gt;
+    }
+    Element <|-- Group
+    Element <|-- Input
+    Element <|-- Output
 ```
 
-* [Group](group.md) — the only one that contains other elements: nested groups,
-  [Inputs](input.md) and [Outputs](output.md)
+Of the three, only [Group](group.md) contains anything:
+
+* [Group](group.md) — nested groups, [Inputs](input.md) and
+  [Outputs](output.md)
 * [Input](input.md) and [Output](output.md) — each **references** a
   [type](type.md) rather than containing one
 

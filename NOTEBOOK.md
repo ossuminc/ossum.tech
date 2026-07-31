@@ -47,8 +47,11 @@ too: the grammar has `inlet = "inlet" identifier is type_ref`, so a type is
   duplicate: its step table documented retired 1.x keywords (`publish`,
   `subscribe`, `arbitrary`, `provide`, `present`), none of which exist in the
   2.0 grammar. Old URLs redirect to `use-case`.
-- **`element.md` kept** — "element" is an umbrella term for Group, Input and
-  Output, not a grammar production, so the page is legitimate. Its `## Contains`
+- **`element.md` kept** — "element" is **abstract**, a class name in the AST
+  like *Node*, not a RIDDL keyword; Group, Input and Output are its concrete
+  kinds. The page uses a mermaid `classDiagram` with an `<<abstract>>`
+  stereotype, because the relation is *is-a* and a flowchart would have implied
+  containment. Its `## Contains`
   now says so instead of claiming it holds Handlers. Its group-alias list was
   also wrong: it listed `row`, `stack`, `panel` and `form`, none of which are
   group aliases (`form` is an *input* alias).
