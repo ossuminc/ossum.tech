@@ -345,8 +345,8 @@ validates.
 
 You can also get real-time validation in your editor with RIDDL IDE support:
 
-- [VS Code Extension](OSS/vscode-extension/index.md)
-- [IntelliJ Plugin](OSS/intellij-plugin/index.md)
+- [VS Code Extension](/ide-help/vscode-extension/)
+- [IntelliJ Plugin](/ide-help/intellij-plugin/)
 
 ---
 

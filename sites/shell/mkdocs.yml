@@ -15,10 +15,20 @@ edit_uri: edit/main/sites/shell/docs/
 # It deploys to the gh-pages ROOT, so `mike set-default` must always be given
 # a --deploy-prefix; without one it would overwrite this site's index.html
 # with a redirect. See scripts/migrate-to-per-product-versioning.md.
+# The product entries are root-relative paths into the versioned sub-sites, each
+# pointing at that product's default alias. MkDocs 1.6 supports this
+# (structure/nav.py) and logs it at validation.nav.absolute_links, which
+# defaults to `info` -- so --strict does not fail. Deliberately NOT absolute
+# https:// URLs, which would send local preview clicks to production.
 nav:
   - Home: index.md
-  - Search All Docs: find.md
-  - Coming Soon: coming-soon/index.md
+  - RIDDL: /riddl/latest/
+  - riddlg: /riddlg/latest/
+  - Synapify: /synapify/latest/
+  - IDE help:
+    - ide-help/index.md
+    - IntelliJ IDEA Plugin: ide-help/intellij-plugin/index.md
+    - VS Code Extension: ide-help/vscode-extension/index.md
   - About:
     - about/index.md
     - Privacy Policy: about/privacy-policy.md

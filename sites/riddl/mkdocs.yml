@@ -130,6 +130,7 @@ nav:
     - guides/index.md
     - For Authors:
       - guides/authors/index.md
+      - Authoring RIDDL: guides/authors/authoring-riddl.md
       - Design Guide:
         - guides/authors/design/index.md
         - Bounded Contexts: guides/authors/design/contexts.md
@@ -167,8 +168,3 @@ nav:
     - sbt-riddl: tools/sbt-riddl/index.md
     - MCP Server: tools/riddl-mcp-server/index.md
     - IntelliJ Plugin: tools/riddl-idea-plugin/index.md
-  - IDE Support:
-    - OSS/index.md
-    - IntelliJ IDEA Plugin: OSS/intellij-plugin/index.md
-    - VS Code Extension: OSS/vscode-extension/index.md
-    - Authoring RIDDL: OSS/authoring-riddl.md

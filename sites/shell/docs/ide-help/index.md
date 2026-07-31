@@ -38,7 +38,7 @@ RIDDL language support for Visual Studio Code, including:
 
 ## Writing RIDDL
 
-### [Authoring RIDDL Sources](authoring-riddl.md)
+### [Authoring RIDDL Sources](/riddl/latest/guides/authors/authoring-riddl/)
 
 A comprehensive guide to writing effective RIDDL source files, covering:
 

@@ -48,13 +48,15 @@ domain, not just those who can write code.
 ### Open Source
 
 - **[RIDDL](/riddl/latest/)** – The specification language and compiler
-- **[IDE Extensions](/riddl/latest/OSS/)** – VS Code and IntelliJ support
-- **[Synapify](/synapify/latest/)** – Professional modeling workbench with
-  visual editing, simulation, and code generation
+- **[IDE help](../ide-help/index.md)** – VS Code and IntelliJ support
 
 ### Commercial
 
-- **[MCP Server](/riddlg/latest/MCP/)** – AI assistant integration
+- **[riddlg](/riddlg/latest/)** – The generator: documentation, API
+  specifications, schemas, catalogs and code from a validated model, with
+  [AI assistant integration](/riddlg/latest/MCP/) over MCP
+- **[Synapify](/synapify/latest/)** – Professional modeling workbench with
+  visual editing, simulation, and code generation
 
 ---
 
@@ -83,3 +85,39 @@ for the full list of contributors and the foundational work RIDDL builds upon.
 ## Legal
 
 - [Privacy Policy](privacy-policy.md)
+
+---
+
+## Search all documentation
+
+There are **two** search fields, and they cover different things.
+
+| Field | Searches |
+|---|---|
+| The box in the title bar | only the site **and version** you are reading |
+| **Full Search**, just below it | every product at once |
+
+The reason for two is that the documentation is published as several
+independent sites — one per product, each with its own versions — and each site
+builds its own search index. That per-site index is what makes the title-bar box
+precise: on the RIDDL 1.31 pages it returns 1.31 answers, not answers from a
+release you are not reading.
+
+Full Search is built separately, over the published pages of every product, so
+it can find things the title-bar box cannot — searching for "Synapify" from
+inside the RIDDL documentation, for instance.
+
+It covers **the current release of each product**, plus the pages on this site.
+Older releases are deliberately left out: each product publishes several
+versions and every alias is a full copy, so including them would return the same
+page three or four times. To search within an older release, open it and use the
+title-bar box.
+
+<div id="pagefind-search" data-pagefind-ignore></div>
+
+<div id="pagefind-unavailable" hidden markdown>
+!!! warning "Search index unavailable"
+    The full-site search index could not be loaded. It is rebuilt after the
+    documentation is published, so it may be briefly missing after a release.
+    The title-bar box is unaffected.
+</div>

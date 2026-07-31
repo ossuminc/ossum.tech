@@ -203,7 +203,7 @@ See [MCP Tools](mcp-tools.md).
   repository.
 - Upgraded to riddl-lib 1.29.0.
 - The simulator module was removed — it is outside riddlg's mission. RIDDL
-  simulation is [on the roadmap](/coming-soon/) elsewhere.
+  simulation now lives in [Synapify](/synapify/latest/simulation/).
 
 ---
 

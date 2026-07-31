@@ -10,11 +10,14 @@ This site provides documentation for technologies created at Ossum, Inc.
 
 The sections at the top correspond to Ossum Inc's main products:
 
-* [RIDDL](/riddl/latest/) - General documentation about the core language behind all products
-* [MCP Server](/riddlg/latest/MCP/) - Documentation for the MCP Server, a REST API for managing RIDDL models
-* [OSS](/riddl/latest/OSS/) - A collection of open source tools to aid in RIDDL modeling
-* [Synapify](/synapify/latest/) - The user interface for RIDDL models
-* [Coming Soon] - A sneak peak about new features and products we are busy working on
+* [RIDDL](/riddl/latest/) - The specification language behind everything else,
+  and its compiler `riddlc`
+* [riddlg](/riddlg/latest/) - The generator: turns a validated RIDDL model into
+  documentation, API specifications, schemas, catalogs and code
+* [Synapify](/synapify/latest/) - The workbench for RIDDL models, with visual
+  editing, simulation and generation
+* [IDE help](ide-help/index.md) - Open source editor support: the IntelliJ
+  plugin and the VS Code extension
 
 # Information
 * Author: Ossum Inc.

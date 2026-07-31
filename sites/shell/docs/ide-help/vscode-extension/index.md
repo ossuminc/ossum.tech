@@ -360,7 +360,7 @@ Diagnostics show their source:
 ## Authoring RIDDL
 
 For tips on writing effective RIDDL source files, see the
-[Authoring RIDDL Sources](../authoring-riddl.md) guide.
+[Authoring RIDDL Sources](/riddl/latest/guides/authors/authoring-riddl/) guide.
 
 ---
 

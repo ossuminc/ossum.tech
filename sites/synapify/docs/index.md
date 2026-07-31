@@ -292,6 +292,6 @@ Synapify is under active development. For updates and announcements:
 - [Code Generation Guide](generation.md) - Generating implementation artifacts
 - [RIDDL Language Reference](/riddl/latest/references/language-reference/) -
   Complete language documentation
-- [Authoring RIDDL Sources](/riddl/latest/OSS/authoring-riddl/) - Best practices for
+- [Authoring RIDDL Sources](/riddl/latest/guides/authors/authoring-riddl/) - Best practices for
   writing RIDDL
 - [MCP Server Integration](/riddlg/latest/MCP/) - Configuring AI assistance

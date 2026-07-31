@@ -484,13 +484,13 @@ Both IDE tools validate your RIDDL as you type. Common validation messages:
 
 See the specific IDE documentation for shortcuts:
 
-- [IntelliJ Plugin Shortcuts](intellij-plugin/index.md#tool-window-actions)
-- [VS Code Extension Shortcuts](vscode-extension/index.md#keyboard-shortcuts)
+- [IntelliJ Plugin Shortcuts](/ide-help/intellij-plugin/#tool-window-actions)
+- [VS Code Extension Shortcuts](/ide-help/vscode-extension/#keyboard-shortcuts)
 
 ---
 
 ## Further Reading
 
-- [RIDDL Language Reference](../references/language-reference.md)
-- [EBNF Grammar](../references/ebnf-grammar.md)
-- [Concept Guide](../concepts/index.md)
+- [RIDDL Language Reference](../../references/language-reference.md)
+- [EBNF Grammar](../../references/ebnf-grammar.md)
+- [Concept Guide](../../concepts/index.md)
