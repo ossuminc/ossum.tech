@@ -130,12 +130,28 @@ prefix, which is why the 1.x line is a *directory* and not a branch: as
 each branch built correctly on its own terms, so nothing in CI could catch it.
 See TASK G in NOTEBOOK.md.
 
-That branch was deleted on 2026-07-31. Its history is preserved by the
-annotated tag **`archive/docs-1.x`** — `git log archive/docs-1.x` and
-`git show archive/docs-1.x:<path>` both still work. **Do not restore it to
-publish from:** it carries its own `publish.yaml` that still triggers on
-`docs/1.x`, so a push would redeploy 1.31 with the pre-consolidation chrome and
-look like a perfectly normal successful deploy.
+That branch was deleted on 2026-07-31. **Do not restore it to publish from:** it
+carries its own `publish.yaml` that still triggers on `docs/1.x`, so a push
+would redeploy 1.31 with the pre-consolidation chrome and look like a perfectly
+normal successful deploy.
+
+### Branches, and where the deleted ones went
+
+Only **`main`** and the `gh-pages` family remain. Retired branches were tagged
+before deletion, so their history is still reachable: `git log archive/<name>`
+and `git show archive/<name>:<path>` both work.
+
+| Tag | Was | Superseded by |
+|---|---|---|
+| `archive/docs-1.x` | the RIDDL 1.x publishing branch | `sites/riddl-1x/` |
+| `archive/riddl-guides-author` | 2025-03 Hugo-era author guide | `guides/authors/`, `references/` |
+| `archive/riddl-guides-developers` | 2025-03 Hugo-era developer guide | the current guides |
+| `archive/reid-spencer-patch-1` | one attribution commit | already in `main`, with its `$$$`/"SPencer" typos fixed |
+
+**`gh-pages-2026-07-preprefix` is load-bearing — do not delete it.** It is not
+an ancestor of `gh-pages`, so its state is unreachable from that history, and
+it is the rollback target for the per-product versioning migration.
+`gh-pages-preversioning` *is* an ancestor, so it is only a convenience marker.
 
 Order in `docs-version.yml` matters for one thing: `mike set-default` runs per
 entry, so the **last `riddl` entry decides where `/riddl/` redirects**. Keep
