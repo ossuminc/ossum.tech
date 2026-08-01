@@ -4205,6 +4205,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#where-do-the-boundaries-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Do the Boundaries Come From?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#related-concepts" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5502,6 +5513,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#where-do-the-boundaries-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Do the Boundaries Come From?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#related-concepts" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5711,6 +5733,27 @@ bounded contexts simultaneously.</p>
    you have excessive translation overhead</p>
 </li>
 </ol>
+<h2 id="where-do-the-boundaries-come-from">Where Do the Boundaries Come From?<a class="headerlink" href="#where-do-the-boundaries-come-from" title="Permanent link">&para;</a></h2>
+<p>There are no formal rules, and that is deliberate — domains are <em>fuzzy</em>
+concepts, because they describe how people actually think and talk about a
+business rather than how a system is built. Two heuristics do most of the work:</p>
+<ul>
+<li>
+<p><strong>Follow the organisation.</strong> Teams that talk constantly converge on a shared
+  language; teams that rarely speak do not. That correspondence between
+  communication structure and system structure is
+  <a href="https://en.wikipedia.org/wiki/Conway%27s_law">Conway's Law</a>, and it is
+  usually a better first guess at a boundary than any diagram.</p>
+</li>
+<li>
+<p><strong>Look for the seams in the vocabulary.</strong> Wherever one word starts meaning
+  two different things — as "order" does in the table above — you have found an
+  edge worth drawing a context around.</p>
+</li>
+</ul>
+<p>If the DDD vocabulary itself is new to you, this
+<a href="https://xenovation.com/blog/patterns/domain-driven-design-glossary/ddd-domain-definition">glossary of domain-driven design terms</a>
+is a compact reference for the words used throughout this guide.</p>
 <h2 id="related-concepts">Related Concepts<a class="headerlink" href="#related-concepts" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../../../../concepts/domain/">Domain</a> - The containing structure for contexts</li>
