@@ -22,6 +22,42 @@
   </a>
 {% endblock %}
 
+{#
+  Store Material's UI state per SITE, not per version.
+
+  Material keys localStorage by the MkDocs project's base URL:
+
+      __md_scope = new URL("{{ '{{ base_url }}' }}", location)
+      __md_get = k => JSON.parse(localStorage.getItem(__md_scope.pathname + "." + k))
+
+  Under mike every version of every product is its own MkDocs project, so the
+  base URL is the VERSION directory. Accepting the cookie notice on
+  /riddl/latest/ wrote `/riddl/latest/.__consent`, and /riddl/2.0/ then looked
+  for `/riddl/2.0/.__consent`, found nothing, and asked again -- up to six
+  times for one site (shell, riddl 1.31, riddl 2.0, next, riddlg, synapify).
+  The same bug reset the light/dark choice: `__palette` is scoped identically.
+
+  WHY THIS BLOCK, of all places. The scope must be reassigned after Material
+  defines it and before anything reads it, and the first reader is the
+  analytics gate -- `__md_get("__consent")` -- which base.html emits in
+  `{% raw %}{% block analytics %}{% endraw %}`, immediately after the definition
+  and immediately BEFORE `extrahead`. Putting this in `extrahead` (the obvious
+  place, where the rest of our head additions live) would be too late: the gate
+  would keep reading the old key and analytics would never enable. Verified by
+  byte offsets in the rendered HTML, not assumed.
+
+  `{% raw %}{{ super() }}{% endraw %}` renders the stock block rather than a
+  copy of it, so this does not pin the repo to a Material release and does not
+  name the analytics partial.
+
+  One-time cost: the old per-version keys are orphaned, so everyone is asked
+  once more, and pre-existing theme choices reset once. Unavoidable for any fix.
+#}
+{% block analytics %}
+  <script>__md_scope = new URL("/", location)</script>
+  {{ super() }}
+{% endblock %}
+
 {% block extrahead %}
   <link rel="icon" sizes="192x192" href="{{ 'assets/images/favicon-192.jpg' | url }}" type="image/jpeg"/>
   <link rel="shortcut icon" href="{{ 'assets/images/favicon.jpg' | url }}" type="image/jpeg"/>

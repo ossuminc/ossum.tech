@@ -11,9 +11,9 @@ to the task file and note completion in this notebook.
 
 ---
 
-## RESUME HERE — as of 2026-07-31
+## RESUME HERE — as of 2026-08-01
 
-**Tasks A–H are all closed.** What is still open:
+**Tasks A–I are all closed.** What is still open:
 
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
@@ -21,13 +21,62 @@ to the task file and note completion in this notebook.
   site-wide, but no file is above three, which is the agreed threshold — this
   is a known gap, not a regression.
 - Promoting RIDDL 2.0 to `latest` when it ships final:
-  `scripts/promote-2.0-to-latest.md`. Read the two-branches-one-alias landmine
-  before touching it. **TASK G would dissolve that landmine entirely** — do them
-  in that order if both are on the table.
+  `scripts/promote-2.0-to-latest.md`. Since TASK G it is **one commit** — the
+  two-branches-one-alias landmine is gone. The single rule left: the last
+  `riddl` entry in `docs-version.yml` owns `mike set-default`, so move the
+  entries, not just the alias.
 
 The sections below are kept as the record of how the current state was reached.
 
 ---
+
+### TASK I — consent and theme asked once per VERSION ✅ **DONE 2026-08-01**
+
+Reid noticed the cookie prompt returning every time he selected the RIDDL 2.0
+`next` version. Cause: Material keys `localStorage` by the MkDocs project's base
+URL —
+
+```js
+__md_scope = new URL("{{ base_url }}", location)
+__md_get = k => JSON.parse(localStorage.getItem(__md_scope.pathname + "." + k))
+```
+
+— and under mike every version of every product is its own project, so the base
+URL is the **version directory**. Accepting on `/riddl/latest/` wrote
+`/riddl/latest/.__consent`; `/riddl/2.0/` looked for `/riddl/2.0/.__consent`,
+found nothing, and asked again. One site, **up to six consents**.
+
+The same scoping reset the light/dark choice — `__palette` is keyed identically,
+which is why the theme sometimes flipped when changing product or version.
+
+**Fixed** by reassigning `__md_scope` to `/` in `overrides/main.html`.
+
+**The placement is the whole trick.** It must land after Material defines the
+scope and before the first thing that reads it — the analytics gate,
+`__md_get("__consent")`, which base.html emits in `{% block analytics %}`,
+between the definition and `extrahead`. Putting it in `extrahead`, where the
+rest of our head additions live, is **too late**: the gate would keep reading
+the old key and analytics would never enable. Confirmed by byte offsets in the
+built HTML:
+
+```
+__md_scope defined   11059
+our reassignment     11369   <- inside {% block analytics %}
+gate reads __consent 12594
+extrahead            12997   <- would have been too late
+```
+
+`{{ super() }}` renders the stock block instead of a copy, so no Material
+partial is named and nothing pins us to a release.
+
+**Verified in a browser**, from cleared storage: prompt appears once, accepting
+writes `/.__consent`, then `/riddl/2.0/` and `/` show no prompt; a dark theme
+chosen on 2.0 carries to the landing page; `typeof __md_analytics !==
+"undefined"` stays true, proving the gate still works. Storage drops from up to
+twelve keys to two.
+
+One-time cost: old per-version keys are orphaned, so everyone is asked once
+more and pre-existing theme choices reset once. Unavoidable for any fix.
 
 ### TASK H — logo linked to the sub-site, not the site ✅ **DONE 2026-07-31**
 
