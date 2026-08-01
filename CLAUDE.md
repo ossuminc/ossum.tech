@@ -265,6 +265,23 @@ crawlers that every version of every page is the same URL.
   with a 404 status and the rewrite happens in the browser, so every legacy URL
   looks like a failure from the command line either way. Use
   `node scripts/test-404-redirects.js`.
+- **Do not judge a deploy by `curl`ing the live site straight afterwards.**
+  ossum.tech is served with `cache-control: max-age=600`, and the CDN routinely
+  populates from the origin *before* Pages finishes publishing — so for up to
+  ten minutes the old content comes back and the deploy looks like it silently
+  failed. A `?cachebust=` query does **not** reliably defeat it, and neither do
+  `Cache-Control: no-cache` request headers. This produced three false alarms in
+  one session.
+  **Check `gh-pages` instead — that is the authority:**
+  ```bash
+  git fetch origin gh-pages
+  git show origin/gh-pages:riddl/2.0/index.html | grep -c 'the thing you changed'
+  ```
+  Then, if you want live confirmation, poll until it flips rather than
+  concluding from one request:
+  ```bash
+  until curl -s https://ossum.tech/<path> | grep -q 'the thing'; do sleep 20; done
+  ```
 - **`overrides/` is `custom_dir` for all four sites.** Anything product-specific
   hard-coded there appears on every site — that is how the Synapify docs briefly
   announced themselves as a preview of RIDDL 2.0. The outdated banner's wording
