@@ -48,7 +48,7 @@ domain, not just those who can write code.
 ### Open Source
 
 - **[RIDDL](/riddl/latest/)** – The specification language and compiler
-- **[IDE help](../ide-help/index.md)** – VS Code and IntelliJ support
+- **[IDE Helpers](../ide-help/index.md)** – VS Code and IntelliJ support
 
 ### Commercial
 

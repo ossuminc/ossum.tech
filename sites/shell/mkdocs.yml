@@ -25,7 +25,7 @@ nav:
   - RIDDL: /riddl/latest/
   - riddlg: /riddlg/latest/
   - Synapify: /synapify/latest/
-  - IDE help:
+  - IDE Helpers:
     - ide-help/index.md
     - IntelliJ IDEA Plugin: ide-help/intellij-plugin/index.md
     - VS Code Extension: ide-help/vscode-extension/index.md

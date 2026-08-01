@@ -16,7 +16,7 @@ The sections at the top correspond to Ossum Inc's main products:
   documentation, API specifications, schemas, catalogs and code
 * [Synapify](/synapify/latest/) - The workbench for RIDDL models, with visual
   editing, simulation and generation
-* [IDE help](ide-help/index.md) - Open source editor support: the IntelliJ
+* [IDE Helpers](ide-help/index.md) - Open source editor support: the IntelliJ
   plugin and the VS Code extension
 
 # Information
