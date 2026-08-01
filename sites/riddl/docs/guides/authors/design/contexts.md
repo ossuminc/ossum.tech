@@ -144,6 +144,26 @@ A `context` can:
 4. **Size appropriately** - Too large and it becomes unwieldy; too small and
    you have excessive translation overhead
 
+## Where Do the Boundaries Come From?
+
+There are no formal rules, and that is deliberate — domains are *fuzzy*
+concepts, because they describe how people actually think and talk about a
+business rather than how a system is built. Two heuristics do most of the work:
+
+- **Follow the organisation.** Teams that talk constantly converge on a shared
+  language; teams that rarely speak do not. That correspondence between
+  communication structure and system structure is
+  [Conway's Law](https://en.wikipedia.org/wiki/Conway%27s_law), and it is
+  usually a better first guess at a boundary than any diagram.
+
+- **Look for the seams in the vocabulary.** Wherever one word starts meaning
+  two different things — as "order" does in the table above — you have found an
+  edge worth drawing a context around.
+
+If the DDD vocabulary itself is new to you, this
+[glossary of domain-driven design terms](https://xenovation.com/blog/patterns/domain-driven-design-glossary/ddd-domain-definition)
+is a compact reference for the words used throughout this guide.
+
 ## Related Concepts
 
 - [Domain](../../../concepts/domain.md) - The containing structure for contexts
