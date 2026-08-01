@@ -15,11 +15,6 @@ to the task file and note completion in this notebook.
 
 **Tasks A–H are all closed.** What is still open:
 
-- **Retiring the `docs/1.x` branch.** TASK G is deployed and verified, so the
-  branch is now redundant *and* a hazard: its own copy of the workflow still
-  triggers on a push to it, which would redeploy 1.31 with the pre-TASK-G
-  chrome. It is the only other copy of that branch's history. Tag it before
-  deleting — decide and do it.
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
 - The ~50 concept pages still lack per-fence directives. 28 fences fail
@@ -147,9 +142,17 @@ of that can be shared, and none of it needs to be: it just moves.
 **Do not delete `docs/1.x` until the directory build is verified deployed.** It
 is the only copy of the 1.31 content.
 
-*(That condition is now met — the deploy is verified. Retiring the branch is the
-open item at the top of this file. `sites/riddl-1x/` holds the content; the
-branch still holds its history, which is why it wants a tag before deletion.)*
+*(Done 2026-07-31, after the deploy was verified. The branch is gone, remote and
+local. Its 18 commits are preserved by the annotated tag `archive/docs-1.x`,
+which was pushed and confirmed to dereference to the branch tip BEFORE anything
+was deleted. `git log archive/docs-1.x` still works, and so does
+`git show archive/docs-1.x:<path>`.)*
+
+**Do not restore that branch to publish from.** It carries its own copy of
+`.github/workflows/publish.yaml`, which still lists `docs/1.x` as a trigger, so
+a push would redeploy 1.31 with the pre-TASK-G chrome — and it would look like
+an ordinary successful deploy while quietly undoing the consolidation. That
+hazard is why the branch was retired rather than merely left alone.
 
 ### TASK F — build on sbt 2 / riddl 2.0.0-rc.5 ✅ **DONE 2026-07-31**
 

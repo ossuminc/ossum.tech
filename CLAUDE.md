@@ -130,6 +130,13 @@ prefix, which is why the 1.x line is a *directory* and not a branch: as
 each branch built correctly on its own terms, so nothing in CI could catch it.
 See TASK G in NOTEBOOK.md.
 
+That branch was deleted on 2026-07-31. Its history is preserved by the
+annotated tag **`archive/docs-1.x`** — `git log archive/docs-1.x` and
+`git show archive/docs-1.x:<path>` both still work. **Do not restore it to
+publish from:** it carries its own `publish.yaml` that still triggers on
+`docs/1.x`, so a push would redeploy 1.31 with the pre-consolidation chrome and
+look like a perfectly normal successful deploy.
+
 Order in `docs-version.yml` matters for one thing: `mike set-default` runs per
 entry, so the **last `riddl` entry decides where `/riddl/` redirects**. Keep
 the entry holding `latest` last.
