@@ -3228,6 +3228,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-sink" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        error-sink
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5391,6 +5408,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-sink" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        error-sink
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5488,8 +5522,39 @@ an <strong>Error</strong>.</p>
 <td><code>unordered</code></td>
 <td>Delivery order is not significant, enabling partitioning and parallelism</td>
 </tr>
+<tr>
+<td><code>error-sink</code></td>
+<td>This inlet receives the hard errors a generator reports</td>
+</tr>
 </tbody>
 </table>
+<h3 id="error-sink"><code>error-sink</code><a class="headerlink" href="#error-sink" title="Permanent link">&para;</a></h3>
+<p>When a generated system hits an unrecoverable failure it reports a
+<code>GeneratorError</code> — a record in RIDDL's standard module. Somewhere has to
+receive one, and RIDDL does not presume where: what a system does with an
+operational alert is a modelling decision, no different from handling any other
+message. So the model names the destination itself.</p>
+<p>The mark goes on the <strong>inlet</strong> rather than the processor, because an inlet names
+the receiver, the port and the message type in one place; a processor may have
+several inlets and a generator would be left guessing which.</p>
+<p>Three rules come with it:</p>
+<ul>
+<li>The inlet <strong>must accept <code>GeneratorError</code></strong> — typed by it directly, or by an
+  alternation that includes it, so a model may route its own error messages to
+  the same place and give the operator one thing to watch. An inlet typed only
+  by the model's own command is a destination a generator cannot deliver to,
+  so this is an <strong>Error</strong>.</li>
+<li><strong>At most one per domain</strong>, an Error for the same reason duplicate adaptors
+  are: two leave a generator no way to choose. Several across <em>different</em>
+  domains is correct and intended — unrelated concerns need not share an alert
+  stream.</li>
+<li>A <strong>leaf</strong> domain with no error-sink in scope draws a <code>[missing]</code> warning.
+  Declaring one on an ancestor domain satisfies every leaf beneath it, so a
+  single destination for a whole model is one declaration. Grouping domains are
+  not asked, because the work that can fail lives in the leaves.</li>
+</ul>
+<p>An error-sink inlet does not count against the processor's shape, so a <code>flow</code>
+or a dedicated <code>sink</code> may host one without changing what it is.</p>
 <div class="admonition warning">
 <p class="admonition-title">Over-parallelization</p>
 <p>If <strong>every</strong> portlet along a connected pipeline is <code>async</code>, the stream

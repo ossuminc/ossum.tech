@@ -8186,7 +8186,10 @@ same node and emits a <code>[deprecated]</code> message.</p>
 <li><strong>Alternation</strong>: <code>one of { TypeA, TypeB, TypeC }</code> — Union/sum types. An
   alternation must offer a <strong>real choice</strong>: zero alternatives is an <strong>Error</strong>,
   exactly one draws a <code>[deprecated]</code> message, two or more is clean, and
-  <code>one of { ??? }</code> remains the way to say "not decided yet".</li>
+  <code>one of { ??? }</code> remains the way to say "not decided yet".
+  May also be written with bars: <code>TypeA | TypeB | TypeC</code> is the identical
+  type. <code>prettify</code> rewrites bars back to <code>one of { ... }</code>, which stays the
+  canonical spelling. Predefined types are not valid alternatives either way.</li>
 <li><strong>Enumeration</strong>: <code>any of { Value1, Value2, Value3 }</code> — Enumerated values</li>
 </ul>
 <p><strong>Aggregate Use Cases:</strong></p>
@@ -9834,7 +9837,7 @@ than one in a single scope is an <strong>Error</strong>.</p>
 <h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
 <p>Metadata goes in a <code>with { }</code> block <strong>after</strong> the closing brace of the
 definition:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-63-2"><a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>  <span class="c1">// Entity definition content</span>
 </span><span id="__span-63-3"><a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-63-4"><a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Product available for purchase&quot;</span>
@@ -9842,9 +9845,8 @@ definition:</p>
 </span><span id="__span-63-6"><a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a>    <span class="sd">| Represents a product in the catalog that customers can purchase.</span>
 </span><span id="__span-63-7"><a id="__codelineno-63-7" name="__codelineno-63-7" href="#__codelineno-63-7"></a>  <span class="p">}</span>
 </span><span id="__span-63-8"><a id="__codelineno-63-8" name="__codelineno-63-8" href="#__codelineno-63-8"></a>  <span class="kp">by</span> <span class="kd">author</span> <span class="n">Reid</span>
-</span><span id="__span-63-9"><a id="__codelineno-63-9" name="__codelineno-63-9" href="#__codelineno-63-9"></a>  <span class="kr">option</span> <span class="kp">is</span> <span class="no">event-sourced</span>
-</span><span id="__span-63-10"><a id="__codelineno-63-10" name="__codelineno-63-10" href="#__codelineno-63-10"></a>  <span class="kd">term</span> <span class="n">SKU</span> <span class="kp">is</span> <span class="p">{</span> <span class="sd">| Stock Keeping Unit, the unique identifier for a variant }</span>
-</span><span id="__span-63-11"><a id="__codelineno-63-11" name="__codelineno-63-11" href="#__codelineno-63-11"></a><span class="p">}</span>
+</span><span id="__span-63-9"><a id="__codelineno-63-9" name="__codelineno-63-9" href="#__codelineno-63-9"></a>  <span class="kd">term</span> <span class="n">SKU</span> <span class="kp">is</span> <span class="p">{</span> <span class="sd">| Stock Keeping Unit, the unique identifier for a variant }</span>
+</span><span id="__span-63-10"><a id="__codelineno-63-10" name="__codelineno-63-10" href="#__codelineno-63-10"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The available metadata kinds are <code>briefly</code>, <code>described by</code>/<code>described at</code>/
 <code>described in file</code>, <code>term</code>, <code>option</code>, <code>by author</code>, <code>figma</code>, <code>attachment</code> and

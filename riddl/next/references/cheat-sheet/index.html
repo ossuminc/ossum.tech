@@ -7419,7 +7419,8 @@ messages, states, and parameters in RIDDL.</p>
 <p><strong>Key details</strong>:</p>
 <ul>
 <li><strong>Aggregation</strong> (record): <code>type X is { field1: T1, field2: T2 }</code></li>
-<li><strong>Alternation</strong> (union): <code>type X is one of { T1, T2, T3 }</code> — zero
+<li><strong>Alternation</strong> (union): <code>type X is one of { T1, T2, T3 }</code>, or with bars
+  <code>type X is T1 | T2 | T3</code> (identical; <code>prettify</code> emits the words) — zero
   alternatives is an Error, one draws a deprecation, <code>one of { ??? }</code> is
   undecided</li>
 <li><strong>Enumeration</strong>: <code>type X is any of { A, B, C }</code></li>
@@ -7741,9 +7742,10 @@ interactions between definitions, not full implementations.</p>
 <p>Both operands must be a value reference, a <code>get from</code>, or a named
 <code>constant</code> — never a literal. <code>count &gt; 5</code>, <code>count &gt; "5"</code> and
 <code>count &gt; true</code> all fail at <strong>parse</strong> time. Name the threshold instead:</p>
+<p><!-- riddl: skip reason="a constant beside a condition that would use it; not one construct" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many&quot;</span> <span class="kr">end</span>
-</span></code></pre></div>
+</span></code></pre></div></p>
 <p><code>==</code>/<code>!=</code> need operands of the same category; <code>&lt;</code>/<code>&gt;</code>/<code>&lt;=</code>/<code>&gt;=</code> need an
 ordered (numeric) type on both sides.</p>
 </div>
@@ -8303,7 +8305,7 @@ behavioral flags, or classification metadata.</p>
 <ul>
 <li><code>option is technology("Kafka")</code> — implementation hint</li>
 <li><code>option is kind("core")</code> — classification</li>
-<li>Boolean if no arguments: <code>option is event-sourced</code></li>
+<li>Boolean if no arguments: <code>option is error-sink</code></li>
 </ul>
 <table>
 <thead>
@@ -8315,11 +8317,15 @@ behavioral flags, or classification metadata.</p>
 <tbody>
 <tr>
 <td>Entity</td>
-<td><code>event-sourced</code>, <code>aggregate</code>, <code>transient</code>, <code>available</code>, <code>consistent</code>, <code>message-queue</code>, <code>value</code>, <code>auto-id</code></td>
+<td><code>message-queue</code>, <code>auto-id</code>, <code>finite-state-machine</code></td>
 </tr>
 <tr>
 <td>Saga</td>
-<td><code>compensate</code>, <code>parallel</code></td>
+<td><code>compensate</code>, <code>parallel</code>, <code>retry</code>, <code>undo-retry</code>, <code>failure-message</code>, <code>timeout</code></td>
+</tr>
+<tr>
+<td>Inlet</td>
+<td><code>error-sink</code></td>
 </tr>
 <tr>
 <td>Inlet / Outlet</td>
@@ -8344,9 +8350,31 @@ behavioral flags, or classification metadata.</p>
 </tbody>
 </table>
 <div class="admonition warning">
-<p class="admonition-title">Deprecated context options</p>
-<p><code>gateway</code>, <code>service</code>, <code>external</code> and <code>wrapper</code> are superseded by the
-context intention prefix and emit a <code>[deprecated]</code> message.</p>
+<p class="admonition-title">Deprecated options superseded by intention keywords</p>
+<p>Entity semantics are no longer options. <code>event-sourced</code>, <code>aggregate</code>,
+<code>transient</code>, <code>available</code>, <code>consistent</code> and <code>value</code> (now <code>persistent</code>) are
+written <strong>before</strong> <code>entity</code> — see
+<a href="../../guides/authors/authoring-riddl/#entity-intentions">Entity Intentions</a>.
+Likewise <code>gateway</code>, <code>service</code>, <code>external</code> and <code>wrapper</code> are superseded by
+the context intention prefix. All still parse, all emit <code>[deprecated]</code>, and
+all go away in RIDDL 3.0.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title"><code>error-sink</code> marks where hard errors go</p>
+<p>A generator reports unrecoverable failures as a <code>GeneratorError</code>. Mark the
+inlet that receives them with <code>option is error-sink</code>; that inlet must accept
+<code>GeneratorError</code>, either directly or as one arm of an alternation. <strong>At most
+one per domain</strong> — two leave a generator no way to choose. A leaf domain
+declaring none draws a <code>[missing]</code> warning, because hard errors would have
+nowhere to go; declaring one on an ancestor domain satisfies every leaf
+beneath it.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Durations must be positive</p>
+<p><code>timeout("0s")</code>, <code>timeout("-1m")</code> and <code>timeout("PT0S")</code> are <strong>Errors</strong>. A
+saga bounded by zero has expired before its first step runs. This is a
+separate message from the vague-duration one: that means "state a unit",
+this means "state a magnitude".</p>
 </div>
 <blockquote>
 <p><em><a href="../../concepts/option/">For more details →</a></em></p>
@@ -8508,6 +8536,7 @@ with a definition.</p>
 cannot be expressed in Markdown descriptions.</p>
 <p><strong>Lives in</strong>: Any vital definition.</p>
 <p><strong>Syntax</strong> — the MIME type comes <strong>before</strong> the content, in all three forms:</p>
+<!-- riddl: skip reason="attachment forms; the referenced diagram file does not exist" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kr">attachment</span> <span class="n">StateChart</span> <span class="kp">is</span> <span class="n">image</span><span class="err">/</span><span class="n">png</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">&quot;diagrams/states.png&quot;</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kr">attachment</span> <span class="n">Note</span>      <span class="kp">is</span> <span class="n">text</span><span class="err">/</span><span class="n">plain</span> <span class="kp">as</span> <span class="s2">&quot;reviewed 2026-07-29&quot;</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kr">attachment</span> <span class="n">ULID</span>      <span class="kp">is</span> <span class="s2">&quot;01ARZ3NDEKTSV4RRFFQ69G5FAV&quot;</span>

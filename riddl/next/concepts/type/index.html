@@ -3100,6 +3100,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Alternation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-spelling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The | spelling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5565,6 +5582,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Alternation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-spelling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The | spelling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5728,7 +5762,10 @@ definitions allowed, so we have grouped them into categories:</p>
 </li>
 <li><a href="#compounds">Compounds</a><ul>
 <li><a href="#enumeration">Enumeration</a></li>
-<li><a href="#alternation">Alternation</a></li>
+<li><a href="#alternation">Alternation</a><ul>
+<li><a href="#the-spelling">The | spelling</a></li>
+</ul>
+</li>
 <li><a href="#aggregation">Aggregation</a></li>
 <li><a href="#mapping">Key/Value Mapping</a></li>
 <li><a href="#aggregate-use-cases">Aggregate Use Cases</a><ul>
@@ -5941,13 +5978,35 @@ using the <code>one of</code> keywords followed by type names in curly braces, l
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span> <span class="n">References</span> <span class="o">=</span> <span class="kr">one</span> <span class="kp">of</span> <span class="p">{</span> <span class="nb">String</span><span class="p">,</span> <span class="nb">URL</span> <span class="p">}</span>
 </span></code></pre></div>
 <p>There must be at least two types in an alternation.</p>
+<h4 id="the-spelling">The <code>|</code> spelling<a class="headerlink" href="#the-spelling" title="Permanent link">&para;</a></h4>
+<p>The same alternation may be written with vertical bars, the notation most
+programmers already read:</p>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">type</span> <span class="n">WebPage</span> <span class="kp">is</span> <span class="nb">URL</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">type</span> <span class="n">PlainText</span> <span class="kp">is</span> <span class="nb">String</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kd">type</span> <span class="n">Reference</span> <span class="kp">is</span> <span class="n">WebPage</span> <span class="sd">| PlainText</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kd">record</span> <span class="n">Payload</span> <span class="kp">is</span> <span class="p">{</span> <span class="kr">body</span><span class="p">:</span> <span class="n">WebPage</span> <span class="sd">| PlainText }</span>
+</span></code></pre></div>
+<p>Both spellings produce the <em>identical</em> type — there is no difference after
+parsing — and the bar form is accepted anywhere a type expression may appear,
+including record fields.</p>
+<div class="admonition note">
+<p class="admonition-title"><code>one of { }</code> is the canonical form</p>
+<p>RIDDL is meant to stay readable by people who are not programmers, so
+<code>riddlc prettify</code> rewrites bars back into words: a document written with
+<code>A | B</code> normalises to <code>one of { A or B }</code> on its next round trip. Nothing
+is lost, because the two were never distinguishable once parsed.</p>
+</div>
+<p>At least one <code>|</code> is required, so a lone type name is never an alternation.
+Predefined types are not valid alternatives in either spelling.</p>
 <h3 id="aggregation">Aggregation<a class="headerlink" href="#aggregation" title="Permanent link">&para;</a></h3>
 <p>A type can be defined as an aggregate of a group of values of types. DDD calls
 this a "value object".  Aggregations can be nested, even recursively. Each
 value in the aggregation has an identifier (name) and a type separated by a
 colon. For example, here is the type definition for a rectangle located on a
 Cartesian coordinate system at point (x,y) with a given height and width:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>type Rectangle = { x: Number, y: Number, height: Number, width: Number }
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>type Rectangle = { x: Number, y: Number, height: Number, width: Number }
 </span></code></pre></div></p>
 <h3 id="mapping">Key/Value Mapping<a class="headerlink" href="#mapping" title="Permanent link">&para;</a></h3>
 <p>A type can be defined as a mapping from one type (the key) to another type
@@ -5955,7 +6014,7 @@ Cartesian coordinate system at point (x,y) with a given height and width:
 (lower case letters) to a type named DictionaryEntry that presumably
 contains all the things one would find in a dictionary entry.</p>
 <!-- riddl: in-domain -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">type</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="kr">mapping</span> <span class="kp">from</span> <span class="nb">Pattern</span><span class="p">(</span><span class="s2">&quot;[a-z]+&quot;</span><span class="p">)</span> <span class="kp">to</span> <span class="n">DictionaryEntry</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">type</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="kr">mapping</span> <span class="kp">from</span> <span class="nb">Pattern</span><span class="p">(</span><span class="s2">&quot;[a-z]+&quot;</span><span class="p">)</span> <span class="kp">to</span> <span class="n">DictionaryEntry</span>
 </span></code></pre></div>
 <h3 id="aggregate-use-cases">Aggregate Use Cases<a class="headerlink" href="#aggregate-use-cases" title="Permanent link">&para;</a></h3>
 <p>An aggregate type (<em>value object</em> in DDD) can be declared with a keyword that
@@ -5967,15 +6026,15 @@ handled. A <code>record</code> is data: it types an entity <a href="../state/">s
 the payload of a <code>morph</code>, but can never be sent. <code>graph</code> and <code>table</code> model
 graph-structured and tabular data respectively.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">command</span> <span class="n">JustDoIt</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">AnEntity</span><span class="p">),</span> <span class="n">encouragement</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">swoosh</span><span class="p">:</span> <span class="nb">URL</span> <span class="p">}</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">record</span>  <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">OrderId</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">Currency</span><span class="p">(</span><span class="n">USD</span><span class="p">)</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">command</span> <span class="n">JustDoIt</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">AnEntity</span><span class="p">),</span> <span class="n">encouragement</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">swoosh</span><span class="p">:</span> <span class="nb">URL</span> <span class="p">}</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kd">record</span>  <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">OrderId</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">Currency</span><span class="p">(</span><span class="n">USD</span><span class="p">)</span> <span class="p">}</span>
 </span></code></pre></div>
 <h4 id="the-yields-clause">The <code>yields</code> Clause<a class="headerlink" href="#the-yields-clause" title="Permanent link">&para;</a></h4>
 <p>A <code>command</code> or <code>query</code> may declare the response it produces, between the
 identifier and the body:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">cartId</span> <span class="kp">is</span> <span class="n">CartId</span> <span class="p">}</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kd">query</span>   <span class="n">GetOrder</span>   <span class="kr">yields</span> <span class="kd">result</span> <span class="n">OrderInfo</span>  <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="n">OrderId</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">cartId</span> <span class="kp">is</span> <span class="n">CartId</span> <span class="p">}</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kd">query</span>   <span class="n">GetOrder</span>   <span class="kr">yields</span> <span class="kd">result</span> <span class="n">OrderInfo</span>  <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="n">OrderId</span> <span class="p">}</span>
 </span></code></pre></div>
 <p>A command's <code>yields</code> must resolve to an event and a query's to a result;
 anything else is an <strong>Error</strong>, as is <code>yields</code> on a type that is neither. See
@@ -6024,7 +6083,7 @@ following meanings:</p>
 <p>Note the empty first item in the table; without the suffix, the 
 cardinality of a type expression is "required" (exactly one).
 For example, in this:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>type MyType = { ids: Id+, name: String? }
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>type MyType = { ids: Id+, name: String? }
 </span></code></pre></div>
 the <code>MyType</code> type is an aggregate that contains one or more Id values
 in the <code>ids</code> field and an optional string value in <code>name</code></p>

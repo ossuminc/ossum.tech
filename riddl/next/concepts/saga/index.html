@@ -5481,13 +5481,42 @@ same as a <a href="../function/">function</a>'s:</p>
 <td><code>parallel</code></td>
 <td>Start all steps at once; the coordinator gathers results asynchronously. Any one failure compensates in reverse order of the original sends.</td>
 </tr>
+<tr>
+<td><code>timeout("30s")</code></td>
+<td>How long the whole saga may take</td>
+</tr>
+<tr>
+<td><code>retry(3)</code></td>
+<td>How many times to retry a step that fails</td>
+</tr>
+<tr>
+<td><code>undo-retry(2)</code></td>
+<td>How many times to retry a compensation that fails</td>
+</tr>
+<tr>
+<td><code>failure-message</code></td>
+<td>The message to emit when the saga ultimately fails</td>
+</tr>
 </tbody>
 </table>
 <p>A saga is <strong>sequential by definition</strong>, so <code>parallel</code> declares the exception
 and there is no <code>sequential</code> option — asking for the default said nothing, so
 it was dropped in RIDDL 2.0.</p>
-<p>Both options are contracts for the code generator rather than behavior
-<code>riddlc</code> enforces.</p>
+<p><code>retry</code> appears at two scopes and means the same thing at each: on a
+<a href="../sagastep/">SagaStep</a> it bounds that step, on the saga it bounds every step.
+A step's own <code>retry</code> wins for that step; the saga's applies to steps without
+one. That precedence is a contract between generators, not something <code>riddlc</code>
+enforces.</p>
+<div class="admonition warning">
+<p class="admonition-title">Durations must be positive</p>
+<p><code>timeout("0s")</code>, <code>timeout("-1m")</code> and <code>timeout("PT0S")</code> are <strong>Errors</strong>. A
+saga bounded by zero has expired before its first step starts, and a
+negative bound is not describable at all. It is a distinct message from the
+vague-duration warning, because the two need different fixes: one means
+"state a unit", the other means "state a magnitude".</p>
+</div>
+<p>These options are contracts for the code generator rather than behavior
+<code>riddlc</code> enforces — apart from the duration rule above, which it checks.</p>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">A saga stays within one domain</p>

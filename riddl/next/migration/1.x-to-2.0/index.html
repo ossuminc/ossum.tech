@@ -1008,6 +1008,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="2. Deprecations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-semantics-move-in-front-of-entity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity semantics move in front of entity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5718,6 +5735,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="2. Deprecations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-semantics-move-in-front-of-entity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity semantics move in front of entity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -6044,6 +6078,14 @@ slated for removal in 3.0.</p>
 <td>the context intention prefix</td>
 </tr>
 <tr>
+<td><code>option is event-sourced</code>/<code>aggregate</code>/<code>transient</code>/<code>consistent</code>/<code>available</code></td>
+<td>the <strong>entity</strong> intention prefix</td>
+</tr>
+<tr>
+<td><code>option is value</code> on an entity</td>
+<td><code>persistent</code> before <code>entity</code> (the keyword was renamed)</td>
+</tr>
+<tr>
 <td><code>requires { … }</code> inline aggregation</td>
 <td><code>requires &lt;TypeRef&gt;</code></td>
 </tr>
@@ -6066,6 +6108,39 @@ and a connector routes the message to a downstream inlet. Reaching directly
 into another processor's inlet bypasses that model — that is what <code>tell</code> is
 for. So the fix depends on intent: if you meant streaming, give the sender an
 outlet and wire a connector; if you meant direct delivery, use <code>tell</code>.</p>
+<h3 id="entity-semantics-move-in-front-of-entity">Entity semantics move in front of <code>entity</code><a class="headerlink" href="#entity-semantics-move-in-front-of-entity" title="Permanent link">&para;</a></h3>
+<p>Six options became keywords written <strong>before</strong> <code>entity</code>, for the same reason the
+context ones did: they decide what the model <em>means</em>, not how a generator should
+implement it.</p>
+<!-- riddl: skip reason="shows the deprecated form beside its replacement, on purpose" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// 1.x, and still parses in 2.0 with a [deprecated] message</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">option</span> <span class="kp">is</span> <span class="no">aggregate</span> <span class="kr">option</span> <span class="kp">is</span> <span class="no">event-sourced</span> <span class="p">}</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1">// 2.0</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="no">aggregate</span> <span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span></code></pre></div>
+<p>They fall into three independent groups — role (<code>aggregate</code>), consistency
+(<code>consistent</code> / <code>available</code>) and persistence (<code>event-sourced</code> / <code>persistent</code> /
+<code>transient</code>). Any order parses; <code>prettify</code> emits role, consistency, persistence.
+Note the rename: 1.x's <code>value</code> is now <code>persistent</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>event-sourced</code> is now enforced, and this is the real migration cost</p>
+<p>In 1.x it was advisory. In 2.0 it turns on four Errors, so a model that
+merely <em>claimed</em> event sourcing may no longer validate:</p>
+<ol>
+<li>every handled command's type declares <code>yields</code>;</li>
+<li>every event so named has an <code>on event</code> clause;</li>
+<li><code>set</code>, <code>morph</code> and <code>become</code> appear <strong>only</strong> in <code>on event</code> clauses —
+   including <code>on init</code>;</li>
+<li>a foreign event may not change state; it must first yield one of the
+   entity's own.</li>
+</ol>
+<p>The practical consequence is that an event-sourced entity's commands and
+events want to be declared <strong>inside</strong> it. If a model was event-sourced in
+name only, the cheapest correct fix is often to drop the keyword and keep
+<code>aggregate</code>, then reintroduce it when the handlers are shaped for replay.</p>
+<p>See <a href="../../guides/authors/authoring-riddl/#event-sourcing-rules">Event Sourcing Rules</a>.</p>
+</div>
 <p><strong><code>option is external</code> on a context.</strong> The intention prefix replaces it, and
 the prefix does more than rename: an <code>external</code> context is now checked for
 modeling persistence it cannot own.</p>
@@ -6098,25 +6173,25 @@ ports to say so. This is design work, not editing. An entity that produced
 events through a placeholder <code>source</code> streamlet in 1.x almost certainly wants
 that outlet on the entity itself now.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// 1.x: the outlet had to live somewhere else</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">source</span> <span class="n">ProductFeed</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">}</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">ProductFeed</span><span class="p">.</span><span class="n">Events</span> <span class="p">}</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="p">}</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  <span class="p">}</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">}</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="c1">// 2.0: the entity owns the port it emits on</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>  <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="p">}</span>
-</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    <span class="p">}</span>
-</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>  <span class="p">}</span>
-</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1">// 1.x: the outlet had to live somewhere else</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kd">source</span> <span class="n">ProductFeed</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">}</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">ProductFeed</span><span class="p">.</span><span class="n">Events</span> <span class="p">}</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="p">}</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  <span class="p">}</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="p">}</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="c1">// 2.0: the entity owns the port it emits on</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>  <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="p">}</span>
+</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    <span class="p">}</span>
+</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>  <span class="p">}</span>
+</span><span id="__span-10-19"><a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>Second, resolve every <code>send … to inlet</code>.</strong> This is the deprecation that
 needs a decision rather than a rewrite, and it is why the streaming work
@@ -6143,9 +6218,9 @@ context boundary is often model correctness rather than a deployment detail.</p>
 inlet needs a feed, so dangling ports now surface as completeness warnings.
 For output you genuinely do not consume, say so explicitly:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
 </span></code></pre></div>
 <p><code>BottomlessPit</code> and <code>ForeverEmpty</code> come from the
 <a href="../../concepts/standard-module/">standard module</a> and need no import. They
@@ -6157,10 +6232,10 @@ something untrue.</p>
 <em>derived</em> from arity, so an ascription that disagrees is an Error — which makes
 it a useful check on the work above rather than mere decoration.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Omitting it is only a suppressible StyleWarning, but stating the shape is how
 the model records what you intended, rather than leaving a reader to count
@@ -6186,6 +6261,12 @@ ports.</p>
   nearest-first.</li>
 <li><strong><a href="../../concepts/metadata/#figma-references">Figma references</a></strong> — link a UI
   definition to one specific design frame, with optional drift checking.</li>
+<li><strong>Infix alternation</strong> — <code>A | B</code> is accepted anywhere a type expression may
+  appear, producing the identical type as <code>one of { A or B }</code>. <code>prettify</code> emits
+  the words, which stay canonical. See <a href="../../concepts/type/#the-spelling">Type</a>.</li>
+<li><strong><a href="../../concepts/inlet/#error-sink"><code>option is error-sink</code></a></strong> — marks the
+  inlet that receives a generator's hard errors. A leaf domain with none in
+  scope now draws a <code>[missing]</code> warning.</li>
 <li><strong><a href="../../concepts/module/">Modules and imports</a></strong> — package definitions for
   reuse and load them from compiled <code>.bast</code> files.</li>
 <li><strong><a href="../../concepts/standard-module/">The standard module</a></strong> —
