@@ -17,9 +17,9 @@ to the task file and note completion in this notebook.
 
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
-- The ~50 concept pages still lack per-fence directives. 28 fences fail
-  site-wide, but no file is above three, which is the agreed threshold — this
-  is a known gap, not a regression.
+- The ~50 concept pages still lack per-fence directives. 26 fences fail
+  site-wide against rc.9, but no file is above three, which is the agreed
+  threshold — a known gap, not a regression.
 - Promoting RIDDL 2.0 to `latest` when it ships final:
   `scripts/promote-2.0-to-latest.md`. Since TASK G it is **one commit** — the
   two-branches-one-alias landmine is gone. The single rule left: the last
