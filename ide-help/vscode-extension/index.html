@@ -1057,6 +1057,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#document-outline-breadcrumbs-and-go-to-symbol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Document Outline, Breadcrumbs and Go to Symbol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handler-completeness-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handler Completeness Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1739,6 +1761,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#document-outline-breadcrumbs-and-go-to-symbol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Document Outline, Breadcrumbs and Go to Symbol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handler-completeness-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handler Completeness Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2311,6 +2355,38 @@ extension provides:</p>
 <li>Press <span class="keys"><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-f12">F12</kbd></span> with cursor on a symbol</li>
 <li>Or right-click and select <strong>Find All References</strong></li>
 </ul>
+<h4 id="document-outline-breadcrumbs-and-go-to-symbol">Document Outline, Breadcrumbs and Go to Symbol<a class="headerlink" href="#document-outline-breadcrumbs-and-go-to-symbol" title="Permanent link">&para;</a></h4>
+<p>The extension publishes the definition hierarchy of the open file, built from
+the RIDDL parse tree rather than guessed from indentation. That drives three
+standard VS Code features at once:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>How to reach it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Outline</strong> view</td>
+<td>Explorer sidebar → <strong>Outline</strong></td>
+</tr>
+<tr>
+<td><strong>Breadcrumbs</strong></td>
+<td>The bar above the editor</td>
+</tr>
+<tr>
+<td><strong>Go to Symbol</strong></td>
+<td><span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-o">O</kbd></span> (Mac) / <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-o">O</kbd></span> (Windows/Linux)</td>
+</tr>
+</tbody>
+</table>
+<p>Because it comes from the parse tree, the outline shows the real containment —
+domains holding contexts holding entities — and follows the file as you edit.</p>
+<h4 id="handler-completeness-diagnostics">Handler Completeness Diagnostics<a class="headerlink" href="#handler-completeness-diagnostics" title="Permanent link">&para;</a></h4>
+<p>A handler that is empty, or whose body is nothing but <code>prompt</code> placeholders, is
+reported as a warning. It parses and it is valid RIDDL — it simply has not said
+what happens yet, which is easy to leave behind and hard to spot by eye.</p>
 <hr />
 <h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
 <p>Access commands via the Command Palette (<span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> / <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span>):</p>
