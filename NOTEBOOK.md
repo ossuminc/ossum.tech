@@ -11,9 +11,9 @@ to the task file and note completion in this notebook.
 
 ---
 
-## RESUME HERE — as of 2026-08-01
+## RESUME HERE — as of 2026-08-02
 
-**Tasks A–I are all closed.** What is still open:
+**Tasks A–J are all closed.** What is still open:
 
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
@@ -29,6 +29,49 @@ to the task file and note completion in this notebook.
 The sections below are kept as the record of how the current state was reached.
 
 ---
+
+### TASK J — riddl rc.9 language changes ✅ **DONE 2026-08-02**
+
+Upgraded to **2.0.0-rc.9-6-46c5968d** (`~/.ivy2/local`; Scala unchanged at
+3.9.0-RC4) and regenerated the grammar. 29 riddl commits since rc.5; five
+changed what the docs must say.
+
+**The one that mattered: entity intentions.** `event-sourced`, `persistent`
+(was `value`), `transient`, `aggregate`, `consistent` and `available` are now
+keywords **before** `entity`. The option spellings still parse but emit
+`[deprecated]` — **and the fence validator gates on `[deprecated]`**, so all 16
+occurrences across 7 files had started failing. This was not a cosmetic rename.
+
+**`event-sourced` is now enforced by four Errors** (R1–R4): commands declare
+`yields`; every event so named has an `on event` clause; `set`/`morph`/`become`
+only inside `on event` (no `on init` exemption); a foreign event may not touch
+state. Several examples claimed event sourcing while being structurally
+impossible to event-source. Each was rewritten — commands and events moved
+*inside* their entity, since only an entity's own events may change its state.
+Two structural examples in `authoring-riddl.md` went the other way and dropped
+`event-sourced`, because forcing the four rules into a section about entity
+*structure* would teach the wrong lesson.
+
+Also documented: infix alternation `A | B` (identical to `one of { … }`;
+prettify emits the words — and **predefined types are not valid alternatives**,
+which the compiler caught in the first draft of the example), `option is
+error-sink` with its three rules, adaptor uniqueness per direction, saga
+`retry`/`undo-retry`/`failure-message`, and non-positive durations now being an
+Error. The migration guide gained an entity-intentions section, since it is the
+page a 1.x reader will look at.
+
+**Compiler to use:** `../bin/riddlc` is 2.0 (rc.9). The Homebrew `riddlc` on
+PATH is **rc.5** and does *not* report the deprecation, so validating the 2.0
+docs with it silently passes examples the real compiler rejects. CLAUDE.md now
+says so in both places it names a compiler.
+
+**Site-wide: 144 fences validated, 26 failing, no file above three** — down from
+28 before the upgrade, so the language change regressed nothing.
+
+**IDE docs** corrected against the shipped plugins: IntelliJ needs **2025.3+**
+(since-build 253) and **JDK 21+**, not the 2024.1/JDK 25 we claimed, and the
+Community/Ultimate distinction is gone from 2025.3. VS Code gained Document
+Outline, Breadcrumbs, Go to Symbol and handler-completeness diagnostics.
 
 ### TASK I — consent and theme asked once per VERSION ✅ **DONE 2026-08-01**
 

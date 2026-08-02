@@ -352,12 +352,17 @@ by showing what it forbids.
 checker above it is a **gate**: it exits non-zero on failure.
 
 **Point each tree at its own compiler.** Both live on `main` now, so nothing
-about the checkout tells you which one is meant — and the 2.0 RC formula owns
-the `riddlc` symlink on PATH, so the wrong pairing reports confident nonsense.
+about the checkout tells you which one is meant — and the `riddlc` on PATH is
+neither of them any more, so the wrong pairing reports confident nonsense.
+
+**`../bin/riddlc` is the 2.0 compiler**, staged from riddl's `release/2`. The
+Homebrew `riddlc` on PATH lags it (2.0.0-rc.5 while `../bin` is rc.9), and rc.9
+deprecated the entity options — so validating the 2.0 docs with the PATH binary
+silently passes examples the real compiler rejects.
 
 ```bash
-# 2.0 -- sites/riddl/, validated by the riddlc on PATH (2.0.0-rc.5)
-python3 scripts/validate-riddl-examples.py "$(which riddlc)" \
+# 2.0 -- sites/riddl/, validated by the STAGED compiler, not the one on PATH
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
 # 1.31 -- sites/riddl-1x/, validated by the 1.31 build, NOT the one on PATH
@@ -402,6 +407,21 @@ compilers):
 | `initial state` / `initial handler` | ❌ | ✅ |
 | query response | `reply` | `yield` (`reply` deprecated) |
 | outlet on an entity | ❌ — put it on a `source` | ✅ |
+| entity semantics | `option is event-sourced` | **`event-sourced entity X`** — the option form is `[deprecated]` |
+| alternation | `one of { A, B }` | also `A \| B` (identical; `prettify` emits the words) |
+| `command C yields event E is …` | ❌ | ✅ — **required** on every command an event-sourced entity handles |
+
+**`event-sourced` is not decoration in 2.0.** It turns on four Errors: every
+handled command's type must declare `yields`; every event so named needs an
+`on event` clause; `set`/`morph`/`become` may appear **only** in `on event`
+clauses (no exemption for `on init`); and a foreign event may not touch state —
+it must yield one of the entity's own first. In practice that means declaring
+an event-sourced entity's commands and events **inside** it. Several examples
+claimed event sourcing while being structurally impossible to event-source, and
+rc.9 started rejecting them.
+
+Since the entity options emit `[deprecated]`, and the fence validator gates on
+that, they now **fail the gate** — so this is not a cosmetic migration.
 
 ### RIDDL Syntax Highlighting
 
@@ -675,7 +695,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py "$(which riddlc)" sites/riddl/docs/quickstart.md` |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
 | Deploy | push to `main`; CI loops over `docs-version.yml` |
