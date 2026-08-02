@@ -24,7 +24,7 @@ lazy val root = Root(
   // Keep these two lines in step: bumping the riddl version may require
   // bumping this one to whatever riddl built with.
   With.Scala3.configure(version = Some("3.9.0-RC4")),
-  With.Riddl.library(version = "2.0.0-rc.5", nonJVMDependency = false)
+  With.Riddl.library(version = "2.0.0-rc.9-6-46c5968d", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
@@ -46,6 +46,8 @@ lazy val root = Root(
     val cp = (Runtime / fullClasspathAsJars).value
       .map(entry => converter.toPath(entry.data).toAbsolutePath.toString)
       .mkString(java.io.File.pathSeparator)
+    // sites/riddl/ only. sites/riddl-1x/ has its own grammar file for the 1.31
+    // language and must NOT be overwritten by a 2.x library.
     val target =
       baseDirectory.value / "sites" / "riddl" / "docs" / "references" / "riddl-grammar.ebnf"
     val script = baseDirectory.value / "tools" / "extract-grammar.sh"
