@@ -108,6 +108,33 @@ type References = one of { String, URL }
 
 There must be at least two types in an alternation.
 
+#### The `|` spelling
+
+The same alternation may be written with vertical bars, the notation most
+programmers already read:
+
+<!-- riddl: in-context -->
+```riddl
+type WebPage is URL
+type PlainText is String
+
+type Reference is WebPage | PlainText
+record Payload is { body: WebPage | PlainText }
+```
+
+Both spellings produce the *identical* type — there is no difference after
+parsing — and the bar form is accepted anywhere a type expression may appear,
+including record fields.
+
+!!! note "`one of { }` is the canonical form"
+    RIDDL is meant to stay readable by people who are not programmers, so
+    `riddlc prettify` rewrites bars back into words: a document written with
+    `A | B` normalises to `one of { A or B }` on its next round trip. Nothing
+    is lost, because the two were never distinguishable once parsed.
+
+At least one `|` is required, so a lone type name is never an alternation.
+Predefined types are not valid alternatives in either spelling.
+
 ### Aggregation
 A type can be defined as an aggregate of a group of values of types. DDD calls
 this a "value object".  Aggregations can be nested, even recursively. Each

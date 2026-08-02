@@ -417,7 +417,8 @@ messages, states, and parameters in RIDDL.
 **Key details**:
 
 - **Aggregation** (record): `type X is { field1: T1, field2: T2 }`
-- **Alternation** (union): `type X is one of { T1, T2, T3 }` — zero
+- **Alternation** (union): `type X is one of { T1, T2, T3 }`, or with bars
+  `type X is T1 | T2 | T3` (identical; `prettify` emits the words) — zero
   alternatives is an Error, one draws a deprecation, `one of { ??? }` is
   undecided
 - **Enumeration**: `type X is any of { A, B, C }`
@@ -1091,17 +1092,38 @@ behavioral flags, or classification metadata.
 
 | Applies to | Options |
 |---|---|
-| Entity | `event-sourced`, `aggregate`, `transient`, `available`, `consistent`, `message-queue`, `value`, `auto-id` |
-| Saga | `compensate`, `parallel` |
+| Entity | `message-queue`, `auto-id`, `finite-state-machine` |
+| Saga | `compensate`, `parallel`, `retry`, `undo-retry`, `failure-message`, `timeout` |
+| Inlet | `error-sink` |
 | Inlet / Outlet | `async` |
 | Connector / Inlet | `ordered`, `unordered`, `persistent` |
 | Any processor | `protocol` |
 | Epic | `sync` |
 | Any definition | `css`, `technology`, `kind`, `faicon` |
 
-!!! warning "Deprecated context options"
-    `gateway`, `service`, `external` and `wrapper` are superseded by the
-    context intention prefix and emit a `[deprecated]` message.
+!!! warning "Deprecated options superseded by intention keywords"
+    Entity semantics are no longer options. `event-sourced`, `aggregate`,
+    `transient`, `available`, `consistent` and `value` (now `persistent`) are
+    written **before** `entity` — see
+    [Entity Intentions](../guides/authors/authoring-riddl.md#entity-intentions).
+    Likewise `gateway`, `service`, `external` and `wrapper` are superseded by
+    the context intention prefix. All still parse, all emit `[deprecated]`, and
+    all go away in RIDDL 3.0.
+
+!!! info "`error-sink` marks where hard errors go"
+    A generator reports unrecoverable failures as a `GeneratorError`. Mark the
+    inlet that receives them with `option is error-sink`; that inlet must accept
+    `GeneratorError`, either directly or as one arm of an alternation. **At most
+    one per domain** — two leave a generator no way to choose. A leaf domain
+    declaring none draws a `[missing]` warning, because hard errors would have
+    nowhere to go; declaring one on an ancestor domain satisfies every leaf
+    beneath it.
+
+!!! warning "Durations must be positive"
+    `timeout("0s")`, `timeout("-1m")` and `timeout("PT0S")` are **Errors**. A
+    saga bounded by zero has expired before its first step runs. This is a
+    separate message from the vague-duration one: that means "state a unit",
+    this means "state a magnitude".
 
 > *[For more details →](../concepts/option.md)*
 

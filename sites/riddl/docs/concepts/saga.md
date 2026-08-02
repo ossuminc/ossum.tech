@@ -36,13 +36,30 @@ saga CheckoutProcess is {
 |--------|---------|
 | `compensate` | On failure, run the accumulated steps' undo blocks in reverse |
 | `parallel` | Start all steps at once; the coordinator gathers results asynchronously. Any one failure compensates in reverse order of the original sends. |
+| `timeout("30s")` | How long the whole saga may take |
+| `retry(3)` | How many times to retry a step that fails |
+| `undo-retry(2)` | How many times to retry a compensation that fails |
+| `failure-message` | The message to emit when the saga ultimately fails |
 
 A saga is **sequential by definition**, so `parallel` declares the exception
 and there is no `sequential` option — asking for the default said nothing, so
 it was dropped in RIDDL 2.0.
 
-Both options are contracts for the code generator rather than behavior
-`riddlc` enforces.
+`retry` appears at two scopes and means the same thing at each: on a
+[SagaStep](sagastep.md) it bounds that step, on the saga it bounds every step.
+A step's own `retry` wins for that step; the saga's applies to steps without
+one. That precedence is a contract between generators, not something `riddlc`
+enforces.
+
+!!! warning "Durations must be positive"
+    `timeout("0s")`, `timeout("-1m")` and `timeout("PT0S")` are **Errors**. A
+    saga bounded by zero has expired before its first step starts, and a
+    negative bound is not describable at all. It is a distinct message from the
+    vague-duration warning, because the two need different fixes: one means
+    "state a unit", the other means "state a magnitude".
+
+These options are contracts for the code generator rather than behavior
+`riddlc` enforces — apart from the duration rule above, which it checks.
 
 ## Scope
 

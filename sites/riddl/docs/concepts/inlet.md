@@ -48,6 +48,38 @@ An inlet that no connector feeds draws a **CompletenessWarning**.
 | `async` | Marks this port as a deliberate codegen async boundary, so the generator inserts a real boundary here instead of fusing the stream |
 | `ordered` | Delivery preserves order |
 | `unordered` | Delivery order is not significant, enabling partitioning and parallelism |
+| `error-sink` | This inlet receives the hard errors a generator reports |
+
+### `error-sink`
+
+When a generated system hits an unrecoverable failure it reports a
+`GeneratorError` — a record in RIDDL's standard module. Somewhere has to
+receive one, and RIDDL does not presume where: what a system does with an
+operational alert is a modelling decision, no different from handling any other
+message. So the model names the destination itself.
+
+The mark goes on the **inlet** rather than the processor, because an inlet names
+the receiver, the port and the message type in one place; a processor may have
+several inlets and a generator would be left guessing which.
+
+Three rules come with it:
+
+- The inlet **must accept `GeneratorError`** — typed by it directly, or by an
+  alternation that includes it, so a model may route its own error messages to
+  the same place and give the operator one thing to watch. An inlet typed only
+  by the model's own command is a destination a generator cannot deliver to,
+  so this is an **Error**.
+- **At most one per domain**, an Error for the same reason duplicate adaptors
+  are: two leave a generator no way to choose. Several across *different*
+  domains is correct and intended — unrelated concerns need not share an alert
+  stream.
+- A **leaf** domain with no error-sink in scope draws a `[missing]` warning.
+  Declaring one on an ancestor domain satisfies every leaf beneath it, so a
+  single destination for a whole model is one declaration. Grouping domains are
+  not asked, because the work that can fail lives in the leaves.
+
+An error-sink inlet does not count against the processor's shape, so a `flow`
+or a dedicated `sink` may host one without changing what it is.
 
 !!! warning "Over-parallelization"
     If **every** portlet along a connected pipeline is `async`, the stream

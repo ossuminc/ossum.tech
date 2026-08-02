@@ -31,6 +31,18 @@ to achieve bidirectional adaptation between
 The directionality of an Adaptor is specified in the definition of the adaptor.
 This leads to two kinds of adaptors: inbound and outbound.
 
+!!! warning "One adaptor per direction, per pair of contexts"
+    A context may adapt both **to** and **from** another context, but only
+    **once in each direction**. Two adaptors with the same direction to the
+    same foreign context split that context's translation across two places,
+    with nothing to say which one handles a given message — an **Error**,
+    because the ambiguity has no defensible resolution.
+
+    Direction is part of the rule. Inbound *plus* outbound between the same
+    pair is the sanctioned way to say "both ways", not duplication. And
+    adaptors owned by *different* contexts are equally fine: A adapting from B
+    while B adapts from A is two contexts each defending its own model.
+
 ## Inbound Adaptors
 Inbound adaptors provide an adaptation that occurs from the 
 [Context](context.md) referenced in the adaptor to the

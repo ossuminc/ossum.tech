@@ -216,6 +216,9 @@ port it is connected to.
   alternation must offer a **real choice**: zero alternatives is an **Error**,
   exactly one draws a `[deprecated]` message, two or more is clean, and
   `one of { ??? }` remains the way to say "not decided yet".
+  May also be written with bars: `TypeA | TypeB | TypeC` is the identical
+  type. `prettify` rewrites bars back to `one of { ... }`, which stays the
+  canonical spelling. Predefined types are not valid alternatives either way.
 - **Enumeration**: `any of { Value1, Value2, Value3 }` — Enumerated values
 
 **Aggregate Use Cases:**
