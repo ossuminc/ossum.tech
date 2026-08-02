@@ -96,31 +96,39 @@ context Catalog is {
     inStock is Boolean
   }
 
-  command CreateProduct is {
-    name is String,
-    price is Decimal(10, 2)
-  }
+  event-sourced entity Product is {
+    // An event-sourced entity OWNS the events that change its state: only its
+    // own events may do so, so they are declared inside it.
+    command CreateProduct yields event ProductCreated is {
+      name is String,
+      price is Decimal(10, 2)
+    }
 
-  event ProductCreated is {
-    id is ProductId,
-    name is String,
-    price is Decimal(10, 2),
-    at is TimeStamp
-  }
+    event ProductCreated is {
+      id is ProductId,
+      name is String,
+      price is Decimal(10, 2),
+      at is TimeStamp
+    }
 
-  entity Product is {
     outlet ProductEvents is event ProductCreated
 
     initial state Active of record ProductInfo is {
       handler Main is {
         on command CreateProduct {
-          do "create the product with a new ID"
-          send event ProductCreated to outlet ProductEvents
+          do "work out the new product's ID"
+          yield event ProductCreated
         }
+        on event ProductCreated {
+          set field Active.name to ProductCreated.name
+        }
+      } with {
+        briefly "Creates the product, then applies the event"
       }
+    } with {
+      briefly "The live product record"
     }
   } with {
-    option is event-sourced
     briefly "A product in the catalog"
   }
 }
@@ -136,8 +144,11 @@ Key concepts:
 
 Three details that are easy to get wrong:
 
-- **Options go in `with { }`**, not in the body. `option is event-sourced`
-  inside the entity body is a parse error.
+- **Semantics go *before* `entity`**, not in `with { }`. `event-sourced`,
+  `persistent`, `transient`, `aggregate`, `consistent` and `available` are
+  *intention keywords* that change what the entity means, so they are part of
+  the declaration. Writing them as `option is event-sourced` still parses but
+  is deprecated and will be removed in RIDDL 3.0.
 - **`do "..."`** describes work for a human or AI to implement later. A bare
   quoted string on its own is not a statement.
 - **`initial`** marks the starting state. Without it the first state declared
@@ -169,37 +180,38 @@ context Shopping is {
     items is CartItem*
   }
 
-  command AddItem is {
-    productId is Catalog.ProductId,
-    quantity is Integer
-  }
-
-  event ItemAdded is {
-    cartId is CartId,
-    productId is Catalog.ProductId,
-    quantity is Integer,
-    at is TimeStamp
-  }
-
   query GetContents is { cartId is CartId }
   result CartContents is { items is CartItem* }
 
-  entity Cart is {
+  event-sourced entity Cart is {
+    command AddItem yields event ItemAdded is {
+      productId is Catalog.ProductId,
+      quantity is Integer
+    }
+
+    event ItemAdded is {
+      cartId is CartId,
+      productId is Catalog.ProductId,
+      quantity is Integer,
+      at is TimeStamp
+    }
+
     outlet CartEvents is event ItemAdded
 
     initial state Active of record CartState is {
       handler Main is {
         on command AddItem {
+          do "work out where the item belongs in the cart"
+          yield event ItemAdded
+        }
+        on event ItemAdded {
           do "add or update the item in the cart"
-          send event ItemAdded to outlet CartEvents
         }
         on query GetContents {
           yield result CartContents
         }
       }
     }
-  } with {
-    option is event-sourced
   }
 }
 ```
@@ -229,33 +241,35 @@ domain OnlineShop is {
       inStock is Boolean
     }
 
-    command CreateProduct is {
-      name is String,
-      price is Decimal(10, 2)
-    }
+    event-sourced entity Product is {
+      command CreateProduct yields event ProductCreated is {
+        name is String,
+        price is Decimal(10, 2)
+      }
 
-    event ProductCreated is {
-      id is ProductId,
-      name is String,
-      price is Decimal(10, 2),
-      at is TimeStamp
-    }
+      event ProductCreated is {
+        id is ProductId,
+        name is String,
+        price is Decimal(10, 2),
+        at is TimeStamp
+      }
 
-    entity Product is {
       outlet ProductEvents is event ProductCreated
 
       initial state Active of record ProductInfo is {
         handler Main is {
           on command CreateProduct {
-            do "create the product with a new ID"
-            send event ProductCreated to outlet ProductEvents
+            do "work out the new product's ID"
+            yield event ProductCreated
+          }
+          on event ProductCreated {
+            set field Active.name to ProductCreated.name
           }
         }
       } with {
         briefly "The live product record"
       }
     } with {
-      option is event-sourced
       briefly "A product in the catalog"
     }
   } with {
@@ -275,29 +289,32 @@ domain OnlineShop is {
       items is CartItem*
     }
 
-    command AddItem is {
-      productId is Catalog.ProductId,
-      quantity is Integer
-    }
-
-    event ItemAdded is {
-      cartId is CartId,
-      productId is Catalog.ProductId,
-      quantity is Integer,
-      at is TimeStamp
-    }
-
     query GetContents is { cartId is CartId }
     result CartContents is { items is CartItem* }
 
-    entity Cart is {
+    event-sourced entity Cart is {
+      command AddItem yields event ItemAdded is {
+        productId is Catalog.ProductId,
+        quantity is Integer
+      }
+
+      event ItemAdded is {
+        cartId is CartId,
+        productId is Catalog.ProductId,
+        quantity is Integer,
+        at is TimeStamp
+      }
+
       outlet CartEvents is event ItemAdded
 
       initial state Active of record CartState is {
         handler Main is {
           on command AddItem {
+            do "work out where the item belongs in the cart"
+            yield event ItemAdded
+          }
+          on event ItemAdded {
             do "add or update the item in the cart"
-            send event ItemAdded to outlet CartEvents
           }
           on query GetContents {
             yield result CartContents
@@ -307,7 +324,6 @@ domain OnlineShop is {
         briefly "The live cart contents"
       }
     } with {
-      option is event-sourced
       briefly "A customer's shopping cart"
     }
   } with {

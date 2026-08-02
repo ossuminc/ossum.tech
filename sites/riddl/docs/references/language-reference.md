@@ -1910,7 +1910,7 @@ Metadata goes in a `with { }` block **after** the closing brace of the
 definition:
 
 ```riddl
-entity Product is {
+event-sourced entity Product is {
   // Entity definition content
 } with {
   briefly as "Product available for purchase"
@@ -1918,7 +1918,6 @@ entity Product is {
     | Represents a product in the catalog that customers can purchase.
   }
   by author Reid
-  option is event-sourced
   term SKU is { | Stock Keeping Unit, the unique identifier for a variant }
 }
 ```

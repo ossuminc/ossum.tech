@@ -177,16 +177,17 @@ context Catalog is {
   type ProductId is UUID
   type CategoryId is UUID
 
-  entity Product is {
-    // Commands - requests to change state
-    command CreateProduct is {
+  aggregate event-sourced entity Product is {
+    // Commands - requests to change state. An event-sourced entity records
+    // every change as an event, so each command says which event it yields.
+    command CreateProduct yields event ProductCreated is {
       name is String,
       description is String,
       price is Money,
       category is CategoryId
     }
 
-    command UpdatePrice is {
+    command UpdatePrice yields event PriceUpdated is {
       productId is ProductId,
       newPrice is Money
     }
@@ -215,18 +216,25 @@ context Catalog is {
     }
     state Active of record ActiveData is {
       handler ActiveHandler is {
+        // Commands decide; they do not change state directly.
         on command UpdatePrice {
           when prompt("price is different from current") then {
-            set field info.price to UpdatePrice.newPrice
-            send event PriceUpdated to outlet Events
+            yield event PriceUpdated
           } end
+        }
+
+        // Events apply the change. Replay re-runs exactly these clauses.
+        on event PriceUpdated {
+          set field Active.price to PriceUpdated.newPrice
+        }
+
+        on event ProductCreated {
+          set field Active.name to ProductCreated.name
         }
       }
     }
   } with {
     briefly "A product in the catalog"
-    option is aggregate
-    option is event-sourced
   }
 }
 ```

@@ -94,8 +94,6 @@ should be implemented or interpreted. The syntax is `option is`
 entity Order is {
   ???
 } with {
-  option is event-sourced
-  option is aggregate
   option is technology("Akka")
   option is kind("core")
 }

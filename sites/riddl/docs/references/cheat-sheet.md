@@ -671,6 +671,7 @@ Wherever a statement needs a value, any of these is accepted:
     `constant` — never a literal. `count > 5`, `count > "5"` and
     `count > true` all fail at **parse** time. Name the threshold instead:
 
+    <!-- riddl: skip reason="a constant beside a condition that would use it; not one construct" -->
     ```riddl
     constant MaxItems is Natural = "100"
     when cart.itemCount > MaxItems then error "too many" end
@@ -1086,7 +1087,7 @@ behavioral flags, or classification metadata.
 
 - `option is technology("Kafka")` — implementation hint
 - `option is kind("core")` — classification
-- Boolean if no arguments: `option is event-sourced`
+- Boolean if no arguments: `option is error-sink`
 
 | Applies to | Options |
 |---|---|
@@ -1297,6 +1298,7 @@ cannot be expressed in Markdown descriptions.
 
 **Syntax** — the MIME type comes **before** the content, in all three forms:
 
+<!-- riddl: skip reason="attachment forms; the referenced diagram file does not exist" -->
 ```riddl
 attachment StateChart is image/png in file "diagrams/states.png"
 attachment Note      is text/plain as "reviewed 2026-07-29"

@@ -324,7 +324,7 @@ result CartContents is {
 
 <!-- riddl: in-context no-prelude=Cart -->
 ```riddl
-entity Cart is {
+aggregate entity Cart is {
   // Identity
   type CartId is Id(Cart)
 
@@ -353,22 +353,99 @@ entity Cart is {
       // state update logic
     }
   }
-} with {
-  option is aggregate
-  option is event-sourced
 }
 ```
 
-### Entity Options
+### Entity Intentions
 
-Common entity options:
+An entity's semantics are declared as keywords **before** `entity`, not as
+options in `with { }`. They change what the model *means*, and one of them —
+`event-sourced` — decides whether it is even legal, so they are part of the
+declaration rather than advice to a generator.
 
-| Option | Description |
-|--------|-------------|
-| `aggregate` | This entity is an aggregate root |
-| `event-sourced` | State is reconstructed from event history |
-| `transient` | Entity state is not persisted |
-| `finite-state-machine` | Entity follows FSM pattern |
+<!-- riddl: in-context no-prelude=Order -->
+```riddl
+aggregate consistent event-sourced entity Order is { ??? }
+```
+
+There are three independent groups. Within a group the keywords are mutually
+exclusive; across groups you may take one of each, in any order.
+
+| Group | Keywords | Meaning |
+|---|---|---|
+| Role | `aggregate` | The entity is an aggregate root |
+| Consistency | `consistent` / `available` | Which side of CAP the entity favours |
+| Persistence | `event-sourced` / `persistent` / `transient` | How its state survives |
+
+`event-sourced` implies `persistent`, so the two are never written together.
+`transient` means the state is not persisted at all.
+
+!!! warning "These used to be options"
+    `option is event-sourced` and friends still parse, but emit a
+    `[deprecated]` message and will be removed in RIDDL 3.0. Note also that
+    `persistent` was previously spelled `value`.
+
+Choosing `event-sourced` brings four rules with it — see
+[Event Sourcing Rules](#event-sourcing-rules) below.
+
+`finite-state-machine` is a genuine option and stays in `with { }`; it is not
+an intention.
+
+### Event Sourcing Rules
+
+Replay rebuilds an entity's state by re-applying its recorded events in order,
+so the *same* state changes must happen again. That is only possible if the
+model is shaped for it, and RIDDL now checks four things. All four are Errors,
+and all four apply only when the entity is `event-sourced`.
+
+1. **Every handled command declares what it yields.** Write it on the command's
+   type, between the name and `is` — otherwise there is nothing to record.
+
+    <!-- riddl: in-context -->
+    ```riddl
+    event Placed is { total: Integer }
+    command Place yields event Placed is { total: Integer }
+    ```
+
+2. **Every event named by such a `yields` has an `on event` clause**, so replay
+   has something to apply.
+
+3. **`set`, `morph` and `become` appear only in `on event` clauses.** There is
+   no exemption for `on init`: an initial state must come from an event like
+   any other change. Commands *decide*; events *apply*.
+
+4. **A foreign event may not change state.** An event declared outside the
+   entity must first be turned into one of the entity's own:
+
+    <!-- riddl: skip reason="two clauses from different handlers, shown to contrast rule 4" -->
+    ```riddl
+    on event Sales.PaymentTaken { yield event Order.Placed }
+    on event Order.Placed { set field Main.total to "1" }
+    ```
+
+Together these give the shape every event-sourced entity takes: the command
+handler validates and yields, and the event handler performs the change.
+
+<!-- riddl: in-context no-prelude=Order -->
+```riddl
+event-sourced entity Order is {
+  record Fields is { total: Integer }
+  command Place yields event Placed is { total: Integer }
+  event Placed is { total: Integer }
+
+  state Main of record Order.Fields is {
+    handler Behavior is {
+      on command Order.Place { yield event Order.Placed }
+      on event Order.Placed { set field Main.total to "1" }
+    }
+  }
+}
+```
+
+!!! tip "Declare the events inside the entity"
+    Rule 4 makes ownership matter: only the entity's *own* events may change
+    its state. Declaring commands and events inside the entity that uses them
+    is the simplest way to satisfy it.
 
 ---
 
@@ -471,7 +548,7 @@ entity Order is {
 
 <!-- riddl: in-context no-prelude=Account -->
 ```riddl
-entity Account is {
+aggregate entity Account is {
   type AccountId is Id(Account)
 
   record State is {
@@ -503,9 +580,6 @@ entity Account is {
       set field State.balance to "balance - amount"
     }
   }
-} with {
-  option is aggregate
-  option is event-sourced
 }
 ```
 

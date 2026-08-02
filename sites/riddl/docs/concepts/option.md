@@ -19,8 +19,8 @@ optional string arguments:
 entity Order is {
   ???
 } with {
-  option is event-sourced
   option is technology("Akka")
+  option is kind("core")
 }
 ```
 
