@@ -149,6 +149,27 @@ Find everywhere a symbol is used:
 - Press ++shift+f12++ with cursor on a symbol
 - Or right-click and select **Find All References**
 
+#### Document Outline, Breadcrumbs and Go to Symbol
+
+The extension publishes the definition hierarchy of the open file, built from
+the RIDDL parse tree rather than guessed from indentation. That drives three
+standard VS Code features at once:
+
+| Feature | How to reach it |
+|---|---|
+| **Outline** view | Explorer sidebar → **Outline** |
+| **Breadcrumbs** | The bar above the editor |
+| **Go to Symbol** | ++cmd+shift+o++ (Mac) / ++ctrl+shift+o++ (Windows/Linux) |
+
+Because it comes from the parse tree, the outline shows the real containment —
+domains holding contexts holding entities — and follows the file as you edit.
+
+#### Handler Completeness Diagnostics
+
+A handler that is empty, or whose body is nothing but `prompt` placeholders, is
+reported as a warning. It parses and it is valid RIDDL — it simply has not said
+what happens yet, which is easy to leave behind and hard to spot by eye.
+
 ---
 
 ## Commands

@@ -33,8 +33,16 @@ Marketplace:
 
 ### Requirements
 
-- IntelliJ IDEA 2024.1 or later (Community or Ultimate Edition)
-- JDK 25 or later
+| | |
+|---|---|
+| IntelliJ IDEA | 2025.3 or later (build 253+) |
+| JDK | 21 or later (Temurin recommended) |
+| RIDDL | 2.0 |
+
+From 2025.3 JetBrains ships a **unified** IntelliJ IDEA distribution, so there
+is no longer a Community/Ultimate choice to make: the plugin targets that one
+distribution. There is no upper bound in the descriptor, so it stays installable
+on later releases.
 
 ---
 
@@ -280,7 +288,7 @@ Standard IntelliJ shortcuts work in RIDDL files:
 
 ### Plugin Not Loading
 
-- Verify IntelliJ IDEA version is 2024.1 or later
+- Verify IntelliJ IDEA version is 2025.3 or later (build 253+)
 - Check **Settings** > **Plugins** > **Installed** for RIDDL4IDEA
 - Try disabling and re-enabling the plugin
 
