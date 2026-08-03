@@ -11,9 +11,9 @@ to the task file and note completion in this notebook.
 
 ---
 
-## RESUME HERE — as of 2026-08-02
+## RESUME HERE — as of 2026-08-03
 
-**Tasks A–J are all closed.** What is still open:
+**Tasks A–K are all closed.** What is still open:
 
 - `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
   see the note at the end of TASK C.
@@ -29,6 +29,44 @@ to the task file and note completion in this notebook.
 The sections below are kept as the record of how the current state was reached.
 
 ---
+
+### TASK K — AST / Finder / Pass API documentation ✅ **DONE 2026-08-03**
+
+New page: `guides/developers/ast-api.md`. Nothing existed — the developer guide
+was index, principles and releasing, and the whole programmatic surface lived
+only in scaladoc, despite riddl-generator, riddlg and both IDE plugins being
+consumers of it.
+
+Written from `AST.scala`, `Finder.scala` and `Pass.scala` on `release/2`.
+
+**The API change it exists to capture:** all 35 accessor declarations now use
+`filterThroughWrappers` and descend **both** `Include` and `BASTImport`.
+Previously `context.entities` was empty whenever the entity was written in an
+included file while `context.repositories` in the same context worked — the
+same model answering differently depending only on which file the author typed
+into. riddl-generator emitted 582 files for reactive-bbq with no entity class
+among them and *everything reported success*. The page tells consumers to
+delete any hand-rolled include walk, or count twice.
+
+**Three claims that did not survive checking, and are why the page is worth
+trusting:**
+
+- riddl says "35 accessors" and so did my first draft — but there are **34
+  names**. `repositories` is declared twice with *different return types*:
+  `Seq[Repository]` on `WithRepositories`, `Seq[RepositoryRef]` on `Projector`.
+  A tool treating the latter as definitions gets refs, and it type-checks.
+- `PassesResult.symbols`/`resolution`/`validation` are `lazy val`s, not `def`s,
+  so a `def` grep says they do not exist. They do.
+- The developer guide still required Scala 3.3.x LTS and sbt 1.10+; riddl is on
+  **3.9.0-RC4 and sbt 2.0.2**, and the experimental-TASTy constraint is why
+  consumers must match exactly.
+
+Also documented, because the scaladoc argues them and the reasoning is the
+useful part: `span` is character offsets (a definition needs start AND end),
+`declaringFile` survives `FlattenPass` and is the supported way to ask "which
+file do I edit?", `isEmpty` is semantic and comment-tolerant, and passes
+**traverse** wrappers while accessors **see through** them — opposite by design,
+since a symbol table cares about provenance and a reader does not.
 
 ### TASK J — riddl rc.9 language changes ✅ **DONE 2026-08-02**
 
