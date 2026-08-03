@@ -33,7 +33,7 @@ PY="$(sed -n '1s|^#!||p' "$(command -v mkdocs)")"
 #
 # Following the alias rather than a pinned version means this needs no edit
 # when RIDDL 2.0 is promoted -- `latest` moves and the index follows.
-GLOB='{index.html,about/**/*.html,ide-help/**/*.html,riddl/latest/**/*.html,riddlg/latest/**/*.html,synapify/latest/**/*.html}'
+GLOB='{index.html,about/**/*.html,blog/**/*.html,ide-help/**/*.html,riddl/latest/**/*.html,riddlg/latest/**/*.html,synapify/latest/**/*.html}'
 
 # Material renders a pilcrow anchor after every heading (`toc.permalink: true`).
 # Pagefind treats it as heading text, so sub-results read "Purpose¶" and a
