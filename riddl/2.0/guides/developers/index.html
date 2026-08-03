@@ -4933,6 +4933,34 @@
   
   
     <li class="md-nav__item">
+      <a href="ast-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AST, Finder and Passes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="releasing/" class="md-nav__link">
         
   
@@ -6081,10 +6109,19 @@ systems, see the <a href="../authors/">Author's Guide</a> or
 <p>To work on RIDDL development, you'll need:</p>
 <ul>
 <li><strong>JDK 25 or later</strong> (Temurin recommended)</li>
-<li><strong>Scala 3.3.x LTS</strong> (managed by sbt)</li>
-<li><strong>sbt 1.10+</strong> (Scala Build Tool)</li>
+<li><strong>Scala 3.9.0-RC4</strong> (managed by sbt)</li>
+<li><strong>sbt 2.0.2</strong> (Scala Build Tool)</li>
 <li><strong>Git</strong> for version control</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Why an RC compiler</p>
+<p>RIDDL 2.0 builds with Scala 3.9.0-RC4, which emits <em>experimental</em> TASTy.
+That is readable only by the exact compiler that produced it, so anything
+consuming the riddl libraries has to build with the same version —
+including this documentation site.</p>
+</div>
+<p>If you are writing a tool <strong>against</strong> RIDDL rather than working on RIDDL
+itself, start with <a href="ast-api/">AST, Finder and Passes</a>.</p>
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <h3 id="clone-the-repository">Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ossuminc/riddl.git
