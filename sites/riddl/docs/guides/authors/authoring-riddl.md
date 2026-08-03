@@ -453,14 +453,27 @@ event-sourced entity Order is {
 clause mentioning it must record something. A clause that *refuses* the command
 discharges the contract by declining, so it need not yield:
 
-<!-- riddl: skip reason="two clauses from one handler, shown without their entity" -->
+<!-- riddl: in-context no-prelude=Account,Withdraw -->
 ```riddl
-on command Withdraw {
-  when prompt("sufficient funds") then {
-    yield event Withdrawn
-  } else {
-    error "Insufficient funds"
-  } end
+event-sourced entity Account is {
+  record Fields is { balance: Integer }
+  command Withdraw yields event Withdrawn is { amount: Integer }
+  event Withdrawn is { amount: Integer }
+
+  state Main of record Account.Fields is {
+    handler H is {
+      on command Account.Withdraw {
+        when prompt("sufficient funds") then {
+          yield event Account.Withdrawn
+        } else {
+          error "Insufficient funds"
+        } end
+      }
+      on event Account.Withdrawn {
+        set field Main.balance to "balance - amount"
+      }
+    }
+  }
 }
 ```
 
