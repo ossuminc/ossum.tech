@@ -145,6 +145,7 @@ nav:
     - For Developers:
       - guides/developers/index.md
       - Design Principles: guides/developers/principles.md
+      - AST, Finder and Passes: guides/developers/ast-api.md
       - Releasing: guides/developers/releasing.md
   - Examples: examples/index.md
   - Playground: playground/index.md

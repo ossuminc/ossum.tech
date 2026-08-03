@@ -10,9 +10,18 @@ systems, see the [Author's Guide](../authors/index.md) or
 To work on RIDDL development, you'll need:
 
 - **JDK 25 or later** (Temurin recommended)
-- **Scala 3.3.x LTS** (managed by sbt)
-- **sbt 1.10+** (Scala Build Tool)
+- **Scala 3.9.0-RC4** (managed by sbt)
+- **sbt 2.0.2** (Scala Build Tool)
 - **Git** for version control
+
+!!! note "Why an RC compiler"
+    RIDDL 2.0 builds with Scala 3.9.0-RC4, which emits *experimental* TASTy.
+    That is readable only by the exact compiler that produced it, so anything
+    consuming the riddl libraries has to build with the same version —
+    including this documentation site.
+
+If you are writing a tool **against** RIDDL rather than working on RIDDL
+itself, start with [AST, Finder and Passes](ast-api.md).
 
 ## Getting Started
 
