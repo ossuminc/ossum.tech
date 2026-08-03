@@ -4275,6 +4275,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Event Sourcing Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refusing-a-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refusing a command
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -6011,6 +6028,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Event Sourcing Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refusing-a-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refusing a command
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -6657,31 +6691,51 @@ handler validates and yields, and the event handler performs the change.</p>
 its state. Declaring commands and events inside the entity that uses them
 is the simplest way to satisfy it.</p>
 </div>
+<h4 id="refusing-a-command">Refusing a command<a class="headerlink" href="#refusing-a-command" title="Permanent link">&para;</a></h4>
+<p><code>yields</code> says what a command records <strong>when it succeeds</strong> — not that every
+clause mentioning it must record something. A clause that <em>refuses</em> the command
+discharges the contract by declining, so it need not yield:</p>
+<!-- riddl: skip reason="two clauses from one handler, shown without their entity" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;sufficient funds&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="k">yield</span> <span class="kd">event</span> <span class="n">Withdrawn</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="k">error</span> <span class="s2">&quot;Insufficient funds&quot;</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>  <span class="p">}</span> <span class="kr">end</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>This is the ordinary shape of a command accepted in one state and refused in
+others, and without the exemption it would be inexpressible: every refusing
+clause would have to yield the success event, recording a state change it had
+just declined to make.</p>
+<p>Both <code>error</code> and <code>require</code> count as refusals. A refusing clause that yields the
+<em>wrong</em> event is still an error — the exemption excuses silence, not a
+mismatch.</p>
 <hr />
 <h2 id="handler-statements">Handler Statements<a class="headerlink" href="#handler-statements" title="Permanent link">&para;</a></h2>
 <p>Handlers use pseudocode statements to describe behavior:</p>
 <h3 id="common-statements">Common Statements<a class="headerlink" href="#common-statements" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-context -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kd">handler</span> <span class="n">OrderCommands</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  <span class="k">on</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="c1">// Create a local value</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="k">let</span> <span class="n">orderId</span> <span class="o">=</span> <span class="s2">&quot;new OrderId&quot;</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="c1">// Validate with conditional</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;inventory is available&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>      <span class="c1">// Produce an event</span>
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>      <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
-</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>      <span class="c1">// Update state</span>
-</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">status</span> <span class="kp">to</span> <span class="s2">&quot;Confirmed&quot;</span>
-</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>      <span class="c1">// Return an error</span>
-</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>      <span class="k">error</span> <span class="s2">&quot;Insufficient inventory for order&quot;</span>
-</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>    <span class="p">}</span> <span class="kr">end</span>
-</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>
-</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>    <span class="c1">// Describe an action the implementation must perform</span>
-</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>    <span class="k">do</span> <span class="s2">&quot;Record that order {orderId} was processed&quot;</span>
-</span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>  <span class="p">}</span>
-</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kd">handler</span> <span class="n">OrderCommands</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  <span class="k">on</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="c1">// Create a local value</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="k">let</span> <span class="n">orderId</span> <span class="o">=</span> <span class="s2">&quot;new OrderId&quot;</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="c1">// Validate with conditional</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;inventory is available&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>      <span class="c1">// Produce an event</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>      <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>      <span class="c1">// Update state</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">status</span> <span class="kp">to</span> <span class="s2">&quot;Confirmed&quot;</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>      <span class="c1">// Return an error</span>
+</span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>      <span class="k">error</span> <span class="s2">&quot;Insufficient inventory for order&quot;</span>
+</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>    <span class="p">}</span> <span class="kr">end</span>
+</span><span id="__span-19-16"><a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>
+</span><span id="__span-19-17"><a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>    <span class="c1">// Describe an action the implementation must perform</span>
+</span><span id="__span-19-18"><a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a>    <span class="k">do</span> <span class="s2">&quot;Record that order {orderId} was processed&quot;</span>
+</span><span id="__span-19-19"><a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a>  <span class="p">}</span>
+</span><span id="__span-19-20"><a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="statement-reference">Statement Reference<a class="headerlink" href="#statement-reference" title="Permanent link">&para;</a></h3>
 <table>
@@ -6749,98 +6803,98 @@ is the simplest way to satisfy it.</p>
 <h2 id="comments-and-documentation">Comments and Documentation<a class="headerlink" href="#comments-and-documentation" title="Permanent link">&para;</a></h2>
 <h3 id="line-comments">Line Comments<a class="headerlink" href="#line-comments" title="Permanent link">&para;</a></h3>
 <!-- riddl: standalone -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1">// This is a single-line comment</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="kd">domain</span> <span class="n">Example</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>  <span class="c1">// Comments can appear anywhere</span>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1">// This is a single-line comment</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="kd">domain</span> <span class="n">Example</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  <span class="c1">// Comments can appear anywhere</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="block-comments">Block Comments<a class="headerlink" href="#block-comments" title="Permanent link">&para;</a></h3>
 <!-- riddl: standalone -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="cm">/* This is a block comment</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="cm">   that spans multiple lines */</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="cm">/* This is a block comment</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="cm">   that spans multiple lines */</span>
 </span></code></pre></div>
 <h3 id="documentation-strings">Documentation Strings<a class="headerlink" href="#documentation-strings" title="Permanent link">&para;</a></h3>
 <p>Use markdown lines for rich documentation:</p>
 <!-- riddl: in-context no-prelude=Order -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>  <span class="c1">// entity definition continues</span>
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>    <span class="sd">|## Order Entity</span>
-</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="sd">|</span>
-</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="sd">|Represents a customer order in the system.</span>
-</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    <span class="sd">|</span>
-</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>    <span class="sd">|### Lifecycle</span>
-</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>    <span class="sd">|</span>
-</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>    <span class="sd">|1. Created when customer checks out</span>
-</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="sd">|2. Confirmed after payment</span>
-</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>    <span class="sd">|3. Shipped when inventory allocated</span>
-</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    <span class="sd">|4. Completed on delivery</span>
-</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>  <span class="p">}</span>
-</span><span id="__span-21-16"><a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>  <span class="c1">// entity definition continues</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>    <span class="sd">|## Order Entity</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>    <span class="sd">|</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>    <span class="sd">|Represents a customer order in the system.</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>    <span class="sd">|</span>
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>    <span class="sd">|### Lifecycle</span>
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>    <span class="sd">|</span>
+</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>    <span class="sd">|1. Created when customer checks out</span>
+</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>    <span class="sd">|2. Confirmed after payment</span>
+</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>    <span class="sd">|3. Shipped when inventory allocated</span>
+</span><span id="__span-22-14"><a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>    <span class="sd">|4. Completed on delivery</span>
+</span><span id="__span-22-15"><a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>  <span class="p">}</span>
+</span><span id="__span-22-16"><a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="common-patterns">Common Patterns<a class="headerlink" href="#common-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="aggregate-with-event-sourcing">Aggregate with Event Sourcing<a class="headerlink" href="#aggregate-with-event-sourcing" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-context no-prelude=Account -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="no">aggregate</span> <span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>  <span class="kd">type</span> <span class="n">AccountId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Account</span><span class="p">)</span>
-</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
-</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>  <span class="kd">record</span> <span class="n">State</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>    <span class="n">id</span><span class="p">:</span> <span class="n">AccountId</span><span class="p">,</span>
-</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>    <span class="n">balance</span><span class="p">:</span> <span class="n">Money</span><span class="p">,</span>
-</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>    <span class="n">transactions</span><span class="p">:</span> <span class="kr">sequence</span> <span class="kp">of</span> <span class="n">Transaction</span>
-</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>  <span class="p">}</span>
-</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>
-</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>  <span class="kd">handler</span> <span class="n">Commands</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Deposit</span> <span class="p">{</span>
-</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>      <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;amount is positive&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">MoneyDeposited</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
-</span><span id="__span-22-14"><a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>      <span class="p">}</span> <span class="kr">end</span>
-</span><span id="__span-22-15"><a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>    <span class="p">}</span>
-</span><span id="__span-22-16"><a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
-</span><span id="__span-22-17"><a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>      <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;balance &gt;= amount&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-22-18"><a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">MoneyWithdrawn</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
-</span><span id="__span-22-19"><a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span id="__span-22-20"><a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>        <span class="k">error</span> <span class="s2">&quot;Insufficient funds&quot;</span>
-</span><span id="__span-22-21"><a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>      <span class="p">}</span> <span class="kr">end</span>
-</span><span id="__span-22-22"><a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>    <span class="p">}</span>
-</span><span id="__span-22-23"><a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a>  <span class="p">}</span>
-</span><span id="__span-22-24"><a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a>
-</span><span id="__span-22-25"><a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>  <span class="kd">handler</span> <span class="n">Projections</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-22-26"><a id="__codelineno-22-26" name="__codelineno-22-26" href="#__codelineno-22-26"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">MoneyDeposited</span> <span class="p">{</span>
-</span><span id="__span-22-27"><a id="__codelineno-22-27" name="__codelineno-22-27" href="#__codelineno-22-27"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance + amount&quot;</span>
-</span><span id="__span-22-28"><a id="__codelineno-22-28" name="__codelineno-22-28" href="#__codelineno-22-28"></a>    <span class="p">}</span>
-</span><span id="__span-22-29"><a id="__codelineno-22-29" name="__codelineno-22-29" href="#__codelineno-22-29"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">MoneyWithdrawn</span> <span class="p">{</span>
-</span><span id="__span-22-30"><a id="__codelineno-22-30" name="__codelineno-22-30" href="#__codelineno-22-30"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance - amount&quot;</span>
-</span><span id="__span-22-31"><a id="__codelineno-22-31" name="__codelineno-22-31" href="#__codelineno-22-31"></a>    <span class="p">}</span>
-</span><span id="__span-22-32"><a id="__codelineno-22-32" name="__codelineno-22-32" href="#__codelineno-22-32"></a>  <span class="p">}</span>
-</span><span id="__span-22-33"><a id="__codelineno-22-33" name="__codelineno-22-33" href="#__codelineno-22-33"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="no">aggregate</span> <span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  <span class="kd">type</span> <span class="n">AccountId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Account</span><span class="p">)</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>  <span class="kd">record</span> <span class="n">State</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>    <span class="n">id</span><span class="p">:</span> <span class="n">AccountId</span><span class="p">,</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>    <span class="n">balance</span><span class="p">:</span> <span class="n">Money</span><span class="p">,</span>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>    <span class="n">transactions</span><span class="p">:</span> <span class="kr">sequence</span> <span class="kp">of</span> <span class="n">Transaction</span>
+</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>  <span class="p">}</span>
+</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>
+</span><span id="__span-23-10"><a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>  <span class="kd">handler</span> <span class="n">Commands</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-23-11"><a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Deposit</span> <span class="p">{</span>
+</span><span id="__span-23-12"><a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a>      <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;amount is positive&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-23-13"><a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">MoneyDeposited</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
+</span><span id="__span-23-14"><a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a>      <span class="p">}</span> <span class="kr">end</span>
+</span><span id="__span-23-15"><a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a>    <span class="p">}</span>
+</span><span id="__span-23-16"><a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-23-17"><a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a>      <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;balance &gt;= amount&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-23-18"><a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">MoneyWithdrawn</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
+</span><span id="__span-23-19"><a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span id="__span-23-20"><a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a>        <span class="k">error</span> <span class="s2">&quot;Insufficient funds&quot;</span>
+</span><span id="__span-23-21"><a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a>      <span class="p">}</span> <span class="kr">end</span>
+</span><span id="__span-23-22"><a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a>    <span class="p">}</span>
+</span><span id="__span-23-23"><a id="__codelineno-23-23" name="__codelineno-23-23" href="#__codelineno-23-23"></a>  <span class="p">}</span>
+</span><span id="__span-23-24"><a id="__codelineno-23-24" name="__codelineno-23-24" href="#__codelineno-23-24"></a>
+</span><span id="__span-23-25"><a id="__codelineno-23-25" name="__codelineno-23-25" href="#__codelineno-23-25"></a>  <span class="kd">handler</span> <span class="n">Projections</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-23-26"><a id="__codelineno-23-26" name="__codelineno-23-26" href="#__codelineno-23-26"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">MoneyDeposited</span> <span class="p">{</span>
+</span><span id="__span-23-27"><a id="__codelineno-23-27" name="__codelineno-23-27" href="#__codelineno-23-27"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance + amount&quot;</span>
+</span><span id="__span-23-28"><a id="__codelineno-23-28" name="__codelineno-23-28" href="#__codelineno-23-28"></a>    <span class="p">}</span>
+</span><span id="__span-23-29"><a id="__codelineno-23-29" name="__codelineno-23-29" href="#__codelineno-23-29"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">MoneyWithdrawn</span> <span class="p">{</span>
+</span><span id="__span-23-30"><a id="__codelineno-23-30" name="__codelineno-23-30" href="#__codelineno-23-30"></a>      <span class="k">set</span> <span class="kd">field</span> <span class="n">State</span><span class="p">.</span><span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance - amount&quot;</span>
+</span><span id="__span-23-31"><a id="__codelineno-23-31" name="__codelineno-23-31" href="#__codelineno-23-31"></a>    <span class="p">}</span>
+</span><span id="__span-23-32"><a id="__codelineno-23-32" name="__codelineno-23-32" href="#__codelineno-23-32"></a>  <span class="p">}</span>
+</span><span id="__span-23-33"><a id="__codelineno-23-33" name="__codelineno-23-33" href="#__codelineno-23-33"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="saga-for-distributed-transactions">Saga for Distributed Transactions<a class="headerlink" href="#saga-for-distributed-transactions" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-context -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kd">saga</span> <span class="n">OrderSaga</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  <span class="kr">requires</span> <span class="kd">command</span> <span class="n">PlaceOrder</span>
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>  <span class="kr">returns</span> <span class="kd">event</span> <span class="n">OrderCompleted</span>
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>  <span class="kd">step</span> <span class="n">ReserveInventory</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>    <span class="c1">// reserve inventory</span>
-</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>    <span class="c1">// release inventory on failure</span>
-</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>  <span class="p">}</span>
-</span><span id="__span-23-10"><a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>
-</span><span id="__span-23-11"><a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>  <span class="kd">step</span> <span class="n">ProcessPayment</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-23-12"><a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a>    <span class="c1">// charge payment</span>
-</span><span id="__span-23-13"><a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-23-14"><a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a>    <span class="c1">// refund payment on failure</span>
-</span><span id="__span-23-15"><a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a>  <span class="p">}</span>
-</span><span id="__span-23-16"><a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a>
-</span><span id="__span-23-17"><a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a>  <span class="kd">step</span> <span class="n">ConfirmOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-23-18"><a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a>    <span class="c1">// finalize order</span>
-</span><span id="__span-23-19"><a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-23-20"><a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a>    <span class="c1">// mark the order cancelled</span>
-</span><span id="__span-23-21"><a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a>  <span class="p">}</span>
-</span><span id="__span-23-22"><a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kd">saga</span> <span class="n">OrderSaga</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>  <span class="kr">requires</span> <span class="kd">command</span> <span class="n">PlaceOrder</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  <span class="kr">returns</span> <span class="kd">event</span> <span class="n">OrderCompleted</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>  <span class="kd">step</span> <span class="n">ReserveInventory</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>    <span class="c1">// reserve inventory</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>    <span class="c1">// release inventory on failure</span>
+</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>  <span class="p">}</span>
+</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>
+</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>  <span class="kd">step</span> <span class="n">ProcessPayment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>    <span class="c1">// charge payment</span>
+</span><span id="__span-24-13"><a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-24-14"><a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>    <span class="c1">// refund payment on failure</span>
+</span><span id="__span-24-15"><a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a>  <span class="p">}</span>
+</span><span id="__span-24-16"><a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a>
+</span><span id="__span-24-17"><a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a>  <span class="kd">step</span> <span class="n">ConfirmOrder</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-24-18"><a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a>    <span class="c1">// finalize order</span>
+</span><span id="__span-24-19"><a id="__codelineno-24-19" name="__codelineno-24-19" href="#__codelineno-24-19"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-24-20"><a id="__codelineno-24-20" name="__codelineno-24-20" href="#__codelineno-24-20"></a>    <span class="c1">// mark the order cancelled</span>
+</span><span id="__span-24-21"><a id="__codelineno-24-21" name="__codelineno-24-21" href="#__codelineno-24-21"></a>  <span class="p">}</span>
+</span><span id="__span-24-22"><a id="__codelineno-24-22" name="__codelineno-24-22" href="#__codelineno-24-22"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="validation-tips">Validation Tips<a class="headerlink" href="#validation-tips" title="Permanent link">&para;</a></h2>
