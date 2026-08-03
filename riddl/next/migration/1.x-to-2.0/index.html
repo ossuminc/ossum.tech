@@ -994,6 +994,45 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#silent-changes-for-tools-that-read-the-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Silent changes for tools that read the AST
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Silent changes for tools that read the AST">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-event-clauses-no-longer-match-onmessageclause" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on event clauses no longer match OnMessageClause
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-ast-companions-can-shadow-your-own-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New AST companions can shadow your own types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5749,6 +5788,45 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#silent-changes-for-tools-that-read-the-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Silent changes for tools that read the AST
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Silent changes for tools that read the AST">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-event-clauses-no-longer-match-onmessageclause" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on event clauses no longer match OnMessageClause
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-ast-companions-can-shadow-your-own-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New AST companions can shadow your own types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -6057,6 +6135,40 @@ work.</p>
 <li>A context-scoped connector whose ends cross contexts is under-scoped</li>
 <li>An ascribed shape that contradicts the declared port arity is an Error</li>
 </ul>
+<h3 id="silent-changes-for-tools-that-read-the-ast">Silent changes for tools that read the AST<a class="headerlink" href="#silent-changes-for-tools-that-read-the-ast" title="Permanent link">&para;</a></h3>
+<p>Everything above announces itself as a parse or validation error. <strong>These two do
+not.</strong> They change the RIDDL libraries' Scala API in ways that keep consuming
+code compiling while changing what it does, so a clean build is not evidence of
+a clean migration. Both cost real debugging time — the first in
+riddl-generator, the second in synapify and sim-engine.</p>
+<p>Skip this if you only write RIDDL; it matters only if you write Scala against
+<code>AST</code>.</p>
+<h4 id="on-event-clauses-no-longer-match-onmessageclause"><code>on event</code> clauses no longer match <code>OnMessageClause</code><a class="headerlink" href="#on-event-clauses-no-longer-match-onmessageclause" title="Permanent link">&para;</a></h4>
+<p><code>OnEventClause</code> is now a <strong>sibling</strong> of <code>OnMessageClause</code> rather than a subtype.
+Both extend <code>OnMessageLikeClause</code>.</p>
+<p>So this keeps compiling and silently stops matching event handlers:</p>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">case</span><span class="w"> </span><span class="n">omc</span><span class="p">:</span><span class="w"> </span><span class="nc">OnMessageClause</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="err">…</span><span class="w">          </span><span class="c1">// no longer sees `on event` clauses</span>
+</span></code></pre></div>
+<p>The symptom is <strong>missing output, not an error</strong> — a generator quietly emits
+nothing for events. Match on the shared parent instead, or add an explicit case:</p>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">case</span><span class="w"> </span><span class="n">c</span><span class="p">:</span><span class="w"> </span><span class="nc">OnMessageLikeClause</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="err">…</span><span class="w">        </span><span class="c1">// both kinds</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1">// or</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">case</span><span class="w"> </span><span class="n">omc</span><span class="p">:</span><span class="w"> </span><span class="nc">OnMessageClause</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="err">…</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="k">case</span><span class="w"> </span><span class="n">oec</span><span class="p">:</span><span class="w"> </span><span class="nc">OnEventClause</span><span class="w">   </span><span class="o">=&gt;</span><span class="w"> </span><span class="err">…</span>
+</span></code></pre></div>
+<h4 id="new-ast-companions-can-shadow-your-own-types">New <code>AST</code> companions can shadow your own types<a class="headerlink" href="#new-ast-companions-can-shadow-your-own-types" title="Permanent link">&para;</a></h4>
+<p>2.0 adds companion objects to <code>AST</code>, including <code>object StreamletShape</code>. If you
+have a type of the same name — sim-engine has a <code>StreamletShape</code> enum, and so
+would any tool modelling shapes — and you use a wildcard import, RIDDL's
+companion shadows yours, and the error points away from the cause:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>value Source is not a member of object AST.StreamletShape
+</span></code></pre></div>
+<p>Your enum is intact; the import is the problem. Import selectively, or rename
+on import:</p>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">import</span><span class="w"> </span><span class="nc">AST</span><span class="p">.{</span><span class="nc">StreamletShape</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">*</span><span class="p">}</span>
+</span></code></pre></div>
+<p>See <a href="../../guides/developers/ast-api/">AST, Finder and Passes</a> for the API more
+generally.</p>
 <hr />
 <h2 id="2-deprecations">2. Deprecations<a class="headerlink" href="#2-deprecations" title="Permanent link">&para;</a></h2>
 <p>These still parse and emit <code>[deprecated]</code>. Fix them at your own pace; they are
@@ -6141,11 +6253,11 @@ outlet and wire a connector; if you meant direct delivery, use <code>tell</code>
 context ones did: they decide what the model <em>means</em>, not how a generator should
 implement it.</p>
 <!-- riddl: skip reason="shows the deprecated form beside its replacement, on purpose" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// 1.x, and still parses in 2.0 with a [deprecated] message</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">option</span> <span class="kp">is</span> <span class="no">aggregate</span> <span class="kr">option</span> <span class="kp">is</span> <span class="no">event-sourced</span> <span class="p">}</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1">// 2.0</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="no">aggregate</span> <span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">// 1.x, and still parses in 2.0 with a [deprecated] message</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">option</span> <span class="kp">is</span> <span class="no">aggregate</span> <span class="kr">option</span> <span class="kp">is</span> <span class="no">event-sourced</span> <span class="p">}</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1">// 2.0</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="no">aggregate</span> <span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span></code></pre></div>
 <p>They fall into three independent groups — role (<code>aggregate</code>), consistency
 (<code>consistent</code> / <code>available</code>) and persistence (<code>event-sourced</code> / <code>persistent</code> /
@@ -6201,25 +6313,25 @@ ports to say so. This is design work, not editing. An entity that produced
 events through a placeholder <code>source</code> streamlet in 1.x almost certainly wants
 that outlet on the entity itself now.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1">// 1.x: the outlet had to live somewhere else</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kd">source</span> <span class="n">ProductFeed</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">}</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">ProductFeed</span><span class="p">.</span><span class="n">Events</span> <span class="p">}</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="p">}</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  <span class="p">}</span>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="p">}</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="c1">// 2.0: the entity owns the port it emits on</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>  <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span>
-</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="p">}</span>
-</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    <span class="p">}</span>
-</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>  <span class="p">}</span>
-</span><span id="__span-10-19"><a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1">// 1.x: the outlet had to live somewhere else</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kd">source</span> <span class="n">ProductFeed</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">}</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>  <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">ProductFeed</span><span class="p">.</span><span class="n">Events</span> <span class="p">}</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="p">}</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>  <span class="p">}</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="p">}</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="c1">// 2.0: the entity owns the port it emits on</span>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>  <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>    <span class="kd">handler</span> <span class="n">Main</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateProduct</span> <span class="p">{</span> <span class="k">send</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="p">}</span>
+</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>    <span class="p">}</span>
+</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>  <span class="p">}</span>
+</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>Second, resolve every <code>send … to inlet</code>.</strong> This is the deprecation that
 needs a decision rather than a rewrite, and it is why the streaming work
@@ -6246,9 +6358,9 @@ context boundary is often model correctness rather than a deployment detail.</p>
 inlet needs a feed, so dangling ports now surface as completeness warnings.
 For output you genuinely do not consume, say so explicitly:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
 </span></code></pre></div>
 <p><code>BottomlessPit</code> and <code>ForeverEmpty</code> come from the
 <a href="../../concepts/standard-module/">standard module</a> and need no import. They
@@ -6260,10 +6372,10 @@ something untrue.</p>
 <em>derived</em> from arity, so an ascription that disagrees is an Error — which makes
 it a useful check on the work above rather than mere decoration.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>  <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Omitting it is only a suppressible StyleWarning, but stating the shape is how
 the model records what you intended, rather than leaving a reader to count
