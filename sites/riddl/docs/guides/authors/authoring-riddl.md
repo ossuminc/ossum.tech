@@ -447,6 +447,32 @@ event-sourced entity Order is {
     its state. Declaring commands and events inside the entity that uses them
     is the simplest way to satisfy it.
 
+#### Refusing a command
+
+`yields` says what a command records **when it succeeds** — not that every
+clause mentioning it must record something. A clause that *refuses* the command
+discharges the contract by declining, so it need not yield:
+
+<!-- riddl: skip reason="two clauses from one handler, shown without their entity" -->
+```riddl
+on command Withdraw {
+  when prompt("sufficient funds") then {
+    yield event Withdrawn
+  } else {
+    error "Insufficient funds"
+  } end
+}
+```
+
+This is the ordinary shape of a command accepted in one state and refused in
+others, and without the exemption it would be inexpressible: every refusing
+clause would have to yield the success event, recording a state change it had
+just declined to make.
+
+Both `error` and `require` count as refusals. A refusing clause that yields the
+*wrong* event is still an error — the exemption excuses silence, not a
+mismatch.
+
 ---
 
 ## Handler Statements

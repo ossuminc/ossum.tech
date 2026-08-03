@@ -32,9 +32,15 @@ The sections below are kept as the record of how the current state was reached.
 
 ### TASK J — riddl rc.9 language changes ✅ **DONE 2026-08-02**
 
-Upgraded to **2.0.0-rc.9-6-46c5968d** (`~/.ivy2/local`; Scala unchanged at
-3.9.0-RC4) and regenerated the grammar. 29 riddl commits since rc.5; five
+Upgraded to **2.0.0-rc.9-12-0054a843** (`~/.ivy2/local`; Scala unchanged at
+3.9.0-RC4) and regenerated the grammar. 35 riddl commits since rc.5; six
 changed what the docs must say.
+
+**Keep `build.sbt` in step with `../bin/riddlc`.** The staged compiler is what
+validates the fences; if the library version drifts from it, the grammar in the
+docs and the compiler enforcing it describe different languages. The staged
+binary moved twice during this work (rc.9-6 then rc.9-12) and the version here
+was bumped both times.
 
 **The one that mattered: entity intentions.** `event-sourced`, `persistent`
 (was `value`), `transient`, `aggregate`, `consistent` and `available` are now
@@ -59,6 +65,16 @@ error-sink` with its three rules, adaptor uniqueness per direction, saga
 `retry`/`undo-retry`/`failure-message`, and non-positive durations now being an
 Error. The migration guide gained an entity-intentions section, since it is the
 page a 1.x reader will look at.
+
+**Late addition in rc.9-12: refusing a command discharges its `yields`.**
+`checkYieldConformance` had required *every* `on command C` clause to yield C's
+declared event, with no exemption for one that refuses it — which combined with
+R1 made the most ordinary event-sourcing shape inexpressible: a command accepted
+in one state and refused in the others, where each refusing clause was required
+to record the state change it had just declined. Both `error` and `require`
+count as refusals; yielding the *wrong* event is still an error. Documented
+under Event Sourcing Rules. No grammar change — the regenerated EBNF was
+byte-identical, which is the check that confirmed it.
 
 **Compiler to use:** `../bin/riddlc` is 2.0 (rc.9). The Homebrew `riddlc` on
 PATH is **rc.5** and does *not* report the deprecation, so validating the 2.0

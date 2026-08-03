@@ -18,22 +18,26 @@ lazy val root = Root(
   devs = developers
 ).configure(
   // 3.9.0-RC4, not the org-standard 3.8.4, because that is what riddl
-  // publishes 2.0.0-rc.5 with. An RC compiler emits EXPERIMENTAL TASTy
+  // publishes 2.0.x with. An RC compiler emits EXPERIMENTAL TASTy
   // (28.9-experimental-1), which only the exact compiler that produced it can
   // read -- 3.8.4 accepts 28.0 to 28.8 and fails to load every riddl class.
   // Keep these two lines in step: bumping the riddl version may require
   // bumping this one to whatever riddl built with.
   With.Scala3.configure(version = Some("3.9.0-RC4")),
-  With.Riddl.library(version = "2.0.0-rc.9-6-46c5968d", nonJVMDependency = false)
+  With.Riddl.library(version = "2.0.0-rc.9-12-0054a843", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
   // Extract RIDDL grammar by compiling and running ExtractGrammar.
   //
-  // The library above now resolves 2.0.0-rc.5, so this task once again
-  // produces the grammar the docs actually describe -- the hand-copy from
-  // riddl's release/2 branch that the 1.29.0 pin forced is no longer needed.
-  // Re-run it whenever the riddl version here is bumped.
+  // The library above resolves a real 2.0 build, so this task produces the
+  // grammar the docs actually describe -- the hand-copy from riddl's release/2
+  // branch that the old 1.29.0 pin forced is no longer needed.
+  //
+  // Keep the version above in step with ../bin/riddlc, the STAGED 2.0
+  // compiler that validates the fences. If they drift, the grammar in the
+  // docs and the compiler enforcing it are describing different languages.
+  // Re-run this task whenever the riddl version here is bumped.
   // Def.uncached because sbt 2 caches task results by hashing their inputs,
   // and this task has no hashable result: it shells out and writes a file as
   // a side effect. Caching it would skip the extraction on a second run.
