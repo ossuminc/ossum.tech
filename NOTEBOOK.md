@@ -13,10 +13,9 @@ to the task file and note completion in this notebook.
 
 ## RESUME HERE — as of 2026-08-03
 
-**Tasks A–K are all closed.** What is still open:
+**Tasks A–K are all closed, and `task/` is empty** (everything in `task/done/`).
+What is still open:
 
-- `task/publish-riddl-license-page.md` — needs a change in **riddl**, not here;
-  see the note at the end of TASK C.
 - The ~50 concept pages still lack per-fence directives. 26 fences fail
   site-wide against rc.9, but no file is above three, which is the agreed
   threshold — a known gap, not a regression.
@@ -29,6 +28,35 @@ to the task file and note completion in this notebook.
 The sections below are kept as the record of how the current state was reached.
 
 ---
+
+### Task-queue triage ✅ **2026-08-03**
+
+Reid's point — *if it needs a change in riddl, drop a task there or it will
+never happen* — turned out to apply to the tracking itself. All three files in
+`task/` were reconciled:
+
+- **`publish-riddl-license-page.md`** — needed **no** riddl task. riddl had
+  already changed all three places in `733573373` (2026-07-30), the same day
+  our "still outstanding" note was written. The note was stale from the moment
+  it was filed and sat on the open list for four days because nobody re-checked
+  the other repo. Verified end to end: `riddlc info` prints
+  `/riddl/2.0/licenses/`, which returns 200.
+  riddl's reason is better than ours, and worth keeping: notices describe the
+  dependencies of **that** release, so a `/latest/` page would show a 2.0 user
+  the notices of a future build. Version-pinning is right on its merits.
+- **`activate-verb-now-parses.md`** — already done; `element.md` documents both
+  spellings and carries no caveat.
+- **`add-silent-breaking-changes-to-2.0-migration-guide.md`** — **genuinely
+  outstanding**, and the one that would have been lost. Now done: the migration
+  guide has a "Silent changes for tools that read the AST" section covering the
+  `OnEventClause`/`OnMessageClause` split and `AST` companion shadowing. Both
+  claims were re-verified against `AST.scala` rather than trusted — the shared
+  parent is `OnMessageLikeClause` (line 3707), which the guide names, because
+  "match on the common parent" is only actionable if the parent is named.
+
+**Lesson:** two of three were already done and one was quietly rotting. Check
+`task/` against the *other repo's* current state, not against what the task file
+says about it.
 
 ### TASK K — AST / Finder / Pass API documentation ✅ **DONE 2026-08-03**
 
@@ -559,10 +587,16 @@ removal of the old root-level `1.31/ 2.0/ latest/ next/`. Deleting the old
 layout *last* rather than first meant no outage — the old URLs kept serving
 until their replacements were live.
 
-**Still outstanding:** `task/publish-riddl-license-page.md`. The page is live at
-`/riddl/2.0/licenses/`, but `riddlc info` still prints `/riddl/licenses/`, which
-404s and cannot be made to work — the second path segment is a version. riddl
-must change three places, not the one the task file mentions.
+**Closed 2026-08-03:** `task/publish-riddl-license-page.md` is in `task/done/`.
+The note that used to sit here said `riddlc info` still printed the unversioned
+`/riddl/licenses/` and that riddl had to change three places. **riddl had
+already changed all three** — commit `733573373`, 2026-07-30, the same day this
+note was written. It was stale from the start and stayed on the open list for
+four days because nobody re-checked the other repo.
+
+Verified end to end: `riddlc info` prints `/riddl/2.0/licenses/`, and that URL
+returns 200 with the notices. Bump the constant, its test and
+`THIRD-PARTY-NOTICES.txt` together on each documented minor release.
 
 **Known wart:** the merge to `main` bypassed a branch-protection rule ("must not
 contain merge commits") because it was `--no-ff`. It was allowed through rather
