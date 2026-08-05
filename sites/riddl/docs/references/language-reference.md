@@ -826,10 +826,15 @@ Handlers can be defined at multiple levels:
 - **Context handlers**: API-level handlers for the bounded context
 - **Processor handlers**: Handlers in Repository, Projector, Adaptor, etc.
 
-An entity-scope handler is defaulted to `initial` only when the entity has
-exactly one state. With multiple states, entity-scope handlers are common parts
-merged into each state's handler set, so none of them is the entity's initial
-handler.
+An entity-scope handler may be marked `initial`, which makes it the initial
+handler for **every state that does not define one of its own** — a default
+across the whole state machine rather than a per-state choice. Where no marker
+appears, an entity-scope handler is defaulted to `initial` only when the entity
+has exactly one state.
+
+Declaring more than one `initial` handler at entity scope is an **Error**,
+regardless of how many states the entity has. Verified against
+`2.0.0-rc.9-54`.
 
 !!! warning "Handler Kind Rules"
     **Errors, enforced at parse time where possible:**
@@ -847,6 +852,123 @@ handler.
 
     - Two `on` clauses in one handler that handle the same message. The later
       clause is unreachable.
+
+## Invariants
+
+An invariant is a named boolean rule. Its full form is:
+
+```
+invariant <identifier> [requires (state <ref> | <type-ref>)] is <condition>
+```
+
+### Implicit Application
+
+**An invariant applies to every clause of its declaring scope**, checked as a
+precondition before any effect in that clause. No statement at the point of use
+is needed.
+
+!!! warning "Changed in RIDDL 2.0"
+    Previously an invariant did nothing unless a clause named it in `require
+    invariant X`, which made it easy to carry a constraint that read as enforced
+    and was inert. Every invariant now applies — including ones you also
+    `require` explicitly, because otherwise adding a single `require` would
+    silently narrow a rule from enforced-everywhere to enforced-there.
+
+### Condition Forms
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+invariant Legacy      is "the account must be in good standing"
+invariant InStock     is quantity >= Zero
+invariant CanCoverFee is {
+  let available = call function Available(held = holdAmount, total = balance)
+  available >= minimumFee
+}
+```
+
+!!! warning "No numeric literals in a condition"
+    The boolean sub-language has no numeric literal atom, so `amount >= 0` does
+    not parse — compare against another named value instead (`amount >= floor`).
+    Arithmetic is not available either: a `let` binds a reference or a `call`,
+    not an expression such as `balance - holdAmount`.
+
+A literal string is an AI-fill site. A
+[boolean expression](#boolean-expressions) or a block already *is* the
+predicate. The block form admits the statements a pure function may contain,
+ending in the boolean that is the predicate.
+
+### Scope and Readable Fields
+
+The declaration decides both — never the call site:
+
+| Declaration | Applies to | May read |
+|---|---|---|
+| in an entity, no `requires` | every clause of that entity, including its states' handlers | fields present in **every** state record |
+| inside a state S | that state's handlers only | S's record fields |
+| in an entity, `requires state S` | that entity's clauses while in state S | S's record fields |
+| `requires <type T>` | nothing implicitly — explicit only | the value handed to it |
+| on a context or other stateless processor | nothing implicitly — explicit only | the value handed to it |
+
+**The intersection rule.** An entity-level invariant reading `balance` forces
+every state record of that entity to have a `balance` field. Referencing a field
+absent from any state record is an **Error**.
+
+A stateless processor has no ambient data for an implicit predicate to read, so
+an invariant declared on one must name what it needs and be invoked explicitly:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+record Limits is { ceiling: Integer, used: Integer }
+
+invariant UnderLimit requires record Limits is used <= ceiling
+```
+
+The clause then hands it the value:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+require invariant UnderLimit with record Limits(ceiling = "10", used = "1")
+```
+
+### Purity
+
+An invariant block may contain only the statements a pure function may contain:
+no state writes, no `send`/`tell`, no `morph`/`become`/`yield`/`reply`. An
+invariant may **not** send even a read-only query — doing so would make the
+predicate asynchronous, fallible, non-deterministic and no longer structurally
+terminating. The clause gathers; the invariant receives.
+
+A [function](#functions) may read no entity state at all; an invariant may read
+the state its declaration names. That asymmetry is deliberate — an invariant is
+a predicate over state, evaluated inside the entity's single-writer window, with
+its readable fields bounded by its declaration.
+
+### Failure Modes
+
+| Applied | Failure is a | Result |
+|---|---|---|
+| explicitly, at `require invariant X` | **refusal** | modeled outcome — an error result naming the rule |
+| implicitly | **fault** | exception plus rollback; does **not** widen the clause's result type |
+
+Invariants in scope are checked in declaration order; the first failure is
+reported.
+
+Implicit invariants are **skipped in `on init`** — that clause is where state
+comes into existence. They **apply in `on term`**, and they **apply in `on
+event`** clauses. The last is not a contradiction of the rule forbidding
+authored `require`/`error` in `on event`: that rule bars *refusing* an event,
+and an implicit violation faults and rolls back rather than refusing, so the
+event remains a fact.
+
+### Diagnostics
+
+- An invariant declaring `requires <type T>` that no `require invariant X with
+  <expr>` ever invokes draws a **warning** — it is inert.
+- An entity-level invariant referencing a field absent from any state record is
+  an **Error**.
+
+See the [Invariant concept page](../concepts/invariant.md) for the reasoning
+behind these rules.
 
 ## Value Expressions
 
@@ -1159,11 +1281,25 @@ Asserts a precondition that must hold before proceeding:
 require amount > Zero
 require "the customer is in good standing"
 require invariant BalanceNonNegative
+require invariant UnderLimit with limits
 ```
 
-!!! warning "Validation"
-    Invariants defined in an entity but never referenced by any
-    `require invariant` statement produce a **UsageWarning**.
+The `with <value>` form hands a value to an invariant that declares
+`requires <type>` — the one invariant form ambient scope cannot supply. See
+[Invariants](#invariants).
+
+In a `when` or `match` **condition** the same invariant needs no argument, and
+the `invariant` keyword itself is optional there. The asymmetry is deliberate:
+a condition *asks* whether the rule holds, while a `require` *applies* it and
+so must be handed what the rule reads.
+
+!!! warning "Naming an invariant does not switch it on"
+    As of RIDDL 2.0 an invariant applies **implicitly** across its declaring
+    scope, whether or not any clause names it. A `require invariant X` is an
+    explicit restatement at a point you want the check called out — never what
+    activates it. The rule that an unreferenced invariant draws a UsageWarning
+    is **withdrawn**; the only inert form left is an invariant declaring
+    `requires <type>` that nothing ever invokes, and that still warns.
 
 ### Error Statement
 

@@ -215,8 +215,15 @@ return call function Tax.Compute(subtotal)
 ```riddl
 require amount > Zero
 require invariant BalanceNonNegative
+require invariant UnderLimit with limits
 error "Price must be greater than zero"
 ```
+
+A `require invariant` is an explicit **restatement** — an
+[invariant](invariant.md) already applies implicitly across its declaring
+scope. The `with <value>` form is the exception that does real work: it hands a
+value to an invariant declaring `requires <type>`, which is the one form
+ambient scope cannot supply.
 
 !!! warning "Refusals before effects"
     Within any single linear statement list, every **refusal** (`require`,

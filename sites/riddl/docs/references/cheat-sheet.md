@@ -248,8 +248,10 @@ in the `with { }` metadata block, not in the body.)*
 **Key details**:
 
 - Entities have one or more named States, each backed by a **record**
-- An optional `initial` marker names the starting state and the handler
-  live after a `morph`; without it, the first declared wins
+- An optional `initial` marker names the starting state and, on a state
+  handler, the one live on entering that state; on an entity-scope handler
+  it is the initial handler for every state declaring none of its own.
+  Without a marker, the first declared wins
 - Supports `morph` (change state) and `become` (change handler)
 - `on activate` / `on passivate` handle rehydration and eviction, and must
   be side-effect free
@@ -541,12 +543,21 @@ violate (e.g., "balance >= 0").
 
 **Key details**:
 
-- The condition may be a structured boolean expression, not just an opaque
-  string: `invariant InStock is quantity >= Zero`
-- A state-scoped invariant constrains that state's record data
-- Reference one from a handler with `require invariant Name`
-- An invariant never referenced by a `require invariant` draws a
-  **UsageWarning**
+- **Applies implicitly** to every clause of its declaring scope, as a
+  precondition before any effect — no `require` needed to switch it on
+- The condition has three forms: an opaque string, a boolean expression
+  (`invariant InStock is quantity >= Zero`), or a block of pure statements
+  ending in a boolean
+- Scope is declared: bare in an entity (reads fields **every** state record
+  has), inside a state, `requires state S`, or `requires <type>` — the last
+  being explicit-only, for stateless processors
+- `require invariant Name` is an explicit **restatement**, never what activates
+  it; `require invariant Name with <value>` feeds a `requires <type>` form
+- Failing implicitly is a **fault** (rollback); failing at an explicit
+  `require` is a **refusal** (error result)
+- Skipped in `on init`; applies in `on term` and `on event`
+- An invariant declaring `requires <type>` that nothing invokes is inert and
+  draws a **warning**
 
 > *[For more details →](../concepts/invariant.md)*
 
@@ -573,6 +584,10 @@ Streamlet, State.
 - Entity handlers are the default; State handlers override them
 - Context-level handlers act as the bounded context's API
 - Multiple handlers per processor allow grouping by concern
+- `initial handler X` marks which handler is live before anything has
+  `become` — on a state handler, on entering that state; at entity scope,
+  for every state that declares none of its own. More than one at either
+  placement is an **Error**
 
 > *[For more details →](../concepts/handler.md)*
 
@@ -723,7 +738,8 @@ The message operand may be a bare reference or an inline constructor.
 |---|---|---|
 | `require` | `require amount > Zero` | Assert a precondition as a boolean expression. |
 | `require` | `require "the customer is in good standing"` | Assert a precondition as a literal string. |
-| `require` | `require invariant BalanceNonNegative` | Assert a precondition by referencing a named invariant. |
+| `require` | `require invariant BalanceNonNegative` | Restate a named invariant explicitly at this point. |
+| `require` | `require invariant UnderLimit with limits` | Hand a value to an invariant declaring `requires <type>`. |
 
 !!! warning "Refusals before effects"
     Within any single linear statement list, every refusal (`require`,

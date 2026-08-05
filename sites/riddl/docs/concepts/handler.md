@@ -71,8 +71,15 @@ state accordingly.
 
 ## The `initial` Marker
 
-An optional `initial` keyword marks the handler that is live after a
-[morph](statement.md#morph-and-become-entity-only):
+An optional `initial` keyword marks which handler is live when nothing has
+selected one yet. It means different — though related — things at the two
+placements a handler can occupy.
+
+### On a State Handler
+
+`initial` marks the handler that becomes active when the entity transitions
+**into** that state, whether by [morph](statement.md#morph-and-become-entity-only)
+or at creation:
 
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
@@ -82,17 +89,44 @@ state Pending of record PendingData is {
 }
 ```
 
-Without the marker, the first handler declared wins — which means reordering
-handlers silently changes behavior. Marking it explicitly makes the model safe
-to reorder, and is fully backward compatible with models that do not.
+Without it, a state with several handlers has no defined starting behavior and
+the entity would have to `become` explicitly before it could react — so the
+first handler declared wins by default, which means reordering handlers silently
+changes behavior. Marking it explicitly makes the model safe to reorder, and is
+fully backward compatible with models that do not.
 
-An entity-scope handler is defaulted to `initial` only when the entity has
-exactly **one** state. With multiple states, entity-scope handlers are common
-parts merged into each state's handler set, so none of them is the entity's
-initial handler.
+### On an Entity-Scope Handler
 
-Declaring more than one `initial` handler in a state — or more than one at
-entity scope when the entity has at most one state — is an **Error**.
+`initial` marks the handler used as the initial handler for **every state that
+does not define one of its own** — a default across the whole state machine
+rather than a per-state choice:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+entity Order is {
+  initial handler Common is { ??? }   // initial for Shipped, and any state
+                                      // that declares no initial of its own
+  initial state Pending of record PendingData is {
+    initial handler PendingHandler is { ??? }
+  }
+  state Shipped of record ShippedData
+}
+```
+
+Where no marker appears, an entity-scope handler is defaulted to `initial` only
+when the entity has exactly **one** state.
+
+### Errors
+
+Declaring more than one `initial` handler in a state, or more than one at entity
+scope, is an **Error** — at entity scope regardless of how many states the
+entity has. Verified against `2.0.0-rc.9-54`.
+
+!!! info "It is not a printer bug"
+    `initial handler` is real syntax, so `riddlc prettify` is correct to emit
+    it. It went undocumented long enough that a consumer reported the output as
+    a printer defect on the grounds that handlers have no such modifier. They
+    do.
 
 ## Options
 
