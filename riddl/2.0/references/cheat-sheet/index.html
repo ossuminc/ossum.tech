@@ -7303,8 +7303,10 @@ in the <code>with { }</code> metadata block, not in the body.)</em></p>
 <p><strong>Key details</strong>:</p>
 <ul>
 <li>Entities have one or more named States, each backed by a <strong>record</strong></li>
-<li>An optional <code>initial</code> marker names the starting state and the handler
-  live after a <code>morph</code>; without it, the first declared wins</li>
+<li>An optional <code>initial</code> marker names the starting state and, on a state
+  handler, the one live on entering that state; on an entity-scope handler
+  it is the initial handler for every state declaring none of its own.
+  Without a marker, the first declared wins</li>
 <li>Supports <code>morph</code> (change state) and <code>become</code> (change handler)</li>
 <li><code>on activate</code> / <code>on passivate</code> handle rehydration and eviction, and must
   be side-effect free</li>
@@ -7583,12 +7585,21 @@ violate (e.g., "balance &gt;= 0").</p>
 <p><strong>Lives in</strong>: Any processor, or an Entity <strong>State</strong> body.</p>
 <p><strong>Key details</strong>:</p>
 <ul>
-<li>The condition may be a structured boolean expression, not just an opaque
-  string: <code>invariant InStock is quantity &gt;= Zero</code></li>
-<li>A state-scoped invariant constrains that state's record data</li>
-<li>Reference one from a handler with <code>require invariant Name</code></li>
-<li>An invariant never referenced by a <code>require invariant</code> draws a
-  <strong>UsageWarning</strong></li>
+<li><strong>Applies implicitly</strong> to every clause of its declaring scope, as a
+  precondition before any effect — no <code>require</code> needed to switch it on</li>
+<li>The condition has three forms: an opaque string, a boolean expression
+  (<code>invariant InStock is quantity &gt;= Zero</code>), or a block of pure statements
+  ending in a boolean</li>
+<li>Scope is declared: bare in an entity (reads fields <strong>every</strong> state record
+  has), inside a state, <code>requires state S</code>, or <code>requires &lt;type&gt;</code> — the last
+  being explicit-only, for stateless processors</li>
+<li><code>require invariant Name</code> is an explicit <strong>restatement</strong>, never what activates
+  it; <code>require invariant Name with &lt;value&gt;</code> feeds a <code>requires &lt;type&gt;</code> form</li>
+<li>Failing implicitly is a <strong>fault</strong> (rollback); failing at an explicit
+  <code>require</code> is a <strong>refusal</strong> (error result)</li>
+<li>Skipped in <code>on init</code>; applies in <code>on term</code> and <code>on event</code></li>
+<li>An invariant declaring <code>requires &lt;type&gt;</code> that nothing invokes is inert and
+  draws a <strong>warning</strong></li>
 </ul>
 <blockquote>
 <p><em><a href="../../concepts/invariant/">For more details →</a></em></p>
@@ -7609,6 +7620,10 @@ Streamlet, State.</p>
 <li>Entity handlers are the default; State handlers override them</li>
 <li>Context-level handlers act as the bounded context's API</li>
 <li>Multiple handlers per processor allow grouping by concern</li>
+<li><code>initial handler X</code> marks which handler is live before anything has
+  <code>become</code> — on a state handler, on entering that state; at entity scope,
+  for every state that declares none of its own. More than one at either
+  placement is an <strong>Error</strong></li>
 </ul>
 <blockquote>
 <p><em><a href="../../concepts/handler/">For more details →</a></em></p>
@@ -7894,7 +7909,12 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 <tr>
 <td><code>require</code></td>
 <td><code>require invariant BalanceNonNegative</code></td>
-<td>Assert a precondition by referencing a named invariant.</td>
+<td>Restate a named invariant explicitly at this point.</td>
+</tr>
+<tr>
+<td><code>require</code></td>
+<td><code>require invariant UnderLimit with limits</code></td>
+<td>Hand a value to an invariant declaring <code>requires &lt;type&gt;</code>.</td>
 </tr>
 </tbody>
 </table>

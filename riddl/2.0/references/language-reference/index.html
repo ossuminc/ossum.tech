@@ -5285,6 +5285,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implicit-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implicit Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#condition-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Condition Forms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scope-and-readable-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope and Readable Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#purity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#value-expressions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7092,6 +7175,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implicit-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implicit Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#condition-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Condition Forms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scope-and-readable-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope and Readable Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#purity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#value-expressions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8814,10 +8980,14 @@ not begin with a lowercase letter draws a StyleWarning.</p>
 <li><strong>Context handlers</strong>: API-level handlers for the bounded context</li>
 <li><strong>Processor handlers</strong>: Handlers in Repository, Projector, Adaptor, etc.</li>
 </ul>
-<p>An entity-scope handler is defaulted to <code>initial</code> only when the entity has
-exactly one state. With multiple states, entity-scope handlers are common parts
-merged into each state's handler set, so none of them is the entity's initial
-handler.</p>
+<p>An entity-scope handler may be marked <code>initial</code>, which makes it the initial
+handler for <strong>every state that does not define one of its own</strong> — a default
+across the whole state machine rather than a per-state choice. Where no marker
+appears, an entity-scope handler is defaulted to <code>initial</code> only when the entity
+has exactly one state.</p>
+<p>Declaring more than one <code>initial</code> handler at entity scope is an <strong>Error</strong>,
+regardless of how many states the entity has. Verified against
+<code>2.0.0-rc.9-54</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Handler Kind Rules</p>
 <p><strong>Errors, enforced at parse time where possible:</strong></p>
@@ -8837,6 +9007,143 @@ handler.</p>
   clause is unreachable.</li>
 </ul>
 </div>
+<h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Permanent link">&para;</a></h2>
+<p>An invariant is a named boolean rule. Its full form is:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>invariant &lt;identifier&gt; [requires (state &lt;ref&gt; | &lt;type-ref&gt;)] is &lt;condition&gt;
+</span></code></pre></div>
+<h3 id="implicit-application">Implicit Application<a class="headerlink" href="#implicit-application" title="Permanent link">&para;</a></h3>
+<p><strong>An invariant applies to every clause of its declaring scope</strong>, checked as a
+precondition before any effect in that clause. No statement at the point of use
+is needed.</p>
+<div class="admonition warning">
+<p class="admonition-title">Changed in RIDDL 2.0</p>
+<p>Previously an invariant did nothing unless a clause named it in <code>require
+invariant X</code>, which made it easy to carry a constraint that read as enforced
+and was inert. Every invariant now applies — including ones you also
+<code>require</code> explicitly, because otherwise adding a single <code>require</code> would
+silently narrow a rule from enforced-everywhere to enforced-there.</p>
+</div>
+<h3 id="condition-forms">Condition Forms<a class="headerlink" href="#condition-forms" title="Permanent link">&para;</a></h3>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kd">invariant</span> <span class="n">Legacy</span>      <span class="kp">is</span> <span class="s2">&quot;the account must be in good standing&quot;</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="kd">invariant</span> <span class="n">InStock</span>     <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="kd">invariant</span> <span class="n">CanCoverFee</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>  <span class="k">let</span> <span class="no">available</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Available</span><span class="p">(</span><span class="n">held</span> <span class="o">=</span> <span class="n">holdAmount</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">balance</span><span class="p">)</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>  <span class="no">available</span> <span class="o">&gt;=</span> <span class="n">minimumFee</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">No numeric literals in a condition</p>
+<p>The boolean sub-language has no numeric literal atom, so <code>amount &gt;= 0</code> does
+not parse — compare against another named value instead (<code>amount &gt;= floor</code>).
+Arithmetic is not available either: a <code>let</code> binds a reference or a <code>call</code>,
+not an expression such as <code>balance - holdAmount</code>.</p>
+</div>
+<p>A literal string is an AI-fill site. A
+<a href="#boolean-expressions">boolean expression</a> or a block already <em>is</em> the
+predicate. The block form admits the statements a pure function may contain,
+ending in the boolean that is the predicate.</p>
+<h3 id="scope-and-readable-fields">Scope and Readable Fields<a class="headerlink" href="#scope-and-readable-fields" title="Permanent link">&para;</a></h3>
+<p>The declaration decides both — never the call site:</p>
+<table>
+<thead>
+<tr>
+<th>Declaration</th>
+<th>Applies to</th>
+<th>May read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>in an entity, no <code>requires</code></td>
+<td>every clause of that entity, including its states' handlers</td>
+<td>fields present in <strong>every</strong> state record</td>
+</tr>
+<tr>
+<td>inside a state S</td>
+<td>that state's handlers only</td>
+<td>S's record fields</td>
+</tr>
+<tr>
+<td>in an entity, <code>requires state S</code></td>
+<td>that entity's clauses while in state S</td>
+<td>S's record fields</td>
+</tr>
+<tr>
+<td><code>requires &lt;type T&gt;</code></td>
+<td>nothing implicitly — explicit only</td>
+<td>the value handed to it</td>
+</tr>
+<tr>
+<td>on a context or other stateless processor</td>
+<td>nothing implicitly — explicit only</td>
+<td>the value handed to it</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The intersection rule.</strong> An entity-level invariant reading <code>balance</code> forces
+every state record of that entity to have a <code>balance</code> field. Referencing a field
+absent from any state record is an <strong>Error</strong>.</p>
+<p>A stateless processor has no ambient data for an implicit predicate to read, so
+an invariant declared on one must name what it needs and be invoked explicitly:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kd">record</span> <span class="n">Limits</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">ceiling</span><span class="p">:</span> <span class="nb">Integer</span><span class="p">,</span> <span class="n">used</span><span class="p">:</span> <span class="nb">Integer</span> <span class="p">}</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kr">requires</span> <span class="kd">record</span> <span class="n">Limits</span> <span class="kp">is</span> <span class="n">used</span> <span class="o">&lt;=</span> <span class="n">ceiling</span>
+</span></code></pre></div>
+<p>The clause then hands it the value:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">Limits</span><span class="p">(</span><span class="n">ceiling</span> <span class="o">=</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="n">used</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="purity">Purity<a class="headerlink" href="#purity" title="Permanent link">&para;</a></h3>
+<p>An invariant block may contain only the statements a pure function may contain:
+no state writes, no <code>send</code>/<code>tell</code>, no <code>morph</code>/<code>become</code>/<code>yield</code>/<code>reply</code>. An
+invariant may <strong>not</strong> send even a read-only query — doing so would make the
+predicate asynchronous, fallible, non-deterministic and no longer structurally
+terminating. The clause gathers; the invariant receives.</p>
+<p>A <a href="#functions">function</a> may read no entity state at all; an invariant may read
+the state its declaration names. That asymmetry is deliberate — an invariant is
+a predicate over state, evaluated inside the entity's single-writer window, with
+its readable fields bounded by its declaration.</p>
+<h3 id="failure-modes">Failure Modes<a class="headerlink" href="#failure-modes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Applied</th>
+<th>Failure is a</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>explicitly, at <code>require invariant X</code></td>
+<td><strong>refusal</strong></td>
+<td>modeled outcome — an error result naming the rule</td>
+</tr>
+<tr>
+<td>implicitly</td>
+<td><strong>fault</strong></td>
+<td>exception plus rollback; does <strong>not</strong> widen the clause's result type</td>
+</tr>
+</tbody>
+</table>
+<p>Invariants in scope are checked in declaration order; the first failure is
+reported.</p>
+<p>Implicit invariants are <strong>skipped in <code>on init</code></strong> — that clause is where state
+comes into existence. They <strong>apply in <code>on term</code></strong>, and they <strong>apply in <code>on
+event</code></strong> clauses. The last is not a contradiction of the rule forbidding
+authored <code>require</code>/<code>error</code> in <code>on event</code>: that rule bars <em>refusing</em> an event,
+and an implicit violation faults and rolls back rather than refusing, so the
+event remains a fact.</p>
+<h3 id="diagnostics">Diagnostics<a class="headerlink" href="#diagnostics" title="Permanent link">&para;</a></h3>
+<ul>
+<li>An invariant declaring <code>requires &lt;type T&gt;</code> that no <code>require invariant X with
+  &lt;expr&gt;</code> ever invokes draws a <strong>warning</strong> — it is inert.</li>
+<li>An entity-level invariant referencing a field absent from any state record is
+  an <strong>Error</strong>.</li>
+</ul>
+<p>See the <a href="../../concepts/invariant/">Invariant concept page</a> for the reasoning
+behind these rules.</p>
 <h2 id="value-expressions">Value Expressions<a class="headerlink" href="#value-expressions" title="Permanent link">&para;</a></h2>
 <p>RIDDL 2.0 introduces a real value-expression system. Wherever a statement
 needs a value, it accepts any of these forms:</p>
@@ -8890,7 +9197,7 @@ needs a value, it accepts any of these forms:</p>
 <p>A constructor builds a message or a record inline. Arguments are positional
 first, then named:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p>An <strong>empty</strong> argument list is an arity of zero and must match like any other,
 so <code>OrderPlaced()</code> against a message that has fields is an Error.</p>
@@ -8899,14 +9206,14 @@ the target's fields.</p>
 <h3 id="get">Get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h3>
 <p><code>get from</code> reads a value from a UI input or an entity state:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">let</span> <span class="kr">email</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Active</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="k">let</span> <span class="kr">email</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Active</span>
 </span></code></pre></div>
 <h3 id="call">Call<a class="headerlink" href="#call" title="Permanent link">&para;</a></h3>
 <p><code>call</code> invokes a <strong>function</strong> — and only a function, because functions are the
 only pure definitions — and produces its result:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Calling something with no declared <code>returns</code> is an Error.</p>
 <h3 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h3>
@@ -8914,13 +9221,13 @@ only pure definitions — and produces its result:</p>
 comparison &lt; atom. Parentheses group.</p>
 <!-- riddl: in-handler -->
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">require</span> <span class="n">count</span> <span class="o">==</span> <span class="n">total</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="n">require</span> <span class="n">count</span> <span class="o">==</span> <span class="n">total</span>
 </span></code></pre></div>
 <p>An <a href="../../concepts/invariant/">invariant</a> takes one too, though it is a
 definition rather than a statement:</p>
 <!-- riddl: in-context -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kd">invariant</span> <span class="n">InStock</span> <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="kd">invariant</span> <span class="n">InStock</span> <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span></code></pre></div>
 <p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
 recognized only inside a boolean expression, so they remain legal identifiers
@@ -8933,9 +9240,9 @@ reference, a <code>get from</code>, or a named <code>constant</code>. A literal 
 parse time.</p>
 <p>To compare against a fixed value, name it:</p>
 <p><!-- riddl: skip reason="elided template; a context-level constant beside a statement" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="c1">// ...</span>
-</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many items&quot;</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="c1">// ...</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many items&quot;</span> <span class="kr">end</span>
 </span></code></pre></div></p>
 <p>This is deliberate. It removes magic constants from models and makes every
 comparison check the types on both sides. <code>==</code> and <code>!=</code> require operands of
@@ -8947,14 +9254,14 @@ type on both sides.</p>
 <p>Changes entity state. The payload is a <strong>record</strong> — a bare record reference or
 an inline constructor:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">ProductData</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">ProductRecord</span><span class="p">(</span><span class="n">price</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">ProductData</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">ProductRecord</span><span class="p">(</span><span class="n">price</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="send-statement">Send Statement<a class="headerlink" href="#send-statement" title="Permanent link">&para;</a></h3>
 <p>Emits a message on one of <em>this</em> processor's own outlets. A connector then
 routes it to a downstream inlet:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="k">send</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartEvents</span>
-</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="k">send</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentRequests</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="k">send</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartEvents</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="k">send</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentRequests</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title"><code>send … to inlet</code> is deprecated</p>
@@ -8966,8 +9273,8 @@ for removal in 3.0.</p>
 <h3 id="tell-statement">Tell Statement<a class="headerlink" href="#tell-statement" title="Permanent link">&para;</a></h3>
 <p>Delivers a message directly to a processor:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="k">tell</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Cart</span>
-</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="k">tell</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Cart</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Validation</p>
@@ -8978,7 +9285,7 @@ a <strong>Warning</strong>.</p>
 <p>Produces a command's or query's declared response, without the handler needing
 to know the sender's identity:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="k">yield</span> <span class="kd">result</span> <span class="n">ProductInfo</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="kr">name</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="k">yield</span> <span class="kd">result</span> <span class="n">ProductInfo</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="kr">name</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
 </span></code></pre></div>
 <p><code>yield</code> satisfies the completeness check that command handlers emit an event
 and query handlers produce a result.</p>
@@ -8990,17 +9297,17 @@ emits a <code>[deprecated]</code> message.</p>
 <h3 id="set-statement">Set Statement<a class="headerlink" href="#set-statement" title="Permanent link">&para;</a></h3>
 <p>Assigns a value to a field or a state:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">status</span> <span class="kp">to</span> <span class="s2">&quot;Active&quot;</span>
-</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">total</span> <span class="kp">to</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">Total</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">tax</span><span class="p">)</span>
-</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="k">set</span> <span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">to</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span><span class="p">()</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">status</span> <span class="kp">to</span> <span class="s2">&quot;Active&quot;</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">total</span> <span class="kp">to</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">Total</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">tax</span><span class="p">)</span>
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="k">set</span> <span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">to</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span><span class="p">()</span>
 </span></code></pre></div>
 <h3 id="let-statement">Let Statement<a class="headerlink" href="#let-statement" title="Permanent link">&para;</a></h3>
 <p>Creates a local variable binding, with an optional type annotation. When no
 annotation is given, the type is inferred from the bound expression:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="k">let</span> <span class="n">totalPrice</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Cart</span><span class="p">.</span><span class="n">Total</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">tax</span><span class="p">,</span> <span class="n">shipping</span><span class="p">)</span>
-</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="k">let</span> <span class="n">discount</span><span class="p">:</span> <span class="nb">Decimal</span> <span class="o">=</span> <span class="s2">&quot;totalPrice * 0.1&quot;</span>
-</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="k">let</span> <span class="n">ready</span> <span class="o">=</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">let</span> <span class="n">totalPrice</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Cart</span><span class="p">.</span><span class="n">Total</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">tax</span><span class="p">,</span> <span class="n">shipping</span><span class="p">)</span>
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="k">let</span> <span class="n">discount</span><span class="p">:</span> <span class="nb">Decimal</span> <span class="o">=</span> <span class="s2">&quot;totalPrice * 0.1&quot;</span>
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="k">let</span> <span class="n">ready</span> <span class="o">=</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span>
 </span></code></pre></div>
 <p>A <code>let</code> is lexically scoped and statement-ordered: it is visible only after its
 declaration and is shadowed inside nested blocks.</p>
@@ -9008,19 +9315,19 @@ declaration and is shadowed inside nested blocks.</p>
 <p>Publishes a value to a UI output. Valid only in application and context
 handlers:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="k">put</span> <span class="n">order</span><span class="p">.</span><span class="n">confirmationNumber</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">ConfirmationPanel</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="k">put</span> <span class="n">order</span><span class="p">.</span><span class="n">confirmationNumber</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">ConfirmationPanel</span>
 </span></code></pre></div>
 <h3 id="return-statement">Return Statement<a class="headerlink" href="#return-statement" title="Permanent link">&para;</a></h3>
 <p>Returns a function's result. Valid only in a function body:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Compute</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Compute</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="when-statement">When Statement<a class="headerlink" href="#when-statement" title="Permanent link">&para;</a></h3>
 <p>Conditional logic. The <code>end</code> keyword is required:</p>
 <!-- riddl: skip reason="syntax template with placeholders, not a model" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="k">when</span> <span class="o">&lt;</span><span class="kr">condition</span><span class="o">&gt;</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>  <span class="c1">// actions</span>
-</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="p">}</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="k">when</span> <span class="o">&lt;</span><span class="kr">condition</span><span class="o">&gt;</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>  <span class="c1">// actions</span>
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
 <p>A condition may be any of:</p>
 <ul>
@@ -9044,31 +9351,31 @@ say so rather than borrow the literal's spelling.</p>
 </div>
 <p>An <code>else</code> clause handles the false case:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">let</span> <span class="n">authorized</span> <span class="o">=</span> <span class="kd">user</span><span class="p">.</span><span class="n">hasPermission</span>
-</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="k">when</span> <span class="n">authorized</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">ActionCompleted</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
-</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span id="__span-35-5"><a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>  <span class="k">error</span> <span class="s2">&quot;User not authorized&quot;</span>
-</span><span id="__span-35-6"><a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a><span class="p">}</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="k">let</span> <span class="n">authorized</span> <span class="o">=</span> <span class="kd">user</span><span class="p">.</span><span class="n">hasPermission</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="k">when</span> <span class="n">authorized</span> <span class="k">then</span> <span class="p">{</span>
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">ActionCompleted</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
+</span><span id="__span-39-4"><a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span id="__span-39-5"><a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>  <span class="k">error</span> <span class="s2">&quot;User not authorized&quot;</span>
+</span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
 <h3 id="match-statement">Match Statement<a class="headerlink" href="#match-statement" title="Permanent link">&para;</a></h3>
 <p>Pattern matching over a typed subject. The subject is a value reference, a
 <code>get from</code>, or a legacy pseudo-code literal:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="k">match</span> <span class="n">order</span><span class="p">.</span><span class="n">status</span> <span class="p">{</span>
-</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>  <span class="kd">case</span> <span class="n">Pending</span> <span class="p">{</span>
-</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>    <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderPending</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
-</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>  <span class="p">}</span>
-</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>  <span class="kd">case</span> <span class="n">Shipped</span> <span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="p">{</span>
-</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>    <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderShipped</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
-</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a>  <span class="p">}</span>
-</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>  <span class="kd">case</span> <span class="o">&gt;=</span> <span class="n">HighValueThreshold</span> <span class="p">{</span>
-</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">EscalateReview</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Review</span>
-</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a>  <span class="p">}</span>
-</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>  <span class="k">default</span> <span class="p">{</span>
-</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>    <span class="k">error</span> <span class="s2">&quot;Unknown order status&quot;</span>
-</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a>  <span class="p">}</span>
-</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="k">match</span> <span class="n">order</span><span class="p">.</span><span class="n">status</span> <span class="p">{</span>
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>  <span class="kd">case</span> <span class="n">Pending</span> <span class="p">{</span>
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>    <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderPending</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
+</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>  <span class="p">}</span>
+</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>  <span class="kd">case</span> <span class="n">Shipped</span> <span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="p">{</span>
+</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>    <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderShipped</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
+</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a>  <span class="p">}</span>
+</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>  <span class="kd">case</span> <span class="o">&gt;=</span> <span class="n">HighValueThreshold</span> <span class="p">{</span>
+</span><span id="__span-40-9"><a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">EscalateReview</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Review</span>
+</span><span id="__span-40-10"><a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>  <span class="p">}</span>
+</span><span id="__span-40-11"><a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a>  <span class="k">default</span> <span class="p">{</span>
+</span><span id="__span-40-12"><a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a>    <span class="k">error</span> <span class="s2">&quot;Unknown order status&quot;</span>
+</span><span id="__span-40-13"><a id="__codelineno-40-13" name="__codelineno-40-13" href="#__codelineno-40-13"></a>  <span class="p">}</span>
+</span><span id="__span-40-14"><a id="__codelineno-40-14" name="__codelineno-40-14" href="#__codelineno-40-14"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>A case pattern is one of:</p>
 <ul>
@@ -9085,13 +9392,13 @@ Enumeration or Alternation — a non-exhaustive match without a <code>default</c
 <h3 id="foreach-statement">Foreach Statement<a class="headerlink" href="#foreach-statement" title="Permanent link">&para;</a></h3>
 <p>RIDDL's safe, bounded loop. There is no unbounded iteration in the language:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="k">foreach</span> <span class="n">line</span> <span class="kp">in</span> <span class="kd">field</span> <span class="n">order</span><span class="p">.</span><span class="n">lines</span> <span class="p">{</span>
-</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">LineShipped</span><span class="p">(</span><span class="n">sku</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">sku</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Shipments</span>
-</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="p">}</span>
-</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>
-</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="k">foreach</span> <span class="kr">item</span> <span class="kp">in</span> <span class="n">myLocalCollection</span> <span class="p">{</span>
-</span><span id="__span-37-6"><a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>  <span class="k">do</span> <span class="s2">&quot;record the item&quot;</span>
-</span><span id="__span-37-7"><a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="k">foreach</span> <span class="n">line</span> <span class="kp">in</span> <span class="kd">field</span> <span class="n">order</span><span class="p">.</span><span class="n">lines</span> <span class="p">{</span>
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">LineShipped</span><span class="p">(</span><span class="n">sku</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">sku</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Shipments</span>
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="p">}</span>
+</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>
+</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="k">foreach</span> <span class="kr">item</span> <span class="kp">in</span> <span class="n">myLocalCollection</span> <span class="p">{</span>
+</span><span id="__span-41-6"><a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>  <span class="k">do</span> <span class="s2">&quot;record the item&quot;</span>
+</span><span id="__span-41-7"><a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The collection is a <code>field</code> reference or a <code>let</code>-bound local whose type resolves
 to a collection — Sequence, Set, Graph, Table, Replica, Mapping, or a
@@ -9099,19 +9406,31 @@ cardinality wrapper such as <code>many</code> or <code>optional</code>.</p>
 <h3 id="require-statement">Require Statement<a class="headerlink" href="#require-statement" title="Permanent link">&para;</a></h3>
 <p>Asserts a precondition that must hold before proceeding:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="n">require</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
-</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="n">require</span> <span class="s2">&quot;the customer is in good standing&quot;</span>
-</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="n">require</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="n">require</span> <span class="s2">&quot;the customer is in good standing&quot;</span>
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
+</span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="n">limits</span>
 </span></code></pre></div>
+<p>The <code>with &lt;value&gt;</code> form hands a value to an invariant that declares
+<code>requires &lt;type&gt;</code> — the one invariant form ambient scope cannot supply. See
+<a href="#invariants">Invariants</a>.</p>
+<p>In a <code>when</code> or <code>match</code> <strong>condition</strong> the same invariant needs no argument, and
+the <code>invariant</code> keyword itself is optional there. The asymmetry is deliberate:
+a condition <em>asks</em> whether the rule holds, while a <code>require</code> <em>applies</em> it and
+so must be handed what the rule reads.</p>
 <div class="admonition warning">
-<p class="admonition-title">Validation</p>
-<p>Invariants defined in an entity but never referenced by any
-<code>require invariant</code> statement produce a <strong>UsageWarning</strong>.</p>
+<p class="admonition-title">Naming an invariant does not switch it on</p>
+<p>As of RIDDL 2.0 an invariant applies <strong>implicitly</strong> across its declaring
+scope, whether or not any clause names it. A <code>require invariant X</code> is an
+explicit restatement at a point you want the check called out — never what
+activates it. The rule that an unreferenced invariant draws a UsageWarning
+is <strong>withdrawn</strong>; the only inert form left is an invariant declaring
+<code>requires &lt;type&gt;</code> that nothing ever invokes, and that still warns.</p>
 </div>
 <h3 id="error-statement">Error Statement<a class="headerlink" href="#error-statement" title="Permanent link">&para;</a></h3>
 <p>Refuses to proceed, with a reason:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="k">error</span> <span class="s2">&quot;Price must be greater than zero&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="k">error</span> <span class="s2">&quot;Price must be greater than zero&quot;</span>
 </span></code></pre></div>
 <h3 id="refusals-before-effects">Refusals Before Effects<a class="headerlink" href="#refusals-before-effects" title="Permanent link">&para;</a></h3>
 <p>Within any single linear statement list, every <strong>refusal</strong> (<code>require</code>, <code>error</code>)
@@ -9122,17 +9441,17 @@ changes behind.</p>
 <code>match</code> or <code>foreach</code> body is its own list. A refusal after an effect in the same
 list is an <strong>Error</strong>.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
-</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>        <span class="c1">// refusals first</span>
-</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>  <span class="n">require</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span>
-</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>  <span class="k">set</span> <span class="kd">field</span> <span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance - amount&quot;</span>   <span class="c1">// then effects</span>
-</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">Withdrawn</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span>
-</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>        <span class="c1">// refusals first</span>
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>  <span class="n">require</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>  <span class="k">set</span> <span class="kd">field</span> <span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance - amount&quot;</span>   <span class="c1">// then effects</span>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">Withdrawn</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span>
+</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="do-statement">Do Statement<a class="headerlink" href="#do-statement" title="Permanent link">&para;</a></h3>
 <p>Describes an action in natural language for later implementation:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="k">do</span> <span class="s2">&quot;Calculate the total price including all applicable taxes and discounts&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="k">do</span> <span class="s2">&quot;Calculate the total price including all applicable taxes and discounts&quot;</span>
 </span></code></pre></div>
 <p>This is useful for describing business logic that will be implemented in
 target code.</p>
@@ -9150,9 +9469,9 @@ pass-through of raw target-language source, handed to the code generator
 untouched.</p>
 <p>It is written as a fenced block with a language tag:</p>
 <!-- riddl: in-context -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="sd">```scala</span>
-</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="sd">val total = items.map(_.price).sum * (1 - discountRate)</span>
-</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="sd">```</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="sd">```scala</span>
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="sd">val total = items.map(_.price).sum * (1 - discountRate)</span>
+</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="sd">```</span>
 </span></code></pre></div>
 <p>The language tag must be one of exactly four: <strong><code>scala</code></strong>, <strong><code>java</code></strong>,
 <strong><code>python</code></strong>, <strong><code>mojo</code></strong>.</p>
@@ -9208,29 +9527,29 @@ the leniency may be tightened.</p>
 <h3 id="become-statement">Become Statement<a class="headerlink" href="#become-statement" title="Permanent link">&para;</a></h3>
 <p>Switches the live handler of an entity:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="k">become</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">handler</span> <span class="n">ShippedHandler</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="k">become</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">handler</span> <span class="n">ShippedHandler</span>
 </span></code></pre></div>
 <h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
 <p>Functions define reusable, <strong>pure</strong> operations. A function's <code>requires</code> and
 <code>returns</code> may name an existing type rather than spelling out an aggregation,
 which makes unary and nullary functions natural:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">TotalInputs</span>
-</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>  <span class="kr">returns</span> <span class="n">Price</span>
-</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>
-</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>  <span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Apply</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
-</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Calculates the final cart total&quot;</span>
-</span><span id="__span-44-8"><a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">TotalInputs</span>
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>  <span class="kr">returns</span> <span class="n">Price</span>
+</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a>
+</span><span id="__span-48-5"><a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>  <span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Apply</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
+</span><span id="__span-48-6"><a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-48-7"><a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Calculates the final cart total&quot;</span>
+</span><span id="__span-48-8"><a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The inline aggregation form still works:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>  <span class="kr">requires</span> <span class="p">{</span> <span class="n">subtotal</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">taxes</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">shipping</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>
-</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>  <span class="kr">returns</span> <span class="p">{</span> <span class="n">total</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>
-</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>  <span class="k">do</span> <span class="s2">&quot;Add subtotal, taxes and shipping&quot;</span>
-</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-49-2"><a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>  <span class="kr">requires</span> <span class="p">{</span> <span class="n">subtotal</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">taxes</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">shipping</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>
+</span><span id="__span-49-3"><a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>  <span class="kr">returns</span> <span class="p">{</span> <span class="n">total</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>
+</span><span id="__span-49-4"><a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a>  <span class="k">do</span> <span class="s2">&quot;Add subtotal, taxes and shipping&quot;</span>
+</span><span id="__span-49-5"><a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Functions must be pure</p>
@@ -9247,21 +9566,21 @@ message but continues to work.</p>
 </div>
 <h2 id="sagas">Sagas<a class="headerlink" href="#sagas" title="Permanent link">&para;</a></h2>
 <p>Sagas coordinate multi-step processes with compensation:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="kd">saga</span> <span class="n">CheckoutProcess</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">CheckoutInputs</span>
-</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>  <span class="kr">returns</span> <span class="kd">record</span> <span class="n">CheckoutOutcome</span>
-</span><span id="__span-46-4"><a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a>
-</span><span id="__span-46-5"><a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a>  <span class="kd">step</span> <span class="n">ProcessPayment</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-46-6"><a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
-</span><span id="__span-46-7"><a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-46-8"><a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">RefundPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
-</span><span id="__span-46-9"><a id="__codelineno-46-9" name="__codelineno-46-9" href="#__codelineno-46-9"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-46-10"><a id="__codelineno-46-10" name="__codelineno-46-10" href="#__codelineno-46-10"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Processes payment for the order&quot;</span>
-</span><span id="__span-46-11"><a id="__codelineno-46-11" name="__codelineno-46-11" href="#__codelineno-46-11"></a>  <span class="p">}</span>
-</span><span id="__span-46-12"><a id="__codelineno-46-12" name="__codelineno-46-12" href="#__codelineno-46-12"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-46-13"><a id="__codelineno-46-13" name="__codelineno-46-13" href="#__codelineno-46-13"></a>  <span class="kr">option</span> <span class="kp">is</span> <span class="no">compensate</span>
-</span><span id="__span-46-14"><a id="__codelineno-46-14" name="__codelineno-46-14" href="#__codelineno-46-14"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Orchestrates the checkout process steps&quot;</span>
-</span><span id="__span-46-15"><a id="__codelineno-46-15" name="__codelineno-46-15" href="#__codelineno-46-15"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="kd">saga</span> <span class="n">CheckoutProcess</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">CheckoutInputs</span>
+</span><span id="__span-50-3"><a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>  <span class="kr">returns</span> <span class="kd">record</span> <span class="n">CheckoutOutcome</span>
+</span><span id="__span-50-4"><a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>
+</span><span id="__span-50-5"><a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>  <span class="kd">step</span> <span class="n">ProcessPayment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-50-6"><a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
+</span><span id="__span-50-7"><a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-50-8"><a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">RefundPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
+</span><span id="__span-50-9"><a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-50-10"><a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Processes payment for the order&quot;</span>
+</span><span id="__span-50-11"><a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a>  <span class="p">}</span>
+</span><span id="__span-50-12"><a id="__codelineno-50-12" name="__codelineno-50-12" href="#__codelineno-50-12"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-50-13"><a id="__codelineno-50-13" name="__codelineno-50-13" href="#__codelineno-50-13"></a>  <span class="kr">option</span> <span class="kp">is</span> <span class="no">compensate</span>
+</span><span id="__span-50-14"><a id="__codelineno-50-14" name="__codelineno-50-14" href="#__codelineno-50-14"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Orchestrates the checkout process steps&quot;</span>
+</span><span id="__span-50-15"><a id="__codelineno-50-15" name="__codelineno-50-15" href="#__codelineno-50-15"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="saga-options">Saga Options<a class="headerlink" href="#saga-options" title="Permanent link">&para;</a></h3>
 <table>
@@ -9305,20 +9624,20 @@ message but continues to work.</p>
 <h2 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">&para;</a></h2>
 <p>Repositories define persistence:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span>
-</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>    <span class="n">cart</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">Cart</span>
-</span><span id="__span-47-4"><a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>    <span class="kr">link</span> <span class="n">cartItems</span> <span class="kp">as</span> <span class="kd">field</span> <span class="n">Cart</span><span class="p">.</span><span class="kr">items</span><span class="p">.</span><span class="n">id</span> <span class="kp">to</span> <span class="kd">field</span> <span class="n">Product</span><span class="p">.</span><span class="n">id</span>
-</span><span id="__span-47-5"><a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>
-</span><span id="__span-47-6"><a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>  <span class="kd">handler</span> <span class="n">CartRepositoryHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-47-7"><a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">CartCreated</span> <span class="p">{</span>
-</span><span id="__span-47-8"><a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>      <span class="k">do</span> <span class="s2">&quot;Persist the new cart record to the database&quot;</span>
-</span><span id="__span-47-9"><a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a>    <span class="p">}</span>
-</span><span id="__span-47-10"><a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span> <span class="k">error</span> <span class="s2">&quot;Unrecognized message&quot;</span> <span class="p">}</span>
-</span><span id="__span-47-11"><a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a>  <span class="p">}</span>
-</span><span id="__span-47-12"><a id="__codelineno-47-12" name="__codelineno-47-12" href="#__codelineno-47-12"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-47-13"><a id="__codelineno-47-13" name="__codelineno-47-13" href="#__codelineno-47-13"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Persistent storage for shopping cart data&quot;</span>
-</span><span id="__span-47-14"><a id="__codelineno-47-14" name="__codelineno-47-14" href="#__codelineno-47-14"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-51-2"><a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span>
+</span><span id="__span-51-3"><a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>    <span class="n">cart</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">Cart</span>
+</span><span id="__span-51-4"><a id="__codelineno-51-4" name="__codelineno-51-4" href="#__codelineno-51-4"></a>    <span class="kr">link</span> <span class="n">cartItems</span> <span class="kp">as</span> <span class="kd">field</span> <span class="n">Cart</span><span class="p">.</span><span class="kr">items</span><span class="p">.</span><span class="n">id</span> <span class="kp">to</span> <span class="kd">field</span> <span class="n">Product</span><span class="p">.</span><span class="n">id</span>
+</span><span id="__span-51-5"><a id="__codelineno-51-5" name="__codelineno-51-5" href="#__codelineno-51-5"></a>
+</span><span id="__span-51-6"><a id="__codelineno-51-6" name="__codelineno-51-6" href="#__codelineno-51-6"></a>  <span class="kd">handler</span> <span class="n">CartRepositoryHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-51-7"><a id="__codelineno-51-7" name="__codelineno-51-7" href="#__codelineno-51-7"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">CartCreated</span> <span class="p">{</span>
+</span><span id="__span-51-8"><a id="__codelineno-51-8" name="__codelineno-51-8" href="#__codelineno-51-8"></a>      <span class="k">do</span> <span class="s2">&quot;Persist the new cart record to the database&quot;</span>
+</span><span id="__span-51-9"><a id="__codelineno-51-9" name="__codelineno-51-9" href="#__codelineno-51-9"></a>    <span class="p">}</span>
+</span><span id="__span-51-10"><a id="__codelineno-51-10" name="__codelineno-51-10" href="#__codelineno-51-10"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span> <span class="k">error</span> <span class="s2">&quot;Unrecognized message&quot;</span> <span class="p">}</span>
+</span><span id="__span-51-11"><a id="__codelineno-51-11" name="__codelineno-51-11" href="#__codelineno-51-11"></a>  <span class="p">}</span>
+</span><span id="__span-51-12"><a id="__codelineno-51-12" name="__codelineno-51-12" href="#__codelineno-51-12"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-51-13"><a id="__codelineno-51-13" name="__codelineno-51-13" href="#__codelineno-51-13"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Persistent storage for shopping cart data&quot;</span>
+</span><span id="__span-51-14"><a id="__codelineno-51-14" name="__codelineno-51-14" href="#__codelineno-51-14"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="repositories-at-domain-scope">Repositories at Domain Scope<a class="headerlink" href="#repositories-at-domain-scope" title="Permanent link">&para;</a></h3>
 <p>A repository that synthesizes messages from entities across several contexts,
@@ -9347,21 +9666,21 @@ different message formats or terminology.</p>
 </ul>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="kd">context</span> <span class="n">OrderContext</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>  <span class="kd">adaptor</span> <span class="n">PaymentIntegration</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">PaymentContext</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>    <span class="kd">handler</span> <span class="n">InboundPayments</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">PaymentContext</span><span class="p">.</span><span class="n">PaymentCompleted</span> <span class="p">{</span>
-</span><span id="__span-48-5"><a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>        <span class="k">let</span> <span class="n">orderId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="kr">reference</span>
-</span><span id="__span-48-6"><a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderPaymentReceived</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">OrderEvents</span>
-</span><span id="__span-48-7"><a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a>      <span class="p">}</span>
-</span><span id="__span-48-8"><a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span>
-</span><span id="__span-48-9"><a id="__codelineno-48-9" name="__codelineno-48-9" href="#__codelineno-48-9"></a>        <span class="k">error</span> <span class="s2">&quot;Unrecognized payment event&quot;</span>
-</span><span id="__span-48-10"><a id="__codelineno-48-10" name="__codelineno-48-10" href="#__codelineno-48-10"></a>      <span class="p">}</span>
-</span><span id="__span-48-11"><a id="__codelineno-48-11" name="__codelineno-48-11" href="#__codelineno-48-11"></a>    <span class="p">}</span>
-</span><span id="__span-48-12"><a id="__codelineno-48-12" name="__codelineno-48-12" href="#__codelineno-48-12"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-48-13"><a id="__codelineno-48-13" name="__codelineno-48-13" href="#__codelineno-48-13"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Translates payment events for order processing&quot;</span>
-</span><span id="__span-48-14"><a id="__codelineno-48-14" name="__codelineno-48-14" href="#__codelineno-48-14"></a>  <span class="p">}</span>
-</span><span id="__span-48-15"><a id="__codelineno-48-15" name="__codelineno-48-15" href="#__codelineno-48-15"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="kd">context</span> <span class="n">OrderContext</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>  <span class="kd">adaptor</span> <span class="n">PaymentIntegration</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">PaymentContext</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>    <span class="kd">handler</span> <span class="n">InboundPayments</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-52-4"><a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">PaymentContext</span><span class="p">.</span><span class="n">PaymentCompleted</span> <span class="p">{</span>
+</span><span id="__span-52-5"><a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>        <span class="k">let</span> <span class="n">orderId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="kr">reference</span>
+</span><span id="__span-52-6"><a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderPaymentReceived</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">OrderEvents</span>
+</span><span id="__span-52-7"><a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a>      <span class="p">}</span>
+</span><span id="__span-52-8"><a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span>
+</span><span id="__span-52-9"><a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a>        <span class="k">error</span> <span class="s2">&quot;Unrecognized payment event&quot;</span>
+</span><span id="__span-52-10"><a id="__codelineno-52-10" name="__codelineno-52-10" href="#__codelineno-52-10"></a>      <span class="p">}</span>
+</span><span id="__span-52-11"><a id="__codelineno-52-11" name="__codelineno-52-11" href="#__codelineno-52-11"></a>    <span class="p">}</span>
+</span><span id="__span-52-12"><a id="__codelineno-52-12" name="__codelineno-52-12" href="#__codelineno-52-12"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-52-13"><a id="__codelineno-52-13" name="__codelineno-52-13" href="#__codelineno-52-13"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Translates payment events for order processing&quot;</span>
+</span><span id="__span-52-14"><a id="__codelineno-52-14" name="__codelineno-52-14" href="#__codelineno-52-14"></a>  <span class="p">}</span>
+</span><span id="__span-52-15"><a id="__codelineno-52-15" name="__codelineno-52-15" href="#__codelineno-52-15"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">The Isolation Seam</p>
@@ -9385,22 +9704,22 @@ model (projections).</p>
 </ul>
 <h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h3>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="kd">context</span> <span class="n">ReportingContext</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-49-2"><a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>  <span class="kd">projector</span> <span class="n">SalesDashboard</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-49-3"><a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>    <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">SalesData</span>
-</span><span id="__span-49-4"><a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a>
-</span><span id="__span-49-5"><a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>    <span class="kd">handler</span> <span class="n">SalesEventHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-49-6"><a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderCompleted</span> <span class="p">{</span>
-</span><span id="__span-49-7"><a id="__codelineno-49-7" name="__codelineno-49-7" href="#__codelineno-49-7"></a>        <span class="k">do</span> <span class="s2">&quot;Update daily sales totals with order amount&quot;</span>
-</span><span id="__span-49-8"><a id="__codelineno-49-8" name="__codelineno-49-8" href="#__codelineno-49-8"></a>      <span class="p">}</span>
-</span><span id="__span-49-9"><a id="__codelineno-49-9" name="__codelineno-49-9" href="#__codelineno-49-9"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderRefunded</span> <span class="p">{</span>
-</span><span id="__span-49-10"><a id="__codelineno-49-10" name="__codelineno-49-10" href="#__codelineno-49-10"></a>        <span class="k">do</span> <span class="s2">&quot;Subtract refund amount from daily totals&quot;</span>
-</span><span id="__span-49-11"><a id="__codelineno-49-11" name="__codelineno-49-11" href="#__codelineno-49-11"></a>      <span class="p">}</span>
-</span><span id="__span-49-12"><a id="__codelineno-49-12" name="__codelineno-49-12" href="#__codelineno-49-12"></a>    <span class="p">}</span>
-</span><span id="__span-49-13"><a id="__codelineno-49-13" name="__codelineno-49-13" href="#__codelineno-49-13"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-49-14"><a id="__codelineno-49-14" name="__codelineno-49-14" href="#__codelineno-49-14"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Projects order events to sales dashboard&quot;</span>
-</span><span id="__span-49-15"><a id="__codelineno-49-15" name="__codelineno-49-15" href="#__codelineno-49-15"></a>  <span class="p">}</span>
-</span><span id="__span-49-16"><a id="__codelineno-49-16" name="__codelineno-49-16" href="#__codelineno-49-16"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="kd">context</span> <span class="n">ReportingContext</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>  <span class="kd">projector</span> <span class="n">SalesDashboard</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>    <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">SalesData</span>
+</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>
+</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>    <span class="kd">handler</span> <span class="n">SalesEventHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-53-6"><a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderCompleted</span> <span class="p">{</span>
+</span><span id="__span-53-7"><a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a>        <span class="k">do</span> <span class="s2">&quot;Update daily sales totals with order amount&quot;</span>
+</span><span id="__span-53-8"><a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>      <span class="p">}</span>
+</span><span id="__span-53-9"><a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderRefunded</span> <span class="p">{</span>
+</span><span id="__span-53-10"><a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a>        <span class="k">do</span> <span class="s2">&quot;Subtract refund amount from daily totals&quot;</span>
+</span><span id="__span-53-11"><a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a>      <span class="p">}</span>
+</span><span id="__span-53-12"><a id="__codelineno-53-12" name="__codelineno-53-12" href="#__codelineno-53-12"></a>    <span class="p">}</span>
+</span><span id="__span-53-13"><a id="__codelineno-53-13" name="__codelineno-53-13" href="#__codelineno-53-13"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-53-14"><a id="__codelineno-53-14" name="__codelineno-53-14" href="#__codelineno-53-14"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Projects order events to sales dashboard&quot;</span>
+</span><span id="__span-53-15"><a id="__codelineno-53-15" name="__codelineno-53-15" href="#__codelineno-53-15"></a>  <span class="p">}</span>
+</span><span id="__span-53-16"><a id="__codelineno-53-16" name="__codelineno-53-16" href="#__codelineno-53-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Projectors are event-only</p>
@@ -9424,35 +9743,35 @@ input ports (inlets) and output ports (outlets).</p>
 <p>Every processor kind may declare ports — not just streamlets. An entity may
 own an outlet; a projector may own an inlet.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>  <span class="kd">processor</span> <span class="n">OrderEventSource</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-50-3"><a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>    <span class="kd">outlet</span> <span class="n">OrderEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
-</span><span id="__span-50-4"><a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-50-5"><a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Streams order events from the event store&quot;</span>
-</span><span id="__span-50-6"><a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>  <span class="p">}</span>
-</span><span id="__span-50-7"><a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>
-</span><span id="__span-50-8"><a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>  <span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-50-9"><a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a>    <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
-</span><span id="__span-50-10"><a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a>    <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
-</span><span id="__span-50-11"><a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a>
-</span><span id="__span-50-12"><a id="__codelineno-50-12" name="__codelineno-50-12" href="#__codelineno-50-12"></a>    <span class="kd">handler</span> <span class="n">EnrichmentHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-50-13"><a id="__codelineno-50-13" name="__codelineno-50-13" href="#__codelineno-50-13"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderEvent</span> <span class="p">{</span>
-</span><span id="__span-50-14"><a id="__codelineno-50-14" name="__codelineno-50-14" href="#__codelineno-50-14"></a>        <span class="k">do</span> <span class="s2">&quot;Look up customer details and product information&quot;</span>
-</span><span id="__span-50-15"><a id="__codelineno-50-15" name="__codelineno-50-15" href="#__codelineno-50-15"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">EnrichedOrderEvent</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">EnrichedOrders</span>
-</span><span id="__span-50-16"><a id="__codelineno-50-16" name="__codelineno-50-16" href="#__codelineno-50-16"></a>      <span class="p">}</span>
-</span><span id="__span-50-17"><a id="__codelineno-50-17" name="__codelineno-50-17" href="#__codelineno-50-17"></a>    <span class="p">}</span>
-</span><span id="__span-50-18"><a id="__codelineno-50-18" name="__codelineno-50-18" href="#__codelineno-50-18"></a>  <span class="p">}</span>
-</span><span id="__span-50-19"><a id="__codelineno-50-19" name="__codelineno-50-19" href="#__codelineno-50-19"></a>
-</span><span id="__span-50-20"><a id="__codelineno-50-20" name="__codelineno-50-20" href="#__codelineno-50-20"></a>  <span class="kd">processor</span> <span class="n">AnalyticsSink</span> <span class="kp">as</span> <span class="kd">sink</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-50-21"><a id="__codelineno-50-21" name="__codelineno-50-21" href="#__codelineno-50-21"></a>    <span class="kd">inlet</span> <span class="n">AnalyticsEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
-</span><span id="__span-50-22"><a id="__codelineno-50-22" name="__codelineno-50-22" href="#__codelineno-50-22"></a>
-</span><span id="__span-50-23"><a id="__codelineno-50-23" name="__codelineno-50-23" href="#__codelineno-50-23"></a>    <span class="kd">handler</span> <span class="n">AnalyticsHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-50-24"><a id="__codelineno-50-24" name="__codelineno-50-24" href="#__codelineno-50-24"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">EnrichedOrderEvent</span> <span class="p">{</span>
-</span><span id="__span-50-25"><a id="__codelineno-50-25" name="__codelineno-50-25" href="#__codelineno-50-25"></a>        <span class="k">do</span> <span class="s2">&quot;Send event to analytics platform&quot;</span>
-</span><span id="__span-50-26"><a id="__codelineno-50-26" name="__codelineno-50-26" href="#__codelineno-50-26"></a>      <span class="p">}</span>
-</span><span id="__span-50-27"><a id="__codelineno-50-27" name="__codelineno-50-27" href="#__codelineno-50-27"></a>    <span class="p">}</span>
-</span><span id="__span-50-28"><a id="__codelineno-50-28" name="__codelineno-50-28" href="#__codelineno-50-28"></a>  <span class="p">}</span>
-</span><span id="__span-50-29"><a id="__codelineno-50-29" name="__codelineno-50-29" href="#__codelineno-50-29"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>  <span class="kd">processor</span> <span class="n">OrderEventSource</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>    <span class="kd">outlet</span> <span class="n">OrderEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
+</span><span id="__span-54-4"><a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-54-5"><a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Streams order events from the event store&quot;</span>
+</span><span id="__span-54-6"><a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a>  <span class="p">}</span>
+</span><span id="__span-54-7"><a id="__codelineno-54-7" name="__codelineno-54-7" href="#__codelineno-54-7"></a>
+</span><span id="__span-54-8"><a id="__codelineno-54-8" name="__codelineno-54-8" href="#__codelineno-54-8"></a>  <span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-54-9"><a id="__codelineno-54-9" name="__codelineno-54-9" href="#__codelineno-54-9"></a>    <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
+</span><span id="__span-54-10"><a id="__codelineno-54-10" name="__codelineno-54-10" href="#__codelineno-54-10"></a>    <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
+</span><span id="__span-54-11"><a id="__codelineno-54-11" name="__codelineno-54-11" href="#__codelineno-54-11"></a>
+</span><span id="__span-54-12"><a id="__codelineno-54-12" name="__codelineno-54-12" href="#__codelineno-54-12"></a>    <span class="kd">handler</span> <span class="n">EnrichmentHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-54-13"><a id="__codelineno-54-13" name="__codelineno-54-13" href="#__codelineno-54-13"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderEvent</span> <span class="p">{</span>
+</span><span id="__span-54-14"><a id="__codelineno-54-14" name="__codelineno-54-14" href="#__codelineno-54-14"></a>        <span class="k">do</span> <span class="s2">&quot;Look up customer details and product information&quot;</span>
+</span><span id="__span-54-15"><a id="__codelineno-54-15" name="__codelineno-54-15" href="#__codelineno-54-15"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">EnrichedOrderEvent</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">EnrichedOrders</span>
+</span><span id="__span-54-16"><a id="__codelineno-54-16" name="__codelineno-54-16" href="#__codelineno-54-16"></a>      <span class="p">}</span>
+</span><span id="__span-54-17"><a id="__codelineno-54-17" name="__codelineno-54-17" href="#__codelineno-54-17"></a>    <span class="p">}</span>
+</span><span id="__span-54-18"><a id="__codelineno-54-18" name="__codelineno-54-18" href="#__codelineno-54-18"></a>  <span class="p">}</span>
+</span><span id="__span-54-19"><a id="__codelineno-54-19" name="__codelineno-54-19" href="#__codelineno-54-19"></a>
+</span><span id="__span-54-20"><a id="__codelineno-54-20" name="__codelineno-54-20" href="#__codelineno-54-20"></a>  <span class="kd">processor</span> <span class="n">AnalyticsSink</span> <span class="kp">as</span> <span class="kd">sink</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-54-21"><a id="__codelineno-54-21" name="__codelineno-54-21" href="#__codelineno-54-21"></a>    <span class="kd">inlet</span> <span class="n">AnalyticsEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
+</span><span id="__span-54-22"><a id="__codelineno-54-22" name="__codelineno-54-22" href="#__codelineno-54-22"></a>
+</span><span id="__span-54-23"><a id="__codelineno-54-23" name="__codelineno-54-23" href="#__codelineno-54-23"></a>    <span class="kd">handler</span> <span class="n">AnalyticsHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-54-24"><a id="__codelineno-54-24" name="__codelineno-54-24" href="#__codelineno-54-24"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">EnrichedOrderEvent</span> <span class="p">{</span>
+</span><span id="__span-54-25"><a id="__codelineno-54-25" name="__codelineno-54-25" href="#__codelineno-54-25"></a>        <span class="k">do</span> <span class="s2">&quot;Send event to analytics platform&quot;</span>
+</span><span id="__span-54-26"><a id="__codelineno-54-26" name="__codelineno-54-26" href="#__codelineno-54-26"></a>      <span class="p">}</span>
+</span><span id="__span-54-27"><a id="__codelineno-54-27" name="__codelineno-54-27" href="#__codelineno-54-27"></a>    <span class="p">}</span>
+</span><span id="__span-54-28"><a id="__codelineno-54-28" name="__codelineno-54-28" href="#__codelineno-54-28"></a>  <span class="p">}</span>
+</span><span id="__span-54-29"><a id="__codelineno-54-29" name="__codelineno-54-29" href="#__codelineno-54-29"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="portlet-options">Portlet Options<a class="headerlink" href="#portlet-options" title="Permanent link">&para;</a></h3>
 <table>
@@ -9508,18 +9827,18 @@ own an outlet; a projector may own an inlet.</p>
 <p>Connectors link an outlet to an inlet, defining how data flows between
 processors.</p>
 <h3 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>connector [name] is from outlet [source.outlet] to inlet [target.inlet]
+<div class="language-text highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>connector [name] is from outlet [source.outlet] to inlet [target.inlet]
 </span></code></pre></div>
 <h3 id="example_2">Example<a class="headerlink" href="#example_2" title="Permanent link">&para;</a></h3>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>  <span class="kd">connector</span> <span class="n">OrderFlow</span> <span class="kp">is</span>
-</span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>    <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">OrderEventSource</span><span class="p">.</span><span class="n">OrderEvents</span>
-</span><span id="__span-52-4"><a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>    <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">OrderEnricher</span><span class="p">.</span><span class="n">RawOrders</span>
-</span><span id="__span-52-5"><a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>  <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-52-6"><a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Connects order source to enrichment&quot;</span>
-</span><span id="__span-52-7"><a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a>  <span class="p">}</span>
-</span><span id="__span-52-8"><a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>  <span class="kd">connector</span> <span class="n">OrderFlow</span> <span class="kp">is</span>
+</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>    <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">OrderEventSource</span><span class="p">.</span><span class="n">OrderEvents</span>
+</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>    <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">OrderEnricher</span><span class="p">.</span><span class="n">RawOrders</span>
+</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>  <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-56-6"><a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Connects order source to enrichment&quot;</span>
+</span><span id="__span-56-7"><a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>  <span class="p">}</span>
+</span><span id="__span-56-8"><a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="port-cardinality">Port Cardinality<a class="headerlink" href="#port-cardinality" title="Permanent link">&para;</a></h3>
 <p><strong>Exactly one connector may attach to any given port.</strong> Fan-in and fan-out are
@@ -9545,17 +9864,17 @@ different contexts, in the enclosing Domain.</p>
 </div>
 <h3 id="pipeline-pattern">Pipeline Pattern<a class="headerlink" href="#pipeline-pattern" title="Permanent link">&para;</a></h3>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="kd">context</span> <span class="n">EventProcessing</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>  <span class="kd">processor</span> <span class="n">Events</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Raw</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawEvent</span> <span class="p">}</span>
-</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>  <span class="kd">processor</span> <span class="n">Validate</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>    <span class="kd">inlet</span> <span class="n">In</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawEvent</span>
-</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>    <span class="kd">outlet</span> <span class="n">Out</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">ValidatedEvent</span>
-</span><span id="__span-53-6"><a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>  <span class="p">}</span>
-</span><span id="__span-53-7"><a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a>  <span class="kd">processor</span> <span class="n">Store</span> <span class="kp">as</span> <span class="kd">sink</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">inlet</span> <span class="n">In</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">ValidatedEvent</span> <span class="p">}</span>
-</span><span id="__span-53-8"><a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>
-</span><span id="__span-53-9"><a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a>  <span class="kd">connector</span> <span class="n">Step1</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Events</span><span class="p">.</span><span class="n">Raw</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Validate</span><span class="p">.</span><span class="n">In</span>
-</span><span id="__span-53-10"><a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a>  <span class="kd">connector</span> <span class="n">Step2</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Validate</span><span class="p">.</span><span class="n">Out</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Store</span><span class="p">.</span><span class="n">In</span>
-</span><span id="__span-53-11"><a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="kd">context</span> <span class="n">EventProcessing</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>  <span class="kd">processor</span> <span class="n">Events</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Raw</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawEvent</span> <span class="p">}</span>
+</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>  <span class="kd">processor</span> <span class="n">Validate</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>    <span class="kd">inlet</span> <span class="n">In</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawEvent</span>
+</span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>    <span class="kd">outlet</span> <span class="n">Out</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">ValidatedEvent</span>
+</span><span id="__span-57-6"><a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>  <span class="p">}</span>
+</span><span id="__span-57-7"><a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a>  <span class="kd">processor</span> <span class="n">Store</span> <span class="kp">as</span> <span class="kd">sink</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">inlet</span> <span class="n">In</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">ValidatedEvent</span> <span class="p">}</span>
+</span><span id="__span-57-8"><a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a>
+</span><span id="__span-57-9"><a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>  <span class="kd">connector</span> <span class="n">Step1</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Events</span><span class="p">.</span><span class="n">Raw</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Validate</span><span class="p">.</span><span class="n">In</span>
+</span><span id="__span-57-10"><a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a>  <span class="kd">connector</span> <span class="n">Step2</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Validate</span><span class="p">.</span><span class="n">Out</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Store</span><span class="p">.</span><span class="n">In</span>
+</span><span id="__span-57-11"><a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="the-standard-module">The Standard Module<a class="headerlink" href="#the-standard-module" title="Permanent link">&para;</a></h2>
 <p>Every model has access to a predefined module named <code>Riddl</code>, with no import and
@@ -9588,9 +9907,9 @@ one-connector-per-port rule makes structurally necessary:</p>
 </tbody>
 </table>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="kd">connector</span> <span class="n">DiscardUnused</span> <span class="kp">is</span>
-</span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Unused</span>
-</span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="kd">connector</span> <span class="n">DiscardUnused</span> <span class="kp">is</span>
+</span><span id="__span-58-2"><a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Unused</span>
+</span><span id="__span-58-3"><a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
 </span></code></pre></div>
 <p>Reaching <code>BottomlessPit</code> terminates a pipeline exactly as a modeled sink does,
 and <code>ForeverEmpty</code> originates one, so neither draws reachability warnings. The
@@ -9602,23 +9921,23 @@ module is never added to your model's contents.</p>
 <p>RIDDL supports UI modeling. <strong>UI may only be modeled inside an <code>application</code>
 context.</strong></p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>  <span class="kr">page</span> <span class="n">ProductDetails</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Page showing product information&quot;</span>
-</span><span id="__span-55-4"><a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>  <span class="p">}</span>
-</span><span id="__span-55-5"><a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>
-</span><span id="__span-55-6"><a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>  <span class="kr">page</span> <span class="n">ShoppingCart</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-55-7"><a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>    <span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="nb">Boolean</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-55-8"><a id="__codelineno-55-8" name="__codelineno-55-8" href="#__codelineno-55-8"></a>      <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Checkout button to proceed to payment&quot;</span>
-</span><span id="__span-55-9"><a id="__codelineno-55-9" name="__codelineno-55-9" href="#__codelineno-55-9"></a>    <span class="p">}</span>
-</span><span id="__span-55-10"><a id="__codelineno-55-10" name="__codelineno-55-10" href="#__codelineno-55-10"></a>  <span class="p">}</span>
-</span><span id="__span-55-11"><a id="__codelineno-55-11" name="__codelineno-55-11" href="#__codelineno-55-11"></a>
-</span><span id="__span-55-12"><a id="__codelineno-55-12" name="__codelineno-55-12" href="#__codelineno-55-12"></a>  <span class="kr">page</span> <span class="n">Payment</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-55-13"><a id="__codelineno-55-13" name="__codelineno-55-13" href="#__codelineno-55-13"></a>    <span class="kr">form</span> <span class="n">PaymentEntry</span> <span class="kr">submits</span> <span class="kd">type</span> <span class="n">PaymentDetails</span>
-</span><span id="__span-55-14"><a id="__codelineno-55-14" name="__codelineno-55-14" href="#__codelineno-55-14"></a>  <span class="p">}</span>
-</span><span id="__span-55-15"><a id="__codelineno-55-15" name="__codelineno-55-15" href="#__codelineno-55-15"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-55-16"><a id="__codelineno-55-16" name="__codelineno-55-16" href="#__codelineno-55-16"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;User interface components for the system&quot;</span>
-</span><span id="__span-55-17"><a id="__codelineno-55-17" name="__codelineno-55-17" href="#__codelineno-55-17"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-59-2"><a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>  <span class="kr">page</span> <span class="n">ProductDetails</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-59-3"><a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Page showing product information&quot;</span>
+</span><span id="__span-59-4"><a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a>  <span class="p">}</span>
+</span><span id="__span-59-5"><a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>
+</span><span id="__span-59-6"><a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a>  <span class="kr">page</span> <span class="n">ShoppingCart</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-59-7"><a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a>    <span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="nb">Boolean</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-59-8"><a id="__codelineno-59-8" name="__codelineno-59-8" href="#__codelineno-59-8"></a>      <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Checkout button to proceed to payment&quot;</span>
+</span><span id="__span-59-9"><a id="__codelineno-59-9" name="__codelineno-59-9" href="#__codelineno-59-9"></a>    <span class="p">}</span>
+</span><span id="__span-59-10"><a id="__codelineno-59-10" name="__codelineno-59-10" href="#__codelineno-59-10"></a>  <span class="p">}</span>
+</span><span id="__span-59-11"><a id="__codelineno-59-11" name="__codelineno-59-11" href="#__codelineno-59-11"></a>
+</span><span id="__span-59-12"><a id="__codelineno-59-12" name="__codelineno-59-12" href="#__codelineno-59-12"></a>  <span class="kr">page</span> <span class="n">Payment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-59-13"><a id="__codelineno-59-13" name="__codelineno-59-13" href="#__codelineno-59-13"></a>    <span class="kr">form</span> <span class="n">PaymentEntry</span> <span class="kr">submits</span> <span class="kd">type</span> <span class="n">PaymentDetails</span>
+</span><span id="__span-59-14"><a id="__codelineno-59-14" name="__codelineno-59-14" href="#__codelineno-59-14"></a>  <span class="p">}</span>
+</span><span id="__span-59-15"><a id="__codelineno-59-15" name="__codelineno-59-15" href="#__codelineno-59-15"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-59-16"><a id="__codelineno-59-16" name="__codelineno-59-16" href="#__codelineno-59-16"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;User interface components for the system&quot;</span>
+</span><span id="__span-59-17"><a id="__codelineno-59-17" name="__codelineno-59-17" href="#__codelineno-59-17"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="element-aliases">Element Aliases<a class="headerlink" href="#element-aliases" title="Permanent link">&para;</a></h3>
 <table>
@@ -9667,23 +9986,23 @@ context.</strong></p>
 <h2 id="epics-and-use-cases">Epics and Use Cases<a class="headerlink" href="#epics-and-use-cases" title="Permanent link">&para;</a></h2>
 <p>Epics model user stories:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="kd">epic</span> <span class="n">ShoppingCartEpic</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;add items to a shopping cart&quot;</span>
-</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can purchase multiple items at once&quot;</span>
-</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>
-</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>  <span class="kd">case</span> <span class="n">AddingToCart</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-56-6"><a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">must</span> <span class="s2">&quot;add products to cart&quot;</span>
-</span><span id="__span-56-7"><a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>    <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can purchase them later&quot;</span>
-</span><span id="__span-56-8"><a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>
-</span><span id="__span-56-9"><a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a>    <span class="kd">step</span> <span class="kr">focus</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="k">on</span> <span class="kr">page</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">ProductDetails</span>
-</span><span id="__span-56-10"><a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a>    <span class="kd">step</span> <span class="k">take</span> <span class="kd">input</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">AddToCartForm</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
-</span><span id="__span-56-11"><a id="__codelineno-56-11" name="__codelineno-56-11" href="#__codelineno-56-11"></a>    <span class="kd">step</span> <span class="k">send</span> <span class="kd">command</span> <span class="n">AddToCart</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Cart</span>
-</span><span id="__span-56-12"><a id="__codelineno-56-12" name="__codelineno-56-12" href="#__codelineno-56-12"></a>    <span class="kd">step</span> <span class="kr">show</span> <span class="kd">output</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">CartSummary</span> <span class="kp">to</span> <span class="kd">user</span> <span class="n">Customer</span>
-</span><span id="__span-56-13"><a id="__codelineno-56-13" name="__codelineno-56-13" href="#__codelineno-56-13"></a>    <span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
-</span><span id="__span-56-14"><a id="__codelineno-56-14" name="__codelineno-56-14" href="#__codelineno-56-14"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-56-15"><a id="__codelineno-56-15" name="__codelineno-56-15" href="#__codelineno-56-15"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Adding products to the shopping cart&quot;</span>
-</span><span id="__span-56-16"><a id="__codelineno-56-16" name="__codelineno-56-16" href="#__codelineno-56-16"></a>  <span class="p">}</span>
-</span><span id="__span-56-17"><a id="__codelineno-56-17" name="__codelineno-56-17" href="#__codelineno-56-17"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="kd">epic</span> <span class="n">ShoppingCartEpic</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;add items to a shopping cart&quot;</span>
+</span><span id="__span-60-3"><a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can purchase multiple items at once&quot;</span>
+</span><span id="__span-60-4"><a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>
+</span><span id="__span-60-5"><a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>  <span class="kd">case</span> <span class="n">AddingToCart</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-60-6"><a id="__codelineno-60-6" name="__codelineno-60-6" href="#__codelineno-60-6"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">must</span> <span class="s2">&quot;add products to cart&quot;</span>
+</span><span id="__span-60-7"><a id="__codelineno-60-7" name="__codelineno-60-7" href="#__codelineno-60-7"></a>    <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can purchase them later&quot;</span>
+</span><span id="__span-60-8"><a id="__codelineno-60-8" name="__codelineno-60-8" href="#__codelineno-60-8"></a>
+</span><span id="__span-60-9"><a id="__codelineno-60-9" name="__codelineno-60-9" href="#__codelineno-60-9"></a>    <span class="kd">step</span> <span class="kr">focus</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="k">on</span> <span class="kr">page</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">ProductDetails</span>
+</span><span id="__span-60-10"><a id="__codelineno-60-10" name="__codelineno-60-10" href="#__codelineno-60-10"></a>    <span class="kd">step</span> <span class="k">take</span> <span class="kd">input</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">AddToCartForm</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
+</span><span id="__span-60-11"><a id="__codelineno-60-11" name="__codelineno-60-11" href="#__codelineno-60-11"></a>    <span class="kd">step</span> <span class="k">send</span> <span class="kd">command</span> <span class="n">AddToCart</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Cart</span>
+</span><span id="__span-60-12"><a id="__codelineno-60-12" name="__codelineno-60-12" href="#__codelineno-60-12"></a>    <span class="kd">step</span> <span class="kr">show</span> <span class="kd">output</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">CartSummary</span> <span class="kp">to</span> <span class="kd">user</span> <span class="n">Customer</span>
+</span><span id="__span-60-13"><a id="__codelineno-60-13" name="__codelineno-60-13" href="#__codelineno-60-13"></a>    <span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
+</span><span id="__span-60-14"><a id="__codelineno-60-14" name="__codelineno-60-14" href="#__codelineno-60-14"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-60-15"><a id="__codelineno-60-15" name="__codelineno-60-15" href="#__codelineno-60-15"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Adding products to the shopping cart&quot;</span>
+</span><span id="__span-60-16"><a id="__codelineno-60-16" name="__codelineno-60-16" href="#__codelineno-60-16"></a>  <span class="p">}</span>
+</span><span id="__span-60-17"><a id="__codelineno-60-17" name="__codelineno-60-17" href="#__codelineno-60-17"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="user-story-verbs">User Story Verbs<a class="headerlink" href="#user-story-verbs" title="Permanent link">&para;</a></h3>
 <p>The user-story verb may be any of <code>wants</code>, <code>must</code>, <code>shall</code>, <code>should</code>, <code>may</code>,
@@ -9744,7 +10063,7 @@ vocabulary, not captured data.</p>
 user's request, which previously had no way to be expressed except as free
 text:</p>
 <!-- riddl: in-usecase -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
 </span></code></pre></div>
 <p>The <strong>arbitrary</strong> and <strong>vague</strong> steps carry free prose rather than typed
 references, so they are the two that the AI-translatability check examines.</p>
@@ -9778,22 +10097,22 @@ trace</strong> through the state machines of the entities it drives. Both emit
 </div>
 <h2 id="modules-and-imports">Modules and Imports<a class="headerlink" href="#modules-and-imports" title="Permanent link">&para;</a></h2>
 <p>A <strong>module</strong> is a named, flat collection of any top-level definition:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="kd">module</span> <span class="n">Commerce</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-58-2"><a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>  <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-58-3"><a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>  <span class="kd">type</span> <span class="n">Money</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">12</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-58-4"><a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>  <span class="kd">author</span> <span class="n">Reid</span> <span class="kp">is</span> <span class="p">{</span> <span class="kr">name</span> <span class="kp">is</span> <span class="s2">&quot;Reid Spencer&quot;</span> <span class="kr">email</span> <span class="kp">is</span> <span class="s2">&quot;reid@ossuminc.com&quot;</span> <span class="p">}</span>
-</span><span id="__span-58-5"><a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a><span class="kd">module</span> <span class="n">Commerce</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-62-2"><a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>  <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-62-3"><a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>  <span class="kd">type</span> <span class="n">Money</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">12</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+</span><span id="__span-62-4"><a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>  <span class="kd">author</span> <span class="n">Reid</span> <span class="kp">is</span> <span class="p">{</span> <span class="kr">name</span> <span class="kp">is</span> <span class="s2">&quot;Reid Spencer&quot;</span> <span class="kr">email</span> <span class="kp">is</span> <span class="s2">&quot;reid@ossuminc.com&quot;</span> <span class="p">}</span>
+</span><span id="__span-62-5"><a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Modules can be compiled to a binary <code>.bast</code> file and imported by other models.</p>
 <h3 id="importing">Importing<a class="headerlink" href="#importing" title="Permanent link">&para;</a></h3>
 <p>The <strong>full</strong> form takes everything the file's root module holds:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="kn">import</span> <span class="s2">&quot;commerce.bast&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="kn">import</span> <span class="s2">&quot;commerce.bast&quot;</span>
 </span></code></pre></div>
 <p>The <strong>selective</strong> form takes exactly one named definition, optionally renamed:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="kn">import</span> <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span>
-</span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a><span class="kn">import</span> <span class="kd">type</span> <span class="n">Money</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span> <span class="kp">as</span> <span class="nb">Currency</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a><span class="kn">import</span> <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span>
+</span><span id="__span-64-2"><a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a><span class="kn">import</span> <span class="kd">type</span> <span class="n">Money</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span> <span class="kp">as</span> <span class="nb">Currency</span>
 </span></code></pre></div>
 <p>An importable kind may be any of <code>domain</code>, <code>context</code>, <code>entity</code>, <code>type</code>, <code>epic</code>,
 <code>saga</code>, <code>adaptor</code>, <code>function</code>, <code>projector</code>, <code>repository</code>, <code>streamlet</code>,
@@ -9818,15 +10137,15 @@ exactly as if it had been written there by hand. An illegal placement is an
 <p>A <code>version</code> declares a component of a scope's version coordinate. It is either a
 name or a natural number, never both:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="kd">domain</span> <span class="n">Garibaldi</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-61-2"><a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>  <span class="kd">version</span> <span class="n">Garibaldi</span>
-</span><span id="__span-61-3"><a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>  <span class="kd">context</span> <span class="n">Ordering</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-61-4"><a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a>    <span class="kd">version</span> <span class="m">4</span>
-</span><span id="__span-61-5"><a id="__codelineno-61-5" name="__codelineno-61-5" href="#__codelineno-61-5"></a>    <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-61-6"><a id="__codelineno-61-6" name="__codelineno-61-6" href="#__codelineno-61-6"></a>      <span class="kd">version</span> <span class="m">3</span>
-</span><span id="__span-61-7"><a id="__codelineno-61-7" name="__codelineno-61-7" href="#__codelineno-61-7"></a>    <span class="p">}</span>
-</span><span id="__span-61-8"><a id="__codelineno-61-8" name="__codelineno-61-8" href="#__codelineno-61-8"></a>  <span class="p">}</span>
-</span><span id="__span-61-9"><a id="__codelineno-61-9" name="__codelineno-61-9" href="#__codelineno-61-9"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-65-1"><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a><span class="kd">domain</span> <span class="n">Garibaldi</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-65-2"><a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>  <span class="kd">version</span> <span class="n">Garibaldi</span>
+</span><span id="__span-65-3"><a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>  <span class="kd">context</span> <span class="n">Ordering</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-65-4"><a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>    <span class="kd">version</span> <span class="m">4</span>
+</span><span id="__span-65-5"><a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a>    <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-65-6"><a id="__codelineno-65-6" name="__codelineno-65-6" href="#__codelineno-65-6"></a>      <span class="kd">version</span> <span class="m">3</span>
+</span><span id="__span-65-7"><a id="__codelineno-65-7" name="__codelineno-65-7" href="#__codelineno-65-7"></a>    <span class="p">}</span>
+</span><span id="__span-65-8"><a id="__codelineno-65-8" name="__codelineno-65-8" href="#__codelineno-65-8"></a>  <span class="p">}</span>
+</span><span id="__span-65-9"><a id="__codelineno-65-9" name="__codelineno-65-9" href="#__codelineno-65-9"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>A definition's precise version is <strong>composed</strong> from every versioned ancestor,
 root to leaf, joined with <code>.</code>. The <code>Order</code> entity above is <code>Garibaldi.4.3</code>. Only
@@ -9845,13 +10164,13 @@ explicit mapping rule.</p>
 </div>
 <h2 id="copyright">Copyright<a class="headerlink" href="#copyright" title="Permanent link">&para;</a></h2>
 <p>A <code>copyright</code> is a <strong>named</strong> notice carried verbatim:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a><span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-62-2"><a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>  <span class="kd">copyright</span> <span class="n">House</span> <span class="kp">is</span> <span class="s2">&quot;© 2026 Ossum Inc.&quot;</span>
-</span><span id="__span-62-3"><a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>
-</span><span id="__span-62-4"><a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>  <span class="kd">external</span> <span class="kd">context</span> <span class="n">StripePayments</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-62-5"><a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>    <span class="kd">copyright</span> <span class="n">Stripe</span> <span class="kp">is</span> <span class="s2">&quot;© 2026 Stripe, Inc.&quot;</span>
-</span><span id="__span-62-6"><a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>  <span class="p">}</span>
-</span><span id="__span-62-7"><a id="__codelineno-62-7" name="__codelineno-62-7" href="#__codelineno-62-7"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-66-1"><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-66-2"><a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>  <span class="kd">copyright</span> <span class="n">House</span> <span class="kp">is</span> <span class="s2">&quot;© 2026 Ossum Inc.&quot;</span>
+</span><span id="__span-66-3"><a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>
+</span><span id="__span-66-4"><a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>  <span class="kd">external</span> <span class="kd">context</span> <span class="n">StripePayments</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-66-5"><a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>    <span class="kd">copyright</span> <span class="n">Stripe</span> <span class="kp">is</span> <span class="s2">&quot;© 2026 Stripe, Inc.&quot;</span>
+</span><span id="__span-66-6"><a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>  <span class="p">}</span>
+</span><span id="__span-66-7"><a id="__codelineno-66-7" name="__codelineno-66-7" href="#__codelineno-66-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The literal string is the notice <strong>in its entirety</strong> — symbol, year and holder —
 because notices vary by jurisdiction, holder and license.</p>
@@ -9865,16 +10184,16 @@ than one in a single scope is an <strong>Error</strong>.</p>
 <h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
 <p>Metadata goes in a <code>with { }</code> block <strong>after</strong> the closing brace of the
 definition:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-63-2"><a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>  <span class="c1">// Entity definition content</span>
-</span><span id="__span-63-3"><a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-63-4"><a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Product available for purchase&quot;</span>
-</span><span id="__span-63-5"><a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-63-6"><a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a>    <span class="sd">| Represents a product in the catalog that customers can purchase.</span>
-</span><span id="__span-63-7"><a id="__codelineno-63-7" name="__codelineno-63-7" href="#__codelineno-63-7"></a>  <span class="p">}</span>
-</span><span id="__span-63-8"><a id="__codelineno-63-8" name="__codelineno-63-8" href="#__codelineno-63-8"></a>  <span class="kp">by</span> <span class="kd">author</span> <span class="n">Reid</span>
-</span><span id="__span-63-9"><a id="__codelineno-63-9" name="__codelineno-63-9" href="#__codelineno-63-9"></a>  <span class="kd">term</span> <span class="n">SKU</span> <span class="kp">is</span> <span class="p">{</span> <span class="sd">| Stock Keeping Unit, the unique identifier for a variant }</span>
-</span><span id="__span-63-10"><a id="__codelineno-63-10" name="__codelineno-63-10" href="#__codelineno-63-10"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-67-1"><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-67-2"><a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>  <span class="c1">// Entity definition content</span>
+</span><span id="__span-67-3"><a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-67-4"><a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Product available for purchase&quot;</span>
+</span><span id="__span-67-5"><a id="__codelineno-67-5" name="__codelineno-67-5" href="#__codelineno-67-5"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="p">{</span>
+</span><span id="__span-67-6"><a id="__codelineno-67-6" name="__codelineno-67-6" href="#__codelineno-67-6"></a>    <span class="sd">| Represents a product in the catalog that customers can purchase.</span>
+</span><span id="__span-67-7"><a id="__codelineno-67-7" name="__codelineno-67-7" href="#__codelineno-67-7"></a>  <span class="p">}</span>
+</span><span id="__span-67-8"><a id="__codelineno-67-8" name="__codelineno-67-8" href="#__codelineno-67-8"></a>  <span class="kp">by</span> <span class="kd">author</span> <span class="n">Reid</span>
+</span><span id="__span-67-9"><a id="__codelineno-67-9" name="__codelineno-67-9" href="#__codelineno-67-9"></a>  <span class="kd">term</span> <span class="n">SKU</span> <span class="kp">is</span> <span class="p">{</span> <span class="sd">| Stock Keeping Unit, the unique identifier for a variant }</span>
+</span><span id="__span-67-10"><a id="__codelineno-67-10" name="__codelineno-67-10" href="#__codelineno-67-10"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The available metadata kinds are <code>briefly</code>, <code>described by</code>/<code>described at</code>/
 <code>described in file</code>, <code>term</code>, <code>option</code>, <code>by author</code>, <code>figma</code>, <code>attachment</code> and
@@ -9899,11 +10218,11 @@ comments.</p>
 <p>A <code>figma</code> reference connects a model element to the exact frame in a Figma file
 that depicts it:</p>
 <!-- riddl: in-domain -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-64-2"><a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>  <span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-64-3"><a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>    <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
-</span><span id="__span-64-4"><a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>  <span class="p">}</span>
-</span><span id="__span-64-5"><a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-68-1"><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-68-2"><a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>  <span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-68-3"><a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>    <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
+</span><span id="__span-68-4"><a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a>  <span class="p">}</span>
+</span><span id="__span-68-5"><a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The two literal strings are the file key and the node id — exactly the two
 arguments the Figma REST API takes — so the reference resolves to <strong>one frame</strong>
@@ -10027,11 +10346,11 @@ type</strong>. The parser reaches the reference, recognises the built-in name, a
 demands its argument list — so the error is reported at the <em>use</em>, which may be
 hundreds of lines from the declaration that caused it.</p>
 <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-65-1"><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a><span class="kd">type</span> <span class="nb">Currency</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span> <span class="n">USD</span><span class="p">,</span> <span class="n">EUR</span><span class="p">,</span> <span class="n">GBP</span><span class="p">,</span> <span class="n">JPY</span> <span class="p">}</span>   <span class="c1">// the actual cause</span>
-</span><span id="__span-65-2"><a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a><span class="c1">// ...</span>
-</span><span id="__span-65-3"><a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a><span class="kd">record</span> <span class="n">Payment</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-65-4"><a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>  <span class="n">amount</span><span class="p">:</span> <span class="nb">Currency</span>                                <span class="c1">// Expected (&quot;(&quot;) reported HERE</span>
-</span><span id="__span-65-5"><a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-69-1"><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a><span class="kd">type</span> <span class="nb">Currency</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span> <span class="n">USD</span><span class="p">,</span> <span class="n">EUR</span><span class="p">,</span> <span class="n">GBP</span><span class="p">,</span> <span class="n">JPY</span> <span class="p">}</span>   <span class="c1">// the actual cause</span>
+</span><span id="__span-69-2"><a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a><span class="c1">// ...</span>
+</span><span id="__span-69-3"><a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a><span class="kd">record</span> <span class="n">Payment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-69-4"><a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a>  <span class="n">amount</span><span class="p">:</span> <span class="nb">Currency</span>                                <span class="c1">// Expected (&quot;(&quot;) reported HERE</span>
+</span><span id="__span-69-5"><a id="__codelineno-69-5" name="__codelineno-69-5" href="#__codelineno-69-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The fix is to rename your type — <code>CurrencyCode</code>, say.</p>
 <p>Predefined names whose parentheses are <strong>required</strong> produce this misleading
@@ -10079,9 +10398,9 @@ shape.</p>
 <p>You have written <code>many of X</code>. The collection prefix is <strong><code>many</code></strong> with no
 <code>of</code>:</p>
 <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-66-1"><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="kr">items</span><span class="p">:</span> <span class="kr">many</span> <span class="n">ProductInfo</span>     <span class="c1">// correct</span>
-</span><span id="__span-66-2"><a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a><span class="kr">items</span><span class="p">:</span> <span class="n">ProductInfo</span><span class="o">*</span>         <span class="c1">// equivalent</span>
-</span><span id="__span-66-3"><a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a><span class="kr">items</span><span class="p">:</span> <span class="kr">many</span> <span class="kp">of</span> <span class="n">ProductInfo</span>  <span class="c1">// does not parse</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-70-1"><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="kr">items</span><span class="p">:</span> <span class="kr">many</span> <span class="n">ProductInfo</span>     <span class="c1">// correct</span>
+</span><span id="__span-70-2"><a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a><span class="kr">items</span><span class="p">:</span> <span class="n">ProductInfo</span><span class="o">*</span>         <span class="c1">// equivalent</span>
+</span><span id="__span-70-3"><a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a><span class="kr">items</span><span class="p">:</span> <span class="kr">many</span> <span class="kp">of</span> <span class="n">ProductInfo</span>  <span class="c1">// does not parse</span>
 </span></code></pre></div>
 <p><code>of</code> does belong to the <em>other</em> collection forms — <code>sequence of X</code>, <code>set of X</code>,
 <code>graph of X</code>, <code>mapping from K to V</code> — which is what makes <code>many of</code> such an
@@ -10089,8 +10408,8 @@ easy slip.</p>
 <h3 id="expected-one-of-yields-at-the-is-of-a-message"><code>Expected one of ("(" | "yields")</code> at the <code>is</code> of a message<a class="headerlink" href="#expected-one-of-yields-at-the-is-of-a-message" title="Permanent link">&para;</a></h3>
 <p>The body is empty. RIDDL has no empty body; use the <code>???</code> placeholder:</p>
 <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-67-1"><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a><span class="kd">command</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>   <span class="c1">// correct</span>
-</span><span id="__span-67-2"><a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a><span class="kd">command</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{}</span>        <span class="c1">// does not parse</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-71-1"><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a><span class="kd">command</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>   <span class="c1">// correct</span>
+</span><span id="__span-71-2"><a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a><span class="kd">command</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{}</span>        <span class="c1">// does not parse</span>
 </span></code></pre></div>
 <p>The error lands on <code>is</code> rather than on the braces, because the parser is still
 looking for what may follow the identifier.</p>
@@ -10099,16 +10418,16 @@ looking for what may follow the identifier.</p>
 may, however, come <em>before</em> it — that is the whole point of the
 <code>undefined = {comment} "???"</code> production:</p>
 <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-68-1"><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="kd">domain</span> <span class="n">MyDomain</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-68-2"><a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>  <span class="c1">// Start building your domain model here</span>
-</span><span id="__span-68-3"><a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>  <span class="gr">???</span>                       <span class="c1">// fine -- the comment introduces the stub</span>
-</span><span id="__span-68-4"><a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a><span class="p">}</span>
-</span><span id="__span-68-5"><a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a>
-</span><span id="__span-68-6"><a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a><span class="kd">domain</span> <span class="n">MyDomain</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-68-7"><a id="__codelineno-68-7" name="__codelineno-68-7" href="#__codelineno-68-7"></a>  <span class="gr">???</span>
-</span><span id="__span-68-8"><a id="__codelineno-68-8" name="__codelineno-68-8" href="#__codelineno-68-8"></a>  <span class="c1">// Start building your domain model here</span>
-</span><span id="__span-68-9"><a id="__codelineno-68-9" name="__codelineno-68-9" href="#__codelineno-68-9"></a>                            <span class="c1">// does not parse -- ??? already closed the body</span>
-</span><span id="__span-68-10"><a id="__codelineno-68-10" name="__codelineno-68-10" href="#__codelineno-68-10"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-72-1"><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="kd">domain</span> <span class="n">MyDomain</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-72-2"><a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>  <span class="c1">// Start building your domain model here</span>
+</span><span id="__span-72-3"><a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>  <span class="gr">???</span>                       <span class="c1">// fine -- the comment introduces the stub</span>
+</span><span id="__span-72-4"><a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a><span class="p">}</span>
+</span><span id="__span-72-5"><a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a>
+</span><span id="__span-72-6"><a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a><span class="kd">domain</span> <span class="n">MyDomain</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-72-7"><a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a>  <span class="gr">???</span>
+</span><span id="__span-72-8"><a id="__codelineno-72-8" name="__codelineno-72-8" href="#__codelineno-72-8"></a>  <span class="c1">// Start building your domain model here</span>
+</span><span id="__span-72-9"><a id="__codelineno-72-9" name="__codelineno-72-9" href="#__codelineno-72-9"></a>                            <span class="c1">// does not parse -- ??? already closed the body</span>
+</span><span id="__span-72-10"><a id="__codelineno-72-10" name="__codelineno-72-10" href="#__codelineno-72-10"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Both parts survive a prettify round trip. The comment is <strong>kept</strong> as part of
 the container's contents, and the <code>???</code> is re-emitted for a body that holds
@@ -10146,36 +10465,36 @@ blocks and doc blocks.</p>
 <h2 id="incomplete-definitions">Incomplete Definitions<a class="headerlink" href="#incomplete-definitions" title="Permanent link">&para;</a></h2>
 <p>Use <code>???</code> as a placeholder for incomplete definitions:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-69-1"><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a><span class="kd">record</span> <span class="n">PaymentDetails</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-69-2"><a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Record for payment information details&quot;</span>
-</span><span id="__span-69-3"><a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a><span class="p">}</span>
-</span><span id="__span-69-4"><a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a>
-</span><span id="__span-69-5"><a id="__codelineno-69-5" name="__codelineno-69-5" href="#__codelineno-69-5"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-69-6"><a id="__codelineno-69-6" name="__codelineno-69-6" href="#__codelineno-69-6"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Checkout page for completing purchase&quot;</span>
-</span><span id="__span-69-7"><a id="__codelineno-69-7" name="__codelineno-69-7" href="#__codelineno-69-7"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-73-1"><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="kd">record</span> <span class="n">PaymentDetails</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-73-2"><a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Record for payment information details&quot;</span>
+</span><span id="__span-73-3"><a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a><span class="p">}</span>
+</span><span id="__span-73-4"><a id="__codelineno-73-4" name="__codelineno-73-4" href="#__codelineno-73-4"></a>
+</span><span id="__span-73-5"><a id="__codelineno-73-5" name="__codelineno-73-5" href="#__codelineno-73-5"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-73-6"><a id="__codelineno-73-6" name="__codelineno-73-6" href="#__codelineno-73-6"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Checkout page for completing purchase&quot;</span>
+</span><span id="__span-73-7"><a id="__codelineno-73-7" name="__codelineno-73-7" href="#__codelineno-73-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="author-inheritance">Author Inheritance<a class="headerlink" href="#author-inheritance" title="Permanent link">&para;</a></h2>
 <p>Authors are defined once and inherited throughout the model hierarchy, but
 cannot contain any definitions. An <code>author</code> <strong>definition</strong> may only appear in a
 Module or a Domain body; everywhere else, reference one with <code>by author Name</code> in
 the <code>with { }</code> block:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-70-1"><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="kd">domain</span> <span class="n">ShopifyCart</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-70-2"><a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>  <span class="kd">author</span> <span class="n">Claude</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-70-3"><a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>    <span class="kr">name</span> <span class="kp">is</span> <span class="s2">&quot;Anthropic Claude&quot;</span>
-</span><span id="__span-70-4"><a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>    <span class="kr">email</span> <span class="kp">is</span> <span class="s2">&quot;support@anthropic.com&quot;</span>
-</span><span id="__span-70-5"><a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-70-6"><a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Model creator and maintainer&quot;</span>
-</span><span id="__span-70-7"><a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a>  <span class="p">}</span>
-</span><span id="__span-70-8"><a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a>
-</span><span id="__span-70-9"><a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a>  <span class="kd">context</span> <span class="n">ShoppingContext</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-70-10"><a id="__codelineno-70-10" name="__codelineno-70-10" href="#__codelineno-70-10"></a>    <span class="gr">???</span>
-</span><span id="__span-70-11"><a id="__codelineno-70-11" name="__codelineno-70-11" href="#__codelineno-70-11"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-70-12"><a id="__codelineno-70-12" name="__codelineno-70-12" href="#__codelineno-70-12"></a>    <span class="kp">by</span> <span class="kd">author</span> <span class="n">Claude</span>
-</span><span id="__span-70-13"><a id="__codelineno-70-13" name="__codelineno-70-13" href="#__codelineno-70-13"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Main shopping context containing commerce entities&quot;</span>
-</span><span id="__span-70-14"><a id="__codelineno-70-14" name="__codelineno-70-14" href="#__codelineno-70-14"></a>  <span class="p">}</span>
-</span><span id="__span-70-15"><a id="__codelineno-70-15" name="__codelineno-70-15" href="#__codelineno-70-15"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-70-16"><a id="__codelineno-70-16" name="__codelineno-70-16" href="#__codelineno-70-16"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Shopping cart domain model&quot;</span>
-</span><span id="__span-70-17"><a id="__codelineno-70-17" name="__codelineno-70-17" href="#__codelineno-70-17"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-74-1"><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="kd">domain</span> <span class="n">ShopifyCart</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-74-2"><a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>  <span class="kd">author</span> <span class="n">Claude</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-74-3"><a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>    <span class="kr">name</span> <span class="kp">is</span> <span class="s2">&quot;Anthropic Claude&quot;</span>
+</span><span id="__span-74-4"><a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a>    <span class="kr">email</span> <span class="kp">is</span> <span class="s2">&quot;support@anthropic.com&quot;</span>
+</span><span id="__span-74-5"><a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-74-6"><a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Model creator and maintainer&quot;</span>
+</span><span id="__span-74-7"><a id="__codelineno-74-7" name="__codelineno-74-7" href="#__codelineno-74-7"></a>  <span class="p">}</span>
+</span><span id="__span-74-8"><a id="__codelineno-74-8" name="__codelineno-74-8" href="#__codelineno-74-8"></a>
+</span><span id="__span-74-9"><a id="__codelineno-74-9" name="__codelineno-74-9" href="#__codelineno-74-9"></a>  <span class="kd">context</span> <span class="n">ShoppingContext</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-74-10"><a id="__codelineno-74-10" name="__codelineno-74-10" href="#__codelineno-74-10"></a>    <span class="gr">???</span>
+</span><span id="__span-74-11"><a id="__codelineno-74-11" name="__codelineno-74-11" href="#__codelineno-74-11"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-74-12"><a id="__codelineno-74-12" name="__codelineno-74-12" href="#__codelineno-74-12"></a>    <span class="kp">by</span> <span class="kd">author</span> <span class="n">Claude</span>
+</span><span id="__span-74-13"><a id="__codelineno-74-13" name="__codelineno-74-13" href="#__codelineno-74-13"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Main shopping context containing commerce entities&quot;</span>
+</span><span id="__span-74-14"><a id="__codelineno-74-14" name="__codelineno-74-14" href="#__codelineno-74-14"></a>  <span class="p">}</span>
+</span><span id="__span-74-15"><a id="__codelineno-74-15" name="__codelineno-74-15" href="#__codelineno-74-15"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-74-16"><a id="__codelineno-74-16" name="__codelineno-74-16" href="#__codelineno-74-16"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Shopping cart domain model&quot;</span>
+</span><span id="__span-74-17"><a id="__codelineno-74-17" name="__codelineno-74-17" href="#__codelineno-74-17"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="deprecated-constructs">Deprecated Constructs<a class="headerlink" href="#deprecated-constructs" title="Permanent link">&para;</a></h2>
 <p>Everything below still parses in 2.x and emits a <code>[deprecated]</code> message. All of

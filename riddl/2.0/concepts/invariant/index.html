@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="A logical expression that must always hold, declarable in any processor or inside an entity state body.">
+        <meta name="description" content="A named business rule that must always hold — checked implicitly as a precondition before every effect in its declaring scope.">
       
       
       
@@ -258,7 +258,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#syntax" class="md-skip">
+        <a href="#invariants-apply-implicitly" class="md-skip">
           Skip to content
         </a>
       
@@ -3131,10 +3131,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#syntax" class="md-nav__link">
+  <a href="#invariants-apply-implicitly" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Syntax
+        Invariants Apply Implicitly
       
     </span>
   </a>
@@ -3142,10 +3142,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#state-scoped-invariants" class="md-nav__link">
+  <a href="#the-condition-has-three-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State-Scoped Invariants
+        The Condition Has Three Forms
       
     </span>
   </a>
@@ -3153,10 +3153,110 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#referencing-an-invariant" class="md-nav__link">
+  <a href="#scope-where-it-applies-and-what-it-may-read" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Referencing an Invariant
+        Scope: Where It Applies, and What It May Read
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope: Where It Applies, and What It May Read">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-intersection-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Intersection Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stateless-processors-are-explicit-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stateless Processors Are Explicit-Only
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#restating-a-check-with-require" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restating a Check with require
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#an-invariant-never-acquires-it-only-receives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An Invariant Never Acquires — It Only Receives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-an-invariant-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When an Invariant Fails
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When an Invariant Fails">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle-and-event-clauses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle and Event Clauses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reacting-instead-of-faulting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reacting Instead of Faulting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics
       
     </span>
   </a>
@@ -5367,10 +5467,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#syntax" class="md-nav__link">
+  <a href="#invariants-apply-implicitly" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Syntax
+        Invariants Apply Implicitly
       
     </span>
   </a>
@@ -5378,10 +5478,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#state-scoped-invariants" class="md-nav__link">
+  <a href="#the-condition-has-three-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State-Scoped Invariants
+        The Condition Has Three Forms
       
     </span>
   </a>
@@ -5389,10 +5489,110 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#referencing-an-invariant" class="md-nav__link">
+  <a href="#scope-where-it-applies-and-what-it-may-read" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Referencing an Invariant
+        Scope: Where It Applies, and What It May Read
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope: Where It Applies, and What It May Read">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-intersection-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Intersection Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stateless-processors-are-explicit-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stateless Processors Are Explicit-Only
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#restating-a-check-with-require" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restating a Check with require
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#an-invariant-never-acquires-it-only-receives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An Invariant Never Acquires — It Only Receives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-an-invariant-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When an Invariant Fails
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When an Invariant Fails">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle-and-event-clauses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle and Event Clauses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reacting-instead-of-faulting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reacting Instead of Faulting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics
       
     </span>
   </a>
@@ -5448,57 +5648,294 @@
 
   <h1>Invariant</h1>
 
-<p>An invariant is a logical expression that must always hold true. Invariants
-validate state changes in <a href="../entity/">entities</a>, or parameter values in
-<a href="../function/">functions</a>.</p>
-<h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<p>As of RIDDL 2.0 an invariant's condition may be a structured
-<a href="../value/#boolean-expressions">boolean expression</a>, not only an opaque quoted
-string:</p>
+<p>An invariant is a named business rule: a boolean condition that must always be
+true. Naming it is what promotes the rule from a comment in somebody's code to a
+citizen of the model — something a domain expert can review and the tooling can
+enforce.</p>
+<h2 id="invariants-apply-implicitly">Invariants Apply Implicitly<a class="headerlink" href="#invariants-apply-implicitly" title="Permanent link">&para;</a></h2>
+<p><strong>An invariant applies to every clause of the scope that declares it</strong>, checked
+as a <em>precondition</em> before any effect in that clause. Nothing at the point of
+use turns it on:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">invariant</span> <span class="n">InStock</span>             <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;</span> <span class="n">Zero</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">invariant</span> <span class="n">Legacy</span>              <span class="kp">is</span> <span class="s2">&quot;the account must be in good standing&quot;</span>
-</span></code></pre></div>
-<p>The quoted form remains available for rules that genuinely resist structure.</p>
-<p>Because comparisons are reference-only, a threshold is named rather than
-written inline:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">constant</span> <span class="n">Zero</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
-</span></code></pre></div>
-<h2 id="state-scoped-invariants">State-Scoped Invariants<a class="headerlink" href="#state-scoped-invariants" title="Permanent link">&para;</a></h2>
-<p>An invariant may be declared inside an entity <a href="../state/">state</a> body, where it
-constrains that state's record-shaped data:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kd">handler</span> <span class="n">H</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="p">}</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="kd">invariant</span> <span class="n">BalanceIsZero</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="p">}</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
-</span></code></pre></div>
-<p>This is what lets different states carry different rules — an open account may
-hold any non-negative balance, while a closed one must hold exactly nothing.
-An invariant declared at entity level instead applies in every state.</p>
-<h2 id="referencing-an-invariant">Referencing an Invariant<a class="headerlink" href="#referencing-an-invariant" title="Permanent link">&para;</a></h2>
-<p>A <a href="../handler/">handler</a> asserts an invariant by name:</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="gr">???</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="c1">// BalanceNonNegative is checked here, before anything below runs</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="gr">???</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="p">}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  <span class="p">}</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Validation</p>
-<p>An invariant defined but never referenced by any <code>require invariant</code>
-statement draws a <strong>UsageWarning</strong>. Declaring a rule the model never
-checks is almost always an oversight.</p>
+<p class="admonition-title">Changed in RIDDL 2.0</p>
+<p>Previously an invariant did nothing unless some clause named it in a
+<code>require invariant X</code> statement. That made it easy — and common — to carry a
+constraint that <em>read</em> as enforced and was inert: an unreferenced invariant
+generated no code, so the rule existed only as prose. Implicit application
+closes that gap.</p>
+<p>If you have models written against the old rule, they get <strong>stronger</strong>, not
+broken: constraints you declared now actually hold.</p>
 </div>
+<p>Every invariant applies, including ones you also <code>require</code> explicitly. The
+alternative — "only unreferenced invariants apply everywhere" — would mean that
+adding one <code>require invariant X</code> to a single clause silently narrowed X from
+enforced-everywhere to enforced-there, weakening every other clause with an edit
+that reads like it strengthens the model.</p>
+<h2 id="the-condition-has-three-forms">The Condition Has Three Forms<a class="headerlink" href="#the-condition-has-three-forms" title="Permanent link">&para;</a></h2>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">invariant</span> <span class="n">Legacy</span>      <span class="kp">is</span> <span class="s2">&quot;the account must be in good standing&quot;</span>   <span class="c1">// 1</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">invariant</span> <span class="n">InStock</span>     <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>                          <span class="c1">// 2</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">invariant</span> <span class="n">CanCoverFee</span> <span class="kp">is</span> <span class="p">{</span>                                         <span class="c1">// 3</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="k">let</span> <span class="no">available</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Available</span><span class="p">(</span><span class="n">held</span> <span class="o">=</span> <span class="n">holdAmount</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">balance</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="no">available</span> <span class="o">&gt;=</span> <span class="n">minimumFee</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
+</span></code></pre></div>
+<ol>
+<li>A <strong>literal string</strong> — natural language. This is an AI-fill site: the
+   generator emits a marker and an AI assistant writes the predicate from the
+   description, with the state's type structure as context.</li>
+<li>A <strong><a href="../value/#boolean-expressions">boolean expression</a></strong> — the structured
+   sub-language. Not an AI-fill site; it already <em>is</em> the predicate.</li>
+<li>A <strong>block</strong> — pure statements followed by the boolean expression that is the
+   predicate.</li>
+</ol>
+<p>The block form earns its place by giving you <code>let</code> bindings and calls to pure
+<a href="../function/">functions</a>, which is the difference between a condition you can
+express and one you must write as English and hope is read the same way twice.
+It also lowers cleanly: a block-form invariant becomes a private boolean method,
+exactly the shape a call site wants.</p>
+<p>Because comparisons are reference-only, a threshold is named rather than written
+inline:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">constant</span> <span class="n">Zero</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">No numeric literals, and no arithmetic</p>
+<p>The boolean sub-language has no numeric literal atom, so <code>amount &gt;= 0</code> does
+not parse. Nor is arithmetic available inside a block: a <code>let</code> binds a
+reference or a <code>call</code>, never an expression such as <code>balance - holdAmount</code>.
+Both limitations predate the 2.0 invariant work.</p>
+</div>
+<h2 id="scope-where-it-applies-and-what-it-may-read">Scope: Where It Applies, and What It May Read<a class="headerlink" href="#scope-where-it-applies-and-what-it-may-read" title="Permanent link">&para;</a></h2>
+<p>These are the same question, and the answer is in the declaration — never at the
+call site. An invariant may declare <code>requires &lt;state-ref | type-ref&gt;</code> to narrow
+or redirect that scope. There is no <code>returns</code>: the condition ends in a boolean,
+so the result type is fixed by construction.</p>
+<table>
+<thead>
+<tr>
+<th>Declaration</th>
+<th>Applies to</th>
+<th>May read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>in an <strong><a href="../entity/">entity</a></strong>, no <code>requires</code></td>
+<td>every clause of that entity, including its states' handlers</td>
+<td>fields present in <strong>every</strong> state record</td>
+</tr>
+<tr>
+<td>inside a <strong><a href="../state/">state</a> S</strong></td>
+<td>that state's handlers only</td>
+<td>S's record fields</td>
+</tr>
+<tr>
+<td>in an entity, <code>requires state S</code></td>
+<td>that entity's clauses <strong>while in state S</strong></td>
+<td>S's record fields</td>
+</tr>
+<tr>
+<td><code>requires &lt;type T&gt;</code></td>
+<td>nothing implicitly — <strong>explicit only</strong></td>
+<td>the value handed to it</td>
+</tr>
+<tr>
+<td>on a <strong><a href="../context/">context</a></strong> or other stateless processor</td>
+<td>nothing implicitly — <strong>explicit only</strong></td>
+<td>the value handed to it</td>
+</tr>
+</tbody>
+</table>
+<p>State scoping is what lets different states carry different rules — an open
+account may hold any non-negative balance, while a closed one must hold exactly
+nothing:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="p">}</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="kd">invariant</span> <span class="n">BalanceIsZero</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  <span class="p">}</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The same narrowing can be written from the entity level instead, which keeps
+related rules together where an author would rather read them side by side:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kr">requires</span> <span class="kd">state</span> <span class="n">Open</span>   <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="kd">invariant</span> <span class="n">BalanceIsZero</span>      <span class="kr">requires</span> <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Open</span>   <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span>   <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="kd">state</span>         <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="the-intersection-rule">The Intersection Rule<a class="headerlink" href="#the-intersection-rule" title="Permanent link">&para;</a></h3>
+<p>An entity-level invariant reading <code>balance</code> forces <strong>every</strong> state record of that
+entity to have a <code>balance</code> field. Referencing a field that any state record
+lacks is an <strong>Error</strong> — the invariant would otherwise be unevaluable in some
+states while claiming to hold in all of them, which is exactly the
+inert-constraint problem implicit application exists to remove.</p>
+<p>An entity with no states cannot carry an entity-level invariant that reads fields
+at all.</p>
+<h2 id="stateless-processors-are-explicit-only">Stateless Processors Are Explicit-Only<a class="headerlink" href="#stateless-processors-are-explicit-only" title="Permanent link">&para;</a></h2>
+<p>A <a href="../context/">context</a>, <a href="../adaptor/">adaptor</a>, <a href="../projector/">projector</a>,
+<a href="../streamlet/">streamlet</a> or <a href="../repository/">repository</a> has no state, so there
+is no ambient data for an implicit predicate to read. An invariant declared there
+must name what it needs with <code>requires &lt;type T&gt;</code> and be invoked explicitly, with
+the clause supplying the value:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">context</span> <span class="n">Ordering</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="kd">record</span> <span class="n">Limits</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">ceiling</span><span class="p">:</span> <span class="nb">Integer</span><span class="p">,</span> <span class="n">used</span><span class="p">:</span> <span class="nb">Integer</span> <span class="p">}</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kr">requires</span> <span class="kd">record</span> <span class="n">Limits</span> <span class="kp">is</span> <span class="n">used</span> <span class="o">&lt;=</span> <span class="n">ceiling</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  <span class="kd">handler</span> <span class="n">Intake</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>      <span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">Limits</span><span class="p">(</span><span class="n">ceiling</span> <span class="o">=</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="n">used</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>      <span class="gr">???</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="p">}</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>  <span class="p">}</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The division of labour is the point: <strong>the clause gathers, the invariant
+receives.</strong></p>
+<h2 id="restating-a-check-with-require">Restating a Check with <code>require</code><a class="headerlink" href="#restating-a-check-with-require" title="Permanent link">&para;</a></h2>
+<p>A <a href="../handler/">handler</a> may still name an invariant explicitly:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  <span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  <span class="gr">???</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>This is a <strong>restatement</strong>, not a restriction. The invariant was already going to
+run. Write it when you want the check called out at a particular point — or when
+the invariant declares <code>requires &lt;type T&gt;</code> and the value has to be handed in,
+which is the one case where the <code>require</code> is doing work nothing else can do.</p>
+<h2 id="an-invariant-never-acquires-it-only-receives">An Invariant Never Acquires — It Only Receives<a class="headerlink" href="#an-invariant-never-acquires-it-only-receives" title="Permanent link">&para;</a></h2>
+<p>An invariant block may contain only the statements a pure
+<a href="../function/">function</a> may contain: <strong>no state writes, no <code>send</code> or <code>tell</code>, no
+<code>morph</code>, <code>become</code>, <code>yield</code> or <code>reply</code>.</strong> With the no-loops rule that makes the
+block structurally terminating.</p>
+<p>The prohibition on <code>send</code> catches people out, because a read-only query looks
+harmless. It is not, and the reason is not mutation — it is that a send would
+break four properties a precondition depends on:</p>
+<ul>
+<li>it becomes <strong>asynchronous</strong>, so the whole refusal window goes async and every
+  mutating command acquires a <code>Future</code>-shaped signature;</li>
+<li>it becomes <strong>fallible</strong> — a timeout gives the predicate a third outcome
+  besides true and false;</li>
+<li>it becomes <strong>non-deterministic and TOCTOU-prone</strong> — remote state can change
+  between the check and the effect, so the invariant is <em>sampled</em> rather than
+  enforced, and the model claims a guarantee it does not have;</li>
+<li>it stops being <strong>structurally terminating</strong>, because an unbounded wait removes
+  the termination guarantee.</li>
+</ul>
+<p>Gathering belongs in the clause, where sending is already legal and already
+modeled.</p>
+<div class="admonition note">
+<p class="admonition-title">How this differs from a function's purity</p>
+<p>The <em>effect</em> prohibitions are identical, but a <a href="../function/">function</a> may
+read no entity state at all — everything arrives through its <code>requires</code>
+message. An invariant <strong>may</strong> read state, bounded by the table above. That
+asymmetry is sound because an invariant is by definition a predicate over
+state, is evaluated inside the entity's single-writer window, and has its
+readable fields fixed by its declaration, so the reads stay statically
+checkable.</p>
+</div>
+<h2 id="when-an-invariant-fails">When an Invariant Fails<a class="headerlink" href="#when-an-invariant-fails" title="Permanent link">&para;</a></h2>
+<p>The same predicate means two different things depending on how it was applied,
+and the distinction matters because it decides whether the failure is part of
+your clause's contract:</p>
+<table>
+<thead>
+<tr>
+<th>Applied</th>
+<th>Failure is a</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>explicitly, at <code>require invariant X</code></td>
+<td><strong>refusal</strong></td>
+<td>a modeled, expected outcome — comes back as an error result naming the rule</td>
+</tr>
+<tr>
+<td>implicitly</td>
+<td><strong>fault</strong></td>
+<td>the model never asserted this mutation preserves X, so the violation is a defect: exception plus rollback</td>
+</tr>
+</tbody>
+</table>
+<p>A fault does <strong>not</strong> widen the clause's result type. That is deliberate: making
+every implicit check a modeled outcome would force every mutating command into
+an <code>Outcome&lt;…&gt;</code> signature for something that a validated model cannot produce.</p>
+<p>Multiple invariants in scope are checked in declaration order, and the first
+failure is the one reported.</p>
+<h3 id="lifecycle-and-event-clauses">Lifecycle and Event Clauses<a class="headerlink" href="#lifecycle-and-event-clauses" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>on init</code> is skipped.</strong> That clause is where state comes into existence, so
+  a precondition over it is ill-defined and would fail on every entity creation.</li>
+<li><strong><code>on term</code> applies</strong> — state still exists there.</li>
+<li><strong><code>on event</code> clauses apply</strong>, which is not a contradiction of the rule that
+  <em>authored</em> <code>require</code> and <code>error</code> statements are forbidden there. That rule
+  bars <strong>refusing</strong> an event, because an event is a fact already accepted
+  elsewhere. An implicit violation faults and rolls back; it does not refuse,
+  and the event remains a fact. Excluding event clauses would have been worse —
+  state changes in event clauses, so an invariant unchecked there would mean
+  "always true except where the state actually moves".</li>
+</ul>
+<h3 id="reacting-instead-of-faulting">Reacting Instead of Faulting<a class="headerlink" href="#reacting-instead-of-faulting" title="Permanent link">&para;</a></h3>
+<p>When an event handler should <em>respond</em> to a rule being false rather than fault,
+name the invariant in a <a href="../statement/#when-statement"><code>when</code></a> and take action:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">on</span> <span class="kd">event</span> <span class="n">PaymentReversed</span> <span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="k">when</span> <span class="k">not</span> <span class="n">BalanceNonNegative</span> <span class="k">then</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="k">send</span> <span class="kd">command</span> <span class="n">FlagForReview</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Review</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  <span class="kr">end</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The <code>invariant</code> keyword is optional here — <code>when not invariant
+BalanceNonNegative then</code> is identical. Either spelling composes like any other
+boolean (<code>when BalanceNonNegative and order.isPaid then</code>), and both are
+resolved and checked: naming an invariant that does not exist is an Error.</p>
+<div class="admonition note">
+<p class="admonition-title">A condition asks; a <code>require</code> applies</p>
+<p>A condition never has to hand an invariant its data — even one declaring
+<code>requires &lt;type&gt;</code>, where <code>with &lt;expr&gt;</code> is optional. <code>require invariant X</code>
+is the asymmetric one: it <em>applies</em> the rule, so it must be given what the
+rule reads. Asking whether something holds and enforcing it are different
+acts. Verified against <code>2.0.0-rc.9-54</code>.</p>
+</div>
+<h2 id="diagnostics">Diagnostics<a class="headerlink" href="#diagnostics" title="Permanent link">&para;</a></h2>
+<p>An invariant that can never run is precisely the defect implicit application
+exists to remove, so riddlc says so rather than passing silently:</p>
+<ul>
+<li>an invariant declaring <code>requires &lt;type T&gt;</code> that no <code>require invariant X with
+  &lt;expr&gt;</code> ever invokes draws a <strong>warning</strong> — it is inert;</li>
+<li>an entity-level invariant referencing a field absent from any state record is
+  an <strong>Error</strong> (the intersection rule above).</li>
+</ul>
 <h2 id="occurs-in">Occurs In<a class="headerlink" href="#occurs-in" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Any <a href="../processor/">processor</a> — <a href="../entity/">entities</a>,
@@ -5509,7 +5946,8 @@ checks is almost always an oversight.</p>
 <li><a href="../module/">Modules</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
-<p>Nothing — but its condition is a <a href="../value/">value</a>.</p>
+<p>Nothing — but its condition is a <a href="../value/">value</a>, and its block form contains
+<a href="../statement/">statements</a>.</p>
 
 
 

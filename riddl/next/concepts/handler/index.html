@@ -2998,6 +2998,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The initial Marker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-a-state-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On a State Handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-an-entity-scope-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On an Entity-Scope Handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5485,6 +5524,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The initial Marker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-a-state-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On a State Handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-an-entity-scope-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On an Entity-Scope Handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5648,23 +5726,51 @@ parse time. Queries against the projected data are served by the
 itself.</p>
 </div>
 <h2 id="the-initial-marker">The <code>initial</code> Marker<a class="headerlink" href="#the-initial-marker" title="Permanent link">&para;</a></h2>
-<p>An optional <code>initial</code> keyword marks the handler that is live after a
-<a href="../statement/#morph-and-become-entity-only">morph</a>:</p>
+<p>An optional <code>initial</code> keyword marks which handler is live when nothing has
+selected one yet. It means different — though related — things at the two
+placements a handler can occupy.</p>
+<h3 id="on-a-state-handler">On a State Handler<a class="headerlink" href="#on-a-state-handler" title="Permanent link">&para;</a></h3>
+<p><code>initial</code> marks the handler that becomes active when the entity transitions
+<strong>into</strong> that state, whether by <a href="../statement/#morph-and-become-entity-only">morph</a>
+or at creation:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="k">initial</span> <span class="kd">handler</span> <span class="n">PendingHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">handler</span> <span class="n">AuditHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Without the marker, the first handler declared wins — which means reordering
-handlers silently changes behavior. Marking it explicitly makes the model safe
-to reorder, and is fully backward compatible with models that do not.</p>
-<p>An entity-scope handler is defaulted to <code>initial</code> only when the entity has
-exactly <strong>one</strong> state. With multiple states, entity-scope handlers are common
-parts merged into each state's handler set, so none of them is the entity's
-initial handler.</p>
-<p>Declaring more than one <code>initial</code> handler in a state — or more than one at
-entity scope when the entity has at most one state — is an <strong>Error</strong>.</p>
+<p>Without it, a state with several handlers has no defined starting behavior and
+the entity would have to <code>become</code> explicitly before it could react — so the
+first handler declared wins by default, which means reordering handlers silently
+changes behavior. Marking it explicitly makes the model safe to reorder, and is
+fully backward compatible with models that do not.</p>
+<h3 id="on-an-entity-scope-handler">On an Entity-Scope Handler<a class="headerlink" href="#on-an-entity-scope-handler" title="Permanent link">&para;</a></h3>
+<p><code>initial</code> marks the handler used as the initial handler for <strong>every state that
+does not define one of its own</strong> — a default across the whole state machine
+rather than a per-state choice:</p>
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">initial</span> <span class="kd">handler</span> <span class="n">Common</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>   <span class="c1">// initial for Shipped, and any state</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                                      <span class="c1">// that declares no initial of its own</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">initial</span> <span class="kd">handler</span> <span class="n">PendingHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  <span class="kd">state</span> <span class="n">Shipped</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ShippedData</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Where no marker appears, an entity-scope handler is defaulted to <code>initial</code> only
+when the entity has exactly <strong>one</strong> state.</p>
+<h3 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h3>
+<p>Declaring more than one <code>initial</code> handler in a state, or more than one at entity
+scope, is an <strong>Error</strong> — at entity scope regardless of how many states the
+entity has. Verified against <code>2.0.0-rc.9-54</code>.</p>
+<div class="admonition info">
+<p class="admonition-title">It is not a printer bug</p>
+<p><code>initial handler</code> is real syntax, so <code>riddlc prettify</code> is correct to emit
+it. It went undocumented long enough that a consumer reported the output as
+a printer defect on the grounds that handlers have no such modifier. They
+do.</p>
+</div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <p><code>timeout</code> (1 argument), <code>retry</code> (1–2 arguments), <code>idempotent</code>, <code>cacheable</code> and
 <code>rate-limit</code> (2 arguments) may be set on a handler's metadata.</p>
@@ -5676,14 +5782,14 @@ foundation for modeling state machines in RIDDL. When an
 entity transitions to a new state via a <code>morph</code> statement,
 the new state's handlers become active.</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">handler</span> <span class="n">ActiveOrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">on</span> <span class="n">ship</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ShipOrder</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Order</span><span class="p">.</span><span class="n">ShippedOrder</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>        <span class="kp">with</span> <span class="kd">record</span> <span class="n">ShippedOrderData</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">trackingNumber</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="p">}</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  <span class="p">}</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">handler</span> <span class="n">ActiveOrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">on</span> <span class="n">ship</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ShipOrder</span> <span class="p">{</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Order</span><span class="p">.</span><span class="n">ShippedOrder</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="kp">with</span> <span class="kd">record</span> <span class="n">ShippedOrderData</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">trackingNumber</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  <span class="p">}</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Note that a state is typed by a <strong>record</strong>, and that a <code>morph</code> carries a
 record too — not the command that triggered it. A command is a request; the

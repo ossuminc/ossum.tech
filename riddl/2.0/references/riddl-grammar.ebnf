@@ -178,10 +178,13 @@ field_type_alternatives = infix_alternation | predefined_types | pattern_type | 
 
 (* Functions *)
 function = "function" identifier is "{" function_body "}" [with_metadata] ;
-function_body = [func_input] [func_output] function_definitions ;
+function_body = function_definitions ;
+(* `requires`/`returns` are ordinary content, not a body prefix: a comment may precede,
+   separate or follow them. At most one of each -- a cardinality the RIDDL parser enforces
+   after the parse, since a grammar closure cannot bound it. *)
 func_input = "requires" ( aggregation | type_ref ) ;
 func_output = "returns" ( aggregation | type_ref ) ;
-function_definitions = {undefined | (vital_definition_contents | function | function_include | statement)} ;
+function_definitions = {undefined | (vital_definition_contents | func_input | func_output | function | function_include | statement)} ;
 function_include = "include" literal_string ;
 
 (* References *)
@@ -299,7 +302,12 @@ not_expression = "not" not_expression | comparison ;
 comparison = comparand comparison_operator comparand | boolean_atom ;
 comparand = get_value | constant_ref | value_ref ;
 comparison_operator = "==" | "!=" | "<=" | ">=" | "<" | ">" ;
-boolean_atom = boolean_literal | "(" boolean_expression ")" | get_value | value_ref ;
+(* `invariant X [with <value>]` names an invariant in a condition. It MUST precede value_ref:
+   without it, `invariant` is taken as an ordinary identifier and the parser then demands a
+   comparison operator, pointing past the real problem. The bare spelling (`when X`) also works,
+   via value_ref, and always has. *)
+boolean_atom = boolean_literal | "(" boolean_expression ")" | get_value | invariant_test | value_ref ;
+invariant_test = "invariant" path_identifier ["with" value] ;
 boolean_literal = "true" | "false" ;
 
 (* A45/A57: boundary value operations. `put` (application/context handlers only) publishes a value
@@ -312,7 +320,9 @@ prompt_statement = ("do" | "prompt") literal_string ;
 code_statement = "```" ("scala" | "java" | "python" | "mojo") code_contents "```" ;
 code_contents = {any_char_except_triple_backtick} ;
 error_statement = "error" literal_string ;
-require_statement = "require" (literal_string | invariant_ref | boolean_expression) ; (* A28 *)
+(* `with <value>` hands a value to an invariant declaring `requires <type_ref>` -- the one
+   invariant form ambient scope cannot supply. The clause gathers; the invariant receives. *)
+require_statement = "require" (literal_string | invariant_ref | boolean_expression) ["with" value] ;
 invariant_ref = "invariant" path_identifier ;
 
 (* Entity state transitions. A54: the morph value is a bare record ref or an inline constructor. *)
@@ -326,7 +336,14 @@ pseudo_code_contents = [undefined] {statement} ;
 
 (* Constants and Invariants *)
 constant = "constant" identifier is type_expression "=" literal_string [with_metadata] ;
-invariant = "invariant" identifier is [literal_string | boolean_expression] [with_metadata] ; (* A28 *)
+(* An invariant applies IMPLICITLY across every clause of its declaring scope, as a precondition.
+   `requires state S` narrows an entity-level invariant to one state and stays implicit;
+   `requires <type_ref>` makes it explicit-only (see require_statement). No `returns`: the
+   condition ends in a boolean, so the result type is fixed by construction.
+   The block form admits the statements a pure function may contain, ending in that boolean. *)
+invariant = "invariant" identifier ["requires" (state_ref | type_ref)] is [invariant_condition] [with_metadata] ;
+invariant_condition = literal_string | boolean_expression | invariant_block ;
+invariant_block = "{" {statement} boolean_expression "}" ;
 
 (* Version - A53: a scope's version component is EITHER a name OR a natural number, never both. *)
 (* Composing a definition's versioned ancestors root-to-leaf and joining with "." yields its    *)
@@ -406,8 +423,8 @@ updates = "updates" repository_ref ;
 
 (* Saga-related *)
 saga = "saga" identifier is "{" saga_body "}" [with_metadata] ;
-saga_body = [func_input] [func_output] {saga_definitions} ;
-saga_definitions = {saga_step | inlet | outlet | function | saga_include} ;
+saga_body = saga_definitions ;
+saga_definitions = {undefined | (vital_definition_contents | func_input | func_output | saga_step | inlet | outlet | function | saga_include)} ;
 saga_include = "include" literal_string ;
 saga_step = "step" identifier is pseudo_code_block "reverted" ["by"] pseudo_code_block [with_metadata] ;
 

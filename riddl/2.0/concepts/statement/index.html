@@ -6103,8 +6103,14 @@ application and context handlers. <code>return</code> produces a
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">require</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">error</span> <span class="s2">&quot;Price must be greater than zero&quot;</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="n">limits</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">error</span> <span class="s2">&quot;Price must be greater than zero&quot;</span>
 </span></code></pre></div>
+<p>A <code>require invariant</code> is an explicit <strong>restatement</strong> — an
+<a href="../invariant/">invariant</a> already applies implicitly across its declaring
+scope. The <code>with &lt;value&gt;</code> form is the exception that does real work: it hands a
+value to an invariant declaring <code>requires &lt;type&gt;</code>, which is the one form
+ambient scope cannot supply.</p>
 <div class="admonition warning">
 <p class="admonition-title">Refusals before effects</p>
 <p>Within any single linear statement list, every <strong>refusal</strong> (<code>require</code>,
