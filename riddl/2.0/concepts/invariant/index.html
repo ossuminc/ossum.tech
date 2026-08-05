@@ -5910,15 +5910,16 @@ failure is the one reported.</p>
 name the invariant in a <a href="../statement/#when-statement"><code>when</code></a> and take action:</p>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">on</span> <span class="kd">event</span> <span class="n">PaymentReversed</span> <span class="p">{</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="k">when</span> <span class="k">not</span> <span class="n">BalanceNonNegative</span> <span class="k">then</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="k">when</span> <span class="k">not</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="k">then</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="k">send</span> <span class="kd">command</span> <span class="n">FlagForReview</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Review</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  <span class="kr">end</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>The <code>invariant</code> keyword is optional here — <code>when not invariant
-BalanceNonNegative then</code> is identical. Either spelling composes like any other
-boolean (<code>when BalanceNonNegative and order.isPaid then</code>), and both are
-resolved and checked: naming an invariant that does not exist is an Error.</p>
+<p>The <code>invariant</code> keyword is optional here — bare <code>when not BalanceNonNegative
+then</code> is identical — but spelling it out matches <code>require invariant X</code> and
+reads as what it is. Either form composes like any other boolean (<code>when
+invariant BalanceNonNegative and order.isPaid then</code>), and both are resolved
+and checked: naming an invariant that does not exist is an Error.</p>
 <div class="admonition note">
 <p class="admonition-title">A condition asks; a <code>require</code> applies</p>
 <p>A condition never has to hand an invariant its data — even one declaring
