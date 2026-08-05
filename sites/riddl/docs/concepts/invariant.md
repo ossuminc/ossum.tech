@@ -265,16 +265,17 @@ name the invariant in a [`when`](statement.md#when-statement) and take action:
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 on event PaymentReversed {
-  when not BalanceNonNegative then
+  when not invariant BalanceNonNegative then
     send command FlagForReview to entity Review
   end
 }
 ```
 
-The `invariant` keyword is optional here — `when not invariant
-BalanceNonNegative then` is identical. Either spelling composes like any other
-boolean (`when BalanceNonNegative and order.isPaid then`), and both are
-resolved and checked: naming an invariant that does not exist is an Error.
+The `invariant` keyword is optional here — bare `when not BalanceNonNegative
+then` is identical — but spelling it out matches `require invariant X` and
+reads as what it is. Either form composes like any other boolean (`when
+invariant BalanceNonNegative and order.isPaid then`), and both are resolved
+and checked: naming an invariant that does not exist is an Error.
 
 !!! note "A condition asks; a `require` applies"
     A condition never has to hand an invariant its data — even one declaring
