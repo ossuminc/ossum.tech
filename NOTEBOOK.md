@@ -11,21 +11,136 @@ to the task file and note completion in this notebook.
 
 ---
 
-## RESUME HERE — as of 2026-08-03
+## HANDOFF — as of 2026-08-04
 
-**Tasks A–K are all closed, and `task/` is empty** (everything in `task/done/`).
-What is still open:
+**State:** branch `main`, clean, **0 commits ahead of `origin/main`** — the
+invariant/`initial handler` documentation work is committed and pushed. Open
+work lives in **`BACKLOG.md`** (new this session, tracked); durable facts in
+CLAUDE.md.
 
-- The ~50 concept pages still lack per-fence directives. 26 fences fail
-  site-wide against rc.9, but no file is above three, which is the agreed
-  threshold — a known gap, not a regression.
-- Promoting RIDDL 2.0 to `latest` when it ships final:
-  `scripts/promote-2.0-to-latest.md`. Since TASK G it is **one commit** — the
-  two-branches-one-alias landmine is gone. The single rule left: the last
-  `riddl` entry in `docs-version.yml` owns `mike set-default`, so move the
-  entries, not just the alias.
+**`task/` is empty.** Everything is in `task/done/`. Tasks A–K closed.
+
+**Nothing is in flight.** The session finished a complete round trip with riddl
+and re-verified the result. Safe to start anything.
+
+### The trap that bit twice today
+
+**riddl `release/2` moves several times a day, and a doc note that says "not
+supported yet" is stale within hours.** This session shipped three such notes
+and had to remove all three the same evening, after riddl fixed both bugs we
+filed and restaged the binary.
+
+Before writing *anything* conditional on riddlc's behavior:
+
+```bash
+ls -la ../bin/riddlc                 # restaged? compare to your last check
+git -C ../riddl log --oneline -3     # what landed
+diff sites/riddl/docs/references/riddl-grammar.ebnf \
+     ../riddl/language/src/main/resources/riddl/grammar/ebnf-grammar.ebnf
+```
+
+The grammar copy drifted **twice in one day**. Do not refresh it with `sbt
+extractGrammar` — that resolves the *published* 1.x library and would look
+successful. BACKLOG item 3 has the correct command.
+
+### Verified this session, against `2.0.0-rc.9-54-64b7b413`
+
+All by compiling, not by reading:
+
+- `when not invariant X then` and bare `when not X` — **both** valid; the
+  `invariant` keyword is optional in a condition, and `with <expr>` is optional
+  even for a `requires <type>` invariant. A condition *asks*; a `require`
+  *applies* and must be handed its data.
+- Duplicate entity-scope `initial` handlers — Error at **any** state count.
+- `requires type T` and bare `requires T` — **both** valid;
+  `aggregate_use_case` includes `"type"`. See BACKLOG item 4; we briefly
+  believed otherwise.
+
+### Certainty
+
+Verified by compiling: every RIDDL example in the six pages changed today.
+Verified by command: all five sites build `--strict` clean, 80 cross-site
+links resolve, `check-riddl-blocks.py` clean on every edited page.
+**Assumed, not verified:** that the ~50 unannotated concept pages still fail at
+the counts recorded in BACKLOG item 1 — that number predates rc.9-54.
+
+### Lesson worth not relearning
+
+A failed compile proves the **spelling** wrong, not the **feature** missing.
+`when not invariant X` failed, and we wrote it up — in the docs and in a riddl
+task — as "invariants cannot be named in conditions". The bare form had worked
+all along. Try the other spellings before concluding a capability is absent;
+the negative test is cheap and we skipped it.
+
+**Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### Invariant semantics and the `initial` handler ✅ **2026-08-04**
+
+Task `2026-08-04-invariant-semantics-and-initial-handler.md` from riddl: RIDDL
+2.0 invariants now apply **implicitly** across their declaring scope as a
+precondition, rather than doing nothing until a clause writes `require invariant
+X`. Six pages changed; details and the full verification log are in
+`task/done/`.
+
+Three things worth keeping:
+
+- **The task file's own claims were the least reliable input.** It said the
+  grammar had not landed (it had, one minute after the file was written — the
+  sender later appended a correction); that `initial handler` was undocumented
+  (it was documented, and the entity-level half was *wrong*, which is worse than
+  a gap because it read as authoritative); and that the EBNF page needed no
+  manual edit (it did — `sbt extractGrammar` resolves the **published** riddl
+  library, so running it would have replaced the 2.0 grammar with a 1.x one).
+- **Compile every example before writing prose around it.** Arithmetic in a
+  block `let` (`balance - holdAmount`) is a parse error, and it came straight
+  from the settled semantics — so "the computational model says so" is not
+  evidence that the compiler accepts it.
+  Two forms we *also* wrote up as errors were not: `when not invariant X`
+  (spelling, see below) and `requires type T`, which is **valid** —
+  `aggregate_use_case` includes `"type"`, and we misread
+  `type_ref = [aggregate_use_case] path_identifier` as excluding the keyword.
+  riddl corrected us. Both spellings work; the docs use the bare one.
+- **A failed compile proves the spelling wrong, not the feature missing.**
+  `when not invariant X` is a parse error, and we first wrote it up — in the
+  docs *and* in a riddl task — as "invariants cannot be named in conditions,
+  A17 unimplemented". Reid asked whether we were reporting real faults or
+  misunderstandings. We were not: the **bare** `when not X` works, resolves to
+  the invariant, and composes with `and`/`or`. Proof it resolves rather than
+  being waved through: delete the invariant's declaration and the same line
+  becomes an error. The real defect is a one-word inconsistency with `require
+  invariant X` plus a diagnostic that points past the cause. **The negative
+  test — does this fail for the reason I think? — was the one we skipped**,
+  and it is cheap: try the other spellings before concluding the capability is
+  absent.
+- **The compiler is the authority over the model document where they differ**,
+  and where they differ *is itself the finding* — both riddl follow-ups above
+  came out of this gap, not out of the docs.
+
+**Round trip completed the same evening.** riddl took all three files, fixed
+both bugs, and shipped `2.0.0-rc.9-54-64b7b413`:
+
+- `invariant X` and `invariant X with <expr>` are now boolean atoms
+  (`InvariantCondition`), so **both** spellings work in conditions, and a
+  condition never needs the argument. Reid's ruling dissolved our design
+  question rather than picking one of its three options: a condition *asks*
+  whether a rule holds, a `require` *applies* it and so must be handed what the
+  rule reads.
+- The `entity.states.sizeIs <= 1` guard is gone.
+- Our report shook out **two latent bugs neither side was looking for**: BAST
+  round-tripping of `require invariant X` was corrupting the stream (tag
+  mismatch between writer and reader), and `defaultEntityInitials` counted
+  states without seeing through `include` while validation did — so riddlc
+  auto-marked a handler `initial` and then reported the *author's* handler as
+  the duplicate. The old guard had been masking the second one, which is the
+  strongest argument for removing it.
+
+So three "not supported yet" notes we shipped in the afternoon were stale by
+evening and are gone. **That is the standing hazard while 2.0 is an RC** —
+see the HANDOFF section.
 
 ---
 
