@@ -6,22 +6,25 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1. Annotate the remaining RIDDL fences outside `concepts/`
+## 1. Annotate the RIDDL fences in the remaining doc trees
 
-**What:** `sites/riddl/docs/concepts/` is now fully gated (56 validated, 76
-skipped, 0 failed). `language-reference.md` is not: **3 fences fail** and are
-pre-existing, unrelated to the concepts work.
+**What:** `concepts/`, `quickstart.md` and `references/language-reference.md`
+are **fully gated** — 84 validated, 127 skipped, 0 failed, exit 0 against
+2.0.0-rc.10-43. Not yet gated: `tutorials/rbbq/` (30 pages), `guides/`,
+`tools/`, and the `riddlg`/`synapify`/`shell` sites.
 
-**Verified 2026-08-08:** the 3 are `language-reference.md` at the fences on
-lines 861 (`in-context`), 1549 and 2138 (both `standalone`). Baselined against
-`git show HEAD:scripts/validate-riddl-examples.py` to confirm they predate the
-new wrapper kinds — they are not a regression from that work.
+**Verified 2026-08-08** against rc.10. Re-run:
+```bash
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
+  sites/riddl/docs/concepts/*.md sites/riddl/docs/quickstart.md \
+  sites/riddl/docs/references/language-reference.md
+```
 
 **Also open:** `check-riddl-blocks.py` flags two items in
 `tutorials/rbbq/restaurant/online-ordering.md` (`state ... of O` without a
-record; a `prompt "` statement). Advisory, left alone as out of scope.
+record; a `prompt "` statement). Advisory, and inside the ungated tree above.
 
-**Order:** Independent of everything else.
+**Order:** Independent. `tutorials/rbbq/` is the biggest and the most read.
 
 ---
 

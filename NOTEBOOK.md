@@ -13,9 +13,11 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-08
 
-**State:** branch `main`, clean, **3 commits ahead of `origin/main`** — not
-pushed. The concept-page gating work is committed in three parts: the validator
-wrappers, the doc corrections, the path-resolution reference.
+**State:** branch `main`, clean. The concept-page gating work is pushed; the
+rc.10 upgrade on top of it is committed and **not yet pushed**.
+
+**Compiler: `../bin/riddlc` is `2.0.0-rc.10-43-9f19dbda`** (`riddlc version`).
+The grammar copy was re-synced to match — by `cp`, never `sbt extractGrammar`.
 
 **`task/` is empty.** Everything is in `task/done/`.
 
@@ -30,10 +32,11 @@ skipped, 0 failed, exit 0, against `../bin/riddlc` at rc.9-54. Re-run with:
 python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/concepts/*.md
 ```
 
-`language-reference.md` still has **3 pre-existing failures** (BACKLOG 1).
-Baselined against the committed validator to prove they are not a regression —
-**do that before blaming a wrapper change for a failure**, it took one command
-and settled it:
+`language-reference.md` is green too, as of the rc.10 upgrade. Remaining
+ungated trees are in BACKLOG 1.
+
+**Baseline before blaming a wrapper change for a failure.** One command settles
+whether a failure is yours or pre-existing:
 
 ```bash
 git show <rev>:scripts/validate-riddl-examples.py > /tmp/base.py
@@ -59,16 +62,25 @@ python3 /tmp/base.py ../bin/riddlc <file.md>
 - **`[severe] empty(1:1->1)` means an exception was thrown in a pass**, not a
   language error — `Pass.scala` catches NonFatal and emits the stack trace,
   which can render empty. Bisect the model; do not read the message.
+- **A markdown line swallows the rest of its line, including `}`.**
+  `term SKU is { | text }` on ONE line consumes the closing brace as
+  description text and unbalances the model. Put the `}` on its own line. The
+  parse error lands at the END of the file, nowhere near the cause.
 - **Do not trust an exit code read through a pipeline.** `riddlc ... | head;
   echo $?` reports `head`'s status. It made a failing compile look like a silent
   pass, and the wrong claim reached Reid before being corrected.
 
-### Filed with riddl (in `../riddl/task/`)
+### Filed with riddl, and FIXED in rc.10
 
-- `2026-08-08-empty-severe-on-dotted-path-through-function.md` — root-caused to
-  an `Option` cast to `Seq` in `findMatchingCandidate`'s Function arm.
-- `2026-08-08-refs-unresolved-inside-interaction-groups.md` — the silent one,
-  and the more serious.
+Both task files are closed by riddl commits `7c8c83ca0` (paths may descend into
+a Function) and `acc11b274` (steps inside sequence/parallel/optional are
+resolved and validated), plus `a466dab16`, which stops the in-pass exception
+handler emitting an empty `[severe]`.
+
+**The second fix had fallout here, as expected:** `use-case.md`'s grouped steps
+referenced five definitions that did not exist and had been passing silently.
+Anything else that leaned on grouped steps going unchecked will surface the
+same way.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
