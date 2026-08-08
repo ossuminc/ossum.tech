@@ -39,16 +39,27 @@ designed in RIDDL to support a detailed definition of a
 
 ## Syntax
 
+<!-- riddl-domain-prelude
+user Customer is "a shopper using the store"
+-->
+<!-- riddl: in-domain -->
 ```riddl
 epic ShoppingCartEpic is {
   user Customer wants to "add items to a shopping cart"
   so that "they can purchase multiple items at once"
 
-  case AddingToCart is { ??? }
+  case AddingToCart is {
+    user Customer wants to "add an item to the cart"
+    so that "it is included in the order"
+    ???
+  }
 } with {
   briefly as "User stories about shopping cart management"
 }
 ```
+
+Every `case` opens with its own user story, and its body may be left `???`
+until the interactions are written — but it cannot be empty.
 
 ### Modal Verbs
 
@@ -56,6 +67,7 @@ RIDDL 2.0 widens the user-story verb from `wants` alone to a modal set:
 
 `wants`, `must`, `shall`, `should`, `may`, `will`, `can`
 
+<!-- riddl: in-epic-story -->
 ```riddl
 user Customer must  "authenticate" so that "their account is protected"
 user Auditor  should "review the ledger" so that "discrepancies are caught"

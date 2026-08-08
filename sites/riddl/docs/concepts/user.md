@@ -39,15 +39,23 @@ domain ECommerce is {
 
   user Guest is "An unregistered visitor who can browse but must register to purchase."
 
+  context Sales is {
+    entity PaymentService is { ??? }
+    entity Catalog is { ??? }
+  }
+
   epic CheckoutFlow is {
     user Customer wants to "complete a purchase"
     so that "they receive products they need"
 
     case RegisteredCheckout is {
-      user Customer "reviews cart contents"
-      then user Customer "confirms shipping address"
-      then entity PaymentService "processes payment"
-      then user Customer "receives order confirmation"
+      user Customer wants to "check out an existing account"
+      so that "the order is placed without re-entering details"
+
+      step for user Customer is "reviews cart contents"
+      step for user Customer is "confirms shipping address"
+      step for entity Sales.PaymentService is "processes payment"
+      step for user Customer is "receives order confirmation"
     }
   }
 
@@ -56,9 +64,12 @@ domain ECommerce is {
     so that "they can decide whether to register"
 
     case BrowseCatalog is {
-      user Guest "searches for products"
-      then entity Catalog "returns matching items"
-      then user Guest "views product details"
+      user Guest wants to "find a product without an account"
+      so that "they can judge whether to register"
+
+      step for user Guest is "searches for products"
+      step for entity Sales.Catalog is "returns matching items"
+      step for user Guest is "views product details"
     }
   }
 }
@@ -79,12 +90,19 @@ domain Banking is {
   user AccountHolder is "A customer who owns one or more bank accounts."
 
   context Accounts is {
+    type Money is { amount: Decimal(10,2), currency: String }
+    type CustomerId is String
+    record AccountState is { balance: Money, holder: CustomerId }
+    command Deposit is { amount: Money }
+    command Withdraw is { amount: Money }
+
     // Entity: Internal system component
     entity Account is {
-      state Active is { balance: Money, holder: CustomerId }
-      handler Operations is {
-        on command Deposit { /* ... */ }
-        on command Withdraw { /* ... */ }
+      state Active of record AccountState is {
+        handler Operations is {
+          on command Deposit { ??? }
+          on command Withdraw { ??? }
+        }
       }
     }
   }
@@ -94,10 +112,13 @@ domain Banking is {
     so that "they can manage their money flexibly"
 
     case SuccessfulTransfer is {
-      user AccountHolder "initiates transfer request"
-      then entity Account "debits source account"
-      then entity Account "credits destination account"
-      then user AccountHolder "sees confirmation"
+      user AccountHolder wants to "transfer between their own accounts"
+      so that "funds are where they are needed"
+
+      step for user AccountHolder is "initiates transfer request"
+      step for entity Accounts.Account is "debits source account"
+      step for entity Accounts.Account is "credits destination account"
+      step for user AccountHolder is "sees confirmation"
     }
   }
 }
@@ -125,6 +146,7 @@ Avoid:
 4. **Consider permissions**: Different users may have different capabilities
 5. **Include system users**: APIs, scheduled jobs, and integrations are users too
 
+<!-- riddl: in-domain -->
 ```riddl
 // System actors are users too
 user PaymentWebhook is "External payment processor calling back with transaction results."

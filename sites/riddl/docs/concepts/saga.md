@@ -15,20 +15,41 @@ proceed with the transaction.
 A saga's `requires` and `returns` may name an existing [type](type.md), the
 same as a [function](function.md)'s:
 
+<!-- riddl-prelude
+record CheckoutInputs is { orderId is String }
+record CheckoutOutcome is { confirmed is Boolean }
+command ProcessPayment is { orderId is String }
+command RefundPayment is { orderId is String }
+command ReserveItems is { orderId is String }
+command ReleaseItems is { orderId is String }
+entity PaymentService is { ??? }
+entity Inventory is { ??? }
+-->
+<!-- riddl: in-context -->
 ```riddl
 saga CheckoutProcess is {
   requires record CheckoutInputs
   returns  record CheckoutOutcome
 
-  step ProcessPayment is {
+  step TakePayment is {
     tell command ProcessPayment(orderId) to entity PaymentService
   } reverted by {
     tell command RefundPayment(orderId) to entity PaymentService
+  }
+
+  step ReserveStock is {
+    tell command ReserveItems(orderId) to entity Inventory
+  } reverted by {
+    tell command ReleaseItems(orderId) to entity Inventory
   }
 } with {
   option is compensate
 }
 ```
+
+A saga must define **at least two** steps — a one-step saga has nothing to
+coordinate — and a step's name must not collide with the message it sends,
+or the reference becomes ambiguous.
 
 ## Options
 

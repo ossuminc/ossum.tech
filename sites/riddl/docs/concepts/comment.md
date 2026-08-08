@@ -58,13 +58,19 @@ RIDDL provides two ways to document definitions:
 
 **Descriptions** are the preferred way to document definitions for end users:
 
+A description is **metadata**, so it belongs in the `with { }` block after the
+body — not inside the body, where only definitions are allowed:
+
 ```riddl
 domain Inventory is {
-  |## Inventory Domain
-  |Manages product stock levels, warehouse locations,
-  |and inventory movements.
-
   // Internal note: Consider splitting into sub-domains later
+  ???
+} with {
+  described as {
+    |## Inventory Domain
+    |Manages product stock levels, warehouse locations,
+    |and inventory movements.
+  }
 }
 ```
 

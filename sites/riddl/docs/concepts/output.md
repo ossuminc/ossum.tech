@@ -46,6 +46,7 @@ picture  Avatar    presents type ImageRef
 A [handler](handler.md) publishes a value to an output with the `put`
 statement, which is valid in application and context handlers:
 
+<!-- riddl: in-app-clauses -->
 ```riddl
 on query GetReceipt {
   put order.confirmationNumber to output Receipt

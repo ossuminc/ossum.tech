@@ -96,11 +96,12 @@ domain ECommerce is {
 If you need to pass it in a message or store it in state, use a
 Type. If you're defining what a word means, use a Term.
 
+<!-- riddl: in-domain -->
 ```riddl
 context Orders is {
   // Use a Type when you need the data structure
-  type Money is { amount: Decimal, currency: CurrencyCode }
-  ???
+  type CurrencyCode is any of { USD, EUR, GBP, JPY }
+  type Money is { amount: Decimal(10,2), currency: CurrencyCode }
 } with {
   // Use a Term when you're defining the concept
   term Revenue is {

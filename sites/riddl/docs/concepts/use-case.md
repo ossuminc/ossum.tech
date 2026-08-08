@@ -82,6 +82,7 @@ than typed references.
 
 Steps may be grouped to express ordering semantics:
 
+<!-- riddl: in-epic no-prelude -->
 ```riddl
 case Checkout is {
   user Customer wants to "pay" so that "the order ships"
@@ -108,16 +109,35 @@ case Checkout is {
 A complete epic typically includes a happy path, alternative paths that still
 succeed, and error paths. The refusal step makes the last of these first-class:
 
+<!-- riddl-domain-prelude
+user Customer is "a shopper using the store"
+-->
+<!-- riddl: in-domain -->
 ```riddl
 epic PlaceOrder is {
   user Customer wants to "purchase items in cart"
   so that "they receive products they need"
 
-  case HappyPath   is { ??? }
-  case OutOfStock  is { ??? }
-  case PaymentFailed is { ??? }
+  case HappyPath is {
+    user Customer wants to "check out with everything in stock"
+    so that "the order is placed"
+    ???
+  }
+  case OutOfStock is {
+    user Customer wants to "be told an item is unavailable"
+    so that "they can choose a substitute"
+    ???
+  }
+  case PaymentFailed is {
+    user Customer wants to "retry a declined payment"
+    so that "the order can still complete"
+    ???
+  }
 }
 ```
+
+Each `case` carries its own user story — the epic's opening story states the
+goal, and each case states the goal of that particular path.
 
 ## Validation
 

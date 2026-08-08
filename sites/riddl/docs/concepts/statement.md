@@ -6,6 +6,10 @@ description: >-
   and the value expressions they operate on.
 ---
 
+<!-- riddl-prelude
+constant MaxItems is Natural = "100"
+-->
+
 A Statement is an action that can be taken in response to a message. Statements
 form the body of an [on clause](onclause.md) which is what
 [handlers](handler.md) are composed of. Statements express the business logic
@@ -83,10 +87,18 @@ everywhere else.
     when count > "5" then ??? end      // fails to parse
     ```
 
-    Name the threshold instead:
+    Name the threshold instead. The constant is a definition, declared
+    alongside the other definitions of its context:
 
+    <!-- riddl: in-context no-prelude=MaxItems -->
     ```riddl
     constant MaxItems is Natural = "100"
+    ```
+
+    and the comparison is a statement, written inside an on-clause:
+
+    <!-- riddl: in-handler -->
+    ```riddl
     when cart.itemCount > MaxItems then error "too many items" end
     ```
 
@@ -204,8 +216,18 @@ yield result CartInfo(cart.id, cart.total)
 application and context handlers. `return` produces a
 [function](function.md)'s result and is valid only in a function body.
 
+They can never appear together — the two scopes are disjoint. `put`, in an
+application or context handler:
+
+<!-- riddl: in-application -->
 ```riddl
 put order.confirmationNumber to output ConfirmationPanel
+```
+
+and `return`, in a function body:
+
+<!-- riddl: in-function -->
+```riddl
 return call function Tax.Compute(subtotal)
 ```
 

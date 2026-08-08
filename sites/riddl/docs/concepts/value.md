@@ -6,6 +6,10 @@ description: >-
   constructors, calls, gets and boolean expressions.
 ---
 
+<!-- riddl-prelude
+constant MaxItems is Natural = "100"
+-->
+
 A value is an expression, in the context of a [statement](statement.md), that
 provides a value to that statement. Values, statements and conditions work
 together to express business logic at an appropriate level of abstraction —
@@ -116,10 +120,18 @@ everywhere else in the language.
     literal. This is enforced at **parse** time, so `count > 5`,
     `count > "5"`, `count > true` and `count > R(1)` all fail to parse.
 
-    To compare against a fixed value, name it:
+    To compare against a fixed value, name it. The constant is a definition,
+    declared alongside the other definitions of its context:
 
+    <!-- riddl: in-context no-prelude=MaxItems -->
     ```riddl
     constant MaxItems is Natural = "100"
+    ```
+
+    and the comparison is a statement, written inside an on-clause:
+
+    <!-- riddl: in-handler -->
+    ```riddl
     when cart.itemCount > MaxItems then error "too many items" end
     ```
 

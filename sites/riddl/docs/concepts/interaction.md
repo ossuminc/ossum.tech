@@ -25,6 +25,18 @@ Interactions serve to:
 Every interaction is introduced by the `step` keyword, followed by one of the
 ten step forms:
 
+<!-- riddl-prelude
+record OrderData is { confirmationNumber is String }
+command ProcessPayment is { note is String }
+entity PaymentService is { ??? }
+entity OrderService is { ??? }
+page Storefront is {
+  page Cart is { ??? }
+  form PaymentDetails acquires type OrderData
+  document Confirmation shows type OrderData
+}
+-->
+<!-- riddl: in-epic -->
 ```riddl
 case PlaceOrder is {
   user Customer wants to "check out" so that "the order is placed"
@@ -71,6 +83,7 @@ to be AI-translatable into a test, and warns when it is not. See
 New in RIDDL 2.0. A refusal models a system element declining a user's
 request:
 
+<!-- riddl: in-usecase no-prelude -->
 ```riddl
 step entity Cart refuses user Customer "the item is out of stock"
 ```

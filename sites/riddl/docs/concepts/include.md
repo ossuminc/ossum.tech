@@ -66,8 +66,9 @@ domain ECommerce is {
 ```
 
 **types/common-types.riddl**
+<!-- riddl: in-context -->
 ```riddl
-type Money is { amount: Decimal, currency: CurrencyCode }
+type Money is { amount: Decimal(10,2), currency: CurrencyCode }
 type CurrencyCode is any of { USD, EUR, GBP, JPY }
 type Address is {
   street: String,
