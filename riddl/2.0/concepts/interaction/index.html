@@ -5563,6 +5563,18 @@ actions between users, entities, and other system components.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <p>Every interaction is introduced by the <code>step</code> keyword, followed by one of the
 ten step forms:</p>
+<!-- riddl-prelude
+record OrderData is { confirmationNumber is String }
+command ProcessPayment is { note is String }
+entity PaymentService is { ??? }
+entity OrderService is { ??? }
+page Storefront is {
+  page Cart is { ??? }
+  form PaymentDetails acquires type OrderData
+  document Confirmation shows type OrderData
+}
+-->
+<!-- riddl: in-epic -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">case</span> <span class="n">PlaceOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;check out&quot;</span> <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;the order is placed&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -5649,6 +5661,7 @@ to be AI-translatable into a test, and warns when it is not. See
 <h3 id="refusal">Refusal<a class="headerlink" href="#refusal" title="Permanent link">&para;</a></h3>
 <p>New in RIDDL 2.0. A refusal models a system element declining a user's
 request:</p>
+<!-- riddl: in-usecase no-prelude -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
 </span></code></pre></div>
 <p>Before it existed, the error branch of a use case — often the most interesting

@@ -5481,6 +5481,7 @@ it presents:</p>
 <h2 id="writing-to-an-output">Writing to an Output<a class="headerlink" href="#writing-to-an-output" title="Permanent link">&para;</a></h2>
 <p>A <a href="../handler/">handler</a> publishes a value to an output with the <code>put</code>
 statement, which is valid in application and context handlers:</p>
+<!-- riddl: in-app-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">on</span> <span class="kd">query</span> <span class="n">GetReceipt</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">put</span> <span class="n">order</span><span class="p">.</span><span class="n">confirmationNumber</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">Receipt</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>

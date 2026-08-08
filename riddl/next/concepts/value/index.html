@@ -5558,6 +5558,10 @@
 
   <h1>Value</h1>
 
+<!-- riddl-prelude
+constant MaxItems is Natural = "100"
+-->
+
 <p>A value is an expression, in the context of a <a href="../statement/">statement</a>, that
 provides a value to that statement. Values, statements and conditions work
 together to express business logic at an appropriate level of abstraction —
@@ -5675,10 +5679,15 @@ everywhere else in the language.</p>
 reference, a <code>get from</code>, or a named <a href="../constant/">constant</a> — never a
 literal. This is enforced at <strong>parse</strong> time, so <code>count &gt; 5</code>,
 <code>count &gt; "5"</code>, <code>count &gt; true</code> and <code>count &gt; R(1)</code> all fail to parse.</p>
-<p>To compare against a fixed value, name it:</p>
+<p>To compare against a fixed value, name it. The constant is a definition,
+declared alongside the other definitions of its context:</p>
+<p><!-- riddl: in-context no-prelude=MaxItems -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many items&quot;</span> <span class="kr">end</span>
-</span></code></pre></div>
+</span></code></pre></div></p>
+<p>and the comparison is a statement, written inside an on-clause:</p>
+<p><!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many items&quot;</span> <span class="kr">end</span>
+</span></code></pre></div></p>
 <p>The point is to remove magic constants from models and to make every
 comparison check the types on both sides. <code>==</code> and <code>!=</code> require operands
 of the same category; <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> and <code>&gt;=</code> require an ordered numeric
