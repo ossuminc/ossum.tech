@@ -6,22 +6,22 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1. Annotate the concept pages with fence directives
+## 1. Annotate the remaining RIDDL fences outside `concepts/`
 
-**What:** The ~50 pages under `sites/riddl/docs/concepts/` carry no per-fence
-`<!-- riddl: ... -->` directives, so `validate-riddl-examples.py` cannot gate
-them. Under `--auto`, 26 fences fail site-wide against rc.9.
+**What:** `sites/riddl/docs/concepts/` is now fully gated (56 validated, 76
+skipped, 0 failed). `language-reference.md` is not: **3 fences fail** and are
+pre-existing, unrelated to the concepts work.
 
-**Why it is not urgent:** No file is above three failures, which is the agreed
-threshold, and the failures are dominated by fragments that reference
-definitions the page deliberately does not show — those need a per-page
-`<!-- riddl-prelude ... -->`, not a correction.
+**Verified 2026-08-08:** the 3 are `language-reference.md` at the fences on
+lines 861 (`in-context`), 1549 and 2138 (both `standalone`). Baselined against
+`git show HEAD:scripts/validate-riddl-examples.py` to confirm they predate the
+new wrapper kinds — they are not a regression from that work.
 
-**Verified:** Counted this session; `quickstart.md` is fully annotated and
-validates clean on both 2.0 and 1.31. See CLAUDE.md § "Compiling RIDDL
-examples" for the directive table.
+**Also open:** `check-riddl-blocks.py` flags two items in
+`tutorials/rbbq/restaurant/online-ordering.md` (`state ... of O` without a
+record; a `prompt "` statement). Advisory, left alone as out of scope.
 
-**Order:** Independent. Pick pages with the most fences first.
+**Order:** Independent of everything else.
 
 ---
 

@@ -11,66 +11,64 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-04
+## HANDOFF — as of 2026-08-08
 
-**State:** branch `main`, clean, **0 commits ahead of `origin/main`** — the
-invariant/`initial handler` documentation work is committed and pushed. Open
-work lives in **`BACKLOG.md`** (new this session, tracked); durable facts in
-CLAUDE.md.
+**State:** branch `main`, clean, **3 commits ahead of `origin/main`** — not
+pushed. The concept-page gating work is committed in three parts: the validator
+wrappers, the doc corrections, the path-resolution reference.
 
-**`task/` is empty.** Everything is in `task/done/`. Tasks A–K closed.
+**`task/` is empty.** Everything is in `task/done/`.
 
-**Nothing is in flight.** The session finished a complete round trip with riddl
-and re-verified the result. Safe to start anything.
+**Nothing is in flight.** Open work is in `BACKLOG.md`.
 
-### The trap that bit twice today
+### What is now true
 
-**riddl `release/2` moves several times a day, and a doc note that says "not
-supported yet" is stale within hours.** This session shipped three such notes
-and had to remove all three the same evening, after riddl fixed both bugs we
-filed and restaged the binary.
-
-Before writing *anything* conditional on riddlc's behavior:
+`sites/riddl/docs/concepts/` is **fully gated** — 56 fences validated, 76
+skipped, 0 failed, exit 0, against `../bin/riddlc` at rc.9-54. Re-run with:
 
 ```bash
-ls -la ../bin/riddlc                 # restaged? compare to your last check
-git -C ../riddl log --oneline -3     # what landed
-diff sites/riddl/docs/references/riddl-grammar.ebnf \
-     ../riddl/language/src/main/resources/riddl/grammar/ebnf-grammar.ebnf
+python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/concepts/*.md
 ```
 
-The grammar copy drifted **twice in one day**. Do not refresh it with `sbt
-extractGrammar` — that resolves the *published* 1.x library and would look
-successful. BACKLOG item 3 has the correct command.
+`language-reference.md` still has **3 pre-existing failures** (BACKLOG 1).
+Baselined against the committed validator to prove they are not a regression —
+**do that before blaming a wrapper change for a failure**, it took one command
+and settled it:
 
-### Verified this session, against `2.0.0-rc.9-54-64b7b413`
+```bash
+git show <rev>:scripts/validate-riddl-examples.py > /tmp/base.py
+python3 /tmp/base.py ../bin/riddlc <file.md>
+```
 
-All by compiling, not by reading:
+### Traps this session paid for
 
-- `when not invariant X then` and bare `when not X` — **both** valid; the
-  `invariant` keyword is optional in a condition, and `with <expr>` is optional
-  even for a `requires <type>` invariant. A condition *asks*; a `require`
-  *applies* and must be handed its data.
-- Duplicate entity-scope `initial` handlers — Error at **any** state count.
-- `requires type T` and bare `requires T` — **both** valid;
-  `aggregate_use_case` includes `"type"`. See BACKLOG item 4; we briefly
-  believed otherwise.
+- **`--auto` reports the LAST wrapping it tried, not the relevant one.** All 15
+  initial failures showed an identical `interactions` error, which looked like
+  one systemic bug and was an artifact. It is a *measurement* mode; diagnose
+  fences one at a time.
+- **A green fence can mean nothing was checked.** `use-case.md:85` passed while
+  referring to five definitions that did not exist — riddlc does not resolve
+  references inside `sequence`/`parallel`/`optional`. Filed with riddl.
+- **`check-riddl-blocks.py` is much weaker than it looks.** It reported all 129
+  concept fences clean while two carried retired 1.x `then`-chains. Only
+  compiling finds this class of error; do not read its "clean" as coverage.
+- **A shared wrapper is load-bearing.** Injecting the ordinary prelude at domain
+  level broke 4 fences in `language-reference.md`. Wrapper vocabulary may be
+  ADDED but never renamed, and a change must be re-baselined against every page
+  that uses that kind, not just the page in hand.
+- **`[severe] empty(1:1->1)` means an exception was thrown in a pass**, not a
+  language error — `Pass.scala` catches NonFatal and emits the stack trace,
+  which can render empty. Bisect the model; do not read the message.
+- **Do not trust an exit code read through a pipeline.** `riddlc ... | head;
+  echo $?` reports `head`'s status. It made a failing compile look like a silent
+  pass, and the wrong claim reached Reid before being corrected.
 
-### Certainty
+### Filed with riddl (in `../riddl/task/`)
 
-Verified by compiling: every RIDDL example in the six pages changed today.
-Verified by command: all five sites build `--strict` clean, 80 cross-site
-links resolve, `check-riddl-blocks.py` clean on every edited page.
-**Assumed, not verified:** that the ~50 unannotated concept pages still fail at
-the counts recorded in BACKLOG item 1 — that number predates rc.9-54.
-
-### Lesson worth not relearning
-
-A failed compile proves the **spelling** wrong, not the **feature** missing.
-`when not invariant X` failed, and we wrote it up — in the docs and in a riddl
-task — as "invariants cannot be named in conditions". The bare form had worked
-all along. Try the other spellings before concluding a capability is absent;
-the negative test is cheap and we skipped it.
+- `2026-08-08-empty-severe-on-dotted-path-through-function.md` — root-caused to
+  an `Option` cast to `Seq` in `findMatchingCandidate`'s Function arm.
+- `2026-08-08-refs-unresolved-inside-interaction-groups.md` — the silent one,
+  and the more serious.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
