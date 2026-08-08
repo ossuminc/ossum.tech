@@ -32,7 +32,10 @@ description: >-
     record CheckoutOutcome is { ok is Boolean }
     command ProcessPayment is { orderId is OrderId }
     command RefundPayment is { orderId is OrderId }
+    command ReserveItems is { orderId is OrderId }
+    command ReleaseItems is { orderId is OrderId }
     entity PaymentService is { ??? }
+    entity Inventory is { ??? }
 -->
 
 
@@ -861,9 +864,7 @@ ordinary type ascription. Within the body the name denotes the whole message:
 ```riddl
 handler H is {
   on ord: command PlaceOrder {
-    when ord.total > MinimumOrder then
-      yield event OrderPlaced(id = ord.id)
-    end
+    yield event OrderPlaced(id = ord.id, total = ord.total)
   }
 }
 ```
@@ -1546,17 +1547,26 @@ function CalculateTotal is {
 
 Sagas coordinate multi-step processes with compensation:
 
+<!-- riddl: in-context -->
 ```riddl
 saga CheckoutProcess is {
   requires record CheckoutInputs
   returns record CheckoutOutcome
 
-  step ProcessPayment is {
+  step TakePayment is {
     tell command ProcessPayment(orderId) to entity PaymentService
   } reverted by {
     tell command RefundPayment(orderId) to entity PaymentService
   } with {
     briefly as "Processes payment for the order"
+  }
+
+  step ReserveStock is {
+    tell command ReserveItems(orderId) to entity Inventory
+  } reverted by {
+    tell command ReleaseItems(orderId) to entity Inventory
+  } with {
+    briefly as "Holds the items until payment settles"
   }
 } with {
   option is compensate
@@ -2135,16 +2145,20 @@ than one in a single scope is an **Error**.
 Metadata goes in a `with { }` block **after** the closing brace of the
 definition:
 
+<!-- riddl: in-context -->
 ```riddl
 event-sourced entity Product is {
   // Entity definition content
+  ???
 } with {
   briefly as "Product available for purchase"
   described by {
     | Represents a product in the catalog that customers can purchase.
   }
   by author Reid
-  term SKU is { | Stock Keeping Unit, the unique identifier for a variant }
+  term SKU is {
+    | Stock Keeping Unit, the unique identifier for a variant
+  }
 }
 ```
 

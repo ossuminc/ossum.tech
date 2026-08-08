@@ -82,7 +82,20 @@ than typed references.
 
 Steps may be grouped to express ordering semantics:
 
-<!-- riddl: in-epic no-prelude -->
+<!-- riddl-prelude
+record OrderData is { total is Natural }
+command Charge is { total is Natural }
+command ReserveStock is { total is Natural }
+command NotifyWarehouse is { total is Natural }
+entity Billing is { ??? }
+entity Inventory is { ??? }
+entity Shipping is { ??? }
+page Storefront is {
+  form Payment acquires type OrderData
+  document GiftOptions shows type OrderData
+}
+-->
+<!-- riddl: in-epic -->
 ```riddl
 case Checkout is {
   user Customer wants to "pay" so that "the order ships"
