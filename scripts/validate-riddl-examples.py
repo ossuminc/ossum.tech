@@ -14,18 +14,30 @@ readers.
     <!-- riddl: in-handler -->        wrap deep enough to be inside an on-clause
     <!-- riddl: in-clauses -->        wrap in a handler (for `on ...` clause fragments)
     <!-- riddl: in-usecase -->        wrap in an epic + use case (for interaction steps)
+    <!-- riddl: in-epic -->           wrap in an epic (for a whole `case`)
+    <!-- riddl: in-epic-story -->     give each bare user story an epic of its own
     <!-- riddl: in-app-context --> wrap in an `application` context (for groups)
     <!-- riddl: in-application -->    as in-handler, but an `application` context (for `put`)
+    <!-- riddl: in-app-clauses -->    as in-clauses, but an `application` handler
     <!-- riddl: in-function -->       wrap in a function body (for `return`)
     <!-- riddl: in-record -->         wrap in a record (for a bare field declaration)
     <!-- riddl: skip -->              not RIDDL, or deliberately invalid
     <!-- riddl: skip reason=... -->   same, with the reason recorded
 
 A page may also declare a PRELUDE: definitions that fragments reference but
-do not show. It is injected into the wrapper alongside the fence body.
+do not show. It is injected into the wrapper alongside the fence body, at
+CONTEXT level.
 
     <!-- riddl-prelude
     record Thing is { a is String }
+    -->
+
+Domain-level vocabulary is declared separately, and is read ONLY by
+in-domain. The two cannot be one block: a `user` is legal only in a domain,
+a `record` only in a context.
+
+    <!-- riddl-domain-prelude
+    user Customer is "a shopper"
     -->
 
 A fence that DEFINES a name the prelude also supplies collides with it --
@@ -61,6 +73,12 @@ FENCE = re.compile(
 )
 DIRECTIVE = re.compile(r"<!--\s*riddl:\s*(?P<what>[a-z-]+)(?P<rest>[^>]*)-->", re.IGNORECASE)
 PRELUDE = re.compile(r"<!--\s*riddl-prelude\s*\n(?P<body>.*?)-->", re.DOTALL | re.IGNORECASE)
+# Domain-level vocabulary is a SEPARATE declaration, not the same prelude at a
+# different depth: a `user` is legal only in a domain and a `record` only in a
+# context, so one block cannot serve both. in-domain reads only this one.
+DOMAIN_PRELUDE = re.compile(
+    r"<!--\s*riddl-domain-prelude\s*\n(?P<body>.*?)-->", re.DOTALL | re.IGNORECASE
+)
 NO_PRELUDE = re.compile(r"no-prelude(?:=(?P<names>[A-Za-z0-9_,]+))?")
 # The head of a top-level prelude entry: a keyword and the name it defines.
 PRELUDE_ENTRY = re.compile(
@@ -105,7 +123,7 @@ def directive_for(text: str, fence_start: int) -> tuple[str, str]:
     return m.group("what").lower(), m.group("rest").strip()
 
 
-def wrap(kind: str, body: str, prelude: str) -> str:
+def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
     """Nest a fragment deep enough to be a whole model.
 
     The prelude always lands at CONTEXT level, whatever the depth, because
@@ -125,12 +143,23 @@ def wrap(kind: str, body: str, prelude: str) -> str:
     AUTHOR = '  author Reid is { name is "Reid Spencer" email is "reid@ossuminc.com" }\n'
 
     if kind == "in-function":
-        # `return` is legal only in a function body.
+        # `return` is legal only in a function body. A `Tax.Compute` is
+        # supplied because `return call function ...` is the form the docs
+        # use; it must resolve AND agree with the enclosing function's return
+        # type, hence `returns Tax.TaxIn`. Tax is a sibling CONTEXT, not a
+        # nested function: rc.9-54 fails internally on a call to a nested
+        # function by dotted path, emitting a bare `[severe] empty(1:1->1)`.
+        # TaxIn has exactly one field because the call passes one argument.
         return (
-            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
-            "    record FnInput is { note is String }\n"
+            "domain Example is {\n" + AUTHOR +
+            "  context Tax is {\n"
+            "    record TaxIn is { subtotal is Natural }\n"
+            "    function Compute is { requires TaxIn returns TaxIn ??? }\n"
+            "  }\n"
+            "  context Example is {\n" + pre + "\n"
+            "    record FnInput is { note is String, subtotal is Natural }\n"
             "    function ExampleFunction is {\n"
-            "      requires FnInput returns FnInput\n"
+            "      requires FnInput returns Tax.TaxIn\n"
             + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
         )
@@ -149,16 +178,91 @@ def wrap(kind: str, body: str, prelude: str) -> str:
         # `put ... to output` is legal only in an application/context handler.
         return (
             "domain Example is {\n" + AUTHOR + "  application context Example is {\n" + pre + "\n"
+            "    record OrderData is { confirmationNumber is String }\n"
             "    record ExampleData is { note is String }\n"
-            "    command ExampleCommand is { note is String }\n"
+            "    command ExampleCommand is { note is String, order is OrderData }\n"
             "    page ExamplePage is {\n"
-            "      document ExampleOutput shows type String\n"
-            "      form ExampleInput accepts type String\n"
+            # `shows type X` needs a resolvable Type: a predefined name like
+            # String is not in the symbol table here.
+            "      document ExampleOutput shows type ExampleData\n"
+            "      document ConfirmationPanel shows type OrderData\n"
+            "      form ExampleInput accepts type ExampleData\n"
             "    }\n"
             "    handler ExampleHandler is {\n"
             "      on command ExampleCommand {\n"
             + ind(body, 8) + "\n"
             "      }\n    }\n  }\n}\n"
+        )
+    if kind == "in-app-clauses":
+        # An `on ...` clause in an APPLICATION handler. in-clauses is NOT the
+        # same thing: it builds an ENTITY handler, where `put` is not in the
+        # statement set and an output cannot exist -- outputs live in a page
+        # or group, which only an application context may hold.
+        # `order` is a field of the handled query because `put order.field`
+        # resolves its root against the handled message.
+        return (
+            "domain Example is {\n" + AUTHOR +
+            "  application context Example is {\n" + pre + "\n"
+            "    record OrderData is { confirmationNumber is String }\n"
+            "    query GetReceipt is { order is OrderData }\n"
+            "    page ExamplePage is {\n"
+            "      document Receipt shows type OrderData\n"
+            "    }\n"
+            "    handler ExampleHandler is {\n"
+            + ind(body, 6) + "\n"
+            "    }\n  }\n}\n"
+        )
+    if kind == "in-epic-story":
+        # A bare user story, or a MENU of them showing alternative spellings.
+        # An epic admits exactly one opening story -- `epic_body = user_story
+        # {epic_definitions}`, and a second story is not an epic_definition --
+        # so each story here gets an epic of its own. A line beginning `user`
+        # starts a new story; anything else continues the current one, which
+        # is how a story with its `so that` on the next line stays intact.
+        stories: list[list[str]] = []
+        for ln in body.split("\n"):
+            if ln.strip().startswith("user ") or not stories:
+                stories.append([ln])
+            else:
+                stories[-1].append(ln)
+        epics = ""
+        for n, story in enumerate(stories):
+            text = "\n".join(story).strip()
+            if not text:
+                continue
+            epics += (
+                f"  epic ExampleEpic{n} is {{\n" + ind(text, 4) + "\n"
+                "    case ExampleCase is {\n"
+                "      user Customer wants to \"do a thing\" so that \"a benefit follows\"\n"
+                "      ???\n"
+                "    }\n  }\n"
+            )
+        return (
+            "domain Example is {\n" + AUTHOR +
+            "  user Customer is \"a customer\"\n"
+            "  user Auditor is \"an auditor\"\n"
+            "  user Guest is \"a guest\"\n"
+            + epics + "}\n"
+        )
+    if kind == "in-epic":
+        # A user story, or a whole `case`, lives in an epic -- which is a
+        # DOMAIN-level definition, so no context wrapper will hold it. The
+        # epic's own opening user story is mandatory (epic_body = user_story
+        # {epic_definitions}), so the wrapper supplies one before the body.
+        # The context carries the `application` intention so that a page
+        # prelude may define the pages, forms and documents an interaction
+        # step refers to -- `group` is a context_definition, but RIDDL 2.0
+        # admits it only in an application context.
+        return (
+            "domain Example is {\n" + AUTHOR +
+            "  user Customer is \"a customer\"\n"
+            "  application context Example is {\n" + pre + "\n"
+            "    entity Cart is { ??? }\n"
+            "  }\n"
+            "  epic ExampleEpic is {\n"
+            "    user Customer wants to \"do a thing\" so that \"a benefit follows\"\n"
+            + ind(body, 4) + "\n"
+            "  }\n}\n"
         )
     if kind == "in-record":
         # A bare field declaration, e.g. `items is many Item`.
@@ -198,10 +302,15 @@ def wrap(kind: str, body: str, prelude: str) -> str:
         )
     if kind == "in-handler":
         # Statement-level fragment: give it an on-clause to live in.
+        # The handled command carries a nested `cart` record so that the
+        # dotted references docs actually write -- `cart.itemCount` -- have
+        # something to resolve against. Fields are only ever ADDED here: an
+        # extra field cannot break a fence that ignores it, but a renamed one
+        # would break every fence that used the old name.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
-            "    record ExampleData is { note is String }\n"
-            "    command ExampleCommand is { note is String }\n"
+            "    record ExampleData is { note is String, itemCount is Natural }\n"
+            "    command ExampleCommand is { note is String, cart is ExampleData }\n"
             "    entity ExampleEntity is {\n"
             "      state ExampleState of record ExampleData is {\n"
             "        handler ExampleHandler is {\n"
@@ -221,7 +330,12 @@ def wrap(kind: str, body: str, prelude: str) -> str:
             + ind(body, 4) + "\n  }\n}\n"
         )
     if kind == "in-domain":
-        return "domain Example is {\n" + AUTHOR + ind(body, 2) + "\n}\n"
+        # Reads riddl-domain-prelude, NOT riddl-prelude: what an in-domain
+        # fence needs supplied is domain-level vocabulary -- a `user` an
+        # epic's story refers to -- and the ordinary prelude holds
+        # context-level definitions that are illegal at this depth.
+        dom_pre = ind(domain_prelude.strip(), 2) + "\n" if domain_prelude.strip() else ""
+        return "domain Example is {\n" + AUTHOR + dom_pre + ind(body, 2) + "\n}\n"
     # standalone: complete by definition, so the prelude is NOT injected --
     # a page prelude holds context-level definitions, and those are illegal at
     # root, which would break the very fences that need no help.
@@ -267,6 +381,7 @@ def main() -> int:
         md = Path(f)
         text = md.read_text(encoding="utf-8")
         prelude = "\n".join(m.group("body") for m in PRELUDE.finditer(text))
+        dom_prelude = "\n".join(m.group("body") for m in DOMAIN_PRELUDE.finditer(text))
 
         for fm in FENCE.finditer(text):
             line = text[: fm.start()].count("\n") + 1
@@ -294,12 +409,12 @@ def main() -> int:
                 # measure how many fences are genuinely wrong on pages that
                 # do not yet carry directives.
                 ok, detail = False, ""
-                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-app-context", "in-application", "in-function", "in-record", "in-clauses", "in-usecase"):
-                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude))
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-app-context", "in-application", "in-app-clauses", "in-function", "in-record", "in-clauses", "in-usecase", "in-epic", "in-epic-story"):
+                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude, dom_prelude))
                     if ok:
                         break
             else:
-                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), fence_prelude))
+                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), fence_prelude, dom_prelude))
             if not ok:
                 failed += 1
                 print(f"\nFAIL {md}:{line}  (riddl: {kind})")
