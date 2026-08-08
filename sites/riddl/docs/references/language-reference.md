@@ -288,7 +288,94 @@ types an entity's state and supplies the payload of a `morph`.
 
 ## Naming Rules
 
+### How a path identifier resolves
+
+Every reference names its target with a **path identifier**: one or more
+identifiers separated by dots, such as `Tax.TaxIn` or `Outer.Deep.Leaf`. A
+single name and a dotted path resolve by different rules, so they are worth
+taking separately.
+
+#### A single name searches the whole model
+
+One identifier with no dots is looked up in the **symbol table** — a dictionary
+of every name defined anywhere in the model. If exactly one definition carries
+that name, that is the answer, wherever it lives. If more than one does, the
+reference is an **ambiguity error** listing the candidates; if none does, it is
+a not-found error.
+
+This is why a bare name can reach a definition in a *sibling* context without
+naming it, and why adding a definition elsewhere in the model can turn a
+working bare reference into an ambiguous one. To make a reference immune to
+that, qualify it.
+
+#### A dotted path anchors, then walks down
+
+A path of two or more names is resolved in two phases.
+
+**Phase 1 — anchor on the first name**, tried in this order:
+
+1. The literal name `Root` anchors at the root of the model, which makes the
+   rest of the path absolute.
+2. Otherwise, if the name matches one of the **ancestors** of the place the
+   reference is written, that ancestor is the anchor. The ancestor **closest**
+   to the reference wins.
+3. Otherwise the name is looked up in the symbol table, exactly as a single
+   name is: unique anchors the path, ambiguous is an error, absent is an error.
+
+Steps 1 and 2 are the guaranteed forms — they depend only on where the
+reference is written, so they cannot be broken by a definition added elsewhere.
+Step 3 is the convenient one, and carries the same ambiguity risk as any bare
+name.
+
+**Phase 2 — walk down, one name at a time.** Each remaining name must be found
+among the contents of the definition named before it. There is no scope-popping
+after the anchor: `Tax.TaxIn` means "anchor `Tax`, then look for `TaxIn` inside
+it", and if `Tax` has no `TaxIn` the path fails there, even when a `TaxIn`
+exists elsewhere in the model.
+
+<!-- riddl: in-domain -->
+```riddl
+context Tax is {
+  record TaxIn is { subtotal is Natural }
+}
+context Billing is {
+  // `Tax` anchors via the symbol table, then `TaxIn` is
+  // sought among Tax's own contents.
+  record Invoice is { amount is Tax.TaxIn }
+}
+```
+
+#### What counts as "inside" depends on the kind
+
+For most definitions the contents are just the definitions written inside the
+braces. Several kinds contribute something else, so that paths follow the model
+rather than the syntax:
+
+| Anchoring definition | What the next name may match |
+|---|---|
+| **State** | its own contents (handlers, invariants) **first**, then the fields of the record it is `of` — so a handler shadows a same-named field |
+| **on-clause** | the fields of the message being handled |
+| **Field**, **Constant**, **Type** | the members of its type expression |
+| **Inlet**, **Outlet** | the members of the type it carries |
+| **Function** | its own definitions, plus the fields of a deprecated inline `requires`/`returns` aggregation |
+| **Include** | the definitions the included file contributes, as though written in place |
+
+Because a State's own contents are searched before the record's fields, a
+handler named the same as a field is reached by a path, and the field is not.
+The nearer declaration wins.
+
 ### Sibling names must be unique, regardless of kind
+
+This rule exists **because** of how paths resolve. Each step of a dotted path
+picks a definition out of a container by name alone — the kind is never part of
+the choice — so two definitions sharing a name in one container would leave the
+step with nothing to decide on.
+
+Uniqueness among siblings is what makes that step well-defined. It does **not**
+make a *bare* name unambiguous, since a bare name is looked up across the whole
+model: two definitions of the same name in different containers are perfectly
+legal, and a bare reference to that name is then an ambiguity error at the
+point of use rather than at either definition.
 
 Two definitions in the same container may not share a name, even when they are
 different kinds of thing:
