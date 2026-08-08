@@ -13,11 +13,18 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-08
 
-**State:** branch `main`, clean. The concept-page gating work is pushed; the
-rc.10 upgrade on top of it is committed and **not yet pushed**.
+**State:** branch `main`, clean, everything pushed (`aa33647`).
 
-**Compiler: `../bin/riddlc` is `2.0.0-rc.10-43-9f19dbda`** (`riddlc version`).
-The grammar copy was re-synced to match — by `cp`, never `sbt extractGrammar`.
+**Compiler: `../bin/riddlc` is `2.0.0-rc.10-43-9f19dbda`** — run `riddlc
+version`, it is restaged often. `build.sbt`'s `With.Riddl.library` pin must
+name the SAME version, or the docs describe a grammar the examples were never
+checked against.
+
+**Refresh the grammar ONLY with `sbt extractGrammar`,** after bumping that pin.
+**Never `cp` it from `../riddl`** — that is a live working tree, and on
+2026-08-08 it held an uncommitted `yields`/`replies` split present in no commit
+and no build. A copy would have documented a language that does not exist and
+looked successful. CLAUDE.md § "Things that will bite" has the recipe.
 
 **`task/` is empty.** Everything is in `task/done/`.
 
@@ -25,15 +32,18 @@ The grammar copy was re-synced to match — by `cp`, never `sbt extractGrammar`.
 
 ### What is now true
 
-`sites/riddl/docs/concepts/` is **fully gated** — 56 fences validated, 76
-skipped, 0 failed, exit 0, against `../bin/riddlc` at rc.9-54. Re-run with:
+`concepts/`, `quickstart.md` and `references/language-reference.md` are **fully
+gated** — 84 fences validated, 127 skipped, 0 failed, exit 0, against rc.10-43.
+Re-run with:
 
 ```bash
-python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/concepts/*.md
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
+  sites/riddl/docs/concepts/*.md sites/riddl/docs/quickstart.md \
+  sites/riddl/docs/references/language-reference.md
 ```
 
-`language-reference.md` is green too, as of the rc.10 upgrade. Remaining
-ungated trees are in BACKLOG 1.
+The 1.31 line is unaffected and still green under its own 1.31 compiler.
+Remaining ungated trees — `tutorials/rbbq/` chief among them — are in BACKLOG 1.
 
 **Baseline before blaming a wrapper change for a failure.** One command settles
 whether a failure is yours or pre-existing:
@@ -45,6 +55,13 @@ python3 /tmp/base.py ../bin/riddlc <file.md>
 
 ### Traps this session paid for
 
+- **A recorded warning can be stale; check its premise before obeying it.**
+  Three places here said `sbt extractGrammar` resolves a *published 1.x*
+  library and would clobber the 2.0 grammar. True when the pin was 1.29.0, and
+  false for a long time since — `build.sbt`'s own comment said so. Acting on
+  the note instead of reading the build produced a `cp` that was correct only
+  by luck of timing. Same shape as the rc.9 lesson below about a failed
+  compile: the note tells you what someone once found, not what is true now.
 - **`--auto` reports the LAST wrapping it tried, not the relevant one.** All 15
   initial failures showed an identical `interactions` error, which looked like
   one systemic bug and was an artifact. It is a *measurement* mode; diagnose
