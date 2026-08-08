@@ -121,7 +121,7 @@ type_expression_alternatives = infix_alternation | predefined_types | pattern_ty
     aggregation | aggregate_use_case_type_expression | aliased_type_expression ;
 
 (* Predefined Types *)
-predefined_types = string_type | currency_type | url_type | integer_predef_types | real_predef_types | time_predef_types | zoned_predef_types | decimal_type | other_predef_types ;
+predefined_types = string_type | currency_type | url_type | integer_predef_types | real_predef_types | time_predef_types | zoned_predef_types | decimal_type | blob_type | other_predef_types ;
 string_type = "String" ["(" [integer] "," [integer] ")"] ;
 currency_type = "Currency" "(" iso_country_code ")" ;
 url_type = "URL" ["(" literal_string ")"] ;
@@ -150,6 +150,11 @@ replica_type = "replica" "of" replica_type_expression ;
 replica_type_expression = integer_predef_types | mapping_from_to | a_set_type ;
 range_type = "range" "(" [integer] "," [integer] ")" ;
 decimal_type = "Decimal" "(" integer "," integer ")" ;
+(* Opaque bulk content of a declared kind. NOTE the capitalization contrast with `range_type`
+   above: `Blob(...)` is a predefined TYPE and capitalized like its peers, while `range(n,m)` is
+   lowercase because it is keyword-introduced. A capitalized `Range` is NOT a type. *)
+blob_type = "Blob" "(" blob_kind ")" ;
+blob_kind = "Text" | "XML" | "JSON" | "Image" | "Audio" | "Video" | "CSV" | "FileSystem" ;
 alternation = "one" ["of"] "{" alternation_contents "}" ;
 (* `A | B` is the same Alternation in infix notation. Accepted, but NOT canonical: the
    prettifier emits the braced form above, so RIDDL stays readable to non-programmers.
@@ -160,6 +165,12 @@ entity_reference_type = "reference" ["to"] ["entity"] path_identifier ;
 aggregation = "{" aggregate_definitions "}" ;
 aggregate_definitions = undefined | {aggregate_content [","]} ;
 aggregate_content = field | method | comment ;
+(* When this stands as the DIRECT type_expression of a def_of_type -- the "type-first" spelling
+   `type Pay is command { ... }` -- it is DEPRECATED in 2.0 and removed in 3.0. It still parses and
+   yields the SAME node as the kind-first `command Pay is { ... }` (def_of_type_kind_type), which is
+   why prettify emits kind-first for both and a type-first model never round-trips to its own
+   spelling. It is also strictly less expressive: `yields` exists only on def_of_type_kind_type.
+   Nested uses -- an aggregate use case as a FIELD's type expression -- are not affected. *)
 aggregate_use_case_type_expression = aggregate_use_case aggregation ;
 aliased_type_expression = [aggregate_use_case] path_identifier ;
 scala_aggregate_definition = "(" {field [","]} ")" ;
@@ -226,7 +237,11 @@ handler_body = {undefined | handler_contents} ;
 handler_contents = {on_clause | comment} ;
 on_clause = on_init_clause | on_other_clause | on_term_clause | on_activate_clause | on_passivate_clause | on_event_clause | on_message_clause ;
 on_init_clause = "on" "init" is pseudo_code_block [with_metadata] ;
-on_other_clause = "on" "other" is pseudo_code_block [with_metadata] ;
+(* A57: `as <name>` optionally binds the message's ENVELOPE (not the message -- this clause names
+   none). The type is OPTIONAL and is a bare path with no `type` keyword: the colon already says a
+   type follows. When omitted the type comes from `option message_envelope` in scope; when written
+   it must agree with it. Both rules are enforced in validation, not the grammar. *)
+on_other_clause = "on" "other" [ "as" identifier [ ":" path_identifier ] ] is pseudo_code_block [with_metadata] ;
 on_term_clause = "on" "term" is pseudo_code_block [with_metadata] ;
 on_activate_clause = "on" "activate" is pseudo_code_block [with_metadata] ;
 on_passivate_clause = "on" "passivate" is pseudo_code_block [with_metadata] ;
@@ -265,11 +280,17 @@ foreach_statement = "foreach" identifier "in" (field_ref | identifier) "{" {stat
 
 (* Message operations. A54: the message operand is a bare ref or an inline constructor. *)
 message_value = constructor | message_ref ;
+(* A56: `tell` and `send` additionally accept a bare name bound by the enclosing on-clause --
+   `on p: command Ping is { tell p to entity F }` -- so a handler can forward the message it was
+   given. Ordered AFTER message_value because message_ref is keyword-led; a bare path is only
+   tried once `command`/`event`/`query`/`result` has failed. NOT accepted by yield_statement,
+   whose operand is compared against the clause's declared `yields`. *)
+deliverable_message_value = message_value | path_identifier ;
 (* A30: `outlet` is the canonical `send` target (emit on your own outlet; a connector routes it
    to a downstream inlet). The `inlet_ref` form is DEPRECATED (soft, removed in 3.0) but still
    parses; use `tell` for direct delivery to a processor. *)
-send_statement = "send" message_value "to" (outlet_ref | inlet_ref) ;
-tell_statement = "tell" message_value "to" processor_ref ;
+send_statement = "send" deliverable_message_value "to" (outlet_ref | inlet_ref) ;
+tell_statement = "tell" deliverable_message_value "to" processor_ref ;
 yield_statement = "yield" message_value ;
 (* `reply` is the deprecated synonym for `yield`; both parse to the same node *)
 reply_statement = "reply" message_value ;

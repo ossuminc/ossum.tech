@@ -5637,7 +5637,20 @@ the least checkable.</p>
 than typed references.</p>
 <h2 id="grouping-steps">Grouping Steps<a class="headerlink" href="#grouping-steps" title="Permanent link">&para;</a></h2>
 <p>Steps may be grouped to express ordering semantics:</p>
-<!-- riddl: in-epic no-prelude -->
+<!-- riddl-prelude
+record OrderData is { total is Natural }
+command Charge is { total is Natural }
+command ReserveStock is { total is Natural }
+command NotifyWarehouse is { total is Natural }
+entity Billing is { ??? }
+entity Inventory is { ??? }
+entity Shipping is { ??? }
+page Storefront is {
+  form Payment acquires type OrderData
+  document GiftOptions shows type OrderData
+}
+-->
+<!-- riddl: in-epic -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">case</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;pay&quot;</span> <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;the order ships&quot;</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
