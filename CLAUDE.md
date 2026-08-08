@@ -297,9 +297,31 @@ crawlers that every version of every page is the same URL.
   site-wide regression and is not one.
 - **This machine has mkdocs-material Insiders; CI installs the community
   edition.** Do not use Insiders-only features.
-- **`sbt extractGrammar` resolves the *published* riddl library.** Until RIDDL
-  2.0 is published it would overwrite the 2.0 grammar with a 1.x one. See the
-  warning at the task in `build.sbt`.
+- **ALWAYS refresh the grammar with `sbt extractGrammar`. Never `cp` it.**
+  The task resolves the riddl version pinned in `build.sbt`, so its output is
+  reproducible and provably matches a real build:
+
+  ```bash
+  # 1. point build.sbt at the same version as ../bin/riddlc
+  #    With.Riddl.library(version = "<what `riddlc version` prints>")
+  # 2. then
+  sbt extractGrammar
+  ```
+
+  Bumping the pin may require bumping `With.Scala3` to whatever riddl built
+  with — the two lines in `build.sbt` are commented to stay in step.
+
+  **`cp` from `../riddl/.../ebnf-grammar.ebnf` is NOT a fallback.** That path
+  is a live working tree: on 2026-08-08 it held an uncommitted `yields`/
+  `replies` split present in no commit and no build, so a copy would have
+  documented a language that does not exist — and looked perfectly successful.
+  A `cp` is right only by luck of timing.
+
+  (Historical note, so this is not "corrected" back: a warning here used to say
+  extractGrammar resolves a *published 1.x* library and would clobber the 2.0
+  grammar. That was true when the pin was 1.29.0. The pin has been a real 2.0
+  build for some time, snapshot builds land in the local cache via riddl's
+  `publishLocal`, and the stale warning is what caused the `cp` above.)
 
 ### When RIDDL 2.0 ships final
 

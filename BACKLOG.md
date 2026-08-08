@@ -46,24 +46,30 @@ the entries, not just the alias.
 
 ## 3. Re-sync the EBNF grammar whenever riddl's parser changes
 
-**What:** `sites/riddl/docs/references/riddl-grammar.ebnf` is a **copy**. It
-drifted twice in one day this session (invariant `requires` + block form, then
-`invariant_test` as a boolean atom).
+**What:** `sites/riddl/docs/references/riddl-grammar.ebnf` is **generated** from
+the riddl version pinned in `build.sbt`. It moves often while 2.0 is in RC.
 
-**The trap, verified:** `sbt extractGrammar` resolves the **published** riddl
-library, which is 1.x. Running it would replace the 2.0 grammar with a 1.x one
-and look like a successful sync. See the warning at the task in `build.sbt`.
-
-**Do this instead:**
+**Do this, always:**
 ```bash
-cp ../riddl/language/src/main/resources/riddl/grammar/ebnf-grammar.ebnf \
-   sites/riddl/docs/references/riddl-grammar.ebnf
+# 1. set build.sbt's With.Riddl.library(version = ...) to match `riddlc version`
+# 2. then
+sbt extractGrammar
 ```
+
+The pin and `../bin/riddlc` must name the SAME version, or the docs describe a
+grammar the validated examples were never checked against. Bumping the pin may
+require bumping `With.Scala3` to whatever riddl built with.
+
+**Never `cp` it from `../riddl`.** That is a live working tree. Verified
+2026-08-08: it held an uncommitted `yields`/`replies` split that exists in no
+commit and no build, so a copy would have documented a language that does not
+exist, and looked successful. See CLAUDE.md § "Things that will bite".
+
 The file is generated wholesale, so partial syncs are not an option — expect
 unrelated rules to come along.
 
-**When:** Any time riddl reports a grammar change. Worth a diff at session
-start while 2.0 is moving this fast.
+**When:** Any time riddl restages `../bin/riddlc`. Compare `riddlc version`
+against the pin in `build.sbt` at session start.
 
 ---
 
