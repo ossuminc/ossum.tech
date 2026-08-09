@@ -8,6 +8,32 @@ description: >-
 
 <!-- riddl-prelude
 constant MaxItems is Natural = "100"
+constant Zero is Natural = "0"
+constant HighValueThreshold is Natural = "1000"
+type OrderStatus is any of { Pending, InTransit, Delivered }
+record ShippedData is { trackingNumber is String }
+event OrderPlaced is { orderId is String, total is Natural, currency is String }
+event ItemAdded is { sku is String }
+event LineShipped is { sku is String }
+event LoginSucceeded is { who is String }
+event OrderShipped is { orderId is String }
+event Withdrawn is { amount is Natural }
+command Withdraw yields event Withdrawn is { amount is Natural }
+command ProcessOrder is { orderId is String }
+command ProcessPayment is { orderId is String }
+command EscalateReview is { orderId is String }
+result CartInfo is { id is String, total is Natural }
+outlet CartEvents is event ItemAdded
+outlet Events is event LoginSucceeded
+outlet Shipments is event LineShipped
+entity OrderProcessor is { ??? }
+entity Review is { ??? }
+entity PaymentService is { ??? }
+entity Order is {
+  state Shipped of record ShippedData is {
+    handler ShippedHandler is { ??? }
+  }
+}
 -->
 
 A Statement is an action that can be taken in response to a message. Statements
@@ -21,7 +47,7 @@ of your system in a structured but abstract way.
 |-----------|-------------|---------|
 | `when` | Conditional logic with optional else | `when total > Minimum then { ... } end` |
 | `match` | Pattern matching over a typed subject | `match status { case Pending { ... } }` |
-| `foreach` | Bounded iteration over a collection | `foreach line in field order.lines { ... }` |
+| `foreach` | Bounded iteration over a collection | `foreach line in field lines { ... }` |
 | `send` | Emit a message on one of this processor's outlets | `send event X to outlet Events` |
 | `tell` | Deliver a message directly to a processor | `tell command X to entity Y` |
 | `yield` | Produce a command's declared **event** | `yield event Placed(id)` |
@@ -66,7 +92,7 @@ A constructor builds a [message](message.md) or record inline. Arguments are
 positional first, then named, and are checked against the target's fields for
 count, name, order and (best effort) type:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 ```
@@ -112,7 +138,7 @@ everywhere else.
 
 ### When Statement
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 when order.isPaid and not order.isCancelled then {
   send event LoginSucceeded to outlet Events
@@ -141,20 +167,33 @@ non-Boolean condition is an **Error**.
 
 ### Match Statement
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 match order.status {
   case Pending {
     tell command ProcessOrder to entity OrderProcessor
   }
-  case Shipped when order.isPaid {
+  case InTransit when order.isPaid {
     send event OrderShipped to outlet Events
   }
+  default {
+    error "Unknown order status"
+  }
+}
+```
+
+A **comparison** case compares the subject against a constant, so it needs a
+subject the operator accepts — an ordered numeric type for `>=`, not the status
+above:
+
+<!-- riddl: in-handler -->
+```riddl
+match order.total {
   case >= HighValueThreshold {
     tell command EscalateReview to entity Review
   }
   default {
-    error "Unknown order status"
+    do "handle an ordinary order"
   }
 }
 ```
@@ -178,7 +217,7 @@ Alternation — a non-exhaustive match without `default` draws a
 RIDDL's only loop, and deliberately bounded — there is no unbounded iteration
 in the language:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="riddlc rc.10-46 does not put the loop variable in scope; see riddl task 2026-08-09-foreach-loop-variable-not-in-scope" -->
 ```riddl
 foreach line in field order.lines {
   send event LineShipped(sku = line.sku) to outlet Shipments
@@ -198,7 +237,7 @@ cardinality wrapper such as `many` or `optional`.
   the sender's identity
 - **reply** — answer a **query** with its declared result
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 send event ItemAdded to outlet CartEvents
 tell command ProcessPayment(orderId) to entity PaymentService
@@ -240,7 +279,7 @@ return call function Tax.Compute(subtotal)
 
 ### Require and Error
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 require amount > Zero
 require invariant BalanceNonNegative
@@ -264,7 +303,7 @@ ambient scope cannot supply.
     `match` or `foreach` body is its own list. A refusal after an effect in the
     same list is an **Error**.
 
-    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+    <!-- riddl: in-clauses -->
     ```riddl
     on cmd: command Withdraw {
       require cmd.amount > Zero          // refusals first
@@ -327,7 +366,7 @@ neither a refusal nor an effect.
 
 ### Morph and Become (Entity Only)
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 morph entity Order to state Shipped with record ShippedData(trackingNumber)
 become entity Order to handler ShippedHandler

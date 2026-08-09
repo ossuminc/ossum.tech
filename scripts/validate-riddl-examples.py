@@ -178,14 +178,14 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # `put ... to output` is legal only in an application/context handler.
         return (
             "domain Example is {\n" + AUTHOR + "  application context Example is {\n" + pre + "\n"
-            "    record OrderData is { confirmationNumber is String }\n"
+            "    record ExampleOrder is { confirmationNumber is String }\n"
             "    record ExampleData is { note is String }\n"
-            "    command ExampleCommand is { note is String, order is OrderData }\n"
+            "    command ExampleCommand is { note is String, order is ExampleOrder }\n"
             "    page ExamplePage is {\n"
             # `shows type X` needs a resolvable Type: a predefined name like
             # String is not in the symbol table here.
             "      document ExampleOutput shows type ExampleData\n"
-            "      document ConfirmationPanel shows type OrderData\n"
+            "      document ConfirmationPanel shows type ExampleOrder\n"
             "      form ExampleInput accepts type ExampleData\n"
             "    }\n"
             "    handler ExampleHandler is {\n"
@@ -203,10 +203,10 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         return (
             "domain Example is {\n" + AUTHOR +
             "  application context Example is {\n" + pre + "\n"
-            "    record OrderData is { confirmationNumber is String }\n"
-            "    query GetReceipt is { order is OrderData }\n"
+            "    record ExampleOrder is { confirmationNumber is String }\n"
+            "    query GetReceipt is { order is ExampleOrder }\n"
             "    page ExamplePage is {\n"
-            "      document Receipt shows type OrderData\n"
+            "      document Receipt shows type ExampleOrder\n"
             "    }\n"
             "    handler ExampleHandler is {\n"
             + ind(body, 6) + "\n"
@@ -292,8 +292,8 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # An `on ...` clause fragment: give it a handler to sit in.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
-            "    record ExampleData is { note is String }\n"
-            "    command ExampleCommand is { note is String }\n"
+            "    record ExampleData is { note is String, balance is Natural }\n"
+            "    command ExampleCommand is { note is String, amount is Natural }\n"
             "    entity ExampleEntity is {\n"
             "      state ExampleState of record ExampleData is {\n"
             "        handler ExampleHandler is {\n"
@@ -309,9 +309,24 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # would break every fence that used the old name.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
-            "    record ExampleData is { note is String, itemCount is Natural }\n"
-            "    command ExampleCommand is { note is String, cart is ExampleData }\n"
+            "    type ExampleLimit is Natural\n"
+            "    record ExampleLine is { sku is String, quantity is Natural }\n"
+            "    record ExampleOrder is { id is String, number is String,\n"
+            "      total is Natural, status is String, isPaid is Boolean,\n"
+            "      isCancelled is Boolean, isRefunded is Boolean,\n"
+            "      confirmationNumber is String, items is many ExampleLine }\n"
+            # The state record: `foreach ... in field X` takes a DIRECT field of
+            # the state, handled message or function input -- a dotted path such
+            # as `order.lines` is rejected -- so the iterable lives here.
+            "    record ExampleData is { note is String, itemCount is Natural,\n"
+            "      id is String, total is Natural, balance is Natural,\n"
+            "      lines is many ExampleLine }\n"
+            "    command ExampleCommand is { note is String, cart is ExampleData,\n"
+            "      order is ExampleOrder, orderId is String, amount is Natural,\n"
+            "      limits is ExampleLimit }\n"
             "    entity ExampleEntity is {\n"
+            "      invariant BalanceNonNegative is \"the balance must not go negative\"\n"
+            "      invariant UnderLimit requires ExampleLimit is \"must stay under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
             "        handler ExampleHandler is {\n"
             "          on command ExampleCommand {\n"
