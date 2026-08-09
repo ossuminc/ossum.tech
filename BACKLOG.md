@@ -6,25 +6,48 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1. Annotate the RIDDL fences in the remaining doc trees
+## 1a. Retire the blanket "illustrative fragment" skips  ← START HERE
 
-**What:** `concepts/`, `quickstart.md` and `references/language-reference.md`
-are **fully gated** — 84 validated, 127 skipped, 0 failed, exit 0 against
-2.0.0-rc.10-43. Not yet gated: `tutorials/rbbq/` (30 pages), `guides/`,
-`tools/`, and the `riddlg`/`synapify`/`shell` sites.
+**What:** The gated pages report 84 validated but **128 skipped**, and
+**118 of those 128 carry one identical reason**: `illustrative fragment;
+references vocabulary this page does not define`. That is precisely what a
+`<!-- riddl-prelude ... -->` exists to supply, so they were bulk-skipped rather
+than annotated. `language-reference.md` alone holds 52.
 
-**Verified 2026-08-08** against rc.10. Re-run:
+Only **7** skips are inherently unskippable (deliberate counter-examples, which
+exist to show what fails); 3 more are one-off templates.
+
+**Measured 2026-08-08**, not estimated: stripping that one reason from 8 sample
+concept pages (14 such skips) and re-running with `--auto` — **4 of the 14
+needed nothing but an existing wrapper** and were skipped for no reason at all.
+The other 10 need a per-page prelude, which is the documented remedy, not a
+correction to the examples.
+
+**Method per page:**
 ```bash
-python3 scripts/validate-riddl-examples.py ../bin/riddlc \
-  sites/riddl/docs/concepts/*.md sites/riddl/docs/quickstart.md \
-  sites/riddl/docs/references/language-reference.md
+# strip the blanket skip (WHOLE line, indentation included -- a leftover
+# indent corrupts fence matching and silently changes the counts)
+# then see which wrapper each fence fits:
+python3 scripts/validate-riddl-examples.py --auto ../bin/riddlc <page>.md
 ```
+Annotate the ones that place; write one page prelude for the rest.
 
-**Also open:** `check-riddl-blocks.py` flags two items in
-`tutorials/rbbq/restaurant/online-ordering.md` (`state ... of O` without a
-record; a `prompt "` statement). Advisory, and inside the ungated tree above.
+**Why this outranks 1b:** these pages are already gated, so the gate reports
+green while checking barely 40% of their RIDDL. That is the same
+"green-but-measured-nothing" failure recorded in NOTEBOOK.
 
-**Order:** Independent. `tutorials/rbbq/` is the biggest and the most read.
+---
+
+## 1b. Gate the doc trees that have no directives at all
+
+**What:** Not yet gated: `tutorials/rbbq/` (30 pages, the most-read tree),
+`guides/`, `tools/`, and the `riddlg`/`synapify`/`shell` sites.
+
+**Also open:** `check-riddl-blocks.py` flags 33 advisory items, all in
+`migration/` (which shows 1.x deliberately — arguably belongs in EXEMPT_PATHS)
+and `tutorials/rbbq/`.
+
+**Order:** After 1a, which is smaller and buys more real coverage.
 
 ---
 
