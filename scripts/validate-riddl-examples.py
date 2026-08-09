@@ -421,7 +421,12 @@ def main() -> int:
                 for ln in detail.split("\n")[:8]:
                     print("    " + ln)
 
-    print(f"\n{total} fence(s) validated, {skipped} skipped, {failed} failed")
+    # `total` counts fences ATTEMPTED, so the passing count is total - failed.
+    # Reporting `total` as "validated" overstates it whenever anything failed.
+    print(
+        f"\n{total - failed} fence(s) validated, {skipped} skipped, "
+        f"{failed} failed ({total} attempted)"
+    )
     return 1 if failed else 0
 
 
