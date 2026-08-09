@@ -13,9 +13,10 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-08
 
-**State:** branch `main`, clean, everything pushed (`aa33647`).
+**State:** branch `main`, clean. Through `aa33647` is pushed; the rc.10-46
+upgrade on top of it is committed and **not yet pushed**.
 
-**Compiler: `../bin/riddlc` is `2.0.0-rc.10-43-9f19dbda`** — run `riddlc
+**Compiler: `../bin/riddlc` is `2.0.0-rc.10-46-286ef815`** — run `riddlc
 version`, it is restaged often. `build.sbt`'s `With.Riddl.library` pin must
 name the SAME version, or the docs describe a grammar the examples were never
 checked against.
@@ -33,7 +34,14 @@ looked successful. CLAUDE.md § "Things that will bite" has the recipe.
 ### What is now true
 
 `concepts/`, `quickstart.md` and `references/language-reference.md` are **fully
-gated** — 84 fences validated, 127 skipped, 0 failed, exit 0, against rc.10-43.
+gated** — 84 fences validated, 128 skipped, 0 failed, exit 0, against rc.10-46.
+
+**rc.10-46 split `yield` and `reply`:** a command `yields`/`yield`s an EVENT, a
+query `replies`/`reply`s a RESULT, `yield result` is an Error, and `reply` is
+un-deprecated. `ask` is new — a VALUE (`let a = ask query Q of entity E`), not a
+statement. Every doc that mentioned `reply` asserted the opposite of the truth
+and was corrected; `check-riddl-blocks.py`'s rule did too. **If a doc rule and
+the compiler disagree after an upgrade, suspect the rule.**
 Re-run with:
 
 ```bash
