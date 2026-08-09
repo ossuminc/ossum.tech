@@ -6186,10 +6186,6 @@ slated for removal in 3.0.</p>
 <td><code>processor &lt;id&gt; as &lt;shape&gt;</code></td>
 </tr>
 <tr>
-<td><code>reply &lt;msg&gt;</code></td>
-<td><code>yield &lt;msg&gt;</code></td>
-</tr>
-<tr>
 <td><code>prompt "..."</code> statement</td>
 <td><code>do "..."</code></td>
 </tr>
@@ -6238,9 +6234,20 @@ slated for removal in 3.0.</p>
 <div class="admonition tip">
 <p class="admonition-title">Prettify does much of this for you</p>
 <p><code>riddlc prettify</code> normalizes the deprecated shape keywords to
-<code>processor … as …</code>, rewrites <code>prompt</code> to <code>do</code>, <code>reply</code> to <code>yield</code>, and
-emits <code>Anything</code> for <code>Abstract</code>. Running it over a 1.x model performs a
-good part of this table mechanically.</p>
+<code>processor … as …</code>, rewrites <code>prompt</code> to <code>do</code>, and emits <code>Anything</code> for
+<code>Abstract</code>. Running it over a 1.x model performs a good part of this table
+mechanically.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title"><code>reply</code> is NOT one of them — it went the other way</p>
+<p>Earlier 2.0 releases deprecated <code>reply</code> in favour of <code>yield</code>, and prettify
+rewrote it. That was <strong>reversed</strong>: <code>reply</code> is now the statement a query
+handler uses to answer with its declared result, while <code>yield</code> is reserved
+for a command's event. <code>yield result</code> is an Error.</p>
+<p>So a 1.x query handler written with <code>reply</code> needs no change, and if an
+earlier migration already rewrote it to <code>yield result</code>, that must be put
+back. The mechanical <code>reply</code> → <code>yield</code> edit has been removed from riddlc
+for exactly this reason.</p>
 </div>
 <p>Two of these are worth a note beyond the table.</p>
 <p><strong><code>send … to inlet</code> versus <code>tell</code>.</strong> A processor emits on its <strong>own</strong> outlet

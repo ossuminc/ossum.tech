@@ -5709,7 +5709,7 @@ messages:</p>
 </span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>          <span class="k">do</span> <span class="s2">&quot;add or update the item in the cart&quot;</span>
 </span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>        <span class="p">}</span>
 </span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>        <span class="k">on</span> <span class="kd">query</span> <span class="n">GetContents</span> <span class="p">{</span>
-</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>          <span class="k">yield</span> <span class="kd">result</span> <span class="n">CartContents</span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>          <span class="kr">reply</span> <span class="kd">result</span> <span class="n">CartContents</span>
 </span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>        <span class="p">}</span>
 </span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>      <span class="p">}</span>
 </span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a>    <span class="p">}</span>
@@ -5811,7 +5811,7 @@ asked.</p>
 </span><span id="__span-5-86"><a id="__codelineno-5-86" name="__codelineno-5-86" href="#__codelineno-5-86"></a>            <span class="k">do</span> <span class="s2">&quot;add or update the item in the cart&quot;</span>
 </span><span id="__span-5-87"><a id="__codelineno-5-87" name="__codelineno-5-87" href="#__codelineno-5-87"></a>          <span class="p">}</span>
 </span><span id="__span-5-88"><a id="__codelineno-5-88" name="__codelineno-5-88" href="#__codelineno-5-88"></a>          <span class="k">on</span> <span class="kd">query</span> <span class="n">GetContents</span> <span class="p">{</span>
-</span><span id="__span-5-89"><a id="__codelineno-5-89" name="__codelineno-5-89" href="#__codelineno-5-89"></a>            <span class="k">yield</span> <span class="kd">result</span> <span class="n">CartContents</span>
+</span><span id="__span-5-89"><a id="__codelineno-5-89" name="__codelineno-5-89" href="#__codelineno-5-89"></a>            <span class="kr">reply</span> <span class="kd">result</span> <span class="n">CartContents</span>
 </span><span id="__span-5-90"><a id="__codelineno-5-90" name="__codelineno-5-90" href="#__codelineno-5-90"></a>          <span class="p">}</span>
 </span><span id="__span-5-91"><a id="__codelineno-5-91" name="__codelineno-5-91" href="#__codelineno-5-91"></a>        <span class="p">}</span>
 </span><span id="__span-5-92"><a id="__codelineno-5-92" name="__codelineno-5-92" href="#__codelineno-5-92"></a>      <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
@@ -5936,9 +5936,9 @@ validates.</p>
 <td><code>do "recalculate the total"</code></td>
 </tr>
 <tr>
-<td><code>yield</code></td>
+<td><code>reply</code></td>
 <td>Answer a query</td>
-<td><code>yield result Contents</code></td>
+<td><code>reply result Contents</code></td>
 </tr>
 </tbody>
 </table>

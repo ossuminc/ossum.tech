@@ -3523,10 +3523,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#send-tell-and-yield" class="md-nav__link">
+  <a href="#send-tell-yield-and-reply" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Send, Tell and Yield
+        Send, Tell, Yield and Reply
       
     </span>
   </a>
@@ -5662,10 +5662,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#send-tell-and-yield" class="md-nav__link">
+  <a href="#send-tell-yield-and-reply" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Send, Tell and Yield
+        Send, Tell, Yield and Reply
       
     </span>
   </a>
@@ -5859,8 +5859,13 @@ of your system in a structured but abstract way.</p>
 </tr>
 <tr>
 <td><code>yield</code></td>
-<td>Produce a command's or query's declared response</td>
-<td><code>yield result Info(id)</code></td>
+<td>Produce a command's declared <strong>event</strong></td>
+<td><code>yield event Placed(id)</code></td>
+</tr>
+<tr>
+<td><code>reply</code></td>
+<td>Answer a query with its declared <strong>result</strong></td>
+<td><code>reply result Info(id)</code></td>
 </tr>
 <tr>
 <td><code>set</code></td>
@@ -5963,6 +5968,11 @@ Wherever a statement needs a value, any of these forms is accepted:</p>
 <td>Call</td>
 <td><code>call function Pricing.Total(a, b)</code></td>
 <td>Invokes a pure function for its result</td>
+</tr>
+<tr>
+<td>Ask</td>
+<td><code>ask query GetInfo of entity Catalog</code></td>
+<td>A query paired with the reply that answers it</td>
 </tr>
 <tr>
 <td>Prompt</td>
@@ -6078,18 +6088,20 @@ in the language:</p>
 <p>The collection is a <code>field</code> reference or a <code>let</code>-bound local whose type
 resolves to a collection: Sequence, Set, Graph, Table, Replica, Mapping, or a
 cardinality wrapper such as <code>many</code> or <code>optional</code>.</p>
-<h3 id="send-tell-and-yield">Send, Tell and Yield<a class="headerlink" href="#send-tell-and-yield" title="Permanent link">&para;</a></h3>
+<h3 id="send-tell-yield-and-reply">Send, Tell, Yield and Reply<a class="headerlink" href="#send-tell-yield-and-reply" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>send</strong> — emit on one of <em>this</em> processor's own <a href="../outlet/">outlets</a>; a
   <a href="../connector/">connector</a> routes it onward</li>
 <li><strong>tell</strong> — deliver directly to a specific processor (point-to-point)</li>
-<li><strong>yield</strong> — produce a command's or query's declared response, without
-  needing to know the sender's identity</li>
+<li><strong>yield</strong> — produce a <strong>command's</strong> declared event, without needing to know
+  the sender's identity</li>
+<li><strong>reply</strong> — answer a <strong>query</strong> with its declared result</li>
 </ul>
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">send</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartEvents</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">yield</span> <span class="kd">result</span> <span class="n">CartInfo</span><span class="p">(</span><span class="n">cart</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">ItemAdded</span><span class="p">(</span><span class="n">cart</span><span class="p">.</span><span class="n">id</span><span class="p">)</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="kr">reply</span> <span class="kd">result</span> <span class="n">CartInfo</span><span class="p">(</span><span class="n">cart</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title"><code>send … to inlet</code> is deprecated</p>
@@ -6098,8 +6110,11 @@ model — that is <code>tell</code>'s job. The inlet form still parses and emits
 <code>[deprecated]</code> message.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title"><code>reply</code> is deprecated</p>
-<p><code>reply</code> is a deprecated synonym for <code>yield</code>, parsing to the same node.</p>
+<p class="admonition-title">Changed in RIDDL 2.0: <code>reply</code> is no longer deprecated</p>
+<p><code>reply</code> used to be a deprecated synonym for <code>yield</code>. It is now a statement
+in its own right: a command handler <code>yield</code>s its declared <strong>event</strong>, and a
+query handler <code>reply</code>s its declared <strong>result</strong>. The wrong pairing —
+<code>yield result</code> or <code>reply event</code> — is an Error.</p>
 </div>
 <h3 id="put-and-return">Put and Return<a class="headerlink" href="#put-and-return" title="Permanent link">&para;</a></h3>
 <p><code>put</code> publishes a value to a UI <a href="../output/">output</a> and is valid only in
@@ -6255,10 +6270,6 @@ statement can never enter the AST at all.</p>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>reply &lt;msg&gt;</code></td>
-<td><code>yield &lt;msg&gt;</code></td>
-</tr>
 <tr>
 <td><code>prompt "..."</code></td>
 <td><code>do "..."</code></td>

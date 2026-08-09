@@ -6962,7 +6962,7 @@ the <a href="../language-reference/">Language Reference</a>.</p>
 </tr>
 <tr>
 <td>Declare what a command or query produces</td>
-<td><a href="#message"><code>yields</code> clause</a></td>
+<td><a href="#message"><code>yields</code>/<code>replies</code> clause</a></td>
 </tr>
 <tr>
 <td>React to incoming messages</td>
@@ -6978,7 +6978,7 @@ the <a href="../language-reference/">Language Reference</a>.</p>
 </tr>
 <tr>
 <td>Produce a query's result</td>
-<td><a href="#concrete-statements"><code>yield</code> statement</a></td>
+<td><a href="#concrete-statements"><code>reply</code> statement</a></td>
 </tr>
 <tr>
 <td>Iterate a collection</td>
@@ -7554,10 +7554,13 @@ communication.</p>
 <li>Commands should produce events (reactive principle)</li>
 <li>Events are past-tense facts; commands are imperative requests</li>
 <li>Queries and results form request-response pairs</li>
-<li>A command or query may declare its response with an optional <code>yields</code>
-  clause: <code>command PlaceOrder yields event OrderPlaced is { ... }</code>.
+<li>A command declares its response with an optional <code>yields</code> clause and a
+  query with <code>replies</code>: <code>command PlaceOrder yields event OrderPlaced is
+  { ... }</code>, <code>query GetOrder replies result OrderInfo is { ... }</code>. Crossing
+  them is an Error.
   A command's must resolve to an event, a query's to a result.
-  When declared, the handler must <code>yield</code> exactly that message.</li>
+  When declared, the handler must respond with exactly that message —
+  <code>yield</code> for a command's event, <code>reply</code> for a query's result.</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">A <code>record</code> is NOT a message</p>
@@ -7653,7 +7656,7 @@ type.</p>
 </tr>
 <tr>
 <td><code>on query X</code></td>
-<td>A specific query message (use <code>yield</code> to produce the result)</td>
+<td>A specific query message (use <code>reply</code> to produce the result)</td>
 </tr>
 <tr>
 <td><code>on result X</code></td>
@@ -7848,8 +7851,18 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 </tr>
 <tr>
 <td><code>yield</code></td>
-<td><code>yield result ProductInfo(id, name)</code></td>
-<td>Produce a command's or query's declared response, without knowing the sender.</td>
+<td><code>yield event ProductAdded(id)</code></td>
+<td>Produce a <strong>command's</strong> declared event, without knowing the sender.</td>
+</tr>
+<tr>
+<td><code>reply</code></td>
+<td><code>reply result ProductInfo(id, name)</code></td>
+<td>Answer a <strong>query</strong> with its declared result.</td>
+</tr>
+<tr>
+<td><code>ask</code></td>
+<td><code>let a = ask query GetInfo of entity Catalog</code></td>
+<td>A value: a query paired with the reply that answers it.</td>
 </tr>
 </tbody>
 </table>
@@ -8026,10 +8039,6 @@ the value denotes something AI computes.</p>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>reply &lt;msg&gt;</code></td>
-<td><code>yield &lt;msg&gt;</code></td>
-</tr>
 <tr>
 <td><code>prompt "..."</code></td>
 <td><code>do "..."</code></td>

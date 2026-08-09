@@ -5757,10 +5757,14 @@ an existing model never breaks the parts you have not annotated yet.</p>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">MemberAdded</span><span class="p">(</span><span class="n">orgId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">orgId</span><span class="p">,</span> <span class="n">memberId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">memberId</span><span class="p">)</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
 </span></code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title"><code>reply</code> is deprecated</p>
-<p><code>reply</code> is a deprecated synonym for <code>yield</code> and emits a <code>[deprecated]</code>
-message. Both parse to the same node.</p>
+<div class="admonition info">
+<p class="admonition-title"><code>yield</code> is for commands; queries use <code>reply</code></p>
+<p>A command handler <code>yield</code>s the <strong>event</strong> the command declares with
+<code>yields</code>. A query handler <code>reply</code>s the <strong>result</strong> the query declares with
+<code>replies</code>. Crossing them is an Error.</p>
+<p>Before RIDDL 2.0 both were spelled <code>yield</code> and <code>reply</code> was a deprecated
+synonym; that was reversed, and <code>reply</code> is now a statement in its own
+right.</p>
 </div>
 <h2 id="type-cardinality-notation">Type Cardinality Notation<a class="headerlink" href="#type-cardinality-notation" title="Permanent link">&para;</a></h2>
 <p>RIDDL uses suffixes to indicate how many values a field can hold:</p>

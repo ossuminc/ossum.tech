@@ -109,7 +109,9 @@ vital_definition_contents = type_def | comment ;
 (* Type Definition *)
 type_def = def_of_type | def_of_type_kind_type ;
 def_of_type = "type" identifier is type_expression [with_metadata] ;
-def_of_type_kind_type = aggregate_use_case identifier ["yields" message_ref] (scala_aggregate_definition | (is (aliased_type_expression | aggregation))) [with_metadata] ;
+(* A command declares its response with "yields" and a query with "replies"; the pairing is an
+   Error, not a parse failure, so the message can name both the keyword and the use case. *)
+def_of_type_kind_type = aggregate_use_case identifier [("yields" | "replies") message_ref] (scala_aggregate_definition | (is (aliased_type_expression | aggregation))) [with_metadata] ;
 aggregate_use_case = "type" | "command" | "query" | "event" | "result" | "record" | "graph" | "table" ;
 
 (* Type Expressions *)
@@ -291,8 +293,10 @@ deliverable_message_value = message_value | path_identifier ;
    parses; use `tell` for direct delivery to a processor. *)
 send_statement = "send" deliverable_message_value "to" (outlet_ref | inlet_ref) ;
 tell_statement = "tell" deliverable_message_value "to" processor_ref ;
+(* `yield` emits a command's declared EVENT; `reply` answers a query with its declared RESULT.
+   Until 2.0 `reply` was a deprecated synonym for `yield` and both parsed to one node. They are
+   now distinct statements, and the wrong pairing (`yield result` / `reply event`) is an Error. *)
 yield_statement = "yield" message_value ;
-(* `reply` is the deprecated synonym for `yield`; both parse to the same node *)
 reply_statement = "reply" message_value ;
 
 (* Variable operations. A54: `set`/`let` operands are now full value expressions. *)
@@ -302,10 +306,16 @@ let_statement = "let" identifier [":" type_ref] "=" value ;
 (* A54: value expressions. A value is pseudo-code text, an AI-computed `prompt(...)`, a message/record
    constructor, a `get from` read of a UI input or entity state, or (A28) a boolean expression whose
    bare atom is a value reference or literal. *)
-value = literal_string | prompt_value | call | constructor | get_value | boolean_expression ;
+value = literal_string | prompt_value | call | ask | constructor | get_value | boolean_expression ;
 prompt_value = "prompt" "(" literal_string ")" ;
 (* A24: call a pure function to get a result. "Functions only" — the callee is a function_ref. *)
 call = "call" function_ref "(" [constructor_arg {"," constructor_arg}] ")" ;
+(* `ask` declares a CORRELATION -- that a reply is expected and which query it answers -- and
+   implies no mechanism (no Future, temp actor, correlation-id field or blocking call); those are
+   lowerings a generator chooses. The operand is a query_ref SPECIFICALLY: a command, event, result
+   or record is not answerable, so the restriction is structural rather than a validation rule. The
+   answer's type is the query's declared `replies result X`. *)
+ask = "ask" query_ref "of" processor_ref ;
 constructor = (message_ref | record_ref) "(" [constructor_arg {"," constructor_arg}] ")" ;
 constructor_arg = (identifier "=" value) | value ;
 get_value = "get" "from" (input_ref | state_ref) ;
