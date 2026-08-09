@@ -30,8 +30,13 @@ from pathlib import Path
 
 # Retired or deprecated constructs, with what to use instead.
 CHECKS: list[tuple[str, re.Pattern[str], str]] = [
-    ("reply-statement", re.compile(r"\breply\s+(command|event|query|result)\b"),
-     "use `yield`"),
+    # 2.0 split `yield` and `reply`, and the direction is the OPPOSITE of what
+    # this rule used to say: `reply result` is now correct, and the retired
+    # spelling is `yield result`. What is wrong in 2.0 is a CROSSED pairing.
+    ("yield-crossed", re.compile(r"\byield\s+(result|command|query)\b"),
+     "a command `yields` an EVENT; a query answers with `reply result`"),
+    ("reply-crossed", re.compile(r"\breply\s+(event|command|query)\b"),
+     "a query `replies` a RESULT; a command emits its event with `yield event`"),
     ("prompt-statement", re.compile(r'(?<!\()\bprompt\s+"'),
      "use `do \"...\"` (the `prompt(...)` VALUE, with parens, is fine)"),
     ("abstract-type", re.compile(r"\bAbstract\b"),
