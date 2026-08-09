@@ -32,6 +32,21 @@ python3 scripts/validate-riddl-examples.py --auto ../bin/riddlc <page>.md
 ```
 Annotate the ones that place; write one page prelude for the rest.
 
+**Progress:** `statement.md` done 2026-08-09 (6 validated/9 skipped → 14/2).
+Gate-wide: **92 validated / 121 skipped**, from 84/128. Remaining blanket skips
+by page: `invariant.md` 8, `value.md` 5, `streamlet.md` 5, `state.md` 4, then
+`type`/`outlet`/`handler`/`function`/`conditional`/`application` at 3 each —
+and `language-reference.md` at 52, which is the bulk and worth doing last, once
+the wrapper vocabulary has settled against the smaller pages.
+
+**Two rules the first page established:**
+
+- Wrapper-internal names keep the `Example` prefix. A record named `OrderData`
+  collided with `language-reference.md`'s own prelude — a page prelude and the
+  wrapper share one context — and broke two of its fences.
+- Wrapper vocabulary is only ever ADDED, never renamed: an extra field cannot
+  break a fence that ignores it.
+
 **Why this outranks 1b:** these pages are already gated, so the gate reports
 green while checking barely 40% of their RIDDL. That is the same
 "green-but-measured-nothing" failure recorded in NOTEBOOK.
