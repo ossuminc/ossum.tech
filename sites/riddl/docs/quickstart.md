@@ -208,7 +208,7 @@ context Shopping is {
           do "add or update the item in the cart"
         }
         on query GetContents {
-          yield result CartContents
+          reply result CartContents
         }
       }
     }
@@ -317,7 +317,7 @@ domain OnlineShop is {
             do "add or update the item in the cart"
           }
           on query GetContents {
-            yield result CartContents
+            reply result CartContents
           }
         }
       } with {
@@ -398,4 +398,4 @@ You've built a working RIDDL model! Here's where to go from here:
 | `handler` | Message behavior | `handler Main is { on command X { ??? } }` |
 | `outlet` | Publishes events | `outlet CartEvents is event ItemAdded` |
 | `do` | Describe work to do | `do "recalculate the total"` |
-| `yield` | Answer a query | `yield result Contents` |
+| `reply` | Answer a query | `reply result Contents` |

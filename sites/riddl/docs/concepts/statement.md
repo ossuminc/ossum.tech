@@ -24,7 +24,8 @@ of your system in a structured but abstract way.
 | `foreach` | Bounded iteration over a collection | `foreach line in field order.lines { ... }` |
 | `send` | Emit a message on one of this processor's outlets | `send event X to outlet Events` |
 | `tell` | Deliver a message directly to a processor | `tell command X to entity Y` |
-| `yield` | Produce a command's or query's declared response | `yield result Info(id)` |
+| `yield` | Produce a command's declared **event** | `yield event Placed(id)` |
+| `reply` | Answer a query with its declared **result** | `reply result Info(id)` |
 | `set` | Assign a value to a field or state | `set field status to "Active"` |
 | `let` | Create a local variable binding | `let total = call function Cart.Total(items)` |
 | `put` | Publish a value to a UI output | `put order.number to output Panel` |
@@ -55,6 +56,7 @@ Wherever a statement needs a value, any of these forms is accepted:
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
+| Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it |
 | Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
 | Boolean | `a > b and not c` | A structured boolean expression |
 
@@ -187,19 +189,21 @@ The collection is a `field` reference or a `let`-bound local whose type
 resolves to a collection: Sequence, Set, Graph, Table, Replica, Mapping, or a
 cardinality wrapper such as `many` or `optional`.
 
-### Send, Tell and Yield
+### Send, Tell, Yield and Reply
 
 - **send** — emit on one of *this* processor's own [outlets](outlet.md); a
   [connector](connector.md) routes it onward
 - **tell** — deliver directly to a specific processor (point-to-point)
-- **yield** — produce a command's or query's declared response, without
-  needing to know the sender's identity
+- **yield** — produce a **command's** declared event, without needing to know
+  the sender's identity
+- **reply** — answer a **query** with its declared result
 
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 send event ItemAdded to outlet CartEvents
 tell command ProcessPayment(orderId) to entity PaymentService
-yield result CartInfo(cart.id, cart.total)
+yield event ItemAdded(cart.id)
+reply result CartInfo(cart.id, cart.total)
 ```
 
 !!! warning "`send … to inlet` is deprecated"
@@ -207,8 +211,11 @@ yield result CartInfo(cart.id, cart.total)
     model — that is `tell`'s job. The inlet form still parses and emits a
     `[deprecated]` message.
 
-!!! warning "`reply` is deprecated"
-    `reply` is a deprecated synonym for `yield`, parsing to the same node.
+!!! warning "Changed in RIDDL 2.0: `reply` is no longer deprecated"
+    `reply` used to be a deprecated synonym for `yield`. It is now a statement
+    in its own right: a command handler `yield`s its declared **event**, and a
+    query handler `reply`s its declared **result**. The wrong pairing —
+    `yield result` or `reply event` — is an Error.
 
 ### Put and Return
 
@@ -363,7 +370,6 @@ statement can never enter the AST at all.
 
 | Deprecated | Replacement |
 |------------|-------------|
-| `reply <msg>` | `yield <msg>` |
 | `prompt "..."` | `do "..."` |
 | `send … to inlet X` | `send … to outlet Y`, or `tell` |
 

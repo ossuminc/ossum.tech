@@ -266,7 +266,7 @@ handler CartHandler is {
   }
 
   on query GetCartContents {
-    yield result CartContents
+    reply result CartContents
   }
 } with {
   briefly "Handles shopping cart operations"

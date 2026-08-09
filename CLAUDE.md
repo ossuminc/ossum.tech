@@ -427,7 +427,9 @@ compilers):
 | `do "..."` | ✅ | ✅ — use this in both |
 | `option is X` in `with { }` | ✅ | ✅ — never in the body |
 | `initial state` / `initial handler` | ❌ | ✅ |
-| query response | `reply` | `yield` (`reply` deprecated) |
+| query response statement | `reply` | `reply` — un-deprecated in rc.10-46; `yield` is for a command's event, and `yield result` is an **Error** |
+| query response declaration | ❌ | `query Q replies result R is …` — `yields` on a query is an Error |
+| `ask` | ❌ | ✅ `let a = ask query Q of entity E` — a **value**, not a statement; requires Q to declare `replies` |
 | outlet on an entity | ❌ — put it on a `source` | ✅ |
 | entity semantics | `option is event-sourced` | **`event-sourced entity X`** — the option form is `[deprecated]` |
 | alternation | `one of { A, B }` | also `A \| B` (identical; `prettify` emits the words) |

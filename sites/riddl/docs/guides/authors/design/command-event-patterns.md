@@ -51,9 +51,14 @@ on cmd: command AddMember {
 }
 ```
 
-!!! warning "`reply` is deprecated"
-    `reply` is a deprecated synonym for `yield` and emits a `[deprecated]`
-    message. Both parse to the same node.
+!!! info "`yield` is for commands; queries use `reply`"
+    A command handler `yield`s the **event** the command declares with
+    `yields`. A query handler `reply`s the **result** the query declares with
+    `replies`. Crossing them is an Error.
+
+    Before RIDDL 2.0 both were spelled `yield` and `reply` was a deprecated
+    synonym; that was reversed, and `reply` is now a statement in its own
+    right.
 
 ## Type Cardinality Notation
 

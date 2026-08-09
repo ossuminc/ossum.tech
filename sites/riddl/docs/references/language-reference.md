@@ -27,7 +27,7 @@ description: >-
     result OrderInfo is { id is OrderId, total is Price }
     command UpdatePrice yields event PriceUpdated is { productId is ProductId, newPrice is Price }
     command PlaceOrder yields event OrderPlaced is { id is OrderId, total is Price }
-    query GetProduct yields result OrderInfo is { id is ProductId }
+    query GetProduct replies result OrderInfo is { id is ProductId }
     record CheckoutInputs is { orderId is OrderId }
     record CheckoutOutcome is { ok is Boolean }
     command ProcessPayment is { orderId is OrderId }
@@ -556,11 +556,11 @@ they say.
   items is many Item
   ```
 
-### The `yields` Clause
+### The `yields` and `replies` Clauses
 
 A command or query may declare the response it produces. This makes the
 request/response pairing declarative, so generators can emit precise
-signatures:
+signatures. RIDDL has **two** such pairings, and each has its own keyword:
 
 <!-- riddl: in-function -->
 ```riddl
@@ -568,17 +568,32 @@ command PlaceOrder yields event OrderPlaced is {
   cartId is CartId
 }
 
-query GetOrder yields result OrderInfo is {
+query GetOrder replies result OrderInfo is {
   orderId is OrderId
 }
 ```
 
-A command's `yields` must resolve to an `event`; a query's must resolve to a
-`result`. `yields` on any other kind of type is an Error.
+A **command `yields` an event**; a **query `replies` a result**. The two are
+genuinely different acts — emitting an event as a consequence of a command is
+not the same thing as answering a question — and a generator lowers them
+differently. Crossing them is an Error: `yields` on a query, `replies` on a
+command, or either naming a type of the wrong kind.
 
-`yields` is **optional**. When it is declared, the handler for that message must
-`yield` exactly that message. When it is not declared, a handler may still
-yield whatever it likes.
+!!! warning "Changed in RIDDL 2.0"
+    Before 2.0 both were spelled `yields`, and the `reply` statement was a
+    deprecated synonym for `yield` that parsed to the same node. They are now
+    distinct, and the switch is **hard**: `yields result` is an Error
+    immediately, with no transitional period.
+
+    The declaration side was effectively empty in practice — commands widely
+    declared `yields event`, while almost no query declared its result — so
+    `replies` fills a gap rather than breaking established models.
+
+Both are **optional**. When declared, the handler for that message must respond
+with exactly that message; when not declared, a handler may respond as it
+likes. The one place `replies` is **required** is a query that something
+[`ask`s](#ask) — an ask takes the answer's type from the query's `replies`, so
+there is nothing to read without it.
 
 !!! warning "Type Validation"
     **Errors:**
@@ -586,9 +601,11 @@ yield whatever it likes.
     - Defining a type whose name exactly matches a predefined type name
       (e.g., `type Currency is Decimal(10,2)`) — this shadows the built-in
       type and is not allowed
-    - `yields` on a type that is not a command or query
-    - A command whose `yields` names a non-event, or a query whose `yields`
+    - `yields` or `replies` on a type that is not a command or query
+    - A command whose `yields` names a non-event, or a query whose `replies`
       names a non-result
+    - Pairing the wrong keyword with the use case: `yields` on a query, or
+      `replies` on a command
 
     **Style Warnings:**
 
@@ -898,7 +915,7 @@ handler ProductCommandHandler is {
   }
 
   on query GetProduct {
-    yield result ProductInfo()
+    reply result ProductInfo()
   }
 } with {
   briefly as "Processes commands for product management"
@@ -1198,22 +1215,28 @@ tell command ProcessPayment(orderId) to entity PaymentService
     A `tell` whose target is not reachable through any modeled connector draws
     a **Warning**.
 
-### Yield Statement
+### Yield and Reply Statements
 
-Produces a command's or query's declared response, without the handler needing
-to know the sender's identity:
+These are the statement halves of the two pairings described under
+[`yields` and `replies`](#the-yields-and-replies-clauses). Both produce a
+declared response without the handler needing to know the sender's identity:
 
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
-yield result ProductInfo(id, name, price)
+yield event OrderPlaced(id, total)      // in a command handler
+reply result ProductInfo(id, name)      // in a query handler
 ```
 
-`yield` satisfies the completeness check that command handlers emit an event
-and query handlers produce a result.
+`yield` emits a **command's** declared event. `reply` answers a **query** with
+its declared result. Each satisfies the completeness check for its own kind of
+handler, and the wrong pairing — `yield result` or `reply event` — is an Error.
 
-!!! warning "`reply` is deprecated"
-    `reply` is a deprecated synonym for `yield`. It parses to the same node and
-    emits a `[deprecated]` message.
+!!! warning "Changed in RIDDL 2.0"
+    Until 2.0 `reply` was a *deprecated synonym* for `yield`, parsing to the
+    same node. That is now reversed: `reply` is a first-class statement with
+    its own meaning, and `yield result` no longer parses as valid. If you are
+    migrating a 1.x model, `reply` is a destination rather than something to
+    rewrite away.
 
 ### Set Statement
 
@@ -1240,6 +1263,47 @@ let ready = order.isPaid and not order.isCancelled
 
 A `let` is lexically scoped and statement-ordered: it is visible only after its
 declaration and is shadowed inside nested blocks.
+
+### Ask
+
+`ask` states that two messages are two halves of **one** interaction: a query
+sent to a processor, and the reply that answers it. It is a **value**, not a
+statement, so it is used through `let`:
+
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+```riddl
+let answer = ask query GetProduct of entity Catalog
+```
+
+Before `ask`, a model could say a message was sent (`tell`) and what handling
+one produces (`yields`/`replies`), but not that a caller awaits a particular
+answer. `yield` names no destination and `tell` says nothing about a reply, so
+a generator could not tell fire-and-forget from request/response.
+
+**`ask` declares that correlation and nothing else.** It deliberately implies
+no mechanism — not a future, a temporary actor, a correlation-id field, or a
+blocking call. All four are lowerings a generator may choose, on the same
+principle as `message_envelope`: RIDDL specifies meaning, generators choose
+representation. Timeouts are likewise a generated-code concern, not language.
+
+**Queries only, structurally.** The operand is a query reference, not a general
+message reference — a command, event, result or record is not answerable, so
+the restriction is in the shape of the syntax rather than in a validation rule.
+
+**The answer's type is always known:** it is the query's declared
+[`replies result X`](#the-yields-and-replies-clauses). This is the one place
+`replies` is mandatory, which is why the requirement sits at the `ask` site
+rather than on every query.
+
+!!! warning "Errors"
+    - Asking a query that declares no `replies` — there is no type to give the
+      answer.
+    - Asking a processor that has no clause handling the query. An `on other`
+      clause counts as handling everything, and an entity's handlers may live
+      under a state.
+
+    An ask whose callee **refuses** is expected, not an error: recording a
+    rejection settles the obligation, consistent with the discharge rule.
 
 ### Put Statement
 
@@ -2447,7 +2511,6 @@ it is slated for removal in 3.0.
 | Deprecated | Replacement |
 |------------|-------------|
 | `source`/`sink`/`flow`/`merge`/`split`/`router` keywords | `processor <id> as <shape>` |
-| `reply <msg>` | `yield <msg>` |
 | `prompt "..."` statement | `do "..."` |
 | `Abstract` type | `Anything` |
 | `state X is record R`, or no introducer at all | `state X of record R` |

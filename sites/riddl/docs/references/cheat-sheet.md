@@ -32,11 +32,11 @@ the [Language Reference](language-reference.md).
 | Capture a user journey | [Epic](#epic) / [Use Case](#use-case-case) |
 | Define a data structure | [Type](#type) |
 | Define a request, response, or notification | [Message](#message) |
-| Declare what a command or query produces | [`yields` clause](#message) |
+| Declare what a command or query produces | [`yields`/`replies` clause](#message) |
 | React to incoming messages | [Handler](#handler) / [On Clause](#on-clause) |
 | Create a reusable computation | [Function](#function) |
 | Assert a precondition in a handler | [`require` statement](#concrete-statements) |
-| Produce a query's result | [`yield` statement](#concrete-statements) |
+| Produce a query's result | [`reply` statement](#concrete-statements) |
 | Iterate a collection | [`foreach` statement](#concrete-statements) |
 | Show a value to a user | [`put` statement](#concrete-statements) |
 | Refuse a user's request in a use case | [refusal step](#use-case-case) |
@@ -507,10 +507,13 @@ communication.
 - Commands should produce events (reactive principle)
 - Events are past-tense facts; commands are imperative requests
 - Queries and results form request-response pairs
-- A command or query may declare its response with an optional `yields`
-  clause: `command PlaceOrder yields event OrderPlaced is { ... }`.
+- A command declares its response with an optional `yields` clause and a
+  query with `replies`: `command PlaceOrder yields event OrderPlaced is
+  { ... }`, `query GetOrder replies result OrderInfo is { ... }`. Crossing
+  them is an Error.
   A command's must resolve to an event, a query's to a result.
-  When declared, the handler must `yield` exactly that message.
+  When declared, the handler must respond with exactly that message —
+  `yield` for a command's event, `reply` for a query's result.
 
 !!! warning "A `record` is NOT a message"
     A record is **data**. It can never be sent, told, yielded, or handled.
@@ -606,7 +609,7 @@ type.
 |---|---|
 | `on command X` | A specific command message |
 | `on event X` | A specific event message |
-| `on query X` | A specific query message (use `yield` to produce the result) |
+| `on query X` | A specific query message (use `reply` to produce the result) |
 | `on result X` | A specific result message |
 | `on init` | Processor initialization (once ever) |
 | `on term` | Processor termination (once ever) |
@@ -719,7 +722,9 @@ non-exhaustive match over a closed subject without `default` draws a
 |---|---|---|
 | `send` | `send event X to outlet Y` | Emit on one of *this* processor's own outlets; a connector routes it onward. |
 | `tell` | `tell command X to entity Y` | Deliver a message directly to a processor (point-to-point). |
-| `yield` | `yield result ProductInfo(id, name)` | Produce a command's or query's declared response, without knowing the sender. |
+| `yield` | `yield event ProductAdded(id)` | Produce a **command's** declared event, without knowing the sender. |
+| `reply` | `reply result ProductInfo(id, name)` | Answer a **query** with its declared result. |
+| `ask` | `let a = ask query GetInfo of entity Catalog` | A value: a query paired with the reply that answers it. |
 
 The message operand may be a bare reference or an inline constructor.
 
@@ -783,7 +788,6 @@ the value denotes something AI computes.
 
 | Deprecated | Replacement |
 |---|---|
-| `reply <msg>` | `yield <msg>` |
 | `prompt "..."` | `do "..."` |
 | `send … to inlet X` | `send … to outlet Y`, or `tell` |
 
