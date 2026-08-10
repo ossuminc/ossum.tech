@@ -311,6 +311,12 @@ crawlers that every version of every page is the same URL.
   Bumping the pin may require bumping `With.Scala3` to whatever riddl built
   with — the two lines in `build.sbt` are commented to stay in step.
 
+  **The sbt build exists only for this task** — it produces no site content
+  and is on no CI publishing path. It is **sbt 2.0.6** (bumped from 2.0.2 on
+  2026-08-10 to clear a critical vulnerability), sbt-ossuminc 3.1.0, and
+  **Scala 3.9.0-RC4**. The RC compiler is required; see NOTEBOOK.md TASK F
+  before "fixing" it to a release version.
+
   **`cp` from `../riddl/.../ebnf-grammar.ebnf` is NOT a fallback.** That path
   is a live working tree: on 2026-08-08 it held an uncommitted `yields`/
   `replies` split present in no commit and no build, so a copy would have

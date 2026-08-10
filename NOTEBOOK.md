@@ -15,10 +15,8 @@ to the task file and note completion in this notebook.
 
 **All figures below were run in this session, not recalled.**
 
-**State:** branch `main`, **1 commit ahead of `origin/main`** (`470b436`).
-`project/build.properties` carries an **uncommitted sbt 2.0.2 → 2.0.6 bump
-that this session did not make** — decide whether it is wanted; CLAUDE.md
-still says 2.0.2.
+**State:** branch `main`, ahead of `origin/main`, tree clean. sbt is **2.0.6**
+(bumped by Reid to clear a critical vulnerability, committed 2026-08-10).
 
 **Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
 pin matches. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** — the WRONG
@@ -76,8 +74,7 @@ links, and that `task/` is empty.
 **Verified by compiling:** every fence on `language-reference.md`, and every
 content fix listed in commit `470b436`.
 
-**Assumed, not re-verified:** BACKLOG item 5's 18 site items. Whether the sbt
-bump in the working tree is wanted.
+**Assumed, not re-verified:** BACKLOG item 5's 18 site items.
 
 ### Pointers
 
