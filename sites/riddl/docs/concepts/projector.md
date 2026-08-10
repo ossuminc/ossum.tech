@@ -3,6 +3,13 @@ title: "Projectors"
 draft: false
 ---
 
+<!-- riddl-domain-prelude
+context OrderContext is {
+  event OrderCompleted is { orderId is String, amount is Natural }
+  event OrderRefunded is { orderId is String, amount is Natural }
+}
+-->
+
 Projectors get their name from
 [Euclidean Geometry](https://en.wikipedia.org/wiki/Projection_(mathematics))
 but are probably more analogous to a
@@ -27,21 +34,36 @@ one job is to fold events into a read model; it does not accept commands, and
 it does not answer queries. Queries are served by the
 [repository](repository.md) the projector `updates`.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
-projector SalesDashboard is {
-  updates repository SalesData
+context Sales is {
+  record SalesTotals is { day is String, amount is Natural }
 
-  handler SalesEvents is {
-    on event OrderContext.OrderCompleted {
-      do "Update daily sales totals with the order amount"
-    }
-    on event OrderContext.OrderRefunded {
-      do "Subtract the refund amount from daily totals"
+  repository SalesData is {
+    schema Totals is relational of totals as type SalesTotals
+  }
+
+  projector SalesDashboard is {
+    record DailySales is { day is String, total is Natural }
+
+    updates repository SalesData
+
+    handler SalesEvents is {
+      on event OrderContext.OrderCompleted {
+        do "Update daily sales totals with the order amount"
+      }
+      on event OrderContext.OrderRefunded {
+        do "Subtract the refund amount from daily totals"
+      }
     }
   }
 }
 ```
+
+!!! warning "A projector must define a record"
+    `Projector 'X' lacks a required Record definition` is an **Error**. The
+    record is the projection's shape — what the folded events produce — so a
+    projector without one has nothing to project into.
 
 !!! warning "Validation"
     **Completeness Warnings:**

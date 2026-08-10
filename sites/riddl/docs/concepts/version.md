@@ -14,10 +14,10 @@ options — the same principle that makes [author](author.md) a definition. A
 
 A version's component is **either a name or a natural number**, never both:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: standalone -->
 ```riddl
-version Garibaldi
-version 4
+domain Named    is { version Garibaldi }
+domain Numbered is { version 4 }
 ```
 
 Organizations routinely name their releases — Ubuntu's "Jammy Jellyfish", the
@@ -31,14 +31,21 @@ have to sanitize.
 A definition's precise version is **composed** from the versions its ancestors
 declare, root to leaf, joined with `.`:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 domain Garibaldi is {
   version Garibaldi
   context Ordering is {
     version 4
+    record OrderData is { id is String }
+    command PlaceOrder is { id is String }
+
     entity Order is {
       version 3
+
+      state Placed of record OrderData is {
+        handler OrderHandler is { on command PlaceOrder { ??? } }
+      }
     }
   }
 }

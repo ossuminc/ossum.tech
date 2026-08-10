@@ -3,6 +3,22 @@ title: "Adaptor"
 draft: false
 ---
 
+<!-- riddl-domain-prelude
+context Payments is {
+  event PaymentCompleted is { orderId is String }
+  event PaymentFailed is { orderId is String }
+}
+context Inventory is {
+  record StockData is { orderId is String }
+  command ReserveStock is { orderId is String }
+  entity Stock is {
+    state Held of record StockData is {
+      handler StockHandler is { on command ReserveStock { ??? } }
+    }
+  }
+}
+-->
+
 An adaptor's purpose is to _adapt_ one [Context](context.md)
 to another [Context](context.md).  In Domain-Driven Design, 
 this concept is known as an _anti-corruption layer_ that keeps the
@@ -55,9 +71,20 @@ Outbound adaptors provide an adaptation that occurs from the
 
 ## Syntax
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 context Orders is {
+  record OrderData is { orderId is String, isPaid is Boolean }
+  command MarkAsPaid is { orderId is String }
+  command HandlePaymentFailure is { orderId is String }
+  command ReserveItems is { orderId is String }
+
+  entity Order is {
+    state Active of record OrderData is {
+      handler OrderHandler is { on command MarkAsPaid { ??? } }
+    }
+  }
+
   adaptor PaymentAdapter from context Payments is {
     handler InboundPayments is {
       on paid: event Payments.PaymentCompleted {

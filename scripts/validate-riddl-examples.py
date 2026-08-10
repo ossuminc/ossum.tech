@@ -17,6 +17,7 @@ readers.
     <!-- riddl: in-epic -->           wrap in an epic (for a whole `case`)
     <!-- riddl: in-epic-story -->     give each bare user story an epic of its own
     <!-- riddl: in-app-context --> wrap in an `application` context (for groups)
+    <!-- riddl: in-group -->          wrap in a page inside one (for inputs/outputs)
     <!-- riddl: in-application -->    as in-handler, but an `application` context (for `put`)
     <!-- riddl: in-app-clauses -->    as in-clauses, but an `application` handler
     <!-- riddl: in-function -->       wrap in a function body (for `return`)
@@ -84,7 +85,12 @@ NO_PRELUDE = re.compile(r"no-prelude(?:=(?P<names>[A-Za-z0-9_,]+))?")
 PRELUDE_ENTRY = re.compile(
     r"^\s*(?:entity|context|type|record|command|event|query|result|outlet|inlet"
     r"|function|repository|projector|saga|adaptor|streamlet|source|sink|flow"
-    r"|merge|split|router|connector|constant|invariant|handler)\s+(?P<name>\w+)\b"
+    r"|merge|split|router|connector|constant|invariant|handler"
+    # Group aliases. A prelude may legally define a page so that a statement
+    # fence can `get from input X`, and such a page must be droppable when the
+    # fence declares the same input itself.
+    r"|group|page|pane|dialog|menu|popup|frame|column|window|section|tab|block"
+    r")\s+(?P<name>\w+)\b"
 )
 
 
@@ -161,6 +167,20 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    function ExampleFunction is {\n"
             "      requires FnInput returns Tax.TaxIn\n"
             + ind(body, 6) + "\n"
+            "    }\n  }\n}\n"
+        )
+    if kind == "in-group":
+        # Inputs and outputs are GROUP contents, not context contents: `form`,
+        # `button`, `picklist` and friends are absent from the contextDefinition
+        # keyword set, so in-app-context fails them on a parse error listing
+        # every keyword EXCEPT the one written. A page -- any group alias --
+        # inside an application context is the shallowest legal home.
+        return (
+            "domain Example is {\n" + AUTHOR +
+            "  user Shopper is \"a customer using the store\"\n"
+            "  application context Example is {\n" + pre + "\n"
+            "    record ExampleGroupData is { note is String }\n"
+            "    page ExampleGroupPage is {\n" + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
         )
     if kind == "in-app-context":
@@ -455,7 +475,7 @@ def main() -> int:
                 # measure how many fences are genuinely wrong on pages that
                 # do not yet carry directives.
                 ok, detail = False, ""
-                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-app-context", "in-application", "in-app-clauses", "in-function", "in-record", "in-clauses", "in-usecase", "in-epic", "in-epic-story"):
+                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-app-context", "in-group", "in-application", "in-app-clauses", "in-function", "in-record", "in-clauses", "in-usecase", "in-epic", "in-epic-story"):
                     ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude, dom_prelude))
                     if ok:
                         break

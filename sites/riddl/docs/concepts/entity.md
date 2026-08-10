@@ -2,6 +2,13 @@
 title: "Entity"
 ---
 
+<!-- riddl-prelude
+event OrderEvent is { id is String }
+event OrderPlaced is { id is String }
+command PlaceOrder is { id is String }
+record OrderData is { id is String }
+-->
+
 An entity in RIDDL is the same as it is in DDD which defines it this way:
 
 !!! hint 
@@ -160,7 +167,7 @@ An entity is a [processor](processor.md), so it may declare
 [inlets](inlet.md) and [outlets](outlet.md) — which is how it publishes its
 events into a stream:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 entity Order is {
   outlet OrderEvents is type OrderEvent

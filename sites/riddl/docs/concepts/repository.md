@@ -3,6 +3,12 @@ title: "Repository"
 draft: false
 ---
 
+<!-- riddl-prelude
+record CartItem is { id is String, sku is String }
+record Cart is { id is String, items is many CartItem }
+record Product is { id is String, name is String }
+-->
+
 A RIDDL repository is an abstraction for anything that can retain 
 information (e.g. [messages](message.md)) for retrieval at a
 later time. This might be a relational database, NoSQL database, a data lake, 
@@ -24,7 +30,7 @@ schema may be: flat, relational, time-series, graphical, hierarchical, star,
 document, columnar, vector, or other. These are only suggestive of the kind of
 storage layout the repository uses. 
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 repository CartRepository is {
   schema CartData is relational

@@ -3,6 +3,10 @@ title: "Element"
 draft: "false"
 ---
 
+<!-- riddl-prelude
+type Clicked is Boolean
+-->
+
 # Element
 
 *Elements* are the definitions that define the user interface for an
@@ -55,9 +59,9 @@ There is **no** `activate` definition. Navigation is expressed as an input
 whose acquisition verb conveys the action — most naturally a `button` with
 `activates` or `triggers`:
 
-<!-- riddl: skip reason="illustrative fragment; references types this page does not define" -->
+<!-- riddl: in-group -->
 ```riddl
-button Checkout activates type Boolean
+button Checkout activates type Clicked
 ```
 
 Both `activate` and `activates` are accepted, as are the other acquisition

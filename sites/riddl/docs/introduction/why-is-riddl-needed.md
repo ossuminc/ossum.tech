@@ -5,6 +5,12 @@ draft: false
 weight: 60
 ---
 
+<!-- riddl-prelude
+event OrderCreated is { id is String }
+command CreateOrder is { id is String }
+outlet Events is type OrderCreated
+-->
+
 ## The Problem
 
 Software development has become increasingly complex. Modern systems are
@@ -107,7 +113,7 @@ RIDDL was designed with AI code generation in mind:
 - Natural language descriptions guide implementation
 - The `prompt` statement explicitly captures implementation intent
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 handler OrderHandler is {
   on command CreateOrder is {

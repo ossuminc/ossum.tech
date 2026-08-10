@@ -24,7 +24,7 @@ Use cases in RIDDL serve several purposes:
 A use case restates the user story, then lists its
 [interaction](interaction.md) steps:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 epic UserAuthentication is {
   user Customer wants to "securely access their account"
@@ -35,16 +35,16 @@ epic UserAuthentication is {
     so that "they can view their orders"
 
     step focus user Customer on page Storefront.LoginPage
-    step take form Storefront.Credentials from user Customer
+    step take form Storefront.LoginPage.Credentials from user Customer
     step send command Authenticate from user Customer to entity AuthService
-    step show document Storefront.Dashboard to user Customer
+    step show document Storefront.DashboardPage.Dashboard to user Customer
   }
 
   case FailedLogin is {
     user Customer may "attempt to sign in with the wrong password"
     so that "they learn their credentials are wrong"
 
-    step take form Storefront.Credentials from user Customer
+    step take form Storefront.LoginPage.Credentials from user Customer
     step send command Authenticate from user Customer to entity AuthService
     step entity AuthService refuses user Customer "credentials not recognized"
   }
@@ -124,6 +124,22 @@ succeed, and error paths. The refusal step makes the last of these first-class:
 
 <!-- riddl-domain-prelude
 user Customer is "a shopper using the store"
+application context Storefront is {
+  record Credential is { username is String, password is String }
+  record DashboardData is { note is String }
+  command Authenticate is { username is String }
+  page LoginPage is {
+    form Credentials accepts type Credential
+  }
+  page DashboardPage is {
+    document Dashboard shows type DashboardData
+  }
+  entity AuthService is {
+    state Ready of record Credential is {
+      handler AuthHandler is { on command Authenticate { ??? } }
+    }
+  }
+}
 -->
 <!-- riddl: in-domain -->
 ```riddl

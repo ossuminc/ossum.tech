@@ -202,7 +202,7 @@ prevents fragments of definitions from being separated across files.
 
 For example, this is allowed:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 ```riddl
 domain ThingAmaJig is {
   include "thingamajig/thing-context.riddl"
@@ -241,7 +241,7 @@ myproject/
 
 With `main.riddl` containing:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 ```riddl
 domain OnlineRetail is {
   include "catalog/catalog-context.riddl"

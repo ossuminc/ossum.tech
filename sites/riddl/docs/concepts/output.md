@@ -3,6 +3,12 @@ title: "Output"
 draft: "false"
 ---
 
+<!-- riddl-prelude
+record ReceiptData is { total is Natural }
+record CartLine is { sku is String, quantity is Natural }
+type ImageRef is URL
+-->
+
 An Output definition is concerned with providing information to the
 [user](user.md) without regard to the form of that information when
 presented to the user. To make this more tangible, an 
@@ -29,7 +35,7 @@ user.
 An output is written as an alias, an identifier, a presentation verb, and what
 it presents:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-group -->
 ```riddl
 document Receipt   shows    type ReceiptData
 list     CartLines displays type CartLine

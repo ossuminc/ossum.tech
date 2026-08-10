@@ -5,11 +5,15 @@ description: >-
   A typed input port. In RIDDL 2.0 any processor may declare one.
 ---
 
+<!-- riddl-prelude
+event TemperatureReading is { value is Natural }
+-->
+
 An Inlet is a component of a [Processor](processor.md) that specifies a named
 input through which data of a particular [type](type.md) streams into the
 processor.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 inlet readings is type TemperatureReading
 ```

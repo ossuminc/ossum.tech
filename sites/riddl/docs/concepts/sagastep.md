@@ -6,6 +6,34 @@ description: >-
   that reverses it.
 ---
 
+<!-- riddl-prelude
+record PaymentInputs is { orderId is String, customerId is String,
+  amount is Natural, transactionId is String }
+record PaymentOutcome is { note is String }
+record InventoryData is { orderId is String }
+command ReserveItems is { orderId is String }
+command ReleaseReservation is { orderId is String }
+command ProcessCharge is { customerId is String, amount is Natural }
+command RefundCharge is { transactionId is String }
+command CreateOrder is { customerId is String }
+command CancelOrder is { orderId is String }
+entity Inventory is {
+  state Held of record InventoryData is {
+    handler InventoryHandler is { on command ReserveItems { ??? } }
+  }
+}
+entity PaymentService is {
+  state Charging of record InventoryData is {
+    handler PaymentHandler is { on command ProcessCharge { ??? } }
+  }
+}
+entity OrderService is {
+  state Placing of record InventoryData is {
+    handler OrderHandler is { on command CreateOrder { ??? } }
+  }
+}
+-->
+
 A saga step represents one action in a [Saga](saga.md)—a distributed
 transaction that coordinates changes across multiple components. Each step
 defines both a forward action and a compensating action, so a later failure
@@ -25,7 +53,7 @@ Saga steps provide:
 A step is an identifier, a forward block, and a `reverted by` compensation
 block. Inputs and outputs are declared once for the whole saga, not per step:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 saga ProcessPayment is {
   requires record PaymentInputs
@@ -45,7 +73,7 @@ saga ProcessPayment is {
     tell command RefundCharge(transactionId) to entity PaymentService
   }
 
-  step CreateOrder is {
+  step PlaceOrder is {
     tell command CreateOrder(customerId) to entity OrderService
   } reverted by {
     tell command CancelOrder(orderId) to entity OrderService

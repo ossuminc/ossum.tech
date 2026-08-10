@@ -6,6 +6,11 @@ description: >-
   declare ports, with a shape derived from its arity.
 ---
 
+<!-- riddl-prelude
+event OrderEvent is { id is String }
+event EnrichedOrderEvent is { id is String }
+-->
+
 A Processor is an abstract [vital definition](vital.md) with several concrete
 manifestations (see below) that represents any definition capable of processing
 messages. Processors have [handlers](handler.md) to process messages sent to
@@ -41,7 +46,7 @@ The following definitions are all processors:
 The generic streaming processor is declared with the `processor` keyword and an
 optional shape ascription:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 processor OrderEnricher as flow is {
   inlet RawOrders is type OrderEvent

@@ -6,6 +6,14 @@ description: >-
   kinds, lifecycle clauses, and optional message binding.
 ---
 
+<!-- riddl-prelude
+constant MinimumOrder is Natural = "10"
+record OrderInfo is { id is String, total is Natural }
+command PlaceOrder is { id is String, total is Natural }
+event OrderPlaced is { id is String, total is Natural }
+command DoIt is { note is String }
+-->
+
 # On Clause
 
 An On Clause specifies how to handle a particular kind of message or situation
@@ -50,7 +58,7 @@ An `on` clause may bind a local name to the message it is handling, using
 ordinary type ascription — the same rule as `let x: T = ...` and a field
 declaration `p1: String`, read as "`ord` has type `command PlaceOrder`":
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 ```riddl
 on ord: command PlaceOrder {
   when ord.total > MinimumOrder then
@@ -77,7 +85,7 @@ parses to exactly the same structure.
 An `on` clause may also name where the message came from, optionally binding a
 local name to the origin:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="two spellings of the SAME clause, which cannot share a handler (duplicate content names), and the origin is a sibling context no wrapper can supply" -->
 ```riddl
 on command DoIt from context Other { ??? }
 on command DoIt from di: context Other { ??? }

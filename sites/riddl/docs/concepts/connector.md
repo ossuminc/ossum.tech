@@ -6,13 +6,23 @@ description: >-
   with validated placement and cardinality.
 ---
 
+<!-- riddl-prelude
+event Order is { id is String }
+event OrderEvent is { id is String }
+event RawOrder is { id is String }
+processor OrderEventSource as source is { outlet OrderEvents is type OrderEvent }
+processor OrderEnricher as sink is { inlet RawOrders is type OrderEvent }
+processor Home as sink is { inlet incoming is type Order }
+processor Abroad as sink is { inlet incoming is type Order }
+-->
+
 # Connector
 
 Connectors are uni-directional conduits for reliably transmitting data of a
 particular [type](type.md). A connector joins exactly one
 [outlet](outlet.md) to exactly one [inlet](inlet.md).
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 connector OrderFlow is
   from outlet OrderEventSource.OrderEvents
@@ -41,7 +51,7 @@ Fan-in and fan-out are modeled by declaring **multiple ports** — the arity is
 what derives a `merge` or `split` [shape](processor.md#shape) — never by
 attaching several connectors to a single port.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 // Correct: a split declares two outlets, each with its own connector
 processor Router as split is {
@@ -49,8 +59,8 @@ processor Router as split is {
   outlet domestic is type Order
   outlet international is type Order
 }
-connector ToDomestic      is from outlet Router.domestic      to inlet Home.in
-connector ToInternational is from outlet Router.international to inlet Abroad.in
+connector ToDomestic      is from outlet Router.domestic      to inlet Home.incoming
+connector ToInternational is from outlet Router.international to inlet Abroad.incoming
 ```
 
 Attaching more than one connector to a port is an **Error**.

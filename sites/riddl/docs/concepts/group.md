@@ -3,6 +3,11 @@ title: "Group"
 draft: "false"
 ---
 
+<!-- riddl-prelude
+record CartLine is { sku is String, quantity is Natural }
+type Clicked is Boolean
+-->
+
 A group is the abstract structuring concept for an application. Groups can be 
 nested which allows them to form a hierarchy that defines the structure of a 
 user interface. Each group can also contain UI elements such as 
@@ -26,11 +31,11 @@ thing structurally. Pick whichever reads best for what you are modeling:
 `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
 `window`, `section`, `tab`, `flow`, `block`
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 ```riddl
 page ShoppingCart is {
   list Items shows type CartLine
-  button Checkout activates type Boolean
+  button Checkout activates type Clicked
 }
 ```
 
@@ -46,7 +51,7 @@ page ShoppingCart is {
 A group may carry a [figma reference](metadata.md#figma-references) linking it
 to the exact frame that depicts it:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 ```riddl
 page Checkout is { ??? } with {
   figma "aBcD1234" node "42:1337"

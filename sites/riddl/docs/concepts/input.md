@@ -3,6 +3,23 @@ title: "Input"
 draft: "false"
 ---
 
+<!-- riddl-prelude
+record SignupDetails is { email is String }
+type Clicked is Boolean
+type CountryCode is String
+record AccountData is { email is String }
+command Register is { email is String }
+command CreateAccount is { details is SignupDetails }
+page SignupPage is {
+  form Signup accepts type SignupDetails
+}
+entity Account is {
+  state Registered of record AccountData is {
+    handler AccountHandler is { on command CreateAccount { ??? } }
+  }
+}
+-->
+
 An Input is the abstract notion of some information provided to an
 application by its [user](user.md). To make this more tangible, inputs could
 be implemented as any of the following:
@@ -33,10 +50,10 @@ by the application's input.
 An input is written as an alias, an identifier, an acquisition verb, and the
 type it takes in:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-group no-prelude=SignupPage -->
 ```riddl
 form  Signup   accepts type SignupDetails
-button Checkout activates type Boolean
+button Checkout activates type Clicked
 picklist Country selects type CountryCode
 ```
 
@@ -65,7 +82,7 @@ RIDDL 2.0; the rest are unchanged.
 A [handler](handler.md) reads an input's value with the `get from` value
 expression:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-clauses -->
 ```riddl
 on command Register {
   let details = get from input Signup
