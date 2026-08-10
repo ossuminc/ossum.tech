@@ -11,131 +11,59 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-08
+## HANDOFF — as of 2026-08-10
 
-**State:** branch `main`, clean, all pushed.
+**State (verified this session, not recalled):** branch `main`, tree clean,
+**0 commits ahead of `origin/main`**, HEAD `53cee2d`.
 
-**Compiler: `../bin/riddlc` is `2.0.0-rc.10-57-e012ebb9`** — run `riddlc
-version`, it is restaged often. `build.sbt`'s `With.Riddl.library` pin must
-name the SAME version, or the docs describe a grammar the examples were never
-checked against.
+**Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
+`With.Riddl.library` pin matches it exactly. Both checked by command. It is
+restaged often — re-check both and keep them equal, or the docs describe a
+grammar the examples were never validated against.
 
-**Refresh the grammar ONLY with `sbt extractGrammar`,** after bumping that pin.
-**Never `cp` it from `../riddl`** — that is a live working tree, and on
-2026-08-08 it held an uncommitted `yields`/`replies` split present in no commit
-and no build. A copy would have documented a language that does not exist and
-looked successful. CLAUDE.md § "Things that will bite" has the recipe.
+**Gate, re-run this session:** 2.0 — **108 validated / 107 skipped / 0 failed,
+exit 0**; 1.31 — 6/0/0.
 
-**`task/` is empty.** Everything is in `task/done/`.
+**`task/` is empty** (only `done/`). Nothing awaits triage here.
 
-**Nothing is in flight.** Open work is in `BACKLOG.md`.
+### In flight — BACKLOG 1a
 
-### What is now true
+Retiring the blanket `"illustrative fragment"` skips. **118 remain.** Done:
+`statement.md`, `value.md`, `invariant.md`. Next by size: `streamlet.md` (5),
+`state.md` (4), then several 3s. **`language-reference.md` (44) last** — each
+page done teaches the shared wrappers vocabulary it will benefit from.
 
-`concepts/`, `quickstart.md` and `references/language-reference.md` are **fully
-gated** — 108 fences validated, 107 skipped, 0 failed, exit 0, against
-rc.10-57. **BACKLOG 1a is in flight**: retiring the 118 remaining blanket
-"illustrative fragment" skips, three pages done (`statement`, `value`,
-`invariant`), `language-reference.md`'s 44 deliberately last.
+Nothing is half-edited; every page is committed at a green gate.
 
-**rc.10-57 fixed `foreach`:** the element is now bound over the loop body (and
-carries its TYPE, so `line.nosuch` is still an Error), and any resolvable path
-that lands on a collection iterates — `order.lines` works. `foreach k, v`
-destructures a mapping, arity checked both ways. Recorded as items 66-68 in
-`../RIDDL-Tools-To-Do-List.md` Part A.
+### Traps — all four already bit here
 
-**Two upgrades running, two silent passes exposed.** rc.10-46's
-interaction-group fix broke `use-case.md`; rc.10-57's mapping value-type
-resolution broke `type.md`, which named a `DictionaryEntry` that never existed.
-**Expect an upgrade that closes a resolver gap to turn green fences red — that
-is the gap being closed, not a regression.**
-
-**rc.10-46 split `yield` and `reply`:** a command `yields`/`yield`s an EVENT, a
-query `replies`/`reply`s a RESULT, `yield result` is an Error, and `reply` is
-un-deprecated. `ask` is new — a VALUE (`let a = ask query Q of entity E`), not a
-statement. Every doc that mentioned `reply` asserted the opposite of the truth
-and was corrected; `check-riddl-blocks.py`'s rule did too. **If a doc rule and
-the compiler disagree after an upgrade, suspect the rule.**
-Re-run with:
-
-```bash
-python3 scripts/validate-riddl-examples.py ../bin/riddlc \
-  sites/riddl/docs/concepts/*.md sites/riddl/docs/quickstart.md \
-  sites/riddl/docs/references/language-reference.md
-```
-
-The 1.31 line is unaffected and still green under its own 1.31 compiler.
-Remaining ungated trees — `tutorials/rbbq/` chief among them — are in BACKLOG 1.
-
-**Baseline before blaming a wrapper change for a failure.** One command settles
-whether a failure is yours or pre-existing:
-
-```bash
-git show <rev>:scripts/validate-riddl-examples.py > /tmp/base.py
-python3 /tmp/base.py ../bin/riddlc <file.md>
-```
-
-### Doing BACKLOG 1a — what the first three pages taught
-
-- **Every page hid real errors.** 4, 1 and 4 respectively — an unsatisfiable
-  `morph ... with record R()`, a `send` to a processor that should be `tell`,
-  `???` written after real statements, states with no handler. Not one page was
-  merely unannotated, so budget for content repair.
-- **Re-run the FULL gate after any wrapper edit.** Wrapper changes regressed
-  other pages three times; the worst was naming a record `OrderData`, which
-  collided with `language-reference.md`'s own prelude.
-- **`dump.py` in the scratchpad ignores `no-prelude`**, so its output is NOT
-  what the gate sees. A "duplicate name" error from it is an artifact. Get the
-  gate's own error before diagnosing.
-- Annotate fences by LINE NUMBER. Keying on a fence's first line put two
-  directives on one fence and left two bare, because two fences both began
+- **Every page hides real errors** (4, 1, 4 so far), so this is content repair,
+  not annotation. Budget accordingly.
+- **Re-run the FULL gate after any wrapper edit**, never just the page in hand.
+  Wrapper changes regressed other pages three times. Wrapper-internal names must
+  keep the `Example` prefix: a record named `OrderData` collided with
+  `language-reference.md`'s own prelude.
+- **`scratchpad/dump.py` ignores `no-prelude`**, so its output is not what the
+  gate sees; a "duplicate name" error from it is an artifact. Get the gate's own
+  error before diagnosing.
+- **Annotate fences by LINE NUMBER.** Matching on a fence's first line put two
+  directives on one fence and left two bare — two fences both began
   `entity Account is {`.
 
-### Traps this session paid for
+### Certainty
 
-- **A recorded warning can be stale; check its premise before obeying it.**
-  Three places here said `sbt extractGrammar` resolves a *published 1.x*
-  library and would clobber the 2.0 grammar. True when the pin was 1.29.0, and
-  false for a long time since — `build.sbt`'s own comment said so. Acting on
-  the note instead of reading the build produced a `cp` that was correct only
-  by luck of timing. Same shape as the rc.9 lesson below about a failed
-  compile: the note tells you what someone once found, not what is true now.
-- **`--auto` reports the LAST wrapping it tried, not the relevant one.** All 15
-  initial failures showed an identical `interactions` error, which looked like
-  one systemic bug and was an artifact. It is a *measurement* mode; diagnose
-  fences one at a time.
-- **A green fence can mean nothing was checked.** `use-case.md:85` passed while
-  referring to five definitions that did not exist — riddlc does not resolve
-  references inside `sequence`/`parallel`/`optional`. Filed with riddl.
-- **`check-riddl-blocks.py` is much weaker than it looks.** It reported all 129
-  concept fences clean while two carried retired 1.x `then`-chains. Only
-  compiling finds this class of error; do not read its "clean" as coverage.
-- **A shared wrapper is load-bearing.** Injecting the ordinary prelude at domain
-  level broke 4 fences in `language-reference.md`. Wrapper vocabulary may be
-  ADDED but never renamed, and a change must be re-baselined against every page
-  that uses that kind, not just the page in hand.
-- **`[severe] empty(1:1->1)` means an exception was thrown in a pass**, not a
-  language error — `Pass.scala` catches NonFatal and emits the stack trace,
-  which can render empty. Bisect the model; do not read the message.
-- **A markdown line swallows the rest of its line, including `}`.**
-  `term SKU is { | text }` on ONE line consumes the closing brace as
-  description text and unbalances the model. Put the `}` on its own line. The
-  parse error lands at the END of the file, nowhere near the cause.
-- **Do not trust an exit code read through a pipeline.** `riddlc ... | head;
-  echo $?` reports `head`'s status. It made a failing compile look like a silent
-  pass, and the wrong claim reached Reid before being corrected.
+**Verified by command this session:** branch/push state, compiler version, pin
+agreement, both gates. **Verified by compiling, earlier this session:** every
+example in the pages changed, and the rc.10-57 `foreach` behaviour.
+**Assumed, not re-verified:** the 118 remaining blanket skips are the count as
+of the last edit; BACKLOG item 5's 18 site items were carried over as written
+and none was re-checked against the current site.
 
-### Filed with riddl, and FIXED in rc.10
+### Pointers
 
-Both task files are closed by riddl commits `7c8c83ca0` (paths may descend into
-a Function) and `acc11b274` (steps inside sequence/parallel/optional are
-resolved and validated), plus `a466dab16`, which stops the in-pass exception
-handler emitting an empty `[severe]`.
-
-**The second fix had fallout here, as expected:** `use-case.md`'s grouped steps
-referenced five definitions that did not exist and had been passing silently.
-Anything else that leaned on grouped steps going unchecked will surface the
-same way.
+Open work is **BACKLOG.md** — 1a is the live one. Durable facts are
+**CLAUDE.md**, notably § "Things that will bite" for the grammar protocol
+(**always `sbt extractGrammar`, never `cp`**).
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
@@ -1359,34 +1287,10 @@ Two historical traps worth remembering:
   rpm), so those links 404'd for the whole 0.3.0 era. 0.4.0 is the
   first release where every documented variant actually exists.
 
-### Deferred Strategic Improvements (Soon)
+### Deferred Strategic Improvements — moved to BACKLOG.md
 
-| ID | Task | Priority | Notes |
-|----|------|----------|-------|
-| 1.3 | Product landing pages by role | Medium | CTO, Architect, Developer pages |
-| 1.4 | Comparison pages | Medium | RIDDL vs OpenAPI/AsyncAPI/UML |
-| 1.5 | Demo video | High | 3-5 min screen recording with voiceover |
-| 2.2 | Troubleshooting/FAQ | Medium | Seed from riddl-mcp-server idioms |
-| 2.3 | Changelog links | Low | Link to GitHub releases |
-| 2.4 | Learning paths | Medium | Beginner → Intermediate → Advanced |
-| 2.5 | Mermaid diagrams | Low | Enable in mkdocs.yml, add to concepts |
-| 3.3 | Social proof | Medium | Testimonials when available |
-| 3.4 | Newsletter signup | Low | Mailchimp/ConvertKit embed |
-| 4.1 | Community (Discord/GH) | Medium | GitHub Discussions or Discord |
-| 4.4 | Page feedback | Low | "Was this helpful?" buttons |
-| 5.2 | PDF export | Low | mkdocs-pdf plugin |
-| 5.3 | API documentation | Medium | OpenAPI spec for MCP server |
-| 6.2 | Pricing page | Medium | When Synapify pricing finalized |
-| 6.3 | Contact form | Low | Replace email link with form |
-
-**Note:** Blog/news (3.2) will be on www.ossuminc.com or LinkedIn, not here.
-
-### Lower Priority
-
-| Task | File | Notes |
-|------|------|-------|
-| Type examples | `references/language-reference.md` | Add specialized examples |
-| Synapify generation docs | `synapify/generation.md` | Use preserved config |
+These 18 site/content items lived here, which meant they were not tracked:
+BACKLOG.md is the single place for open work. They are now **BACKLOG item 5**.
 
 ---
 
@@ -1394,13 +1298,15 @@ Two historical traps worth remembering:
 
 ### EBNF Grammar Single-Sourcing
 
-The EBNF grammar is extracted from the `riddl-language` library (pinned to
-`1.29.0` in `build.sbt`) via the Grammar API:
+The EBNF grammar is extracted from the `riddl-language` library via the
+Grammar API. **The pinned version is whatever `build.sbt` says — check it, do
+not trust a number written here.** It was `2.0.0-rc.10-57-e012ebb9` on
+2026-08-10, and it must equal what `../bin/riddlc version` prints.
 
-- **Task**: `sbt extractGrammar` (a manual `taskKey` in `build.sbt:12,26`;
-  it compiles the project and runs `tools/extract-grammar.sh`)
-- **Target**: `docs/riddl/references/riddl-grammar.ebnf` (`build.sbt:32`),
-  which `docs/riddl/references/ebnf-grammar.md` snippet-includes
+- **Task**: `sbt extractGrammar` (a manual `taskKey` in `build.sbt`; it
+  compiles the project and runs `tools/extract-grammar.sh`)
+- **Target**: `sites/riddl/docs/references/riddl-grammar.ebnf`, which
+  `sites/riddl/docs/references/ebnf-grammar.md` snippet-includes
 - **Trigger**: **Manual** — it is *not* wired to `sbt update`; run it
   explicitly when bumping the riddl-language version
 - **Note**: `riddl-grammar.ebnf` is checked in, so it can go stale relative

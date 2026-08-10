@@ -134,3 +134,45 @@ compiling both spellings.
 having misread `type_ref = [aggregate_use_case] path_identifier` as excluding
 the keyword. The docs use the bare form, which is correct — but do not "fix"
 anyone who writes `requires type T`, and do not assert it is wrong.
+
+---
+
+## 5. Site and content roadmap (was buried in NOTEBOOK.md)
+
+**What:** 18 site/content items that had been recorded in NOTEBOOK.md's
+"Deferred Strategic Improvements" and "Lower Priority" tables. Moved here
+2026-08-10 because NOTEBOOK is the narrative record and BACKLOG is the tracked
+one — an item living only in NOTEBOOK is not tracked.
+
+**Not verified.** Unlike items 1-4, these were carried over as written and none
+was re-checked against the current site. Treat priorities as stale until
+confirmed; several predate the per-product versioning migration.
+
+
+| ID | Task | Priority | Notes |
+|----|------|----------|-------|
+| 1.3 | Product landing pages by role | Medium | CTO, Architect, Developer pages |
+| 1.4 | Comparison pages | Medium | RIDDL vs OpenAPI/AsyncAPI/UML |
+| 1.5 | Demo video | High | 3-5 min screen recording with voiceover |
+| 2.2 | Troubleshooting/FAQ | Medium | Seed from riddl-mcp-server idioms |
+| 2.3 | Changelog links | Low | Link to GitHub releases |
+| 2.4 | Learning paths | Medium | Beginner → Intermediate → Advanced |
+| 2.5 | Mermaid diagrams | Low | Enable in mkdocs.yml, add to concepts |
+| 3.3 | Social proof | Medium | Testimonials when available |
+| 3.4 | Newsletter signup | Low | Mailchimp/ConvertKit embed |
+| 4.1 | Community (Discord/GH) | Medium | GitHub Discussions or Discord |
+| 4.4 | Page feedback | Low | "Was this helpful?" buttons |
+| 5.2 | PDF export | Low | mkdocs-pdf plugin |
+| 5.3 | API documentation | Medium | OpenAPI spec for MCP server |
+| 6.2 | Pricing page | Medium | When Synapify pricing finalized |
+| 6.3 | Contact form | Low | Replace email link with form |
+
+**Note:** Blog/news (3.2) will be on www.ossuminc.com or LinkedIn, not here.
+
+
+**Lower priority**
+
+| Task | File | Notes |
+|------|------|-------|
+| Type examples | `references/language-reference.md` | Add specialized examples |
+| Synapify generation docs | `synapify/generation.md` | Use preserved config |
