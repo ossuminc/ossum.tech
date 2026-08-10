@@ -22,8 +22,8 @@ when ready. HEAD is the last of six 1a commits.
 restaged often — re-check both and keep them equal, or the docs describe a
 grammar the examples were never validated against.
 
-**Gate, re-run this session:** 2.0 — **129 validated / 97 skipped / 0 failed,
-exit 0**; 1.31 — 6/0/0.
+**Gate, re-run this session:** 2.0 — **159 validated / 67 skipped / 0 failed,
+exit 0**; 1.31 — 6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
 
 **The gate's scope is a FILE LIST, and it is now written down** in CLAUDE.md
 § "Compiling RIDDL examples". It was not before, and the previous session's
@@ -36,15 +36,18 @@ comparison is only meaningful within one scope.
 
 ### In flight — BACKLOG 1a
 
-Retiring the blanket `"illustrative fragment"` skips. **100 remain**, from 118.
-Done this session: `streamlet.md`, `state.md`, `type.md`, `message.md`,
-`outlet.md`, `standard-module.md`.
+Retiring the blanket `"illustrative fragment"` skips. **61 remain**, from 118
+at the start of the session. **`concepts/` and `introduction/` are
+finished** — not one blanket skip left in either.
 
-Next: the remaining 3s in `concepts/` — `handler`, `function`, `conditional`,
-`application` — then the long tail of 1-2. **Leave for last:**
-`language-reference.md` (44), and `migration/` + `guides/` (15 between them),
-which sit **outside the gate scope** and carry 4 pre-existing failures — those
-are 1b's problem, so touching their skips drags 1b forward.
+What remains splits in two, and the split matters:
+
+- **`references/language-reference.md` (44)** — in scope, and the last such
+  page. Left deliberately for last: every page done so far taught the shared
+  wrappers vocabulary it will benefit from.
+- **`migration/` and `guides/` (17)** — **outside the gate scope**, and those
+  trees carry 4 pre-existing failures. Touching them starts BACKLOG 1b. Decide
+  that deliberately; do not drift into it.
 
 Nothing is half-edited; every page is committed at a green gate.
 
@@ -59,6 +62,15 @@ Nothing is half-edited; every page is committed at a green gate.
 - **A page prelude must be self-contained.** It must not name anything a
   *fence* defines either, not just anything the wrapper defines — that breaks
   every other fence on the page, with errors pointing at innocent lines.
+- **A context-level prelude cannot supply a sibling context**, and contexts do
+  NOT nest (verified rc.10-57). A fence naming `Other.SomeEvent` must either
+  show its enclosing context (making it `in-domain`, which reads the
+  domain-prelude) or resolve the name locally. Injecting the domain-prelude
+  into every wrapper was tried and reverted: it collides with the epic
+  wrappers, which already define `user Customer`.
+- **A dotted path is anchor-then-DIRECT-child, not a deep search.**
+  `Storefront.Credentials` fails when `Credentials` sits inside a page; it must
+  be `Storefront.LoginPage.Credentials`.
 - **A fence naming an outlet cannot be fixed by a prelude.** An outlet lives in
   a processor and a prelude lands at context level, so no statement wrapper can
   reach one. Show the owning processor, or skip with a precise reason.
@@ -96,6 +108,38 @@ Open work is **BACKLOG.md** — 1a is the live one. Durable facts are
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### BACKLOG 1a, third pass: concepts/ + introduction/ done ✅ **2026-08-10**
+
+18 more pages; 100 → 61 blanket skips; gate 139/87 → 159/67. Neither
+`concepts/` nor `introduction/` holds a blanket skip any more.
+
+**One wrong line had been copied onto four pages.** `button Checkout activates
+type Boolean` appears in application, input, group and element — and a
+predefined type never resolves where a declared type reference is required.
+The same rule had already broken `type References = one of { String, URL }`
+earlier in the day. Nobody noticed because all five fences were skipped.
+
+**Two wrong things can cancel out and read as correct.** use-case.md addressed
+an input as `Storefront.Credentials`. Inputs live inside a group, and a dotted
+path is anchor-then-*direct*-child — so the path was wrong AND the mental
+model of where inputs live was wrong, and together they looked plausible.
+Compiling separated them.
+
+**A generalisation was tried and reverted, which was the point of trying it.**
+Injecting the domain-prelude at domain level in *every* wrapper would let any
+fence name a sibling context. It broke epic.md and use-case.md, whose wrappers
+already define `user Customer`. That took one gate run to learn and one `cp` to
+undo; guessing either way would have cost more. adaptor.md and projector.md
+instead show their enclosing context — which is what those examples were
+describing anyway, so the constraint improved them.
+
+**Errors keep being rules the page never stated.** A projector must define a
+`record`; a scope may declare at most one `version`; a saga step may not share
+a name with the command it sends. Each was an Error the prose was silent about,
+and each is now written down beside the example that broke.
 
 ---
 

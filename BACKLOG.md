@@ -8,14 +8,16 @@ what is durably true goes to CLAUDE.md.
 
 ## 1a. Retire the blanket "illustrative fragment" skips  ← START HERE
 
-**What:** The gated pages report 84 validated but **128 skipped**, and
-**118 of those 128 carry one identical reason**: `illustrative fragment;
+**What:** When filed, the gated pages reported 84 validated and **128 skipped**,
+**118 of them carrying one identical reason**: `illustrative fragment;
 references vocabulary this page does not define`. That is precisely what a
 `<!-- riddl-prelude ... -->` exists to supply, so they were bulk-skipped rather
-than annotated. `language-reference.md` alone holds 52.
+than annotated.
 
-Only **7** skips are inherently unskippable (deliberate counter-examples, which
-exist to show what fails); 3 more are one-off templates.
+A skip is a legitimate outcome for a fence that genuinely cannot compile — a
+deliberate counter-example, or an `include` resolved against a file that does
+not exist. What 1a retires is the **blanket** reason applied without looking.
+Each such fence keeps a skip, but with a reason that says which of those it is.
 
 **Measured 2026-08-08**, not estimated: stripping that one reason from 8 sample
 concept pages (14 such skips) and re-running with `--auto` — **4 of the 14
@@ -32,40 +34,32 @@ python3 scripts/validate-riddl-examples.py --auto ../bin/riddlc <page>.md
 ```
 Annotate the ones that place; write one page prelude for the rest.
 
-**Progress:** `statement.md`, `value.md`, `invariant.md` (2026-08-09/10), then
-`streamlet.md`, `state.md`, `type.md`, `message.md`, `outlet.md` and
-`standard-module.md` (2026-08-10). Gate-wide: **129 validated / 97 skipped /
-0 failed**.
+**Progress:** `concepts/` and `introduction/` are **done** — not one blanket
+skip remains in either. 24 pages gated across two sessions. Gate: **159
+validated / 67 skipped / 0 failed**, from 84/128 when 1a was filed.
 
-**100 blanket skips remain** — `language-reference.md` 44,
-`migration/1.x-to-2.0.md` 6, `guides/authors/design/command-event-patterns.md`
-6, `ui-modeling.md` 3, then `handler`/`function`/`conditional`/`application`
-at 3 each and a long tail of 1-2.
+**61 blanket skips remain, and they are the hard ones:**
+
+| Where | Count | Note |
+|---|---|---|
+| `references/language-reference.md` | 44 | in scope, deliberately left last |
+| `migration/1.x-to-2.0.md` | 6 | **outside the gate** — 1b territory |
+| `guides/authors/design/command-event-patterns.md` | 6 | outside the gate |
+| `guides/authors/design/ui-modeling.md` | 3 | outside the gate |
+| `guides/authors/index.md` | 2 | outside the gate |
+
+`language-reference.md` is the next and last in-scope page. It benefits most
+from the vocabulary the other 24 taught, which is why it waited. The other 17
+sit in trees the gate does not cover and that carry 4 pre-existing failures —
+doing them means starting 1b, so decide that deliberately rather than drifting
+into it.
 
 **The gate's scope is a file list, not a directory**, and it was not written
-down until now — the previous session's "108/107" could not be reproduced,
-and the numbers above come from a scope measured against the parent commit
-rather than carried forward. The exact command is in CLAUDE.md
-§ "Compiling RIDDL examples". Note that `migration/` and `guides/` sit
-OUTSIDE it and have 4 pre-existing failures: doing their blanket skips means
-entering 1b's territory, so leave them for last with `language-reference.md`.
+down until 2026-08-10 — the older "108/107" figure could not be reproduced.
+The exact command is in CLAUDE.md § "Compiling RIDDL examples". Compare
+numbers only within one scope.
 
-Do `language-reference.md` **last**: it is the bulk, and every page done so far
-has taught the shared wrappers a new piece of vocabulary that it will benefit
-from.
-
-**Most pages hide real errors** — 4 in `statement.md`, 1 in `value.md`, 4 in
-`invariant.md`, 2 in `state.md`, 2 in `type.md`, 1 in `message.md`, all found
-only by compiling. `streamlet.md`, `outlet.md` and `standard-module.md` hid
-none, so it is not universal — but budget for fixing content, not just adding
-directives.
-
-**The errors cluster where a keyword changed in 2.0.** `query … yields result`
-was documented on the two pages whose fences were skipped and correct on the
-two that were gated. A page's prose does not stay true on its own; only
-compiling it keeps it true.
-
-**Two rules the first page established:**
+**Rules the work established** (each earned by a regression):
 
 - Wrapper-internal names keep the `Example` prefix. A record named `OrderData`
   collided with `language-reference.md`'s own prelude — a page prelude and the
