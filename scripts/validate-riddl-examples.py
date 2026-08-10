@@ -81,6 +81,16 @@ DOMAIN_PRELUDE = re.compile(
     r"<!--\s*riddl-domain-prelude\s*\n(?P<body>.*?)-->", re.DOTALL | re.IGNORECASE
 )
 NO_PRELUDE = re.compile(r"no-prelude(?:=(?P<names>[A-Za-z0-9_,]+))?")
+# Every wrapper, in the order --auto tries them: shallowest first, so a fence
+# is reported under the least nesting that satisfies it. annotate-riddl-
+# examples.py imports THIS list -- it used to keep its own copy, which drifted
+# and silently stopped offering the newer wrappers.
+ATTEMPTS = (
+    "standalone", "in-domain", "in-context", "in-entity", "in-handler",
+    "in-app-context", "in-group", "in-application", "in-app-clauses",
+    "in-function", "in-record", "in-clauses", "in-usecase", "in-epic",
+    "in-epic-story",
+)
 # The head of a top-level prelude entry: a keyword and the name it defines.
 PRELUDE_ENTRY = re.compile(
     r"^\s*(?:entity|context|type|record|command|event|query|result|outlet|inlet"
@@ -475,7 +485,7 @@ def main() -> int:
                 # measure how many fences are genuinely wrong on pages that
                 # do not yet carry directives.
                 ok, detail = False, ""
-                for attempt in ("standalone", "in-domain", "in-context", "in-entity", "in-handler", "in-app-context", "in-group", "in-application", "in-app-clauses", "in-function", "in-record", "in-clauses", "in-usecase", "in-epic", "in-epic-story"):
+                for attempt in ATTEMPTS:
                     ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude, dom_prelude))
                     if ok:
                         break

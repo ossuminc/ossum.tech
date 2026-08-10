@@ -41,8 +41,9 @@ directive_for = _ns["directive_for"]
 wrap = _ns["wrap"]
 validate = _ns["validate"]
 
-ATTEMPTS = ("standalone", "in-domain", "in-context", "in-entity", "in-handler",
-            "in-application", "in-function", "in-record", "in-clauses", "in-usecase")
+# Imported, never re-declared: this list used to be a second copy and drifted
+# out of date, so newly added wrappers were never offered here.
+ATTEMPTS = _ns["ATTEMPTS"]
 
 
 def main() -> int:

@@ -36,6 +36,66 @@ description: >-
     command ReleaseItems is { orderId is OrderId }
     entity PaymentService is { ??? }
     entity Inventory is { ??? }
+
+    // --- added for the statement and definition fences below ---
+    type RawEvent is String
+    type ValidatedEvent is String
+    record Item is { sku is String, quantity is Integer }
+    record ProductRecord is { id is ProductId, price is Price, status is String }
+    record PendingData is { note is String }
+    record ActiveData is { note is String }
+    record PendingOrderData is { note is String }
+    record ActiveOrderData is { note is String }
+    record ShippedOrderData is { trackingNumber is String }
+    record CartData is { id is CartId, total is Price, items is many CartItem }
+    record Product is { id is ProductId, price is Price }
+    record AvailIn is { held is Natural, total is Natural }
+    constant minimumFee is Natural = "5"
+    function Available is { requires AvailIn returns AvailIn ??? }
+    record PricingInput is { subtotal is Price, taxRate is Price,
+      tax is Price, shipping is Price }
+    function Pricing is {
+      requires PricingInput returns PricingInput
+      function CalculateTotal is { requires PricingInput returns PricingInput ??? }
+      function Total is { requires PricingInput returns PricingInput ??? }
+    }
+    // NOTE: do NOT define `Tax` here. The in-function wrapper supplies a
+    // sibling `context Tax`, and a prelude entry of that name makes every
+    // `Tax.…` path ambiguous, breaking the in-function fences on this page.
+    event ItemAdded is { sku is String }
+    event ActionCompleted is { note is String }
+    event LineShipped is { sku is String }
+    event OrderPending is { id is OrderId }
+    event OrderShipped is { id is OrderId }
+    event Withdrawn is { amount is Natural }
+    event CartCreated is { id is CartId }
+    event OrderPaymentReceived is { id is OrderId }
+    command ConfirmOrder is { id is OrderId }
+    command ShipOrder is { trackingNumber is String }
+    command EscalateReview is { id is OrderId }
+    command Withdraw is { amount is Natural }
+    outlet Events is type PriceUpdated
+    outlet CartEvents is type ItemAdded
+    outlet PaymentRequests is type ProcessPayment
+    outlet Shipments is type LineShipped
+    outlet OrderEvents is type OrderPlaced
+    entity Cart is {
+      state Filling of record CartData is {
+        handler CartHandler is { on event ItemAdded { ??? } }
+      }
+    }
+    entity Catalog is {
+      state Listed of record ProductRecord is {
+        handler CatalogHandler is {
+          on query GetProduct { reply result OrderInfo() }
+        }
+      }
+    }
+    entity Review is {
+      state Reviewing of record OrderData is {
+        handler ReviewHandler is { on command EscalateReview { ??? } }
+      }
+    }
 -->
 
 
@@ -706,7 +766,7 @@ entity Product is {
 States can also be defined without a body when handlers are defined at the
 entity level instead:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 entity SimpleProduct is {
   state ProductData of record ProductRecord
@@ -981,7 +1041,7 @@ is needed.
 
 ### Condition Forms
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 invariant Legacy      is "the account must be in good standing"
 invariant InStock     is quantity >= Zero
@@ -1021,7 +1081,7 @@ absent from any state record is an **Error**.
 A stateless processor has no ambient data for an implicit predicate to read, so
 an invariant declared on one must name what it needs and be invoked explicitly:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 record Limits is { ceiling: Integer, used: Integer }
 
@@ -1030,7 +1090,7 @@ invariant UnderLimit requires record Limits is used <= ceiling
 
 The clause then hands it the value:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 require invariant UnderLimit with record Limits(ceiling = "10", used = "1")
 ```
@@ -1110,7 +1170,7 @@ the target's fields.
 
 `get from` reads a value from a UI input or an entity state:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-application -->
 ```riddl
 let email = get from input SignupForm
 let current = get from state Active
@@ -1121,7 +1181,7 @@ let current = get from state Active
 `call` invokes a **function** — and only a function, because functions are the
 only pure definitions — and produces its result:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 let total = call function Pricing.CalculateTotal(subtotal, taxRate = rate)
 ```
@@ -1133,7 +1193,6 @@ Calling something with no declared `returns` is an Error.
 Boolean expressions have the usual precedence: `or` < `and` < `not` <
 comparison < atom. Parentheses group.
 
-<!-- riddl: in-handler -->
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 when order.isPaid and not order.isCancelled then ??? end
@@ -1143,7 +1202,7 @@ require count == total
 An [invariant](../concepts/invariant.md) takes one too, though it is a
 definition rather than a statement:
 
-<!-- riddl: in-context -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 invariant InStock is quantity >= Zero
 ```
@@ -1189,7 +1248,7 @@ morph entity Product to state ProductData with record ProductRecord(price)
 Emits a message on one of *this* processor's own outlets. A connector then
 routes it to a downstream inlet:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 send event ItemAdded to outlet CartEvents
 send command ProcessPayment(orderId) to outlet PaymentRequests
@@ -1205,7 +1264,7 @@ send command ProcessPayment(orderId) to outlet PaymentRequests
 
 Delivers a message directly to a processor:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 tell event ItemAdded to entity Cart
 tell command ProcessPayment(orderId) to entity PaymentService
@@ -1221,7 +1280,7 @@ These are the statement halves of the two pairings described under
 [`yields` and `replies`](#the-yields-and-replies-clauses). Both produce a
 declared response without the handler needing to know the sender's identity:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 yield event OrderPlaced(id, total)      // in a command handler
 reply result ProductInfo(id, name)      // in a query handler
@@ -1270,7 +1329,7 @@ declaration and is shadowed inside nested blocks.
 sent to a processor, and the reply that answers it. It is a **value**, not a
 statement, so it is used through `let`:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 let answer = ask query GetProduct of entity Catalog
 ```
@@ -1310,7 +1369,7 @@ rather than on every query.
 Publishes a value to a UI output. Valid only in application and context
 handlers:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-application -->
 ```riddl
 put order.confirmationNumber to output ConfirmationPanel
 ```
@@ -1319,7 +1378,7 @@ put order.confirmationNumber to output ConfirmationPanel
 
 Returns a function's result. Valid only in a function body:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-function -->
 ```riddl
 return call function Tax.Compute(subtotal)
 ```
@@ -1453,7 +1512,7 @@ and it is checked in both directions:
 
 Asserts a precondition that must hold before proceeding:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 require amount > Zero
 require "the customer is in good standing"
@@ -1498,7 +1557,7 @@ Each statement list is checked independently, so each branch of a `when`,
 `match` or `foreach` body is its own list. A refusal after an effect in the same
 list is an **Error**.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 ```riddl
 on cmd: command Withdraw {
   require cmd.amount > Zero        // refusals first
@@ -2086,7 +2145,7 @@ The **refusal** step is new in 2.0. It models a system element declining a
 user's request, which previously had no way to be expressed except as free
 text:
 
-<!-- riddl: in-usecase -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 step entity Cart refuses user Customer "the item is out of stock"
 ```
@@ -2234,7 +2293,7 @@ than one in a single scope is an **Error**.
 Metadata goes in a `with { }` block **after** the closing brace of the
 definition:
 
-<!-- riddl: in-context -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 ```riddl
 event-sourced entity Product is {
   // Entity definition content
@@ -2490,7 +2549,7 @@ blocks and doc blocks.
 
 Use `???` as a placeholder for incomplete definitions:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 ```riddl
 record PaymentDetails is { ??? } with {
   briefly as "Record for payment information details"
