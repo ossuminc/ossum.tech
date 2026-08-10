@@ -8,6 +8,17 @@ description: >-
 
 <!-- riddl-prelude
 constant MaxItems is Natural = "100"
+record DoneData is { note is String }
+record SignupData is { email is String }
+event OrderPlaced is { orderId is String, total is Natural, currency is String }
+record PricingInput is { subtotal is Natural, taxRate is Natural }
+function Pricing is {
+  requires PricingInput returns PricingInput
+  function CalculateTotal is { requires PricingInput returns PricingInput ??? }
+}
+entity Order is {
+  state Done of record DoneData is { handler H is { ??? } }
+}
 -->
 
 A value is an expression, in the context of a [statement](statement.md), that
@@ -53,10 +64,10 @@ shadowed inside nested blocks.
 A constructor builds a [message](message.md) or record inline, rather than
 requiring it be assembled elsewhere first:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
-morph entity Order to state Done with record DoneData()
+morph entity Order to state Done with record DoneData(note = "fulfilled")
 ```
 
 Arguments are **positional first, then named**. Count, names, ordering and
@@ -67,7 +78,7 @@ Arguments are **positional first, then named**. Count, names, ordering and
 `get from` reads a value from a UI [input](input.md) or an entity
 [state](state.md):
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-application -->
 ```riddl
 let email   = get from input SignupForm
 let current = get from state Active
@@ -78,7 +89,7 @@ let current = get from state Active
 `call` invokes a [function](function.md) — and only a function, since
 functions are the only definitions guaranteed pure — and produces its result:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 let total = call function Pricing.CalculateTotal(subtotal, taxRate = rate)
 ```
@@ -91,7 +102,7 @@ declares no `returns` is an **Error**.
 
 `prompt("...")` denotes a value computed by AI at generation time:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 set field recommendation to prompt("suggest a complementary product")
 ```
@@ -105,7 +116,7 @@ something AI computes.
 Precedence runs `or` < `and` < `not` < comparison < atom, with parentheses to
 group:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 when order.isPaid and not (order.isCancelled or order.isRefunded) then ??? end
 ```

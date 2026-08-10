@@ -187,6 +187,12 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "      document ExampleOutput shows type ExampleData\n"
             "      document ConfirmationPanel shows type ExampleOrder\n"
             "      form ExampleInput accepts type ExampleData\n"
+            "      form SignupForm accepts type ExampleData\n"
+            "    }\n"
+            # `get from input X` and `get from state Y` are documented together,
+            # so an application wrapper needs a state to read as well as a form.
+            "    entity ExampleAccount is {\n"
+            "      state Active of record ExampleData is { handler H is { ??? } }\n"
             "    }\n"
             "    handler ExampleHandler is {\n"
             "      on command ExampleCommand {\n"
@@ -321,10 +327,11 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             # so the iterable sits where an author would put it -- on `order` --
             # rather than being hoisted to a direct field of the state.
             "    record ExampleData is { note is String, itemCount is Natural,\n"
-            "      id is String, total is Natural, balance is Natural }\n"
+            "      id is String, total is Natural, balance is Natural,\n"
+            "      recommendation is String }\n"
             "    command ExampleCommand is { note is String, cart is ExampleData,\n"
             "      order is ExampleOrder, orderId is String, amount is Natural,\n"
-            "      limits is ExampleLimit }\n"
+            "      limits is ExampleLimit, rate is Natural, subtotal is Natural }\n"
             "    entity ExampleEntity is {\n"
             "      invariant BalanceNonNegative is \"the balance must not go negative\"\n"
             "      invariant UnderLimit requires ExampleLimit is \"must stay under the limit\"\n"
