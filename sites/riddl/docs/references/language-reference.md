@@ -11,7 +11,7 @@ description: >-
     type CartId is UUID
     type OrderEvent is String
     type EnrichedOrderEvent is String
-    record ProductInfo is { id is ProductId, price is Price }
+    result ProductInfo is { id is ProductId, price is Price }
     record OrderData is { id is OrderId, total is Price }
     record TotalInputs is { subtotal is Price, taxRate is Price }
     record CartItem is { sku is String, quantity is Integer }
@@ -27,7 +27,7 @@ description: >-
     result OrderInfo is { id is OrderId, total is Price }
     command UpdatePrice yields event PriceUpdated is { productId is ProductId, newPrice is Price }
     command PlaceOrder yields event OrderPlaced is { id is OrderId, total is Price }
-    query GetProduct replies result OrderInfo is { id is ProductId }
+    query GetProduct replies result ProductInfo is { id is ProductId }
     record CheckoutInputs is { orderId is OrderId }
     record CheckoutOutcome is { ok is Boolean }
     command ProcessPayment is { orderId is OrderId }
@@ -87,13 +87,56 @@ description: >-
     entity Catalog is {
       state Listed of record ProductRecord is {
         handler CatalogHandler is {
-          on query GetProduct { reply result OrderInfo() }
+          on query GetProduct { reply result ProductInfo() }
         }
       }
     }
     entity Review is {
       state Reviewing of record OrderData is {
         handler ReviewHandler is { on command EscalateReview { ??? } }
+      }
+    }
+    // `become` names an ENTITY-level handler, so ShippedHandler sits beside
+    // the state rather than inside it. A fence that declares its own
+    // `entity Order` must say no-prelude=Order.
+    entity Order is {
+      state Placed of record OrderData is {
+        handler PlacedHandler is { on command ConfirmOrder { ??? } }
+      }
+      handler ShippedHandler is { on command ShipOrder { ??? } }
+    }
+    // Endpoints for the `connector` fence that discards an unused outlet.
+    processor MyProcessor as source is { outlet Unused is type OrderEvent }
+    processor BottomlessPit as sink is { inlet hole is type OrderEvent }
+-->
+
+<!-- riddl-domain-prelude
+    // Domain-level vocabulary for the fences that declare a whole `context`.
+    // Streams carry these across context boundaries, so they cannot live in
+    // any one context; a domain may hold type definitions.
+    // These are EVENTS, not plain types: an `on event X` clause rejects a
+    // String-typed X with "should reference one of these types: Event".
+    event OrderEvent is { orderId is UUID, amount is Decimal(10, 2) }
+    event EnrichedOrderEvent is { orderId is UUID, region is String }
+    event RawEvent is { note is String }
+    event ValidatedEvent is { note is String }
+
+    user Customer is "a shopper buying from the store"
+
+    // The sibling contexts that whole-context fences name by dotted path. A
+    // fence declaring its own `context OrderContext` must say
+    // no-prelude=OrderContext.
+    context PaymentContext is {
+      event PaymentCompleted is { reference is UUID, amount is Decimal(10, 2) }
+    }
+    context OrderContext is {
+      event OrderCompleted is { orderId is UUID, amount is Decimal(10, 2) }
+      event OrderRefunded is { orderId is UUID, amount is Decimal(10, 2) }
+    }
+    application context Storefront is {
+      record StorefrontData is { sku is String }
+      page ProductDetails is {
+        form AddToCartForm submits type StorefrontData
       }
     }
 -->
@@ -611,7 +654,7 @@ they say.
   ```
 
 - **Collections**:
-  <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+  <!-- riddl: in-record -->
   ```riddl
   items is many Item
   ```
@@ -683,7 +726,7 @@ there is nothing to read without it.
 A context may declare its **intention** — what kind of bounded context it is —
 with a keyword prefix:
 
-<!-- riddl: in-domain -->
+<!-- riddl: in-domain no-prelude=Storefront -->
 ```riddl
 type Request is String
 
@@ -742,7 +785,7 @@ Entities are stateful objects with explicit states. Each state references a
 **record** that defines its data structure, and can optionally contain handlers
 and invariants that apply while the entity is in that state:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Product -->
 ```riddl
 entity Product is {
   initial state ProductData of record ProductRecord is {
@@ -779,7 +822,7 @@ entity SimpleProduct is {
 An optional `initial` keyword before `state` or `handler` marks the entity's
 starting state, and the handler that is live after a `morph`:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its `state Active` is elided to `???`, and RIDDL 2.0 requires every state to have a handler" -->
 ```riddl
 entity Order is {
   initial state Pending of record PendingData is {
@@ -802,7 +845,7 @@ When an entity has multiple states with their own handlers, it models a finite
 state machine — each state responds to messages differently, and the `morph`
 statement transitions between states:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`record ActiveOrderData()` is an empty constructor for a record that must have at least one field; the fence elides the arguments" -->
 ```riddl
 entity Order is {
   initial state PendingOrder of record PendingOrderData is {
@@ -954,7 +997,7 @@ not begin with a lowercase letter draws a StyleWarning.
 
 An `on` clause may name where the message came from:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="two spellings of the SAME on-clause, which cannot share one handler -- same shape as onclause.md" -->
 ```riddl
 on command DoIt from context Other { ??? }
 on command DoIt from di: context Other { ??? }
@@ -962,7 +1005,7 @@ on command DoIt from di: context Other { ??? }
 
 ### Basic Handler Example
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 handler ProductCommandHandler is {
   on upd: command UpdatePrice {
@@ -1155,7 +1198,7 @@ needs a value, it accepts any of these forms:
 A constructor builds a message or a record inline. Arguments are positional
 first, then named:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="page shows OrderPlaced with two different field sets; this one adds `currency`, while the `yield event OrderPlaced(id, total)` fence does not -- a page prelude can supply only one shape" -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 ```
@@ -1193,7 +1236,7 @@ Calling something with no declared `returns` is an Error.
 Boolean expressions have the usual precedence: `or` < `and` < `not` <
 comparison < atom. Parentheses group.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 when order.isPaid and not order.isCancelled then ??? end
 require count == total
@@ -1202,7 +1245,7 @@ require count == total
 An [invariant](../concepts/invariant.md) takes one too, though it is a
 definition rather than a statement:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 invariant InStock is quantity >= Zero
 ```
@@ -1238,7 +1281,7 @@ everywhere else.
 Changes entity state. The payload is a **record** — a bare record reference or
 an inline constructor:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`ProductRecord(price)` passes one positional argument to a three-field record, and `price` is not in scope; the fence elides the rest" -->
 ```riddl
 morph entity Product to state ProductData with record ProductRecord(price)
 ```
@@ -1301,7 +1344,7 @@ handler, and the wrong pairing — `yield result` or `reply event` — is an Err
 
 Assigns a value to a field or a state:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`set state ActiveOrder to record ActiveOrderData()` is an empty constructor for a one-field record, and `call function Pricing.Total(subtotal, tax)` passes two of four inputs" -->
 ```riddl
 set field status to "Active"
 set field total to call function Pricing.Total(subtotal, tax)
@@ -1313,7 +1356,7 @@ set state ActiveOrder to record ActiveOrderData()
 Creates a local variable binding, with an optional type annotation. When no
 annotation is given, the type is inferred from the bound expression:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="calls `Cart.Total`, a function this page never defines, and annotates a `let` with the predefined `Decimal`, which does not resolve as a type path" -->
 ```riddl
 let totalPrice = call function Cart.Total(subtotal, tax, shipping)
 let discount: Decimal = "totalPrice * 0.1"
@@ -1417,7 +1460,7 @@ non-Boolean condition is an Error.
 
 An `else` clause handles the false case:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 let authorized = user.hasPermission
 when authorized then {
@@ -1432,7 +1475,7 @@ when authorized then {
 Pattern matching over a typed subject. The subject is a value reference, a
 `get from`, or a legacy pseudo-code literal:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="matches a String-typed `status` against type-cases and a numeric `>=` threshold; the subject would have to be an enumerated type, which conflicts with the `set field status` fence" -->
 ```riddl
 match order.status {
   case Pending {
@@ -1468,7 +1511,7 @@ Enumeration or Alternation — a non-exhaustive match without a `default` draws 
 
 RIDDL's safe, bounded loop. There is no unbounded iteration in the language:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`myLocalCollection` must be a `let`-bound local, and the fence elides the binding" -->
 ```riddl
 foreach line in field order.lines {
   send event LineShipped(sku = line.sku) to outlet Shipments
@@ -1645,7 +1688,7 @@ number, so it declines to guess rather than guessing wrong.
 
 Switches the live handler of an entity:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 become entity Order to handler ShippedHandler
 ```
@@ -1656,7 +1699,7 @@ Functions define reusable, **pure** operations. A function's `requires` and
 `returns` may name an existing type rather than spelling out an aggregation,
 which makes unary and nullary functions natural:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="calls `Tax.Apply`, which this page never defines; the prelude cannot supply a `Tax` because the in-function wrapper already owns that name" -->
 ```riddl
 function CalculateTotal is {
   requires record TotalInputs
@@ -1670,7 +1713,7 @@ function CalculateTotal is {
 
 The inline aggregation form still works:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="declares its inputs and outputs as inline anonymous aggregates, which 2.0 marks deprecated in favour of a named record" -->
 ```riddl
 function CalculateTotal is {
   requires { subtotal is Price, taxes is Price, shipping is Price }
@@ -1752,7 +1795,7 @@ A saga is sequential by default, so there is no `sequential` option.
 
 Repositories define persistence:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its schema names `record Cart`, while the page prelude must supply `entity Cart` for other fences; one context cannot hold both" -->
 ```riddl
 repository CartRepository is {
   schema CartData is relational of
@@ -1800,7 +1843,7 @@ Adaptors specify a direction relative to a context:
 
 ### Example
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="the adaptor emits `OrderPaymentReceived`, which belongs to neither its parent nor its referent context, so 2.0 rejects it as crossing the adaptor's isolation seam" -->
 ```riddl
 context OrderContext is {
   adaptor PaymentIntegration from context PaymentContext is {
@@ -1844,7 +1887,7 @@ model (projections).
 
 ### Example
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="a 2.0 projector requires a record definition, and this one has none" -->
 ```riddl
 context ReportingContext is {
   projector SalesDashboard is {
@@ -1887,7 +1930,7 @@ input ports (inlets) and output ports (outlets).
 Every processor kind may declare ports — not just streamlets. An entity may
 own an outlet; a projector may own an inlet.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 context DataPipeline is {
   processor OrderEventSource as source is {
@@ -1962,7 +2005,7 @@ connector [name] is from outlet [source.outlet] to inlet [target.inlet]
 
 ### Example
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="continuation of the pipeline fence above; the processors it connects are declared there" -->
 ```riddl
 context DataPipeline is {
   connector OrderFlow is
@@ -2000,7 +2043,7 @@ different contexts, in the enclosing Domain.
 
 ### Pipeline Pattern
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 context EventProcessing is {
   processor Events as source is { outlet Raw is type RawEvent }
@@ -2027,7 +2070,7 @@ one-connector-per-port rule makes structurally necessary:
 | `ForeverEmpty` | source | Never produces anything on its outlet `void` |
 | `Drain` | type | `Anything`, so one drain absorbs every message type |
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 connector DiscardUnused is
   from outlet MyProcessor.Unused
@@ -2047,7 +2090,7 @@ module is never added to your model's contents.
 RIDDL supports UI modeling. **UI may only be modeled inside an `application`
 context.**
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`button ... activates type Boolean` is not valid 2.0; a known content bug shared with four other pages" -->
 ```riddl
 application context Storefront is {
   page ProductDetails is { ??? } with {
@@ -2099,7 +2142,7 @@ application context Storefront is {
 
 Epics model user stories:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its steps name `Storefront.AddToCartForm` and `Storefront.CartSummary` as direct children of the context, but the page's own application fence puts forms inside pages" -->
 ```riddl
 epic ShoppingCartEpic is {
   user Customer wants to "add items to a shopping cart"
@@ -2145,7 +2188,7 @@ The **refusal** step is new in 2.0. It models a system element declining a
 user's request, which previously had no way to be expressed except as free
 text:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-usecase no-prelude -->
 ```riddl
 step entity Cart refuses user Customer "the item is out of stock"
 ```
@@ -2197,14 +2240,14 @@ Modules can be compiled to a binary `.bast` file and imported by other models.
 
 The **full** form takes everything the file's root module holds:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="loads a BAST file that does not exist; nothing on disk can satisfy it" -->
 ```riddl
 import "commerce.bast"
 ```
 
 The **selective** form takes exactly one named definition, optionally renamed:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="loads a BAST file that does not exist; nothing on disk can satisfy it" -->
 ```riddl
 import domain Shopping from "commerce.bast"
 import type Money from "commerce.bast" as Currency
@@ -2233,7 +2276,7 @@ exactly as if it had been written there by hand. An illegal placement is an
 A `version` declares a component of a scope's version coordinate. It is either a
 name or a natural number, never both:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its `entity Order` has no handler and no state, which 2.0 rejects; the fence is about `version`, not about entities" -->
 ```riddl
 domain Garibaldi is {
   version Garibaldi
@@ -2293,7 +2336,7 @@ than one in a single scope is an **Error**.
 Metadata goes in a `with { }` block **after** the closing brace of the
 definition:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Product -->
 ```riddl
 event-sourced entity Product is {
   // Entity definition content
@@ -2333,7 +2376,7 @@ comments.
 A `figma` reference connects a model element to the exact frame in a Figma file
 that depicts it:
 
-<!-- riddl: in-domain -->
+<!-- riddl: in-domain no-prelude=Storefront -->
 ```riddl
 application context Storefront is {
   page Checkout is { ??? } with {
