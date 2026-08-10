@@ -5560,6 +5560,17 @@
 
 <!-- riddl-prelude
 constant MaxItems is Natural = "100"
+record DoneData is { note is String }
+record SignupData is { email is String }
+event OrderPlaced is { orderId is String, total is Natural, currency is String }
+record PricingInput is { subtotal is Natural, taxRate is Natural }
+function Pricing is {
+  requires PricingInput returns PricingInput
+  function CalculateTotal is { requires PricingInput returns PricingInput ??? }
+}
+entity Order is {
+  state Done of record DoneData is { handler H is { ??? } }
+}
 -->
 
 <p>A value is an expression, in the context of a <a href="../statement/">statement</a>, that
@@ -5634,23 +5645,23 @@ shadowed inside nested blocks.</p>
 <h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
 <p>A constructor builds a <a href="../message/">message</a> or record inline, rather than
 requiring it be assembled elsewhere first:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Done</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">DoneData</span><span class="p">()</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Done</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">DoneData</span><span class="p">(</span><span class="n">note</span> <span class="o">=</span> <span class="s2">&quot;fulfilled&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Arguments are <strong>positional first, then named</strong>. Count, names, ordering and
 (best effort) types are all checked against the target's fields.</p>
 <h2 id="get">Get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h2>
 <p><code>get from</code> reads a value from a UI <a href="../input/">input</a> or an entity
 <a href="../state/">state</a>:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-application -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">let</span> <span class="kr">email</span>   <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Active</span>
 </span></code></pre></div>
 <h2 id="call">Call<a class="headerlink" href="#call" title="Permanent link">&para;</a></h2>
 <p><code>call</code> invokes a <a href="../function/">function</a> — and only a function, since
 functions are the only definitions guaranteed pure — and produces its result:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
 </span></code></pre></div>
 <p>A call is value-producing rather than a bare statement, so it composes with
@@ -5658,7 +5669,7 @@ functions are the only definitions guaranteed pure — and produces its result:<
 declares no <code>returns</code> is an <strong>Error</strong>.</p>
 <h2 id="prompt">Prompt<a class="headerlink" href="#prompt" title="Permanent link">&para;</a></h2>
 <p><code>prompt("...")</code> denotes a value computed by AI at generation time:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">recommendation</span> <span class="kp">to</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;suggest a complementary product&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p>It is distinguished from the <code>do</code> <strong>statement</strong> by its parentheses. The
@@ -5667,7 +5678,7 @@ something AI computes.</p>
 <h2 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h2>
 <p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; atom, with parentheses to
 group:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="kp">or</span> <span class="n">order</span><span class="p">.</span><span class="n">isRefunded</span><span class="p">)</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span></code></pre></div>
 <p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
