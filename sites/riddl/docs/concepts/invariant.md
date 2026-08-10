@@ -6,6 +6,23 @@ description: >-
   precondition before every effect in its declaring scope.
 ---
 
+<!-- riddl-domain-prelude
+command PlaceOrder is { note is String }
+-->
+<!-- riddl-prelude
+constant Zero is Natural = "0"
+constant minimumFee is Natural = "5"
+record OpenData is { balance is Natural, quantity is Natural,
+  holdAmount is Natural }
+record ClosedData is { balance is Natural }
+record AvailIn is { held is Natural, total is Natural }
+command Withdraw is { amount is Natural }
+command PlaceOrder is { note is String }
+event PaymentReversed is { note is String }
+entity Review is { ??? }
+function Available is { requires AvailIn returns AvailIn ??? }
+-->
+
 An invariant is a named business rule: a boolean condition that must always be
 true. Naming it is what promotes the rule from a comment in somebody's code to a
 citizen of the model — something a domain expert can review and the tooling can
@@ -17,7 +34,7 @@ enforce.
 as a *precondition* before any effect in that clause. Nothing at the point of
 use turns it on:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 entity Account is {
   invariant BalanceNonNegative is balance >= Zero
@@ -51,7 +68,7 @@ that reads like it strengthens the model.
 
 ## The Condition Has Three Forms
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 invariant Legacy      is "the account must be in good standing"   // 1
 invariant InStock     is quantity >= Zero                          // 2
@@ -78,7 +95,7 @@ exactly the shape a call site wants.
 Because comparisons are reference-only, a threshold is named rather than written
 inline:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity no-prelude=Zero -->
 ```riddl
 constant Zero is Natural = "0"
 invariant BalanceNonNegative is balance >= Zero
@@ -109,7 +126,7 @@ State scoping is what lets different states carry different rules — an open
 account may hold any non-negative balance, while a closed one must hold exactly
 nothing:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 entity Account is {
   initial state Open of record OpenData is {
@@ -120,6 +137,8 @@ entity Account is {
 
   state Closed of record ClosedData is {
     invariant BalanceIsZero is balance == Zero
+
+    handler Settling is { ??? }
   }
 }
 ```
@@ -127,14 +146,14 @@ entity Account is {
 The same narrowing can be written from the entity level instead, which keeps
 related rules together where an author would rather read them side by side:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 entity Account is {
   invariant BalanceNonNegative requires state Open   is balance >= Zero
   invariant BalanceIsZero      requires state Closed is balance == Zero
 
-  initial state Open   of record OpenData   is { ??? }
-  state         Closed of record ClosedData is { ??? }
+  initial state Open   of record OpenData   is { handler Transacting is { ??? } }
+  state         Closed of record ClosedData is { handler Settling    is { ??? } }
 }
 ```
 
@@ -157,7 +176,7 @@ is no ambient data for an implicit predicate to read. An invariant declared ther
 must name what it needs with `requires <type T>` and be invoked explicitly, with
 the clause supplying the value:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 context Ordering is {
   record Limits is { ceiling: Integer, used: Integer }
@@ -167,7 +186,6 @@ context Ordering is {
   handler Intake is {
     on command PlaceOrder {
       require invariant UnderLimit with record Limits(ceiling = "10", used = "1")
-      ???
     }
   }
 }
@@ -180,11 +198,11 @@ receives.**
 
 A [handler](handler.md) may still name an invariant explicitly:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 ```riddl
 on command Withdraw {
   require invariant BalanceNonNegative
-  ???
+  do "apply the withdrawal"
 }
 ```
 
@@ -262,11 +280,11 @@ failure is the one reported.
 When an event handler should *respond* to a rule being false rather than fault,
 name the invariant in a [`when`](statement.md#when-statement) and take action:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 ```riddl
 on event PaymentReversed {
   when not invariant BalanceNonNegative then
-    send command FlagForReview to entity Review
+    tell command FlagForReview to entity Review
   end
 }
 ```

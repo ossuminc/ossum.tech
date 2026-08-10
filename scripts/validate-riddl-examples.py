@@ -298,9 +298,13 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # An `on ...` clause fragment: give it a handler to sit in.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
+            "    constant ExampleZero is Natural = \"0\"\n"
+            "    type ExampleLimit is Natural\n"
             "    record ExampleData is { note is String, balance is Natural }\n"
             "    command ExampleCommand is { note is String, amount is Natural }\n"
             "    entity ExampleEntity is {\n"
+            "      invariant BalanceNonNegative is balance >= ExampleZero\n"
+            "      invariant UnderLimit requires ExampleLimit is \"under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
             "        handler ExampleHandler is {\n"
             + ind(body, 10) + "\n"
@@ -342,9 +346,19 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "          }\n        }\n      }\n    }\n  }\n}\n"
         )
     if kind == "in-entity":
+        # The entity carries a state WITH a handler: an entity having neither
+        # is an Error, so a fence contributing only (say) invariants would fail
+        # for the wrapper's shape rather than for anything the fence wrote.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
+            "    record ExampleEntityData is { note is String, balance is Natural,\n"
+            "      quantity is Natural, holdAmount is Natural }\n"
+            "    command ExampleEntityCommand is { note is String }\n"
             "    entity ExampleEntity is {\n" + ind(body, 6) + "\n"
+            "      state ExampleEntityState of record ExampleEntityData is {\n"
+            "        handler ExampleEntityHandler is {\n"
+            "          on command ExampleEntityCommand { ??? }\n"
+            "        }\n      }\n"
             "    }\n  }\n}\n"
         )
     if kind == "in-context":
