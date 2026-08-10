@@ -8324,6 +8324,66 @@
     command ReleaseItems is { orderId is OrderId }
     entity PaymentService is { ??? }
     entity Inventory is { ??? }
+
+    // --- added for the statement and definition fences below ---
+    type RawEvent is String
+    type ValidatedEvent is String
+    record Item is { sku is String, quantity is Integer }
+    record ProductRecord is { id is ProductId, price is Price, status is String }
+    record PendingData is { note is String }
+    record ActiveData is { note is String }
+    record PendingOrderData is { note is String }
+    record ActiveOrderData is { note is String }
+    record ShippedOrderData is { trackingNumber is String }
+    record CartData is { id is CartId, total is Price, items is many CartItem }
+    record Product is { id is ProductId, price is Price }
+    record AvailIn is { held is Natural, total is Natural }
+    constant minimumFee is Natural = "5"
+    function Available is { requires AvailIn returns AvailIn ??? }
+    record PricingInput is { subtotal is Price, taxRate is Price,
+      tax is Price, shipping is Price }
+    function Pricing is {
+      requires PricingInput returns PricingInput
+      function CalculateTotal is { requires PricingInput returns PricingInput ??? }
+      function Total is { requires PricingInput returns PricingInput ??? }
+    }
+    // NOTE: do NOT define `Tax` here. The in-function wrapper supplies a
+    // sibling `context Tax`, and a prelude entry of that name makes every
+    // `Tax.…` path ambiguous, breaking the in-function fences on this page.
+    event ItemAdded is { sku is String }
+    event ActionCompleted is { note is String }
+    event LineShipped is { sku is String }
+    event OrderPending is { id is OrderId }
+    event OrderShipped is { id is OrderId }
+    event Withdrawn is { amount is Natural }
+    event CartCreated is { id is CartId }
+    event OrderPaymentReceived is { id is OrderId }
+    command ConfirmOrder is { id is OrderId }
+    command ShipOrder is { trackingNumber is String }
+    command EscalateReview is { id is OrderId }
+    command Withdraw is { amount is Natural }
+    outlet Events is type PriceUpdated
+    outlet CartEvents is type ItemAdded
+    outlet PaymentRequests is type ProcessPayment
+    outlet Shipments is type LineShipped
+    outlet OrderEvents is type OrderPlaced
+    entity Cart is {
+      state Filling of record CartData is {
+        handler CartHandler is { on event ItemAdded { ??? } }
+      }
+    }
+    entity Catalog is {
+      state Listed of record ProductRecord is {
+        handler CatalogHandler is {
+          on query GetProduct { reply result OrderInfo() }
+        }
+      }
+    }
+    entity Review is {
+      state Reviewing of record OrderData is {
+        handler ReviewHandler is { on command EscalateReview { ??? } }
+      }
+    }
 -->
 
 <h1 id="riddl-language-guide">RIDDL Language Guide<a class="headerlink" href="#riddl-language-guide" title="Permanent link">&para;</a></h1>
@@ -9019,7 +9079,7 @@ and invariants that apply while the entity is in that state:</p>
 </span></code></pre></div>
 <p>States can also be defined without a body when handlers are defined at the
 entity level instead:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">entity</span> <span class="n">SimpleProduct</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="kd">state</span> <span class="n">ProductData</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductRecord</span>
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  <span class="kd">handler</span> <span class="n">ProductHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
@@ -9294,7 +9354,7 @@ and was inert. Every invariant now applies — including ones you also
 silently narrow a rule from enforced-everywhere to enforced-there.</p>
 </div>
 <h3 id="condition-forms">Condition Forms<a class="headerlink" href="#condition-forms" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kd">invariant</span> <span class="n">Legacy</span>      <span class="kp">is</span> <span class="s2">&quot;the account must be in good standing&quot;</span>
 </span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="kd">invariant</span> <span class="n">InStock</span>     <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="kd">invariant</span> <span class="n">CanCoverFee</span> <span class="kp">is</span> <span class="p">{</span>
@@ -9356,13 +9416,13 @@ every state record of that entity to have a <code>balance</code> field. Referenc
 absent from any state record is an <strong>Error</strong>.</p>
 <p>A stateless processor has no ambient data for an implicit predicate to read, so
 an invariant declared on one must name what it needs and be invoked explicitly:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kd">record</span> <span class="n">Limits</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">ceiling</span><span class="p">:</span> <span class="nb">Integer</span><span class="p">,</span> <span class="n">used</span><span class="p">:</span> <span class="nb">Integer</span> <span class="p">}</span>
 </span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
 </span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kr">requires</span> <span class="kd">record</span> <span class="n">Limits</span> <span class="kp">is</span> <span class="n">used</span> <span class="o">&lt;=</span> <span class="n">ceiling</span>
 </span></code></pre></div>
 <p>The clause then hands it the value:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">Limits</span><span class="p">(</span><span class="n">ceiling</span> <span class="o">=</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="n">used</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="purity">Purity<a class="headerlink" href="#purity" title="Permanent link">&para;</a></h3>
@@ -9475,28 +9535,27 @@ so <code>OrderPlaced()</code> against a message that has fields is an Error.</p>
 the target's fields.</p>
 <h3 id="get">Get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h3>
 <p><code>get from</code> reads a value from a UI input or an entity state:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-application -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="k">let</span> <span class="kr">email</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
 </span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Active</span>
 </span></code></pre></div>
 <h3 id="call">Call<a class="headerlink" href="#call" title="Permanent link">&para;</a></h3>
 <p><code>call</code> invokes a <strong>function</strong> — and only a function, because functions are the
 only pure definitions — and produces its result:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Calling something with no declared <code>returns</code> is an Error.</p>
 <h3 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h3>
 <p>Boolean expressions have the usual precedence: <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt;
 comparison &lt; atom. Parentheses group.</p>
-<!-- riddl: in-handler -->
 <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="n">require</span> <span class="n">count</span> <span class="o">==</span> <span class="n">total</span>
 </span></code></pre></div>
 <p>An <a href="../../concepts/invariant/">invariant</a> takes one too, though it is a
 definition rather than a statement:</p>
-<!-- riddl: in-context -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="kd">invariant</span> <span class="n">InStock</span> <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span></code></pre></div>
 <p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
@@ -9529,7 +9588,7 @@ an inline constructor:</p>
 <h3 id="send-statement">Send Statement<a class="headerlink" href="#send-statement" title="Permanent link">&para;</a></h3>
 <p>Emits a message on one of <em>this</em> processor's own outlets. A connector then
 routes it to a downstream inlet:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="k">send</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartEvents</span>
 </span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="k">send</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentRequests</span>
 </span></code></pre></div>
@@ -9542,7 +9601,7 @@ for removal in 3.0.</p>
 </div>
 <h3 id="tell-statement">Tell Statement<a class="headerlink" href="#tell-statement" title="Permanent link">&para;</a></h3>
 <p>Delivers a message directly to a processor:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="k">tell</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Cart</span>
 </span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
 </span></code></pre></div>
@@ -9555,7 +9614,7 @@ a <strong>Warning</strong>.</p>
 <p>These are the statement halves of the two pairings described under
 <a href="#the-yields-and-replies-clauses"><code>yields</code> and <code>replies</code></a>. Both produce a
 declared response without the handler needing to know the sender's identity:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>      <span class="c1">// in a command handler</span>
 </span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="kr">reply</span> <span class="kd">result</span> <span class="n">ProductInfo</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="kr">name</span><span class="p">)</span>      <span class="c1">// in a query handler</span>
 </span></code></pre></div>
@@ -9591,7 +9650,7 @@ declaration and is shadowed inside nested blocks.</p>
 <p><code>ask</code> states that two messages are two halves of <strong>one</strong> interaction: a query
 sent to a processor, and the reply that answers it. It is a <strong>value</strong>, not a
 statement, so it is used through <code>let</code>:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="k">let</span> <span class="n">answer</span> <span class="o">=</span> <span class="n">ask</span> <span class="kd">query</span> <span class="n">GetProduct</span> <span class="kp">of</span> <span class="kd">entity</span> <span class="n">Catalog</span>
 </span></code></pre></div>
 <p>Before <code>ask</code>, a model could say a message was sent (<code>tell</code>) and what handling
@@ -9625,12 +9684,12 @@ rejection settles the obligation, consistent with the discharge rule.</p>
 <h3 id="put-statement">Put Statement<a class="headerlink" href="#put-statement" title="Permanent link">&para;</a></h3>
 <p>Publishes a value to a UI output. Valid only in application and context
 handlers:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-application -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="k">put</span> <span class="n">order</span><span class="p">.</span><span class="n">confirmationNumber</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">ConfirmationPanel</span>
 </span></code></pre></div>
 <h3 id="return-statement">Return Statement<a class="headerlink" href="#return-statement" title="Permanent link">&para;</a></h3>
 <p>Returns a function's result. Valid only in a function body:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-function -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Compute</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="when-statement">When Statement<a class="headerlink" href="#when-statement" title="Permanent link">&para;</a></h3>
@@ -9748,7 +9807,7 @@ and it is checked in both directions:</p>
 </table>
 <h3 id="require-statement">Require Statement<a class="headerlink" href="#require-statement" title="Permanent link">&para;</a></h3>
 <p>Asserts a precondition that must hold before proceeding:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="n">require</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
 </span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="n">require</span> <span class="s2">&quot;the customer is in good standing&quot;</span>
 </span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
@@ -9783,7 +9842,7 @@ changes behind.</p>
 <p>Each statement list is checked independently, so each branch of a <code>when</code>,
 <code>match</code> or <code>foreach</code> body is its own list. A refusal after an effect in the same
 list is an <strong>Error</strong>.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
 </span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>        <span class="c1">// refusals first</span>
 </span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>  <span class="n">require</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span>
@@ -10414,7 +10473,7 @@ vocabulary, not captured data.</p>
 <p>The <strong>refusal</strong> step is new in 2.0. It models a system element declining a
 user's request, which previously had no way to be expressed except as free
 text:</p>
-<!-- riddl: in-usecase -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
 </span></code></pre></div>
 <p>The <strong>arbitrary</strong> and <strong>vague</strong> steps carry free prose rather than typed
@@ -10536,7 +10595,7 @@ than one in a single scope is an <strong>Error</strong>.</p>
 <h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
 <p>Metadata goes in a <code>with { }</code> block <strong>after</strong> the closing brace of the
 definition:</p>
-<!-- riddl: in-context -->
+<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-70-1"><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-70-2"><a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>  <span class="c1">// Entity definition content</span>
 </span><span id="__span-70-3"><a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>  <span class="gr">???</span>
@@ -10820,7 +10879,7 @@ blocks and doc blocks.</p>
 </ol>
 <h2 id="incomplete-definitions">Incomplete Definitions<a class="headerlink" href="#incomplete-definitions" title="Permanent link">&para;</a></h2>
 <p>Use <code>???</code> as a placeholder for incomplete definitions:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-76-1"><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a><span class="kd">record</span> <span class="n">PaymentDetails</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-76-2"><a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Record for payment information details&quot;</span>
 </span><span id="__span-76-3"><a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a><span class="p">}</span>
