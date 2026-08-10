@@ -16,74 +16,101 @@ to the task file and note completion in this notebook.
 **All figures below were run in this session, not recalled.**
 
 **State:** branch `main`, ahead of `origin/main`, tree clean. sbt is **2.0.6**
-(bumped by Reid to clear a critical vulnerability, committed 2026-08-10).
+(bumped by Reid to clear a critical vulnerability).
 
 **Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
 pin matches. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** — the WRONG
 compiler for the 2.0 docs. Re-check at session start; it is restaged often.
 
-**Gates:** 2.0 — **191 validated / 36 skipped / 0 failed, exit 0**; 1.31 —
-6/0/0, exit 0. `mkdocs build --strict` clean, 80 cross-site links checked.
+**Gates:** 2.0 — **251 validated / 122 skipped / 0 failed, exit 0**, now over
+the WHOLE of `sites/riddl/docs`; 1.31 — 6/0/0, exit 0. All five sites build
+`--strict` clean; 80 cross-site links checked.
 
 **`task/` holds only `done/`.** Nothing awaits triage.
 
-### BACKLOG 1a and 1a-followup are both DONE
+### 1a, 1a-followup and 1b are all DONE
 
-No blanket `"illustrative fragment"` skip remains in `sites/riddl/docs`, and
-every content bug that gating exposed on `language-reference.md` is fixed. The
-page is 55 validated / 21 skipped, from 23/52 when the work began.
+**Not one blanket `"illustrative fragment"` skip remains in the site** — 118
+at the start. Every page with RIDDL in it now carries directives, and the gate's
+documented scope in CLAUDE.md is simply `sites/riddl/docs`.
 
-**Next is BACKLOG 1b** — gating `tutorials/rbbq/`, `guides/`, `tools/` and the
-other three sites. The last 17 blanket skips live there, and those trees carry
-4 pre-existing failures, so expect to go red before green; gate one page at a
-time.
+**Next is BACKLOG 1c**, and it is the one that matters: `tutorials/rbbq/` is 73
+skipped / 0 validated, all under one unverified reason ("quoted verbatim from
+riddl-models, which is still 1.x"). That is the same shape as the blanket skip
+1a retired. Read 1c before assuming the tutorial is 1.x — at least one of its
+fences validates clean today, and `concepts/` looked just as bad at this stage
+before turning out to be mostly missing vocabulary.
 
-Only **1a-remnant** is left over: one fence whose schema needs `record Cart`
-while the page prelude must supply `entity Cart`. A harness collision, not a
-wrong example.
+**1a-remnant** is the only other leftover: one fence needing `record Cart`
+while its page prelude must supply `entity Cart`.
 
 ### Traps
 
-- **The gate's scope is a FILE LIST, not a directory** — exact command in
-  CLAUDE.md § "Compiling RIDDL examples". Compare figures only within a scope.
 - **`cmd | tail` reports tail's exit status, not the gate's.** Redirect to a
-  file and check `$?` before believing a gate passed.
-- **Re-run the FULL gate after any wrapper or script edit**, and the 1.31 gate
-  too. Wrapper changes have now regressed unrelated pages six times.
-- **An enumeration must never go in the shared wrapper.** Its enumerators join
-  the enclosing namespace, so a wrapper-level `Shipped` collides with any page
-  naming a state `Shipped` — `concepts/statement.md` does. The "wrapper
-  vocabulary is only ever ADDED" rule holds for fields, NOT for enumerations.
-- **Nothing in a domain prelude may depend on an entry a fence might strip.**
-  A `context Shopping` borrowing a record from `Storefront` broke all three
-  fences using `no-prelude=Storefront`. Prelude entries must be self-contained.
-- **A hand-rolled probe filtering only `[error]`/`[severe]` will lie**; the
-  gate also fails on `[deprecated]`.
-- **A malformed directive degrades SILENTLY to `standalone`**, turning a skip
-  into a validated fence. If a fence's result surprises you, check the
-  directive parses.
-- **Annotate fences by LINE NUMBER**, and assert the match is unique — several
-  fences on this page share an opening line.
+  file and check `$?`. This is now in CLAUDE.md.
+- **Re-run the FULL gate after any wrapper or script edit**, and 1.31 too.
+  Wrapper changes have regressed unrelated pages six times.
+- **An enumeration must never go in the shared wrapper** — its enumerators
+  join the enclosing namespace and collide with any page naming a state the
+  same thing. The "wrapper vocabulary is only ever ADDED" rule holds for
+  fields only.
+- **Nothing in a prelude may depend on an entry a fence might strip** with
+  `no-prelude`, or that fence loses both.
+- **`in-domain` fences never see the page prelude.** Anything they reach for
+  must be repeated in the domain prelude — and an entity cannot sit at domain
+  level, so it goes in a sibling context, where a bare name still resolves.
+- **A fence indented inside an admonition needs its directive indented too**,
+  and a naive string replace on ```` ```riddl ```` silently misses it.
+- **`--auto` reports placements; it does not write them.** Running it and
+  moving on leaves the fences unannotated and still failing.
+- **A hand-rolled probe filtering only `[error]`/`[severe]` will lie**; the gate
+  also fails on `[deprecated]`.
+- **A malformed directive degrades SILENTLY to `standalone`.**
 
 ### Certainty
 
 **Verified by command this session:** git state, both compiler versions, the
-pin, both gates *with their real exit status*, the strict build, cross-site
+pin, both gates with their real exit status, all five strict builds, cross-site
 links, and that `task/` is empty.
 
-**Verified by compiling:** every fence on `language-reference.md`, and every
-content fix listed in commit `470b436`.
+**Verified by compiling:** every content fix in commits `470b436` and
+`c7a109e`, and the 4-of-76 tutorial measurement in BACKLOG 1c.
 
-**Assumed, not re-verified:** BACKLOG item 5's 18 site items.
+**Assumed, not re-verified:** BACKLOG item 5's 18 site items. Whether
+`riddl-models` has migrated to 2.0 — 1c depends on it and it was not checked.
 
 ### Pointers
 
-Open work is **BACKLOG.md** — 1b is live. Durable facts are **CLAUDE.md**,
+Open work is **BACKLOG.md** — 1c is live. Durable facts are **CLAUDE.md**,
 notably § "Things that will bite" and § "Compiling RIDDL examples".
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### BACKLOG 1b: guides/ and migration/ gated ✅ **2026-08-10**
+
+3 failures and 11 blanket skips → 0 failures, 0 blanket skips site-wide. Whole
+2.0 tree now 251/122/0.
+
+**"Looks like 1.x" is not evidence.** `command-event-patterns.md` reads as a
+1.x page — colon-style fields, `?`, `*`, `+`, `briefly` without `as`. All of
+those are valid 2.0. Exactly ONE construct on it was actually retired
+(`state Active is {` without `of record`). Had it been "migrated" on sight, six
+fences would have been rewritten for nothing. Check each construct against the
+compiler before calling a page stale.
+
+**Two of the three bugs were in an event-sourcing example**, which is where a
+reader is least able to spot them: a command yielding its event only inside a
+`when`, and `Id(Product)` pointing at a `type Product` that shadowed the
+`entity Product` declared further down the same page.
+
+**The tutorial's skip reason is an assumption wearing the clothes of a
+decision.** 73 fences, one sentence, never checked individually — the same
+pattern 1a spent four passes undoing. Filed as 1c rather than left as a
+footnote, because the phrasing makes it read like settled policy.
 
 ---
 
