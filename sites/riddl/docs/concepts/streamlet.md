@@ -6,6 +6,21 @@ description: >-
   an optional `as <shape>` ascription.
 ---
 
+<!-- riddl-domain-prelude
+event RawOrder is { id is Natural }
+event EnrichedOrder is { id is Natural }
+-->
+<!-- riddl-prelude
+constant AlertThreshold is Natural = "100"
+event TemperatureReading is { value is Natural }
+event TemperatureAlert is { value is Natural }
+event TemperatureMetric is { value is Natural }
+event OrderEvent is { id is Natural }
+event UserNotification is { note is String }
+event RawOrder is { id is Natural }
+event EnrichedOrder is { id is Natural }
+-->
+
 A Streamlet is a [processor](processor.md) that handles streaming data flows.
 Streamlets are the building blocks for data pipelines, connecting sources of
 data to consumers through transformations.
@@ -14,7 +29,7 @@ In RIDDL 2.0 a streamlet is declared with the generic `processor` keyword and
 an optional shape ascription. The shape is otherwise **derived** from how many
 [inlets](inlet.md) and [outlets](outlet.md) the processor declares.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 processor TemperatureProcessor as split is {
   inlet readings is type TemperatureReading
@@ -57,7 +72,7 @@ Sources generate data without receiving input. They might poll external
 systems, listen for external events, generate data on timers, or read from
 files and databases.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 processor OrderEventSource as source is {
   outlet orders is type OrderEvent
@@ -75,7 +90,7 @@ processor OrderEventSource as source is {
 Sinks consume data without producing output. They might write to databases,
 send notifications, update external systems, or log and archive data.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 processor NotificationSink as sink is {
   inlet notifications is type UserNotification
@@ -92,7 +107,7 @@ processor NotificationSink as sink is {
 
 Flows transform data from one shape to another:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 processor OrderEnricher as flow is {
   inlet rawOrders is type RawOrder
@@ -112,7 +127,7 @@ processor OrderEnricher as flow is {
 Processors are wired together with [Connectors](connector.md), which link an
 outlet to an inlet:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 context DataPipeline is {
   processor Ingest    as source is { outlet events is type RawOrder }
