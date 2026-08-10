@@ -5492,10 +5492,19 @@
 
   <h1>Outlet</h1>
 
+<!-- riddl-prelude
+event TemperatureAlert is { value is Natural }
+event TemperatureReading is { value is Natural }
+record ReadingData is { value is Natural }
+processor MyProcessor as source is {
+  outlet Diagnostics is type TemperatureAlert
+}
+-->
+
 <p>An Outlet is a component of a <a href="../processor/">Processor</a> that specifies a named
 output through which data of a particular <a href="../type/">type</a> streams out of the
 processor.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureAlert</span>
 </span></code></pre></div>
 <h2 id="where-outlets-may-be-declared">Where Outlets May Be Declared<a class="headerlink" href="#where-outlets-may-be-declared" title="Permanent link">&para;</a></h2>
@@ -5505,8 +5514,18 @@ its events into a stream.</p>
 <h2 id="the-canonical-send-target">The Canonical <code>send</code> Target<a class="headerlink" href="#the-canonical-send-target" title="Permanent link">&para;</a></h2>
 <p>A processor emits on its <strong>own</strong> outlet, and a <a href="../connector/">connector</a> routes
 the message to a downstream inlet:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">send</span> <span class="kd">event</span> <span class="n">TemperatureAlert</span><span class="p">(</span><span class="n">reading</span><span class="p">.</span><span class="no">value</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">alerts</span>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Thermometer</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureAlert</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">state</span> <span class="n">Watching</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ReadingData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="kd">handler</span> <span class="n">WatchTemperature</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      <span class="k">on</span> <span class="n">reading</span><span class="p">:</span> <span class="kd">event</span> <span class="n">TemperatureReading</span> <span class="p">{</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">TemperatureAlert</span><span class="p">(</span><span class="n">reading</span><span class="p">.</span><span class="no">value</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">alerts</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>      <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="p">}</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title"><code>send … to inlet</code> is deprecated</p>
@@ -5528,7 +5547,7 @@ an <strong>Error</strong>.</p>
 genuinely has no consumer, route it to the
 <a href="../standard-module/">standard module's</a> <code>BottomlessPit</code> rather than leaving it
 dangling:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>

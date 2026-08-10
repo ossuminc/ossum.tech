@@ -5470,6 +5470,24 @@
 
   <h1>State</h1>
 
+<!-- riddl-prelude
+constant Zero is Natural = "0"
+record ActiveOrderData is { total is Natural }
+record PendingData is { note is String }
+record ActiveData is { note is String }
+record ShippedData is { trackingNumber is String }
+command CancelOrder is { orderId is String }
+command ShipOrder is { trackingNumber is String }
+entity Order is {
+  initial state Pending of record PendingData is {
+    handler PendingHandler is { on command CancelOrder { ??? } }
+  }
+  state Shipped of record ShippedData is {
+    handler ShippedHandler is { on command ShipOrder { ??? } }
+  }
+}
+-->
+
 <p>A State defines a named state of an <a href="../entity/">entity</a>. It
 references a <strong>record</strong> that defines the data structure
 for the state, and optionally contains
@@ -5493,7 +5511,7 @@ their own definitions. The <code>morph</code> statement transitions an
 entity from one state to another, changing which handlers
 are active.</p>
 <h3 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">initial</span> <span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">invariant</span> <span class="n">TotalIsPositive</span> <span class="kp">is</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="n">Zero</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -5504,17 +5522,27 @@ are active.</p>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The state body is optional — a state can also be defined simply as:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span>
 </span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Every state must have a handler somewhere</p>
+<p><code>State 'X' in Entity 'Y' has no handlers</code> is an <strong>Error</strong>, so a state
+with no body is only valid when the <em>entity</em> declares a handler that
+covers it. Handlers may sit at either level, and an entity may carry
+both: a state-scoped handler for behavior that differs by state, and an
+entity-level handler for behavior that does not.</p>
+</div>
 <h2 id="the-initial-marker">The <code>initial</code> Marker<a class="headerlink" href="#the-initial-marker" title="Permanent link">&para;</a></h2>
 <p>An optional <code>initial</code> keyword marks the entity's starting state:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Order -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">state</span> <span class="n">Active</span>  <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveData</span>  <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="kd">state</span> <span class="n">Shipped</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ShippedData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">handler</span> <span class="n">OrderLifecycle</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">on</span> <span class="kd">command</span> <span class="n">CancelOrder</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Without the marker, the first state <em>declared</em> is the starting state — which
 means reordering states silently changes behavior. Marking it explicitly makes
@@ -5530,7 +5558,7 @@ exactly nothing.</p>
 <p>The <code>morph</code> statement transitions an entity from one state to another,
 changing which handlers are active. Its payload is a <strong>record</strong> — the new
 state's data — not the message that triggered the transition:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">on</span> <span class="n">ship</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ShipOrder</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Order</span><span class="p">.</span><span class="n">Shipped</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="kp">with</span> <span class="kd">record</span> <span class="n">ShippedData</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">trackingNumber</span><span class="p">)</span>

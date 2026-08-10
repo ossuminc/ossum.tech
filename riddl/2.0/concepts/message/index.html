@@ -5714,6 +5714,13 @@
 
   <h1>Message</h1>
 
+<!-- riddl-prelude
+type CartId is String
+type OrderId is String
+event OrderPlaced is { cartId is CartId }
+result OrderInfo is { orderId is OrderId }
+-->
+
 <p>Messages are a foundational concept in RIDDL because a RIDDL model implies 
 an implementation that is a message-driven system per the 
 <a href="https://reactivemanifesto.org">Reactive Manifesto</a>. Messages in RIDDL are 
@@ -5766,23 +5773,24 @@ real messages only.</p>
 messages, and <code>RecordRef</code> sits beside it rather than beneath it.</p>
 </div>
 <h3 id="declared-responses">Declared Responses<a class="headerlink" href="#declared-responses" title="Permanent link">&para;</a></h3>
-<p>A command or query may declare the response it produces, with an optional
-<code>yields</code> clause between the identifier and the body:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<p>A command or query may declare the response it produces, between the
+identifier and the body — a command with <code>yields</code>, a query with <code>replies</code>:</p>
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="n">cartId</span> <span class="kp">is</span> <span class="n">CartId</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kd">query</span> <span class="n">GetOrder</span> <span class="kr">yields</span> <span class="kd">result</span> <span class="n">OrderInfo</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kd">query</span> <span class="n">GetOrder</span> <span class="n">replies</span> <span class="kd">result</span> <span class="n">OrderInfo</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="n">orderId</span> <span class="kp">is</span> <span class="n">OrderId</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>This makes the request/response pairing declarative, so a generator can emit
 precise signatures rather than inferring them.</p>
-<p>A command's <code>yields</code> must resolve to an <strong>event</strong>, and a query's to a
-<strong>result</strong>; anything else is an <strong>Error</strong>, as is <code>yields</code> on a type that is
-neither a command nor a query.</p>
-<p><code>yields</code> is <strong>optional</strong>. When declared, the handler for that message must
+<p>The keywords are not interchangeable. A command's <code>yields</code> must resolve to an
+<strong>event</strong>, and a query's <code>replies</code> to a <strong>result</strong>. Writing <code>yields</code> on a
+query is an <strong>Error</strong> in its own right — the compiler says so by name — as is
+either clause on a type that is neither a command nor a query.</p>
+<p>The clause is <strong>optional</strong>. When declared, the handler for that message must
 <code>yield</code> exactly that message, and a mismatch or a handler that never yields is
 an Error. When not declared, a handler may still yield whatever it likes — so
 adding <code>yields</code> to an existing model is opt-in, one message at a time.</p>

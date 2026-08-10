@@ -3154,10 +3154,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-yields-clause" class="md-nav__link">
+  <a href="#the-yields-and-replies-clauses" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The yields Clause
+        The yields and replies Clauses
       
     </span>
   </a>
@@ -5664,10 +5664,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-yields-clause" class="md-nav__link">
+  <a href="#the-yields-and-replies-clauses" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The yields Clause
+        The yields and replies Clauses
       
     </span>
   </a>
@@ -5797,7 +5797,7 @@ definitions allowed, so we have grouped them into categories:</p>
 <li><a href="#aggregation">Aggregation</a></li>
 <li><a href="#mapping">Key/Value Mapping</a></li>
 <li><a href="#aggregate-use-cases">Aggregate Use Cases</a><ul>
-<li><a href="#the-yields-clause">The yields Clause</a></li>
+<li><a href="#the-yields-and-replies-clauses">The yields and replies Clauses</a></li>
 </ul>
 </li>
 <li><a href="#cardinality">Cardinality</a><ul>
@@ -6002,10 +6002,15 @@ identifiers enclosed in curly braces, like this:</p>
 </div>
 <p>A type can be defined as any one type chosen from a set of other type names
 using the <code>one of</code> keywords followed by type names in curly braces, like this:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span> <span class="n">References</span> <span class="o">=</span> <span class="kr">one</span> <span class="kp">of</span> <span class="p">{</span> <span class="nb">String</span><span class="p">,</span> <span class="nb">URL</span> <span class="p">}</span>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span> <span class="n">WebPage</span> <span class="kp">is</span> <span class="nb">URL</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">type</span> <span class="n">PlainText</span> <span class="kp">is</span> <span class="nb">String</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">type</span> <span class="n">References</span> <span class="kp">is</span> <span class="kr">one</span> <span class="kp">of</span> <span class="p">{</span> <span class="n">WebPage</span><span class="p">,</span> <span class="n">PlainText</span> <span class="p">}</span>
 </span></code></pre></div>
-<p>There must be at least two types in an alternation.</p>
+<p>There must be at least two types in an alternation, and each alternative must
+be a <strong>declared</strong> type name — a predefined type such as <code>String</code> does not
+resolve here, which is why the two are given names above.</p>
 <h4 id="the-spelling">The <code>|</code> spelling<a class="headerlink" href="#the-spelling" title="Permanent link">&para;</a></h4>
 <p>The same alternation may be written with vertical bars, the notation most
 programmers already read:</p>
@@ -6046,6 +6051,16 @@ record DictionaryEntry is {
   headword is String
   definition is String
 }
+type CartId is String
+type OrderId is String
+event OrderPlaced is { cartId is CartId }
+result OrderInfo is { orderId is OrderId }
+command LookUp is { headword is String }
+entity AnEntity is {
+  state AnEntityState of record DictionaryEntry is {
+    handler AnEntityHandler is { on command LookUp { ??? } }
+  }
+}
 -->
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">type</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="kr">mapping</span> <span class="kp">from</span> <span class="nb">Pattern</span><span class="p">(</span><span class="s2">&quot;[a-z]+&quot;</span><span class="p">)</span> <span class="kp">to</span> <span class="n">DictionaryEntry</span>
@@ -6059,20 +6074,22 @@ says what kind of thing it is. Eight are available: <code>type</code>, <code>com
 handled. A <code>record</code> is data: it types an entity <a href="../state/">state</a> and supplies
 the payload of a <code>morph</code>, but can never be sent. <code>graph</code> and <code>table</code> model
 graph-structured and tabular data respectively.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">command</span> <span class="n">JustDoIt</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="n">AnEntity</span><span class="p">),</span> <span class="n">encouragement</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">swoosh</span><span class="p">:</span> <span class="nb">URL</span> <span class="p">}</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kd">record</span>  <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">OrderId</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">Currency</span><span class="p">(</span><span class="n">USD</span><span class="p">)</span> <span class="p">}</span>
 </span></code></pre></div>
-<h4 id="the-yields-clause">The <code>yields</code> Clause<a class="headerlink" href="#the-yields-clause" title="Permanent link">&para;</a></h4>
+<h4 id="the-yields-and-replies-clauses">The <code>yields</code> and <code>replies</code> Clauses<a class="headerlink" href="#the-yields-and-replies-clauses" title="Permanent link">&para;</a></h4>
 <p>A <code>command</code> or <code>query</code> may declare the response it produces, between the
-identifier and the body:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">OrderPlaced</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">cartId</span> <span class="kp">is</span> <span class="n">CartId</span> <span class="p">}</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kd">query</span>   <span class="n">GetOrder</span>   <span class="kr">yields</span> <span class="kd">result</span> <span class="n">OrderInfo</span>  <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="n">OrderId</span> <span class="p">}</span>
+identifier and the body — but the two use <strong>different keywords</strong>:</p>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="kr">yields</span>  <span class="kd">event</span>  <span class="n">OrderPlaced</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">cartId</span> <span class="kp">is</span> <span class="n">CartId</span> <span class="p">}</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kd">query</span>   <span class="n">GetOrder</span>   <span class="n">replies</span> <span class="kd">result</span> <span class="n">OrderInfo</span>   <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="n">OrderId</span> <span class="p">}</span>
 </span></code></pre></div>
-<p>A command's <code>yields</code> must resolve to an event and a query's to a result;
-anything else is an <strong>Error</strong>, as is <code>yields</code> on a type that is neither. See
-<a href="../message/#declared-responses">Messages</a> for the conformance rules.</p>
+<p>A command pairs with an event using <code>yields</code>; a query pairs with a result
+using <code>replies</code>. Crossing them is an <strong>Error</strong> — <code>yields</code> on a query is
+rejected outright — as is either clause on a type that is neither a command
+nor a query. See <a href="../message/#declared-responses">Messages</a> for the
+conformance rules.</p>
 <h3 id="cardinality">Cardinality<a class="headerlink" href="#cardinality" title="Permanent link">&para;</a></h3>
 <p>You can use a cardinality suffix or prefix with any of the type expressions 
 defined above to transform that type expression into the element type of 

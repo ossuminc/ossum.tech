@@ -5474,6 +5474,14 @@
   
 
 
+<!-- riddl-prelude
+event Diagnostic is { note is String }
+processor MyProcessor as flow is {
+  inlet incoming is type Diagnostic
+  outlet Diagnostics is type Diagnostic
+}
+-->
+
 <h1 id="the-standard-module">The Standard Module<a class="headerlink" href="#the-standard-module" title="Permanent link">&para;</a></h1>
 <p>Every model has access to a predefined <a href="../module/">module</a> named <code>Riddl</code>. It
 requires no <code>import</code> and no author declaration — it is simply always in scope.</p>
@@ -5512,13 +5520,13 @@ that isn't true.</p>
 </table>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <p>Route output you genuinely do not consume into the pit:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
 </span></code></pre></div>
 <p>Feed an inlet that has no upstream yet:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">connector</span> <span class="n">NoInputYet</span> <span class="kp">is</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">ForeverEmpty</span><span class="p">.</span><span class="kd">void</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">incoming</span>
