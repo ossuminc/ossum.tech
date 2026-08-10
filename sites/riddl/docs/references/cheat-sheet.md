@@ -724,7 +724,7 @@ non-exhaustive match over a closed subject without `default` draws a
 | `tell` | `tell command X to entity Y` | Deliver a message directly to a processor (point-to-point). |
 | `yield` | `yield event ProductAdded(id)` | Produce a **command's** declared event, without knowing the sender. |
 | `reply` | `reply result ProductInfo(id, name)` | Answer a **query** with its declared result. |
-| `ask` | `let a = ask query GetInfo of entity Catalog` | A value: a query paired with the reply that answers it. |
+| `ask` | `let a = ask query GetInfo of entity Catalog` | A value: a query paired with the reply that answers it. **Never inside a saga.** |
 
 The message operand may be a bare reference or an inline constructor.
 

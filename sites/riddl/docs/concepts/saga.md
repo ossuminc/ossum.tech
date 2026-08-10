@@ -109,6 +109,21 @@ These options are contracts for the code generator rather than behavior
     `send`, `tell`, `yield` and `put` can fail, and so can each embedded
     `call` or `get` — `let x = call F(get from input I)` counts as two.
 
+!!! warning "A saga step may not `ask`"
+    An [`ask`](../references/language-reference.md#ask) anywhere in a step is
+    an **Error**, including one nested inside a larger value expression. A saga
+    must not depend on dynamic state, or the same inputs could yield different
+    transaction results at different times — and compensation would then be
+    reversing something other than what actually happened.
+
+    Acquire the value in a handler and pass it into the saga through its
+    `requires`, so the saga is closed over its inputs and the undo sees the
+    same data the do saw.
+
+    A step containing an `ask` is not also reported for the failure-point rule
+    above: an `ask` is itself a failure point, so every such step would trip
+    that rule too, and the advice to split the step would not help.
+
 ## A Saga Is Not a Processor
 
 A Saga extends the [vital definition](vital.md) base rather than

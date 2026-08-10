@@ -1426,9 +1426,25 @@ rather than on every query.
     - Asking a processor that has no clause handling the query. An `on other`
       clause counts as handling everything, and an entity's handlers may live
       under a state.
+    - Asking **anywhere inside a saga step**, including as a value nested in a
+      larger expression. See below.
 
     An ask whose callee **refuses** is expected, not an error: recording a
     rejection settles the obligation, consistent with the discharge rule.
+
+!!! warning "A saga may not `ask`"
+    A saga must not depend on dynamic state, or the same inputs could yield
+    different transaction results at different times. Compensation makes this
+    sharper: if the forward action read a value that has since changed, the
+    undo would be reversing something other than what happened.
+
+    The remedy is to acquire the value in a handler and pass it into the saga
+    through the saga's `requires`, so the saga is closed over its inputs and
+    compensation sees the same data the forward action saw.
+
+    The prohibition reaches **every `ask` embedded in a value expression, at
+    any depth** — it is not enough to keep `ask` off the right-hand side of a
+    `let`.
 
 ### Put Statement
 
