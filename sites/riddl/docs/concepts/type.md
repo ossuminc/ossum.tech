@@ -150,7 +150,13 @@ A type can be defined as a mapping from one type (the key) to another type
 (the value). For example, here is a dictionary definition that maps a word
 (lower case letters) to a type named DictionaryEntry that presumably
 contains all the things one would find in a dictionary entry.
-<!-- riddl: in-domain -->
+<!-- riddl-prelude
+record DictionaryEntry is {
+  headword is String
+  definition is String
+}
+-->
+<!-- riddl: in-context -->
 ```riddl
 type dictionary = mapping from Pattern("[a-z]+") to DictionaryEntry
 ```

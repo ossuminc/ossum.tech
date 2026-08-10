@@ -1422,7 +1422,32 @@ foreach item in myLocalCollection {
 
 The collection is a `field` reference or a `let`-bound local whose type resolves
 to a collection — Sequence, Set, Graph, Table, Replica, Mapping, or a
-cardinality wrapper such as `many` or `optional`.
+cardinality wrapper such as `many` or `optional`. **Any resolvable path that
+lands on a collection is accepted**; it need not be a direct field of the
+enclosing state, which is why `order.lines` above works.
+
+The element name is **bound over the loop body** and carries the element's
+type, so `line.sku` resolves and `line.nosuch` is an Error. The binding ends at
+the closing brace.
+
+#### Destructuring a mapping
+
+A mapping yields a key and a value, so iterating one binds **two** names:
+
+<!-- riddl: in-handler -->
+```riddl
+foreach sku, price in field order.prices {
+  send event LineShipped(sku = sku) to outlet Shipments
+}
+```
+
+Arity is a validation rule rather than a grammatical one — both shapes parse —
+and it is checked in both directions:
+
+| Mistake | Message |
+|---|---|
+| one name over a mapping | *binds a key AND a value, so it needs two names* |
+| two names over a non-mapping | *binds a second name only over a mapping* |
 
 ### Require Statement
 

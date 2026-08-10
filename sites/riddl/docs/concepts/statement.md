@@ -217,7 +217,7 @@ Alternation — a non-exhaustive match without `default` draws a
 RIDDL's only loop, and deliberately bounded — there is no unbounded iteration
 in the language:
 
-<!-- riddl: skip reason="riddlc rc.10-46 does not put the loop variable in scope; see riddl task 2026-08-09-foreach-loop-variable-not-in-scope" -->
+<!-- riddl: in-handler -->
 ```riddl
 foreach line in field order.lines {
   send event LineShipped(sku = line.sku) to outlet Shipments
@@ -226,7 +226,31 @@ foreach line in field order.lines {
 
 The collection is a `field` reference or a `let`-bound local whose type
 resolves to a collection: Sequence, Set, Graph, Table, Replica, Mapping, or a
-cardinality wrapper such as `many` or `optional`.
+cardinality wrapper such as `many` or `optional`. Any path that lands on a
+collection will do — the field need not be a direct field of the state, as
+`order.lines` above shows.
+
+**The element is bound over the loop body**, and it carries the element's
+*type*, not merely its name: `line.sku` resolves, while `line.nosuch` is an
+Error. The binding ends at the closing brace, so referring to it after the
+loop is an Error too.
+
+#### Destructuring a mapping
+
+A mapping has two halves, so iterating one binds **two** names — a key and a
+value:
+
+<!-- riddl: in-handler -->
+```riddl
+foreach sku, price in field order.prices {
+  send event LineShipped(sku = sku) to outlet Shipments
+}
+```
+
+The arity is checked both ways, and each mistake has its own message:
+
+- one name over a mapping — *"binds a key AND a value, so it needs two names"*
+- two names over anything else — *"binds a second name only over a mapping"*
 
 ### Send, Tell, Yield and Reply
 

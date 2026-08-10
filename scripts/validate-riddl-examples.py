@@ -314,13 +314,14 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    record ExampleOrder is { id is String, number is String,\n"
             "      total is Natural, status is String, isPaid is Boolean,\n"
             "      isCancelled is Boolean, isRefunded is Boolean,\n"
-            "      confirmationNumber is String, items is many ExampleLine }\n"
-            # The state record: `foreach ... in field X` takes a DIRECT field of
-            # the state, handled message or function input -- a dotted path such
-            # as `order.lines` is rejected -- so the iterable lives here.
+            "      confirmationNumber is String, items is many ExampleLine,\n"
+            "      lines is many ExampleLine,\n"
+            "      prices is mapping from String to ExampleLine }\n"
+            # `foreach` resolves any path that lands on a collection (rc.10-57),
+            # so the iterable sits where an author would put it -- on `order` --
+            # rather than being hoisted to a direct field of the state.
             "    record ExampleData is { note is String, itemCount is Natural,\n"
-            "      id is String, total is Natural, balance is Natural,\n"
-            "      lines is many ExampleLine }\n"
+            "      id is String, total is Natural, balance is Natural }\n"
             "    command ExampleCommand is { note is String, cart is ExampleData,\n"
             "      order is ExampleOrder, orderId is String, amount is Natural,\n"
             "      limits is ExampleLimit }\n"
