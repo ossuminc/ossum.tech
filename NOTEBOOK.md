@@ -13,8 +13,7 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-08
 
-**State:** branch `main`, clean. Everything through the rc.10-57 upgrade is
-committed; **not yet pushed**.
+**State:** branch `main`, clean, all pushed.
 
 **Compiler: `../bin/riddlc` is `2.0.0-rc.10-57-e012ebb9`** — run `riddlc
 version`, it is restaged often. `build.sbt`'s `With.Riddl.library` pin must
@@ -34,7 +33,10 @@ looked successful. CLAUDE.md § "Things that will bite" has the recipe.
 ### What is now true
 
 `concepts/`, `quickstart.md` and `references/language-reference.md` are **fully
-gated** — 95 fences validated, 120 skipped, 0 failed, exit 0, against rc.10-57.
+gated** — 108 fences validated, 107 skipped, 0 failed, exit 0, against
+rc.10-57. **BACKLOG 1a is in flight**: retiring the 118 remaining blanket
+"illustrative fragment" skips, three pages done (`statement`, `value`,
+`invariant`), `language-reference.md`'s 44 deliberately last.
 
 **rc.10-57 fixed `foreach`:** the element is now bound over the loop body (and
 carries its TYPE, so `line.nosuch` is still an Error), and any resolvable path
@@ -72,6 +74,22 @@ whether a failure is yours or pre-existing:
 git show <rev>:scripts/validate-riddl-examples.py > /tmp/base.py
 python3 /tmp/base.py ../bin/riddlc <file.md>
 ```
+
+### Doing BACKLOG 1a — what the first three pages taught
+
+- **Every page hid real errors.** 4, 1 and 4 respectively — an unsatisfiable
+  `morph ... with record R()`, a `send` to a processor that should be `tell`,
+  `???` written after real statements, states with no handler. Not one page was
+  merely unannotated, so budget for content repair.
+- **Re-run the FULL gate after any wrapper edit.** Wrapper changes regressed
+  other pages three times; the worst was naming a record `OrderData`, which
+  collided with `language-reference.md`'s own prelude.
+- **`dump.py` in the scratchpad ignores `no-prelude`**, so its output is NOT
+  what the gate sees. A "duplicate name" error from it is an artifact. Get the
+  gate's own error before diagnosing.
+- Annotate fences by LINE NUMBER. Keying on a fence's first line put two
+  directives on one fence and left two bare, because two fences both began
+  `entity Account is {`.
 
 ### Traps this session paid for
 
