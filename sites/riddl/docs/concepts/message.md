@@ -3,6 +3,13 @@ title: "Messages"
 draft: false
 ---
 
+<!-- riddl-prelude
+type CartId is String
+type OrderId is String
+event OrderPlaced is { cartId is CartId }
+result OrderInfo is { orderId is OrderId }
+-->
+
 Messages are a foundational concept in RIDDL because a RIDDL model implies 
 an implementation that is a message-driven system per the 
 [Reactive Manifesto](https://reactivemanifesto.org). Messages in RIDDL are 
@@ -67,16 +74,16 @@ handled by an [on clause](onclause.md); it types an entity
 
 ### Declared Responses
 
-A command or query may declare the response it produces, with an optional
-`yields` clause between the identifier and the body:
+A command or query may declare the response it produces, between the
+identifier and the body — a command with `yields`, a query with `replies`:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 command PlaceOrder yields event OrderPlaced is {
   cartId is CartId
 }
 
-query GetOrder yields result OrderInfo is {
+query GetOrder replies result OrderInfo is {
   orderId is OrderId
 }
 ```
@@ -84,11 +91,12 @@ query GetOrder yields result OrderInfo is {
 This makes the request/response pairing declarative, so a generator can emit
 precise signatures rather than inferring them.
 
-A command's `yields` must resolve to an **event**, and a query's to a
-**result**; anything else is an **Error**, as is `yields` on a type that is
-neither a command nor a query.
+The keywords are not interchangeable. A command's `yields` must resolve to an
+**event**, and a query's `replies` to a **result**. Writing `yields` on a
+query is an **Error** in its own right — the compiler says so by name — as is
+either clause on a type that is neither a command nor a query.
 
-`yields` is **optional**. When declared, the handler for that message must
+The clause is **optional**. When declared, the handler for that message must
 `yield` exactly that message, and a mismatch or a handler that never yields is
 an Error. When not declared, a handler may still yield whatever it likes — so
 adding `yields` to an existing model is opt-in, one message at a time.

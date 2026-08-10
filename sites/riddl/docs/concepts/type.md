@@ -101,12 +101,17 @@ type Color = any of { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
 A type can be defined as any one type chosen from a set of other type names
 using the `one of` keywords followed by type names in curly braces, like this:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
-type References = one of { String, URL }
+type WebPage is URL
+type PlainText is String
+
+type References is one of { WebPage, PlainText }
 ```
 
-There must be at least two types in an alternation.
+There must be at least two types in an alternation, and each alternative must
+be a **declared** type name — a predefined type such as `String` does not
+resolve here, which is why the two are given names above.
 
 #### The `|` spelling
 
@@ -155,6 +160,16 @@ record DictionaryEntry is {
   headword is String
   definition is String
 }
+type CartId is String
+type OrderId is String
+event OrderPlaced is { cartId is CartId }
+result OrderInfo is { orderId is OrderId }
+command LookUp is { headword is String }
+entity AnEntity is {
+  state AnEntityState of record DictionaryEntry is {
+    handler AnEntityHandler is { on command LookUp { ??? } }
+  }
+}
 -->
 <!-- riddl: in-context -->
 ```riddl
@@ -173,26 +188,28 @@ handled. A `record` is data: it types an entity [state](state.md) and supplies
 the payload of a `morph`, but can never be sent. `graph` and `table` model
 graph-structured and tabular data respectively.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 command JustDoIt is { id: Id(AnEntity), encouragement: String, swoosh: URL }
 record  OrderData is { id: OrderId, total: Currency(USD) }
 ```
 
-#### The `yields` Clause
+#### The `yields` and `replies` Clauses
 
 A `command` or `query` may declare the response it produces, between the
-identifier and the body:
+identifier and the body — but the two use **different keywords**:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
-command PlaceOrder yields event OrderPlaced is { cartId is CartId }
-query   GetOrder   yields result OrderInfo  is { orderId is OrderId }
+command PlaceOrder yields  event  OrderPlaced is { cartId is CartId }
+query   GetOrder   replies result OrderInfo   is { orderId is OrderId }
 ```
 
-A command's `yields` must resolve to an event and a query's to a result;
-anything else is an **Error**, as is `yields` on a type that is neither. See
-[Messages](message.md#declared-responses) for the conformance rules.
+A command pairs with an event using `yields`; a query pairs with a result
+using `replies`. Crossing them is an **Error** — `yields` on a query is
+rejected outright — as is either clause on a type that is neither a command
+nor a query. See [Messages](message.md#declared-responses) for the
+conformance rules.
 
 ### Cardinality
 You can use a cardinality suffix or prefix with any of the type expressions 
