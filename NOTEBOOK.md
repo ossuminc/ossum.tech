@@ -11,83 +11,116 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-10 (late)
+## HANDOFF — as of 2026-08-10 (end of day)
 
 **All figures below were run in this session, not recalled.**
 
-**State:** branch `main`, tree clean, **2 commits ahead of `origin/main`** —
-`c52287c` (validator fixes) and `faa4cbe` (the page). Not yet pushed.
+**State:** branch `main`, **1 commit ahead of `origin/main`** (`470b436`).
+`project/build.properties` carries an **uncommitted sbt 2.0.2 → 2.0.6 bump
+that this session did not make** — decide whether it is wanted; CLAUDE.md
+still says 2.0.2.
 
 **Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
-pin matches exactly. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** and is the
-WRONG compiler for the 2.0 docs. Re-check the binary against the pin at session
-start; it is restaged often.
+pin matches. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** — the WRONG
+compiler for the 2.0 docs. Re-check at session start; it is restaged often.
 
-**Gates:** 2.0 — **183 validated / 43 skipped / 0 failed, exit 0** (was
-171/55); 1.31 — 6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
+**Gates:** 2.0 — **191 validated / 36 skipped / 0 failed, exit 0**; 1.31 —
+6/0/0, exit 0. `mkdocs build --strict` clean, 80 cross-site links checked.
 
 **`task/` holds only `done/`.** Nothing awaits triage.
 
-### BACKLOG 1a is DONE
+### BACKLOG 1a and 1a-followup are both DONE
 
-**Not one blanket `"illustrative fragment"` skip remains in
-`sites/riddl/docs`** — 118 at the start of the work, 0 now. The 20 skips left
-on `language-reference.md` each state their own reason.
+No blanket `"illustrative fragment"` skip remains in `sites/riddl/docs`, and
+every content bug that gating exposed on `language-reference.md` is fixed. The
+page is 55 validated / 21 skipped, from 23/52 when the work began.
 
-**Next is BACKLOG 1a-followup**, which is the subset of those reasons that mean
-*the example is wrong*: `OrderPlaced` shown with two different field sets on
-one page, epic steps whose paths contradict the page's own application fence,
-an adaptor that crosses its isolation seam, a projector with no record. All
-were read off real riddlc diagnostics — do not re-derive them.
+**Next is BACKLOG 1b** — gating `tutorials/rbbq/`, `guides/`, `tools/` and the
+other three sites. The last 17 blanket skips live there, and those trees carry
+4 pre-existing failures, so expect to go red before green; gate one page at a
+time.
 
-The remaining 17 blanket skips site-wide are in `migration/` and `guides/`,
-outside the gate, and are now folded into BACKLOG 1b.
+Only **1a-remnant** is left over: one fence whose schema needs `record Cart`
+while the page prelude must supply `entity Cart`. A harness collision, not a
+wrong example.
 
 ### Traps
 
 - **The gate's scope is a FILE LIST, not a directory** — exact command in
-  CLAUDE.md § "Compiling RIDDL examples". A figure is only comparable within
-  one scope.
-- **The gate truncates diagnostics** to a position. For the real message,
-  import the script as a module, re-wrap with `wrap()`, and run
-  `../bin/riddlc validate <file>` — a bare path, there is no `--input-file`.
-- **A diagnostic filter that watches only `[error]`/`[severe]` will lie to
-  you.** The gate also fails on `[deprecated]`, so a hand-rolled probe called
-  a fence clean that the gate then rejected. Filter exactly as the gate does.
+  CLAUDE.md § "Compiling RIDDL examples". Compare figures only within a scope.
+- **`cmd | tail` reports tail's exit status, not the gate's.** Redirect to a
+  file and check `$?` before believing a gate passed.
 - **Re-run the FULL gate after any wrapper or script edit**, and the 1.31 gate
-  too — a script change is not scoped to one tree. Wrapper changes have
-  regressed unrelated pages five times now.
-- **Extending a prelude regresses fences that were already green.** Adding
-  `currency` to `OrderPlaced` broke a fence in a different section; adding a
-  domain-level `Storefront` broke two more. Re-run the whole page after every
-  prelude edit, not just the fence in hand.
-- **Prelude/wrapper name collisions run both ways.** Wrapper names keep an
-  `Example` prefix; equally a prelude must not take a name a wrapper supplies.
-- **Annotate fences by LINE NUMBER**, never by matching a fence's first line —
-  and check the match is unique before writing, since several fences on this
-  page share an opening line.
+  too. Wrapper changes have now regressed unrelated pages six times.
+- **An enumeration must never go in the shared wrapper.** Its enumerators join
+  the enclosing namespace, so a wrapper-level `Shipped` collides with any page
+  naming a state `Shipped` — `concepts/statement.md` does. The "wrapper
+  vocabulary is only ever ADDED" rule holds for fields, NOT for enumerations.
+- **Nothing in a domain prelude may depend on an entry a fence might strip.**
+  A `context Shopping` borrowing a record from `Storefront` broke all three
+  fences using `no-prelude=Storefront`. Prelude entries must be self-contained.
+- **A hand-rolled probe filtering only `[error]`/`[severe]` will lie**; the
+  gate also fails on `[deprecated]`.
+- **A malformed directive degrades SILENTLY to `standalone`**, turning a skip
+  into a validated fence. If a fence's result surprises you, check the
+  directive parses.
+- **Annotate fences by LINE NUMBER**, and assert the match is unique — several
+  fences on this page share an opening line.
 
 ### Certainty
 
 **Verified by command this session:** git state, both compiler versions, the
-pin, both gates, the strict build, that `task/` is empty, and that zero blanket
-skips remain.
+pin, both gates *with their real exit status*, the strict build, cross-site
+links, and that `task/` is empty.
 
 **Verified by compiling:** every fence on `language-reference.md`, and every
-claim in BACKLOG 1a-followup.
+content fix listed in commit `470b436`.
 
-**Assumed, not re-verified:** BACKLOG item 5's 18 site items. The gh-pages
-deploy state — nothing has been pushed this session.
+**Assumed, not re-verified:** BACKLOG item 5's 18 site items. Whether the sbt
+bump in the working tree is wanted.
 
 ### Pointers
 
-Open work is **BACKLOG.md** — 1a-followup is live. Durable facts are
-**CLAUDE.md**, notably § "Things that will bite" and § "Compiling RIDDL
-examples".
+Open work is **BACKLOG.md** — 1b is live. Durable facts are **CLAUDE.md**,
+notably § "Things that will bite" and § "Compiling RIDDL examples".
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### BACKLOG 1a-followup: the examples gating proved wrong ✅ **2026-08-10**
+
+Page 47/28 → 55/21; gate 183/43 → 191/36. Seven content bugs fixed.
+
+**The gate paid for itself here.** The adaptor example emitted a message owned
+by neither of its two contexts — directly contradicting the isolation-seam
+warning printed immediately below it, on the same screen. No reader review had
+caught it; a compiler did, immediately.
+
+**The epic hid a second bug behind the first.** Fixing its paths revealed that
+it also routed a user's command straight at an entity, which 2.0 rejects: a
+user may interact only at the application boundary. One diagnostic at a time —
+fixing what a message says can expose the next rule, so re-run after each fix
+rather than batching.
+
+**Two examples can be mutually exclusive, and that is a content decision.**
+The match fence needed `status` to be an enumeration while another fence set it
+to a string. The resolution was not to pick a winner but to notice the example
+was wrong in a deeper way: enumerator cases and a numeric `>=` case cannot
+share a subject at all. It became two fences, which is also what the prose
+around it describes.
+
+**An enumeration is not additive wrapper vocabulary.** Putting one in the
+shared wrapper to give match a closed subject broke `concepts/statement.md`,
+because enumerators join the enclosing namespace. The standing rule ("wrapper
+vocabulary is only ever ADDED; an extra field cannot break a fence that ignores
+it") is true of fields and false of enumerations.
+
+**Prelude entries must be self-contained.** A domain-prelude context borrowing
+a record from a sibling broke every fence that stripped that sibling with
+`no-prelude` — three of them, all far from the edit.
 
 ---
 

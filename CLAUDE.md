@@ -442,17 +442,28 @@ python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
 # 1.31 -- same shape over sites/riddl-1x/docs, with the 1.31 compiler
 ```
 
-**Status** (2026-08-10): the gated set is **183 validated / 43 skipped / 0
+**Status** (2026-08-10): the gated set is **191 validated / 36 skipped / 0
 failed**, and **every blanket `"illustrative fragment"` skip is gone** — there
 were 118 of them when the work started. `quickstart.md`, `concepts/`,
 `introduction/` and `references/language-reference.md` are all annotated and
 green. Every remaining skip states its own reason.
 
-A skip is not a pass in disguise: ~20 of them record examples that are
-genuinely wrong for 2.0, tracked as BACKLOG 1a-followup. `guides/`,
-`migration/` and `tutorials/rbbq/` are still ungated (BACKLOG 1b).
+Gating `language-reference.md` found seven wrong examples that review had not
+— including an adaptor that violated the isolation-seam rule warned about
+immediately below it. All are fixed. `guides/`, `migration/` and
+`tutorials/rbbq/` are still ungated (BACKLOG 1b).
 
-**Two ways this gate can lie to you, both observed:**
+**Wrapper vocabulary is only ever ADDED — and that rule covers fields, NOT
+enumerations.** An enumeration's enumerators join the enclosing namespace, so a
+wrapper-level `any of { Pending, Shipped }` collides with any page naming a
+state `Shipped`. Put enumerations in the page prelude. Likewise **no prelude
+entry may depend on another that a fence might strip** with `no-prelude`, or
+that fence loses both.
+
+**Three ways this gate can lie to you, all observed:**
+
+- **`python3 scripts/validate-riddl-examples.py ... | tail` reports `tail`'s
+  exit status.** Redirect to a file and check `$?`, or a red gate reads green.
 
 - A **hand-rolled probe that filters only `[error]`/`[severe]` will call a
   fence clean that the gate rejects** — the gate also fails on `[deprecated]`.

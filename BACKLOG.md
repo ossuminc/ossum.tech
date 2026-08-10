@@ -6,51 +6,24 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1a-followup. Content bugs found by gating language-reference.md
+## 1a-remnant. `repository CartRepository` cannot be gated as written
 
-← START HERE
+**What:** One fence on `references/language-reference.md` still carries a
+skip that is *not* a content bug. Its schema names `record Cart`, while the
+page prelude must supply `entity Cart` for other fences on the page. One
+context cannot hold both names, and `no-prelude=Cart` withdraws the entity
+without providing the record.
 
-**What:** Retiring the blanket skips (1a, done 2026-08-10) compiled every
-fence on the page that can compile. The 20 that still carry a skip each name
-their own reason now, and these are the ones whose reason is **the example is
-wrong**, not "the harness cannot wrap it". Each was read off a real riddlc
-diagnostic, so none needs re-deriving:
+**Fixing it** means renaming the prelude's `entity Cart` and every fence that
+reaches it — bigger than it looks, and worth doing only if that page's
+vocabulary is being reworked anyway. Everything else 1a-followup listed is
+fixed (commit `470b436`).
 
-- **`OrderPlaced` has two different shapes on one page.** One fence yields
-  `OrderPlaced(id, total)`, another `OrderPlaced(orderId, total = cart.total,
-  currency = "USD")`. A prelude can supply only one. Decide which is the
-  event and make both fences agree.
-- **The epic's steps use paths the page's own application fence contradicts.**
-  `step take input Storefront.AddToCartForm` treats the form as a direct child
-  of the context, while the application fence puts forms inside `page`s. 2.0
-  containment agrees with the application fence, so the epic's paths are
-  wrong.
-- **The adaptor example crosses its own isolation seam.** `PaymentIntegration`
-  emits `OrderPaymentReceived`, which belongs to neither its parent context
-  nor its referent. 2.0 rejects this. The example needs the event declared in
-  `OrderContext`, which means showing it.
-- **The projector example has no record.** A 2.0 projector requires one.
-- **`button Checkout activates type Boolean`** — the fifth page carrying this
-  line. Still not valid 2.0.
-- **The `version` fence's `entity Order` has no handler and no state.**
-- **`match order.status`** matches a String against type-cases and a numeric
-  `>=` threshold. For it to compile, `status` would have to be an enumerated
-  type — which directly conflicts with the `set field status to "Active"`
-  fence. The two examples cannot both be right.
-
-**Also parked, and NOT a content bug:** the `repository CartRepository` fence
-names `record Cart` in its schema, while the page prelude must supply
-`entity Cart` for other fences. One context cannot hold both names. Fixing it
-means renaming the prelude's entity and every fence that reaches it, which is
-a bigger edit than it looks.
-
-**Verification:** the page and both gates are green as it stands — 2.0 at
-183/43/0, 1.31 at 6/0/0. These are skips with honest reasons, not failures,
-so nothing is red while they wait.
+**Not urgent:** the fence is a skip with an honest reason, so nothing is red.
 
 ---
 
-## 1b. Gate the doc trees that have no directives at all
+## 1b. Gate the doc trees that have no directives at all  ← START HERE
 
 **What:** Not yet gated: `tutorials/rbbq/` (30 pages, the most-read tree),
 `guides/`, `tools/`, and the `riddlg`/`synapify`/`shell` sites.
@@ -66,7 +39,7 @@ time.
 `migration/` (which shows 1.x deliberately — arguably belongs in EXEMPT_PATHS)
 and `tutorials/rbbq/`.
 
-**Order:** after 1a-followup, which fixes examples readers can see today.
+**Order:** this is now the top of the list.
 
 ---
 
