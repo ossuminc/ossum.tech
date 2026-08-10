@@ -6,11 +6,20 @@ description: >-
   the canonical target of `send`.
 ---
 
+<!-- riddl-prelude
+event TemperatureAlert is { value is Natural }
+event TemperatureReading is { value is Natural }
+record ReadingData is { value is Natural }
+processor MyProcessor as source is {
+  outlet Diagnostics is type TemperatureAlert
+}
+-->
+
 An Outlet is a component of a [Processor](processor.md) that specifies a named
 output through which data of a particular [type](type.md) streams out of the
 processor.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 outlet alerts is type TemperatureAlert
 ```
@@ -26,9 +35,19 @@ its events into a stream.
 A processor emits on its **own** outlet, and a [connector](connector.md) routes
 the message to a downstream inlet:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
-send event TemperatureAlert(reading.value) to outlet alerts
+entity Thermometer is {
+  outlet alerts is type TemperatureAlert
+
+  state Watching of record ReadingData is {
+    handler WatchTemperature is {
+      on reading: event TemperatureReading {
+        send event TemperatureAlert(reading.value) to outlet alerts
+      }
+    }
+  }
+}
 ```
 
 !!! warning "`send … to inlet` is deprecated"
@@ -55,7 +74,7 @@ genuinely has no consumer, route it to the
 [standard module's](standard-module.md) `BottomlessPit` rather than leaving it
 dangling:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 connector DiscardDiagnostics is
   from outlet MyProcessor.Diagnostics

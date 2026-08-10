@@ -6,6 +6,14 @@ description: >-
   can use without importing anything.
 ---
 
+<!-- riddl-prelude
+event Diagnostic is { note is String }
+processor MyProcessor as flow is {
+  inlet incoming is type Diagnostic
+  outlet Diagnostics is type Diagnostic
+}
+-->
+
 # The Standard Module
 
 Every model has access to a predefined [module](module.md) named `Riddl`. It
@@ -30,7 +38,7 @@ that isn't true.
 
 Route output you genuinely do not consume into the pit:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 connector DiscardDiagnostics is
   from outlet MyProcessor.Diagnostics
@@ -39,7 +47,7 @@ connector DiscardDiagnostics is
 
 Feed an inlet that has no upstream yet:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 connector NoInputYet is
   from outlet ForeverEmpty.void
