@@ -129,7 +129,8 @@ is gone.
 `riddl` entry** in `docs-version.yml` decides where `/riddl/` redirects. Move
 the entries, not just the alias.
 
-**Blocked on:** RIDDL 2.0 final. Currently `2.0.0-rc.9-54`.
+**Blocked on:** RIDDL 2.0 final. `../bin/riddlc` is `2.0.0-rc.10-57-e012ebb9`
+(verified 2026-08-10); do not trust a version written here, run it.
 
 ---
 

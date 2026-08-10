@@ -13,104 +13,75 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-10
 
-**State (verified this session, not recalled):** branch `main`, tree clean,
-**unpushed commits ahead of `origin/main`** — check with `git status` and push
-when ready. HEAD is the last of six 1a commits.
+**All figures below were run in this session, not recalled.**
+
+**State:** branch `main`, tree clean, **0 commits ahead of `origin/main`**,
+HEAD `e446a20`. Everything is pushed; CI has deployed from it.
 
 **Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
-`With.Riddl.library` pin matches it exactly. Both checked by command. It is
-restaged often — re-check both and keep them equal, or the docs describe a
-grammar the examples were never validated against.
+`With.Riddl.library` pin matches exactly. The Homebrew `riddlc` on PATH is
+**2.0.0-rc.5** and is the WRONG compiler for the 2.0 docs. riddlc is restaged
+often — re-check the binary against the pin at session start.
 
-**Gate, re-run this session:** 2.0 — **171 validated / 55 skipped / 0 failed,
-exit 0**; 1.31 — 6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
+**Gates:** 2.0 — **171 validated / 55 skipped / 0 failed, exit 0**; 1.31 —
+6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
 
-**The gate's scope is a FILE LIST, and it is now written down** in CLAUDE.md
-§ "Compiling RIDDL examples". Compare a figure only against one taken over the
-same scope; if one fails to reproduce, re-measure the baseline against the
-parent commit rather than trusting it.
-
-**`task/` is empty** (only `done/`). Nothing awaits triage here.
+**`task/` holds only `done/`.** Nothing awaits triage.
 
 ### In flight — BACKLOG 1a
 
-**49 blanket skips remain**, from 118 at the start of the session.
-`concepts/` and `introduction/` are **finished**. `language-reference.md` has
-had a first slice (23/52 → 35/40, 12 retired); its remaining **32 are restored
-verbatim**, so the page is green and the work is still tracked.
+Retiring the blanket `"illustrative fragment"` skips. **49 remain**, from 118
+at session start. `concepts/` and `introduction/` are **finished**.
 
-**BACKLOG 1a now carries the measured analysis of those 32** — which want
-`in-handler`, which want `in-domain` plus a domain prelude the page does not
-yet have, which are genuinely unskippable, and which hide known content bugs.
-Read it before touching the page; it cost a full pass to derive.
+`references/language-reference.md` is **half-done and is where to resume**: 12
+of its 44 retired (page 23/52 → 35/40), and **the other 32 were restored
+verbatim** so the page is green. That restore is deliberate, not abandoned
+work — the gate must never be left red.
+
+**BACKLOG 1a carries the measured analysis of those 32** — which want
+`in-handler`, which want `in-domain` plus a domain prelude the page still
+lacks, which are genuinely unskippable, and which hide known content bugs.
+Read it first; it cost a full pass to derive.
 
 The other 17 sit in `migration/` and `guides/`, **outside the gate scope**,
-whose trees carry 4 pre-existing failures. Starting them starts BACKLOG 1b —
-decide that deliberately.
-
-Nothing is half-edited; every page is committed at a green gate.
+in trees carrying 4 pre-existing failures. Starting them starts BACKLOG 1b.
 
 ### Traps
 
-- **Most pages hide real errors** — 13 found so far by compiling. Three pages
-  hid none, so it is not a law, but budget for content repair.
-- **Re-run the FULL gate after any wrapper edit**, never just the page in hand.
-  Wrapper changes regressed other pages three times. Wrapper-internal names must
-  keep the `Example` prefix: a record named `OrderData` collided with
-  `language-reference.md`'s own prelude.
-- **A page prelude must be self-contained.** It must not name anything a
-  *fence* defines either, not just anything the wrapper defines — that breaks
-  every other fence on the page, with errors pointing at innocent lines.
-- **Never name a prelude entry `Tax`.** The `in-function` wrapper supplies a
-  sibling `context Tax`; a prelude `function Tax` makes every `Tax.…` path
-  ambiguous and breaks that page's in-function fences. The known rule was the
-  mirror image — wrapper names colliding with prelude names — the same wall
-  from the other side.
+- **The gate's scope is a FILE LIST, not a directory** — exact command in
+  CLAUDE.md § "Compiling RIDDL examples". A figure is only comparable within
+  one scope; if one fails to reproduce, re-measure against the parent commit
+  rather than trusting it. That is why the inherited "108/107" was discarded.
+- **The gate truncates diagnostics** to a position. For the real message,
+  import the script as a module, re-wrap with `wrap()` (mirroring any
+  `no-prelude`), and run `../bin/riddlc validate <file>` — a bare path, there
+  is no `--input-file` flag.
+- **Re-run the FULL gate after any wrapper or script edit.** Wrapper changes
+  have regressed unrelated pages four times.
 - **`annotate-riddl-examples.py` places a fence against the prelude AS IT
-  WAS**, so extending the prelude afterwards can invalidate earlier
-  placements. It silently invalidated 8 on `language-reference.md`.
-- **A context-level prelude cannot supply a sibling context**, and contexts do
-  NOT nest (verified rc.10-57). A fence naming `Other.SomeEvent` must either
-  show its enclosing context (making it `in-domain`, which reads the
-  domain-prelude) or resolve the name locally. Injecting the domain-prelude
-  into every wrapper was tried and reverted: it collides with the epic
-  wrappers, which already define `user Customer`.
-- **A dotted path is anchor-then-DIRECT-child, not a deep search.**
-  `Storefront.Credentials` fails when `Credentials` sits inside a page; it must
-  be `Storefront.LoginPage.Credentials`.
-- **A fence naming an outlet cannot be fixed by a prelude.** An outlet lives in
-  a processor and a prelude lands at context level, so no statement wrapper can
-  reach one. Show the owning processor, or skip with a precise reason.
-- **`scratchpad/dump.py` ignores `no-prelude`**, so its output is not what the
-  gate sees; a "duplicate name" error from it is an artifact. Get the gate's own
-  error before diagnosing.
-- **The gate truncates diagnostics.** It prints the `[error]` position and
-  little else. To read the real message, re-wrap with `wrap()` (import the
-  script as a module, mirror the `no-prelude` logic) and run
-  `../bin/riddlc validate <file>` yourself. Note the subcommand takes a bare
-  path — there is no `--input-file` flag.
-- **Annotate fences by LINE NUMBER.** Matching on a fence's first line put two
-  directives on one fence and left two bare — two fences both began
-  `entity Account is {`.
+  WAS.** Extending the prelude afterwards silently invalidated 8 placements.
+- **Prelude/wrapper name collisions run both ways.** Wrapper names keep an
+  `Example` prefix; equally, a prelude must not take a name a wrapper supplies
+  — `function Tax` broke every in-function fence on its own page.
+- **Annotate fences by LINE NUMBER**, never by matching a fence's first line.
 
 ### Certainty
 
-**Verified by command this session:** branch/push state, compiler version, pin
-agreement, both gates, `mkdocs build --strict` on `sites/riddl`. Every gate
-figure quoted above was measured, including the pre-change baselines.
-**Verified by compiling:** every example on the six pages changed; that an
-entity-level handler satisfies a state's handler requirement; that a query
-declares its response with `replies` and that `yields` on a query is an Error;
-that predefined types do not resolve as alternation members; that
-`BottomlessPit`/`ForeverEmpty` need no import.
+**Verified by command this session:** git state, both compiler versions, the
+pin, both gates, the strict build, that `task/` is empty, and that no
+unexecuted plan in `~/.claude/plans/` holds open work for this repo.
+
+**Verified by compiling:** every example on the 25 pages changed, plus the
+rules recorded in BACKLOG 1a and in the pass entries below.
+
 **Assumed, not re-verified:** BACKLOG item 5's 18 site items were carried over
-as written and none was re-checked against the current site.
+as written and none was re-checked against the current site. The gh-pages
+deploy triggered by the last push was not inspected.
 
 ### Pointers
 
-Open work is **BACKLOG.md** — 1a is the live one. Durable facts are
-**CLAUDE.md**, notably § "Things that will bite" for the grammar protocol
-(**always `sbt extractGrammar`, never `cp`**).
+Open work is **BACKLOG.md** — 1a is live. Durable facts are **CLAUDE.md**,
+notably § "Things that will bite" and § "Compiling RIDDL examples".
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 

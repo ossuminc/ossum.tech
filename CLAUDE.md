@@ -378,9 +378,10 @@ about the checkout tells you which one is meant — and the `riddlc` on PATH is
 neither of them any more, so the wrong pairing reports confident nonsense.
 
 **`../bin/riddlc` is the 2.0 compiler**, staged from riddl's `release/2`. The
-Homebrew `riddlc` on PATH lags it (2.0.0-rc.5 while `../bin` is rc.9), and rc.9
-deprecated the entity options — so validating the 2.0 docs with the PATH binary
-silently passes examples the real compiler rejects.
+Homebrew `riddlc` on PATH lags it badly — verified 2026-08-10: PATH is
+**2.0.0-rc.5** while `../bin` is **2.0.0-rc.10-57**. rc.9 deprecated the entity
+options, so validating the 2.0 docs with the PATH binary silently passes
+examples the real compiler rejects. Run both and compare; never assume.
 
 ```bash
 # 2.0 -- sites/riddl/, validated by the STAGED compiler, not the one on PATH
