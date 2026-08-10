@@ -8299,7 +8299,7 @@
     type CartId is UUID
     type OrderEvent is String
     type EnrichedOrderEvent is String
-    record ProductInfo is { id is ProductId, price is Price }
+    result ProductInfo is { id is ProductId, price is Price }
     record OrderData is { id is OrderId, total is Price }
     record TotalInputs is { subtotal is Price, taxRate is Price }
     record CartItem is { sku is String, quantity is Integer }
@@ -8315,7 +8315,7 @@
     result OrderInfo is { id is OrderId, total is Price }
     command UpdatePrice yields event PriceUpdated is { productId is ProductId, newPrice is Price }
     command PlaceOrder yields event OrderPlaced is { id is OrderId, total is Price }
-    query GetProduct replies result OrderInfo is { id is ProductId }
+    query GetProduct replies result ProductInfo is { id is ProductId }
     record CheckoutInputs is { orderId is OrderId }
     record CheckoutOutcome is { ok is Boolean }
     command ProcessPayment is { orderId is OrderId }
@@ -8375,13 +8375,56 @@
     entity Catalog is {
       state Listed of record ProductRecord is {
         handler CatalogHandler is {
-          on query GetProduct { reply result OrderInfo() }
+          on query GetProduct { reply result ProductInfo() }
         }
       }
     }
     entity Review is {
       state Reviewing of record OrderData is {
         handler ReviewHandler is { on command EscalateReview { ??? } }
+      }
+    }
+    // `become` names an ENTITY-level handler, so ShippedHandler sits beside
+    // the state rather than inside it. A fence that declares its own
+    // `entity Order` must say no-prelude=Order.
+    entity Order is {
+      state Placed of record OrderData is {
+        handler PlacedHandler is { on command ConfirmOrder { ??? } }
+      }
+      handler ShippedHandler is { on command ShipOrder { ??? } }
+    }
+    // Endpoints for the `connector` fence that discards an unused outlet.
+    processor MyProcessor as source is { outlet Unused is type OrderEvent }
+    processor BottomlessPit as sink is { inlet hole is type OrderEvent }
+-->
+
+<!-- riddl-domain-prelude
+    // Domain-level vocabulary for the fences that declare a whole `context`.
+    // Streams carry these across context boundaries, so they cannot live in
+    // any one context; a domain may hold type definitions.
+    // These are EVENTS, not plain types: an `on event X` clause rejects a
+    // String-typed X with "should reference one of these types: Event".
+    event OrderEvent is { orderId is UUID, amount is Decimal(10, 2) }
+    event EnrichedOrderEvent is { orderId is UUID, region is String }
+    event RawEvent is { note is String }
+    event ValidatedEvent is { note is String }
+
+    user Customer is "a shopper buying from the store"
+
+    // The sibling contexts that whole-context fences name by dotted path. A
+    // fence declaring its own `context OrderContext` must say
+    // no-prelude=OrderContext.
+    context PaymentContext is {
+      event PaymentCompleted is { reference is UUID, amount is Decimal(10, 2) }
+    }
+    context OrderContext is {
+      event OrderCompleted is { orderId is UUID, amount is Decimal(10, 2) }
+      event OrderRefunded is { orderId is UUID, amount is Decimal(10, 2) }
+    }
+    application context Storefront is {
+      record StorefrontData is { sku is String }
+      page ProductDetails is {
+        form AddToCartForm submits type StorefrontData
       }
     }
 -->
@@ -8918,7 +8961,7 @@ they say.</p>
 </span></code></pre></div>
 <ul>
 <li><strong>Collections</strong>:
-  <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" --></li>
+  <!-- riddl: in-record --></li>
 </ul>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kr">items</span> <span class="kp">is</span> <span class="kr">many</span> <span class="n">Item</span>
 </span></code></pre></div>
@@ -8983,7 +9026,7 @@ there is nothing to read without it.</p>
 <h2 id="contexts-and-intentions">Contexts and Intentions<a class="headerlink" href="#contexts-and-intentions" title="Permanent link">&para;</a></h2>
 <p>A context may declare its <strong>intention</strong> — what kind of bounded context it is —
 with a keyword prefix:</p>
-<!-- riddl: in-domain -->
+<!-- riddl: in-domain no-prelude=Storefront -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">type</span> <span class="n">Request</span> <span class="kp">is</span> <span class="nb">String</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span>    <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
@@ -9058,7 +9101,7 @@ intention prefix instead. The options still parse and emit a
 <p>Entities are stateful objects with explicit states. Each state references a
 <strong>record</strong> that defines its data structure, and can optionally contain handlers
 and invariants that apply while the entity is in that state:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Product -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">ProductData</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ProductRecord</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="kd">invariant</span> <span class="n">PriceIsPositive</span> <span class="kp">is</span> <span class="n">price</span> <span class="o">&gt;</span> <span class="n">MinimumPrice</span>
@@ -9088,7 +9131,7 @@ entity level instead:</p>
 <h3 id="the-initial-marker">The <code>initial</code> Marker<a class="headerlink" href="#the-initial-marker" title="Permanent link">&para;</a></h3>
 <p>An optional <code>initial</code> keyword before <code>state</code> or <code>handler</code> marks the entity's
 starting state, and the handler that is live after a <code>morph</code>:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its `state Active` is elided to `???`, and RIDDL 2.0 requires every state to have a handler" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="k">initial</span> <span class="kd">handler</span> <span class="n">PendingHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
@@ -9105,7 +9148,7 @@ reorder.</p>
 <p>When an entity has multiple states with their own handlers, it models a finite
 state machine — each state responds to messages differently, and the <code>morph</code>
 statement transitions between states:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`record ActiveOrderData()` is an empty constructor for a record that must have at least one field; the fence elides the arguments" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">PendingOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingOrderData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="kd">handler</span> <span class="n">PendingHandler</span> <span class="kp">is</span> <span class="p">{</span>
@@ -9279,12 +9322,12 @@ that shadows an outer definition is legal but draws a Warning; a name that does
 not begin with a lowercase letter draws a StyleWarning.</p>
 <h3 id="message-origins">Message Origins<a class="headerlink" href="#message-origins" title="Permanent link">&para;</a></h3>
 <p>An <code>on</code> clause may name where the message came from:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="two spellings of the SAME on-clause, which cannot share one handler -- same shape as onclause.md" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="n">di</span><span class="p">:</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span></code></pre></div>
 <h3 id="basic-handler-example">Basic Handler Example<a class="headerlink" href="#basic-handler-example" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kd">handler</span> <span class="n">ProductCommandHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  <span class="k">on</span> <span class="n">upd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">UpdatePrice</span> <span class="p">{</span>
 </span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="k">when</span> <span class="n">upd</span><span class="p">.</span><span class="n">newPrice</span> <span class="o">&gt;</span> <span class="n">Zero</span> <span class="k">then</span>
@@ -9526,7 +9569,7 @@ needs a value, it accepts any of these forms:</p>
 <h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
 <p>A constructor builds a message or a record inline. Arguments are positional
 first, then named:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="page shows OrderPlaced with two different field sets; this one adds `currency`, while the `yield event OrderPlaced(id, total)` fence does not -- a page prelude can supply only one shape" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p>An <strong>empty</strong> argument list is an arity of zero and must match like any other,
@@ -9549,13 +9592,13 @@ only pure definitions — and produces its result:</p>
 <h3 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h3>
 <p>Boolean expressions have the usual precedence: <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt;
 comparison &lt; atom. Parentheses group.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="n">require</span> <span class="n">count</span> <span class="o">==</span> <span class="n">total</span>
 </span></code></pre></div>
 <p>An <a href="../../concepts/invariant/">invariant</a> takes one too, though it is a
 definition rather than a statement:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="kd">invariant</span> <span class="n">InStock</span> <span class="kp">is</span> <span class="n">quantity</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span></code></pre></div>
 <p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
@@ -9582,7 +9625,7 @@ type on both sides.</p>
 <h3 id="morph-statement">Morph Statement<a class="headerlink" href="#morph-statement" title="Permanent link">&para;</a></h3>
 <p>Changes entity state. The payload is a <strong>record</strong> — a bare record reference or
 an inline constructor:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`ProductRecord(price)` passes one positional argument to a three-field record, and `price` is not in scope; the fence elides the rest" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">ProductData</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">ProductRecord</span><span class="p">(</span><span class="n">price</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="send-statement">Send Statement<a class="headerlink" href="#send-statement" title="Permanent link">&para;</a></h3>
@@ -9631,7 +9674,7 @@ rewrite away.</p>
 </div>
 <h3 id="set-statement">Set Statement<a class="headerlink" href="#set-statement" title="Permanent link">&para;</a></h3>
 <p>Assigns a value to a field or a state:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`set state ActiveOrder to record ActiveOrderData()` is an empty constructor for a one-field record, and `call function Pricing.Total(subtotal, tax)` passes two of four inputs" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">status</span> <span class="kp">to</span> <span class="s2">&quot;Active&quot;</span>
 </span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">total</span> <span class="kp">to</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">Total</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">tax</span><span class="p">)</span>
 </span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="k">set</span> <span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">to</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span><span class="p">()</span>
@@ -9639,7 +9682,7 @@ rewrite away.</p>
 <h3 id="let-statement">Let Statement<a class="headerlink" href="#let-statement" title="Permanent link">&para;</a></h3>
 <p>Creates a local variable binding, with an optional type annotation. When no
 annotation is given, the type is inferred from the bound expression:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="calls `Cart.Total`, a function this page never defines, and annotates a `let` with the predefined `Decimal`, which does not resolve as a type path" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="k">let</span> <span class="n">totalPrice</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Cart</span><span class="p">.</span><span class="n">Total</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">tax</span><span class="p">,</span> <span class="n">shipping</span><span class="p">)</span>
 </span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="k">let</span> <span class="n">discount</span><span class="p">:</span> <span class="nb">Decimal</span> <span class="o">=</span> <span class="s2">&quot;totalPrice * 0.1&quot;</span>
 </span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="k">let</span> <span class="n">ready</span> <span class="o">=</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span>
@@ -9720,7 +9763,7 @@ decides. A natural-language condition is plainly the latter, so it should
 say so rather than borrow the literal's spelling.</p>
 </div>
 <p>An <code>else</code> clause handles the false case:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="k">let</span> <span class="n">authorized</span> <span class="o">=</span> <span class="kd">user</span><span class="p">.</span><span class="n">hasPermission</span>
 </span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="k">when</span> <span class="n">authorized</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">ActionCompleted</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
@@ -9731,7 +9774,7 @@ say so rather than borrow the literal's spelling.</p>
 <h3 id="match-statement">Match Statement<a class="headerlink" href="#match-statement" title="Permanent link">&para;</a></h3>
 <p>Pattern matching over a typed subject. The subject is a value reference, a
 <code>get from</code>, or a legacy pseudo-code literal:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="matches a String-typed `status` against type-cases and a numeric `>=` threshold; the subject would have to be an enumerated type, which conflicts with the `set field status` fence" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="k">match</span> <span class="n">order</span><span class="p">.</span><span class="n">status</span> <span class="p">{</span>
 </span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>  <span class="kd">case</span> <span class="n">Pending</span> <span class="p">{</span>
 </span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>    <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderPending</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
@@ -9761,7 +9804,7 @@ Enumeration or Alternation — a non-exhaustive match without a <code>default</c
 <strong>StyleWarning</strong>.</p>
 <h3 id="foreach-statement">Foreach Statement<a class="headerlink" href="#foreach-statement" title="Permanent link">&para;</a></h3>
 <p>RIDDL's safe, bounded loop. There is no unbounded iteration in the language:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`myLocalCollection` must be a `let`-bound local, and the fence elides the binding" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="k">foreach</span> <span class="n">line</span> <span class="kp">in</span> <span class="kd">field</span> <span class="n">order</span><span class="p">.</span><span class="n">lines</span> <span class="p">{</span>
 </span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">LineShipped</span><span class="p">(</span><span class="n">sku</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">sku</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Shipments</span>
 </span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="p">}</span>
@@ -9928,14 +9971,14 @@ the leniency may be tightened.</p>
 </div>
 <h3 id="become-statement">Become Statement<a class="headerlink" href="#become-statement" title="Permanent link">&para;</a></h3>
 <p>Switches the live handler of an entity:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="k">become</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">handler</span> <span class="n">ShippedHandler</span>
 </span></code></pre></div>
 <h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
 <p>Functions define reusable, <strong>pure</strong> operations. A function's <code>requires</code> and
 <code>returns</code> may name an existing type rather than spelling out an aggregation,
 which makes unary and nullary functions natural:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="calls `Tax.Apply`, which this page never defines; the prelude cannot supply a `Tax` because the in-function wrapper already owns that name" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-51-2"><a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">TotalInputs</span>
 </span><span id="__span-51-3"><a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>  <span class="kr">returns</span> <span class="n">Price</span>
@@ -9946,7 +9989,7 @@ which makes unary and nullary functions natural:</p>
 </span><span id="__span-51-8"><a id="__codelineno-51-8" name="__codelineno-51-8" href="#__codelineno-51-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The inline aggregation form still works:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="declares its inputs and outputs as inline anonymous aggregates, which 2.0 marks deprecated in favour of a named record" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>  <span class="kr">requires</span> <span class="p">{</span> <span class="n">subtotal</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">taxes</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">shipping</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>
 </span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>  <span class="kr">returns</span> <span class="p">{</span> <span class="n">total</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>
@@ -10034,7 +10077,7 @@ message but continues to work.</p>
 </div>
 <h2 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">&para;</a></h2>
 <p>Repositories define persistence:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its schema names `record Cart`, while the page prelude must supply `entity Cart` for other fences; one context cannot hold both" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span>
 </span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>    <span class="n">cart</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">Cart</span>
@@ -10076,7 +10119,7 @@ different message formats or terminology.</p>
 <li><code>to context X</code>: Sends messages to context X, translating from local format</li>
 </ul>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="the adaptor emits `OrderPaymentReceived`, which belongs to neither its parent nor its referent context, so 2.0 rejects it as crossing the adaptor's isolation seam" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="kd">context</span> <span class="n">OrderContext</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>  <span class="kd">adaptor</span> <span class="n">PaymentIntegration</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">PaymentContext</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>    <span class="kd">handler</span> <span class="n">InboundPayments</span> <span class="kp">is</span> <span class="p">{</span>
@@ -10114,7 +10157,7 @@ model (projections).</p>
 <li>Maintain materialized views updated by event streams</li>
 </ul>
 <h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="a 2.0 projector requires a record definition, and this one has none" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="kd">context</span> <span class="n">ReportingContext</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>  <span class="kd">projector</span> <span class="n">SalesDashboard</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>    <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">SalesData</span>
@@ -10153,7 +10196,7 @@ input ports (inlets) and output ports (outlets).</p>
 </ul>
 <p>Every processor kind may declare ports — not just streamlets. An entity may
 own an outlet; a projector may own an inlet.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>  <span class="kd">processor</span> <span class="n">OrderEventSource</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>    <span class="kd">outlet</span> <span class="n">OrderEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
@@ -10241,7 +10284,7 @@ processors.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>connector [name] is from outlet [source.outlet] to inlet [target.inlet]
 </span></code></pre></div>
 <h3 id="example_2">Example<a class="headerlink" href="#example_2" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="continuation of the pipeline fence above; the processors it connects are declared there" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-59-2"><a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>  <span class="kd">connector</span> <span class="n">OrderFlow</span> <span class="kp">is</span>
 </span><span id="__span-59-3"><a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>    <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">OrderEventSource</span><span class="p">.</span><span class="n">OrderEvents</span>
@@ -10274,7 +10317,7 @@ different contexts, in the enclosing Domain.</p>
 </ul>
 </div>
 <h3 id="pipeline-pattern">Pipeline Pattern<a class="headerlink" href="#pipeline-pattern" title="Permanent link">&para;</a></h3>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="kd">context</span> <span class="n">EventProcessing</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>  <span class="kd">processor</span> <span class="n">Events</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Raw</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawEvent</span> <span class="p">}</span>
 </span><span id="__span-60-3"><a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>  <span class="kd">processor</span> <span class="n">Validate</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
@@ -10317,7 +10360,7 @@ one-connector-per-port rule makes structurally necessary:</p>
 </tr>
 </tbody>
 </table>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="kd">connector</span> <span class="n">DiscardUnused</span> <span class="kp">is</span>
 </span><span id="__span-61-2"><a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Unused</span>
 </span><span id="__span-61-3"><a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
@@ -10331,7 +10374,7 @@ module is never added to your model's contents.</p>
 <h2 id="ui-components">UI Components<a class="headerlink" href="#ui-components" title="Permanent link">&para;</a></h2>
 <p>RIDDL supports UI modeling. <strong>UI may only be modeled inside an <code>application</code>
 context.</strong></p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="`button ... activates type Boolean` is not valid 2.0; a known content bug shared with four other pages" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-62-2"><a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>  <span class="kr">page</span> <span class="n">ProductDetails</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-62-3"><a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Page showing product information&quot;</span>
@@ -10396,7 +10439,7 @@ context.</strong></p>
 </div>
 <h2 id="epics-and-use-cases">Epics and Use Cases<a class="headerlink" href="#epics-and-use-cases" title="Permanent link">&para;</a></h2>
 <p>Epics model user stories:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its steps name `Storefront.AddToCartForm` and `Storefront.CartSummary` as direct children of the context, but the page's own application fence puts forms inside pages" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="kd">epic</span> <span class="n">ShoppingCartEpic</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-63-2"><a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;add items to a shopping cart&quot;</span>
 </span><span id="__span-63-3"><a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can purchase multiple items at once&quot;</span>
@@ -10473,7 +10516,7 @@ vocabulary, not captured data.</p>
 <p>The <strong>refusal</strong> step is new in 2.0. It models a system element declining a
 user's request, which previously had no way to be expressed except as free
 text:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-usecase no-prelude -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
 </span></code></pre></div>
 <p>The <strong>arbitrary</strong> and <strong>vague</strong> steps carry free prose rather than typed
@@ -10517,11 +10560,11 @@ trace</strong> through the state machines of the entities it drives. Both emit
 <p>Modules can be compiled to a binary <code>.bast</code> file and imported by other models.</p>
 <h3 id="importing">Importing<a class="headerlink" href="#importing" title="Permanent link">&para;</a></h3>
 <p>The <strong>full</strong> form takes everything the file's root module holds:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="loads a BAST file that does not exist; nothing on disk can satisfy it" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-66-1"><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="kn">import</span> <span class="s2">&quot;commerce.bast&quot;</span>
 </span></code></pre></div>
 <p>The <strong>selective</strong> form takes exactly one named definition, optionally renamed:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="loads a BAST file that does not exist; nothing on disk can satisfy it" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-67-1"><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a><span class="kn">import</span> <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span>
 </span><span id="__span-67-2"><a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a><span class="kn">import</span> <span class="kd">type</span> <span class="n">Money</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span> <span class="kp">as</span> <span class="nb">Currency</span>
 </span></code></pre></div>
@@ -10547,7 +10590,7 @@ exactly as if it had been written there by hand. An illegal placement is an
 <h2 id="version">Version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h2>
 <p>A <code>version</code> declares a component of a scope's version coordinate. It is either a
 name or a natural number, never both:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="its `entity Order` has no handler and no state, which 2.0 rejects; the fence is about `version`, not about entities" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-68-1"><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="kd">domain</span> <span class="n">Garibaldi</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-68-2"><a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>  <span class="kd">version</span> <span class="n">Garibaldi</span>
 </span><span id="__span-68-3"><a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>  <span class="kd">context</span> <span class="n">Ordering</span> <span class="kp">is</span> <span class="p">{</span>
@@ -10595,7 +10638,7 @@ than one in a single scope is an <strong>Error</strong>.</p>
 <h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
 <p>Metadata goes in a <code>with { }</code> block <strong>after</strong> the closing brace of the
 definition:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Product -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-70-1"><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-70-2"><a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>  <span class="c1">// Entity definition content</span>
 </span><span id="__span-70-3"><a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>  <span class="gr">???</span>
@@ -10632,7 +10675,7 @@ comments.</p>
 <h3 id="figma-references">Figma References<a class="headerlink" href="#figma-references" title="Permanent link">&para;</a></h3>
 <p>A <code>figma</code> reference connects a model element to the exact frame in a Figma file
 that depicts it:</p>
-<!-- riddl: in-domain -->
+<!-- riddl: in-domain no-prelude=Storefront -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-71-1"><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">Storefront</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-71-2"><a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>  <span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-71-3"><a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>    <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
