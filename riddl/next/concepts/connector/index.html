@@ -5552,11 +5552,21 @@
   
 
 
+<!-- riddl-prelude
+event Order is { id is String }
+event OrderEvent is { id is String }
+event RawOrder is { id is String }
+processor OrderEventSource as source is { outlet OrderEvents is type OrderEvent }
+processor OrderEnricher as sink is { inlet RawOrders is type OrderEvent }
+processor Home as sink is { inlet incoming is type Order }
+processor Abroad as sink is { inlet incoming is type Order }
+-->
+
 <h1 id="connector">Connector<a class="headerlink" href="#connector" title="Permanent link">&para;</a></h1>
 <p>Connectors are uni-directional conduits for reliably transmitting data of a
 particular <a href="../type/">type</a>. A connector joins exactly one
 <a href="../outlet/">outlet</a> to exactly one <a href="../inlet/">inlet</a>.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">connector</span> <span class="n">OrderFlow</span> <span class="kp">is</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">OrderEventSource</span><span class="p">.</span><span class="n">OrderEvents</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">OrderEnricher</span><span class="p">.</span><span class="n">RawOrders</span>
@@ -5577,15 +5587,15 @@ stream.</p>
 <p>Fan-in and fan-out are modeled by declaring <strong>multiple ports</strong> — the arity is
 what derives a <code>merge</code> or <code>split</code> <a href="../processor/#shape">shape</a> — never by
 attaching several connectors to a single port.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Correct: a split declares two outlets, each with its own connector</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">processor</span> <span class="n">Router</span> <span class="kp">as</span> <span class="kd">split</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">inlet</span> <span class="n">incoming</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">Order</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">outlet</span> <span class="n">domestic</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">Order</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">outlet</span> <span class="n">international</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">Order</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kd">connector</span> <span class="n">ToDomestic</span>      <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Router</span><span class="p">.</span><span class="n">domestic</span>      <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Home</span><span class="p">.</span><span class="kp">in</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="kd">connector</span> <span class="n">ToInternational</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Router</span><span class="p">.</span><span class="n">international</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Abroad</span><span class="p">.</span><span class="kp">in</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kd">connector</span> <span class="n">ToDomestic</span>      <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Router</span><span class="p">.</span><span class="n">domestic</span>      <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Home</span><span class="p">.</span><span class="n">incoming</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="kd">connector</span> <span class="n">ToInternational</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Router</span><span class="p">.</span><span class="n">international</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Abroad</span><span class="p">.</span><span class="n">incoming</span>
 </span></code></pre></div>
 <p>Attaching more than one connector to a port is an <strong>Error</strong>.</p>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>

@@ -5536,6 +5536,11 @@
 
   <h1>Processor</h1>
 
+<!-- riddl-prelude
+event OrderEvent is { id is String }
+event EnrichedOrderEvent is { id is String }
+-->
+
 <p>A Processor is an abstract <a href="../vital/">vital definition</a> with several concrete
 manifestations (see below) that represents any definition capable of processing
 messages. Processors have <a href="../handler/">handlers</a> to process messages sent to
@@ -5566,7 +5571,7 @@ not.</p>
 <h2 id="the-processor-keyword">The <code>processor</code> Keyword<a class="headerlink" href="#the-processor-keyword" title="Permanent link">&para;</a></h2>
 <p>The generic streaming processor is declared with the <code>processor</code> keyword and an
 optional shape ascription:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>

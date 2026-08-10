@@ -5508,6 +5508,10 @@
   
 
 
+<!-- riddl-prelude
+type Clicked is Boolean
+-->
+
 <h1 id="element">Element<a class="headerlink" href="#element" title="Permanent link">&para;</a></h1>
 <p><em>Elements</em> are the definitions that define the user interface for an
 <a href="../application/">application</a>. Every element is associated 
@@ -5541,8 +5545,8 @@ an <strong>acquisition verb</strong>, and the type acquired:</p>
 <p>There is <strong>no</strong> <code>activate</code> definition. Navigation is expressed as an input
 whose acquisition verb conveys the action — most naturally a <code>button</code> with
 <code>activates</code> or <code>triggers</code>:</p>
-<!-- riddl: skip reason="illustrative fragment; references types this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="nb">Boolean</span>
+<!-- riddl: in-group -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="n">Clicked</span>
 </span></code></pre></div>
 <p>Both <code>activate</code> and <code>activates</code> are accepted, as are the other acquisition
 verbs — pick whichever reads best at the call site.</p>

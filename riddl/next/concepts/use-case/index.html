@@ -5550,7 +5550,7 @@ interactions between users and system components.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <p>A use case restates the user story, then lists its
 <a href="../interaction/">interaction</a> steps:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">epic</span> <span class="n">UserAuthentication</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;securely access their account&quot;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can view orders and manage settings&quot;</span>
@@ -5560,16 +5560,16 @@ interactions between users and system components.</p>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can view their orders&quot;</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="kd">step</span> <span class="kr">focus</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="k">on</span> <span class="kr">page</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">LoginPage</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="kd">step</span> <span class="k">take</span> <span class="kr">form</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">Credentials</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="kd">step</span> <span class="k">take</span> <span class="kr">form</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">LoginPage</span><span class="p">.</span><span class="n">Credentials</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="kd">step</span> <span class="k">send</span> <span class="kd">command</span> <span class="n">Authenticate</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">AuthService</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="kd">step</span> <span class="kr">show</span> <span class="kr">document</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">Dashboard</span> <span class="kp">to</span> <span class="kd">user</span> <span class="n">Customer</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="kd">step</span> <span class="kr">show</span> <span class="kr">document</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">DashboardPage</span><span class="p">.</span><span class="n">Dashboard</span> <span class="kp">to</span> <span class="kd">user</span> <span class="n">Customer</span>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="p">}</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="kd">case</span> <span class="n">FailedLogin</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">may</span> <span class="s2">&quot;attempt to sign in with the wrong password&quot;</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they learn their credentials are wrong&quot;</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="kd">step</span> <span class="k">take</span> <span class="kr">form</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">Credentials</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="kd">step</span> <span class="k">take</span> <span class="kr">form</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">LoginPage</span><span class="p">.</span><span class="n">Credentials</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="kd">step</span> <span class="k">send</span> <span class="kd">command</span> <span class="n">Authenticate</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">AuthService</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="kd">step</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;credentials not recognized&quot;</span>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>  <span class="p">}</span>
@@ -5674,6 +5674,22 @@ page Storefront is {
 succeed, and error paths. The refusal step makes the last of these first-class:</p>
 <!-- riddl-domain-prelude
 user Customer is "a shopper using the store"
+application context Storefront is {
+  record Credential is { username is String, password is String }
+  record DashboardData is { note is String }
+  command Authenticate is { username is String }
+  page LoginPage is {
+    form Credentials accepts type Credential
+  }
+  page DashboardPage is {
+    document Dashboard shows type DashboardData
+  }
+  entity AuthService is {
+    state Ready of record Credential is {
+      handler AuthHandler is { on command Authenticate { ??? } }
+    }
+  }
+}
 -->
 <!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">epic</span> <span class="n">PlaceOrder</span> <span class="kp">is</span> <span class="p">{</span>

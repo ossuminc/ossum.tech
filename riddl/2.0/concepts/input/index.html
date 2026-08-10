@@ -5448,6 +5448,23 @@
 
   <h1>Input</h1>
 
+<!-- riddl-prelude
+record SignupDetails is { email is String }
+type Clicked is Boolean
+type CountryCode is String
+record AccountData is { email is String }
+command Register is { email is String }
+command CreateAccount is { details is SignupDetails }
+page SignupPage is {
+  form Signup accepts type SignupDetails
+}
+entity Account is {
+  state Registered of record AccountData is {
+    handler AccountHandler is { on command CreateAccount { ??? } }
+  }
+}
+-->
+
 <p>An Input is the abstract notion of some information provided to an
 application by its <a href="../user/">user</a>. To make this more tangible, inputs could
 be implemented as any of the following:
@@ -5473,9 +5490,9 @@ by the application's input.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <p>An input is written as an alias, an identifier, an acquisition verb, and the
 type it takes in:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-group no-prelude=SignupPage -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">form</span>  <span class="n">Signup</span>   <span class="kr">accepts</span> <span class="kd">type</span> <span class="n">SignupDetails</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="nb">Boolean</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="n">Clicked</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kr">picklist</span> <span class="n">Country</span> <span class="kr">selects</span> <span class="kd">type</span> <span class="n">CountryCode</span>
 </span></code></pre></div>
 <p><strong>Aliases</strong>: <code>input</code>, <code>form</code>, <code>text</code>, <code>button</code>, <code>picklist</code>, <code>selector</code>, <code>item</code></p>
@@ -5498,7 +5515,7 @@ not pile onto the real error.</p>
 <h2 id="reading-an-input">Reading an Input<a class="headerlink" href="#reading-an-input" title="Permanent link">&para;</a></h2>
 <p>A <a href="../handler/">handler</a> reads an input's value with the <code>get from</code> value
 expression:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">Register</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">let</span> <span class="kr">details</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">Signup</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="k">tell</span> <span class="kd">command</span> <span class="n">CreateAccount</span><span class="p">(</span><span class="kr">details</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Account</span>

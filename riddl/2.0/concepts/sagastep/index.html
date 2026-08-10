@@ -5558,6 +5558,34 @@
 
   <h1>Saga Step</h1>
 
+<!-- riddl-prelude
+record PaymentInputs is { orderId is String, customerId is String,
+  amount is Natural, transactionId is String }
+record PaymentOutcome is { note is String }
+record InventoryData is { orderId is String }
+command ReserveItems is { orderId is String }
+command ReleaseReservation is { orderId is String }
+command ProcessCharge is { customerId is String, amount is Natural }
+command RefundCharge is { transactionId is String }
+command CreateOrder is { customerId is String }
+command CancelOrder is { orderId is String }
+entity Inventory is {
+  state Held of record InventoryData is {
+    handler InventoryHandler is { on command ReserveItems { ??? } }
+  }
+}
+entity PaymentService is {
+  state Charging of record InventoryData is {
+    handler PaymentHandler is { on command ProcessCharge { ??? } }
+  }
+}
+entity OrderService is {
+  state Placing of record InventoryData is {
+    handler OrderHandler is { on command CreateOrder { ??? } }
+  }
+}
+-->
+
 <p>A saga step represents one action in a <a href="../saga/">Saga</a>—a distributed
 transaction that coordinates changes across multiple components. Each step
 defines both a forward action and a compensating action, so a later failure
@@ -5573,7 +5601,7 @@ can be rolled back.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <p>A step is an identifier, a forward block, and a <code>reverted by</code> compensation
 block. Inputs and outputs are declared once for the whole saga, not per step:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">saga</span> <span class="n">ProcessPayment</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">PaymentInputs</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">returns</span>  <span class="kd">record</span> <span class="n">PaymentOutcome</span>
@@ -5592,7 +5620,7 @@ block. Inputs and outputs are declared once for the whole saga, not per step:</p
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">RefundCharge</span><span class="p">(</span><span class="n">transactionId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>  <span class="p">}</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="kd">step</span> <span class="n">CreateOrder</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="kd">step</span> <span class="n">PlaceOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">CreateOrder</span><span class="p">(</span><span class="n">customerId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">OrderService</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  <span class="p">}</span> <span class="k">reverted</span> <span class="kp">by</span> <span class="p">{</span>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">CancelOrder</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">OrderService</span>

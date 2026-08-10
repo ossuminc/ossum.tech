@@ -5636,6 +5636,22 @@
 
   <h1>Handler</h1>
 
+<!-- riddl-prelude
+record PendingData is { note is String }
+record ShippedData is { trackingNumber is String }
+record ActiveOrderData is { total is Natural }
+record ShippedOrderData is { trackingNumber is String }
+command ShipOrder is { trackingNumber is String }
+entity Order is {
+  initial state PendingOrder of record PendingData is {
+    handler PendingOrderHandler is { on command ShipOrder { ??? } }
+  }
+  state ShippedOrder of record ShippedOrderData is {
+    handler ShippedOrderHandler is { on command ShipOrder { ??? } }
+  }
+}
+-->
+
 <p>A <em>handler</em> is a very important definition in RIDDL because it is RIDDL's 
 way of expressing both business logic and relationships between the various
 components in a model. Handlers do that by specifying what should be done 
@@ -5733,7 +5749,7 @@ placements a handler can occupy.</p>
 <p><code>initial</code> marks the handler that becomes active when the entity transitions
 <strong>into</strong> that state, whether by <a href="../statement/#morph-and-become-entity-only">morph</a>
 or at creation:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="k">initial</span> <span class="kd">handler</span> <span class="n">PendingHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">handler</span> <span class="n">AuditHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
@@ -5748,7 +5764,7 @@ fully backward compatible with models that do not.</p>
 <p><code>initial</code> marks the handler used as the initial handler for <strong>every state that
 does not define one of its own</strong> — a default across the whole state machine
 rather than a per-state choice:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Order -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">initial</span> <span class="kd">handler</span> <span class="n">Common</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>   <span class="c1">// initial for Shipped, and any state</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                                      <span class="c1">// that declares no initial of its own</span>
@@ -5781,7 +5797,7 @@ enabling each state to respond to messages differently—the
 foundation for modeling state machines in RIDDL. When an
 entity transitions to a new state via a <code>morph</code> statement,
 the new state's handlers become active.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">handler</span> <span class="n">ActiveOrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">on</span> <span class="n">ship</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ShipOrder</span> <span class="p">{</span>

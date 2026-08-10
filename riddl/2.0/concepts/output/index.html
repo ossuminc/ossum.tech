@@ -5448,6 +5448,12 @@
 
   <h1>Output</h1>
 
+<!-- riddl-prelude
+record ReceiptData is { total is Natural }
+record CartLine is { sku is String, quantity is Natural }
+type ImageRef is URL
+-->
+
 <p>An Output definition is concerned with providing information to the
 <a href="../user/">user</a> without regard to the form of that information when
 presented to the user. To make this more tangible, an 
@@ -5470,7 +5476,7 @@ user.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <p>An output is written as an alias, an identifier, a presentation verb, and what
 it presents:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-group -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">document</span> <span class="n">Receipt</span>   <span class="kr">shows</span>    <span class="kd">type</span> <span class="n">ReceiptData</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">list</span>     <span class="n">CartLines</span> <span class="kr">displays</span> <span class="kd">type</span> <span class="n">CartLine</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kr">picture</span>  <span class="n">Avatar</span>    <span class="kr">presents</span> <span class="kd">type</span> <span class="n">ImageRef</span>

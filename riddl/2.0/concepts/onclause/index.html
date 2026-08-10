@@ -5496,6 +5496,14 @@
   
 
 
+<!-- riddl-prelude
+constant MinimumOrder is Natural = "10"
+record OrderInfo is { id is String, total is Natural }
+command PlaceOrder is { id is String, total is Natural }
+event OrderPlaced is { id is String, total is Natural }
+command DoIt is { note is String }
+-->
+
 <h1 id="on-clause">On Clause<a class="headerlink" href="#on-clause" title="Permanent link">&para;</a></h1>
 <p>An On Clause specifies how to handle a particular kind of message or situation
 as part of the definition of a <a href="../handler/">handler</a>. An On Clause is
@@ -5566,7 +5574,7 @@ being initialized or terminated again.</p>
 <p>An <code>on</code> clause may bind a local name to the message it is handling, using
 ordinary type ascription — the same rule as <code>let x: T = ...</code> and a field
 declaration <code>p1: String</code>, read as "<code>ord</code> has type <code>command PlaceOrder</code>":</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">on</span> <span class="n">ord</span><span class="p">:</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">when</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span> <span class="o">&gt;</span> <span class="n">MinimumOrder</span> <span class="k">then</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
@@ -5591,7 +5599,7 @@ parses to exactly the same structure.</p>
 <h2 id="message-origins">Message Origins<a class="headerlink" href="#message-origins" title="Permanent link">&para;</a></h2>
 <p>An <code>on</code> clause may also name where the message came from, optionally binding a
 local name to the origin:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="two spellings of the SAME clause, which cannot share a handler (duplicate content names), and the origin is a sibling context no wrapper can supply" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="n">di</span><span class="p">:</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span></code></pre></div>

@@ -5575,11 +5575,11 @@ times faster than reparsing the source, and the file is typically two thirds
 the size.</p>
 <h3 id="importing">Importing<a class="headerlink" href="#importing" title="Permanent link">&para;</a></h3>
 <p>The <strong>full</strong> form takes everything the file's root module holds:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="s2">&quot;commerce.bast&quot;</span>
 </span></code></pre></div>
 <p>The <strong>selective</strong> form takes exactly one named definition, optionally renamed:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">import</span> <span class="kd">type</span> <span class="n">Money</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span> <span class="kp">as</span> <span class="nb">Currency</span>
 </span></code></pre></div>

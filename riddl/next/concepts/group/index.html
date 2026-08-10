@@ -5426,6 +5426,11 @@
 
   <h1>Group</h1>
 
+<!-- riddl-prelude
+record CartLine is { sku is String, quantity is Natural }
+type Clicked is Boolean
+-->
+
 <p>A group is the abstract structuring concept for an application. Groups can be 
 nested which allows them to form a hierarchy that defines the structure of a 
 user interface. Each group can also contain UI elements such as 
@@ -5444,10 +5449,10 @@ their overall UI design theme.</p>
 thing structurally. Pick whichever reads best for what you are modeling:</p>
 <p><code>group</code>, <code>page</code>, <code>pane</code>, <code>dialog</code>, <code>menu</code>, <code>popup</code>, <code>frame</code>, <code>column</code>,
 <code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code>, <code>block</code></p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">page</span> <span class="n">ShoppingCart</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="n">list</span> <span class="n">Items</span> <span class="kr">shows</span> <span class="kd">type</span> <span class="n">CartLine</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="nb">Boolean</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="n">Clicked</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
@@ -5461,7 +5466,7 @@ treated as an application.</p>
 <h2 id="design-references">Design References<a class="headerlink" href="#design-references" title="Permanent link">&para;</a></h2>
 <p>A group may carry a <a href="../metadata/#figma-references">figma reference</a> linking it
 to the exact frame that depicts it:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>

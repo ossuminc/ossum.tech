@@ -5470,6 +5470,12 @@
 
   <h1>Repository</h1>
 
+<!-- riddl-prelude
+record CartItem is { id is String, sku is String }
+record Cart is { id is String, items is many CartItem }
+record Product is { id is String, name is String }
+-->
+
 <p>A RIDDL repository is an abstraction for anything that can retain 
 information (e.g. <a href="../message/">messages</a>) for retrieval at a
 later time. This might be a relational database, NoSQL database, a data lake, 
@@ -5488,7 +5494,7 @@ are related, and a set of indices defines which fields the database indexes. </p
 schema may be: flat, relational, time-series, graphical, hierarchical, star, 
 document, columnar, vector, or other. These are only suggestive of the kind of
 storage layout the repository uses. </p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="kp">of</span> <span class="n">cart</span> <span class="kp">as</span> <span class="kd">type</span> <span class="n">Cart</span>

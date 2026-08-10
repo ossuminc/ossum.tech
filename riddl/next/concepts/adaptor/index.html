@@ -5602,6 +5602,22 @@
 
   <h1>Adaptor</h1>
 
+<!-- riddl-domain-prelude
+context Payments is {
+  event PaymentCompleted is { orderId is String }
+  event PaymentFailed is { orderId is String }
+}
+context Inventory is {
+  record StockData is { orderId is String }
+  command ReserveStock is { orderId is String }
+  entity Stock is {
+    state Held of record StockData is {
+      handler StockHandler is { on command ReserveStock { ??? } }
+    }
+  }
+}
+-->
+
 <p>An adaptor's purpose is to <em>adapt</em> one <a href="../context/">Context</a>
 to another <a href="../context/">Context</a>.  In Domain-Driven Design, 
 this concept is known as an <em>anti-corruption layer</em> that keeps the
@@ -5647,37 +5663,48 @@ while B adapts from A is two contexts each defending its own model.</p>
 <a href="../context/">Context</a> containing the adaptor to the
 <a href="../context/">Context</a> referenced in the adaptor.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">context</span> <span class="n">Orders</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">adaptor</span> <span class="n">PaymentAdapter</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Payments</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="kd">handler</span> <span class="n">InboundPayments</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>      <span class="k">on</span> <span class="n">paid</span><span class="p">:</span> <span class="kd">event</span> <span class="n">Payments</span><span class="p">.</span><span class="n">PaymentCompleted</span> <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        <span class="k">tell</span> <span class="kd">command</span> <span class="n">MarkAsPaid</span><span class="p">(</span><span class="n">paid</span><span class="p">.</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      <span class="p">}</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">Payments</span><span class="p">.</span><span class="n">PaymentFailed</span> <span class="p">{</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="k">tell</span> <span class="kd">command</span> <span class="n">HandlePaymentFailure</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="p">}</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="k">error</span> <span class="s2">&quot;Unrecognized message from the Payments context&quot;</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>      <span class="p">}</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="p">}</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Translates payment messages between Orders and Payments&quot;</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="p">}</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>  <span class="kd">adaptor</span> <span class="n">InventoryAdapter</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Inventory</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="kd">handler</span> <span class="n">OutboundInventory</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">ReserveItems</span> <span class="p">{</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>        <span class="k">tell</span> <span class="kd">command</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">ReserveStock</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Inventory</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>      <span class="p">}</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="k">error</span> <span class="s2">&quot;Unrecognized outbound message&quot;</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>      <span class="p">}</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>    <span class="p">}</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Translates inventory requests from Orders to Inventory&quot;</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>  <span class="p">}</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="p">}</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">record</span> <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">isPaid</span> <span class="kp">is</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">command</span> <span class="n">MarkAsPaid</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">command</span> <span class="n">HandlePaymentFailure</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="kd">command</span> <span class="n">ReserveItems</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">on</span> <span class="kd">command</span> <span class="n">MarkAsPaid</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  <span class="p">}</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="kd">adaptor</span> <span class="n">PaymentAdapter</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Payments</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="kd">handler</span> <span class="n">InboundPayments</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>      <span class="k">on</span> <span class="n">paid</span><span class="p">:</span> <span class="kd">event</span> <span class="n">Payments</span><span class="p">.</span><span class="n">PaymentCompleted</span> <span class="p">{</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="k">tell</span> <span class="kd">command</span> <span class="n">MarkAsPaid</span><span class="p">(</span><span class="n">paid</span><span class="p">.</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>      <span class="p">}</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">Payments</span><span class="p">.</span><span class="n">PaymentFailed</span> <span class="p">{</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="k">tell</span> <span class="kd">command</span> <span class="n">HandlePaymentFailure</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Order</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>      <span class="p">}</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>        <span class="k">error</span> <span class="s2">&quot;Unrecognized message from the Payments context&quot;</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>      <span class="p">}</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="p">}</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Translates payment messages between Orders and Payments&quot;</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>  <span class="p">}</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>  <span class="kd">adaptor</span> <span class="n">InventoryAdapter</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Inventory</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>    <span class="kd">handler</span> <span class="n">OutboundInventory</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">ReserveItems</span> <span class="p">{</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>        <span class="k">tell</span> <span class="kd">command</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">ReserveStock</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Inventory</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>      <span class="p">}</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>        <span class="k">error</span> <span class="s2">&quot;Unrecognized outbound message&quot;</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>      <span class="p">}</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>    <span class="p">}</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>    <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Translates inventory requests from Orders to Inventory&quot;</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>  <span class="p">}</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Note the operand order: <code>tell &lt;message&gt; to &lt;processor&gt;</code>, not the reverse.</p>
 <h2 id="the-isolation-seam">The Isolation Seam<a class="headerlink" href="#the-isolation-seam" title="Permanent link">&para;</a></h2>

@@ -5606,7 +5606,7 @@ models and enabling team collaboration.</p>
 <li><strong>Reuse definitions</strong>: Share common types or patterns across contexts</li>
 </ul>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">include</span> <span class="s2">&quot;path/to/file.riddl&quot;</span>
 </span></code></pre></div>
 <p>The path is relative to the file containing the include statement.</p>
@@ -5631,7 +5631,7 @@ to lose the file structure in exchange.</p>
 <h2 id="example-organizing-a-domain">Example: Organizing a Domain<a class="headerlink" href="#example-organizing-a-domain" title="Permanent link">&para;</a></h2>
 <p>A complex domain might be organized like this:</p>
 <p><strong>main.riddl</strong></p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">domain</span> <span class="n">ECommerce</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kn">include</span> <span class="s2">&quot;types/common-types.riddl&quot;</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kn">include</span> <span class="s2">&quot;contexts/catalog.riddl&quot;</span>

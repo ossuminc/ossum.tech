@@ -5953,7 +5953,7 @@ to organize large specifications into multiple files.</p>
 <p>Include statements are only permitted within container definitions. This
 prevents fragments of definitions from being separated across files.</p>
 <p>For example, this is allowed:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">domain</span> <span class="n">ThingAmaJig</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kn">include</span> <span class="s2">&quot;thingamajig/thing-context.riddl&quot;</span>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  <span class="kn">include</span> <span class="s2">&quot;thingamajig/ama-topic.riddl&quot;</span>
@@ -5981,7 +5981,7 @@ prevents fragments of definitions from being separated across files.</p>
 </span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>    └── fulfillment-context.riddl
 </span></code></pre></div>
 <p>With <code>main.riddl</code> containing:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">domain</span> <span class="n">OnlineRetail</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  <span class="kn">include</span> <span class="s2">&quot;catalog/catalog-context.riddl&quot;</span>
 </span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  <span class="kn">include</span> <span class="s2">&quot;shopping/shopping-context.riddl&quot;</span>

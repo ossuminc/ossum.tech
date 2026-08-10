@@ -5426,6 +5426,13 @@
 
   <h1>Projector</h1>
 
+<!-- riddl-domain-prelude
+context OrderContext is {
+  event OrderCompleted is { orderId is String, amount is Natural }
+  event OrderRefunded is { orderId is String, amount is Natural }
+}
+-->
+
 <p>Projectors get their name from
 <a href="https://en.wikipedia.org/wiki/Projection_(mathematics)">Euclidean Geometry</a>
 but are probably more analogous to a
@@ -5445,20 +5452,36 @@ rejected at <strong>parse</strong> time.</p>
 one job is to fold events into a read model; it does not accept commands, and
 it does not answer queries. Queries are served by the
 <a href="../repository/">repository</a> the projector <code>updates</code>.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">projector</span> <span class="n">SalesDashboard</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">SalesData</span>
+<!-- riddl: in-domain -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">context</span> <span class="n">Sales</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">record</span> <span class="n">SalesTotals</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">day</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">amount</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">handler</span> <span class="n">SalesEvents</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderCompleted</span> <span class="p">{</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      <span class="k">do</span> <span class="s2">&quot;Update daily sales totals with the order amount&quot;</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="p">}</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderRefunded</span> <span class="p">{</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="k">do</span> <span class="s2">&quot;Subtract the refund amount from daily totals&quot;</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="p">}</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  <span class="p">}</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">repository</span> <span class="n">SalesData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kr">schema</span> <span class="n">Totals</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span> <span class="n">totals</span> <span class="kp">as</span> <span class="kd">type</span> <span class="n">SalesTotals</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="p">}</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kd">projector</span> <span class="n">SalesDashboard</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="kd">record</span> <span class="n">DailySales</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">day</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">total</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">SalesData</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="kd">handler</span> <span class="n">SalesEvents</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderCompleted</span> <span class="p">{</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="k">do</span> <span class="s2">&quot;Update daily sales totals with the order amount&quot;</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>      <span class="p">}</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderRefunded</span> <span class="p">{</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="k">do</span> <span class="s2">&quot;Subtract the refund amount from daily totals&quot;</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>      <span class="p">}</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="p">}</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  <span class="p">}</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="p">}</span>
 </span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">A projector must define a record</p>
+<p><code>Projector 'X' lacks a required Record definition</code> is an <strong>Error</strong>. The
+record is the projection's shape — what the folded events produce — so a
+projector without one has nothing to project into.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Validation</p>
 <p><strong>Completeness Warnings:</strong></p>

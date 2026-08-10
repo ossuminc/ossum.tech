@@ -5626,6 +5626,12 @@
 
   <h1>Why is RIDDL Needed?</h1>
 
+<!-- riddl-prelude
+event OrderCreated is { id is String }
+command CreateOrder is { id is String }
+outlet Events is type OrderCreated
+-->
+
 <h2 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p>Software development has become increasingly complex. Modern systems are
 distributed, event-driven, and must operate at scale. Yet the gap between
@@ -5708,7 +5714,7 @@ contextually appropriate outputs for different platforms and purposes.</p>
 <li>Natural language descriptions guide implementation</li>
 <li>The <code>prompt</code> statement explicitly captures implementation intent</li>
 </ul>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">do</span> <span class="s2">&quot;Validate inventory availability for all items&quot;</span>

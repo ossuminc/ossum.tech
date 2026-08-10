@@ -5448,6 +5448,21 @@
 
   <h1>Function</h1>
 
+<!-- riddl-prelude
+type Price is Natural
+record TotalInputs is { subtotal is Price }
+record TaxInput is { subtotal is Price }
+function Tax is {
+  requires TaxInput returns Price
+  function Apply is { requires TaxInput returns Price ??? }
+}
+record PricingInput is { subtotal is Price, taxRate is Price }
+function Pricing is {
+  requires PricingInput returns Price
+  function CalculateTotal is { requires PricingInput returns Price ??? }
+}
+-->
+
 <p>A function definition provides a way to not repeat yourself in 
 other definitions. We can define functions in several places and then use 
 them in an expression or action. This way, we only need to define the logic 
@@ -5456,7 +5471,7 @@ for something once.</p>
 <p>A function's <code>requires</code> and <code>returns</code> may name an existing <a href="../type/">type</a>
 rather than spelling out an inline aggregation, which makes unary and nullary
 functions natural to write:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">function</span> <span class="n">CalculateTotal</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">requires</span> <span class="kd">record</span> <span class="n">TotalInputs</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">returns</span> <span class="n">Price</span>
@@ -5468,7 +5483,7 @@ functions natural to write:</p>
 <code>requires type Age</code> and <code>requires record Args</code> are all valid.</p>
 <div class="admonition warning">
 <p class="admonition-title">The inline aggregation form is deprecated</p>
-<p><!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<p><!-- riddl: skip reason="deliberate counter-example: the inline aggregation form emits [deprecated], which the gate treats as failure" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">requires</span> <span class="p">{</span> <span class="n">subtotal</span> <span class="kp">is</span> <span class="n">Price</span><span class="p">,</span> <span class="n">taxes</span> <span class="kp">is</span> <span class="n">Price</span> <span class="p">}</span>   <span class="c1">// still works</span>
 </span></code></pre></div>
 It continues to parse and validate but emits a <code>[deprecated]</code> message.
@@ -5485,7 +5500,7 @@ or another function — with no scope gate and no ordering concern.</p>
 <h2 id="calling-a-function">Calling a Function<a class="headerlink" href="#calling-a-function" title="Permanent link">&para;</a></h2>
 <p><code>call</code> is a <a href="../value/">value</a> expression rather than a bare statement, because
 a pure function's result would otherwise be discarded:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">grandTotal</span> <span class="kp">to</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Apply</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
 </span></code></pre></div>
