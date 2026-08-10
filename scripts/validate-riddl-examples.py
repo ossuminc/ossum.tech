@@ -47,6 +47,11 @@ same context, duplicate content names. Such a fence names what it owns:
     <!-- riddl: in-context no-prelude=Cart -->
     <!-- riddl: in-context no-prelude=Cart,Order -->
 
+This applies to BOTH preludes, by the same names: an in-domain fence that
+declares its own `context OrderContext` collides with a domain prelude
+supplying one exactly as a context-level fence collides with the page
+prelude.
+
 Only those entries are withheld; the rest of the page vocabulary still
 reaches the fence. A bare `no-prelude` withholds everything, which is
 rarely what you want -- a fence that defines `Cart` usually still needs the
@@ -72,7 +77,12 @@ FENCE = re.compile(
     r"^(?P<indent>[ \t]*)```+riddl[^\n]*\n(?P<body>.*?)^(?P=indent)```+",
     re.MULTILINE | re.DOTALL,
 )
-DIRECTIVE = re.compile(r"<!--\s*riddl:\s*(?P<what>[a-z-]+)(?P<rest>[^>]*)-->", re.IGNORECASE)
+# `rest` is non-greedy up to the comment close, NOT [^>]*: a reason mentioning
+# `>=` used to end the match early, so the whole directive stopped parsing and
+# the fence silently fell back to `standalone` -- a skip that quietly became a
+# validated fence. `.` excludes newlines here, so a directive still cannot span
+# lines.
+DIRECTIVE = re.compile(r"<!--\s*riddl:\s*(?P<what>[a-z-]+)(?P<rest>.*?)-->", re.IGNORECASE)
 PRELUDE = re.compile(r"<!--\s*riddl-prelude\s*\n(?P<body>.*?)-->", re.DOTALL | re.IGNORECASE)
 # Domain-level vocabulary is a SEPARATE declaration, not the same prelude at a
 # different depth: a `user` is legal only in a domain and a `record` only in a
@@ -93,9 +103,14 @@ ATTEMPTS = (
 )
 # The head of a top-level prelude entry: a keyword and the name it defines.
 PRELUDE_ENTRY = re.compile(
-    r"^\s*(?:entity|context|type|record|command|event|query|result|outlet|inlet"
+    # An optional intention/modifier prefix, so `application context Storefront`
+    # and `event-sourced entity Product` are recognised as defining Storefront
+    # and Product. Optional and backtracking, so a bare `record Foo` still
+    # matches with no prefix consumed.
+    r"^\s*(?:[a-z][a-z-]*\s+)?"
+    r"(?:entity|context|type|record|command|event|query|result|outlet|inlet"
     r"|function|repository|projector|saga|adaptor|streamlet|source|sink|flow"
-    r"|merge|split|router|connector|constant|invariant|handler"
+    r"|merge|split|router|connector|constant|invariant|handler|processor"
     # Group aliases. A prelude may legally define a page so that a statement
     # fence can `get from input X`, and such a page must be droppable when the
     # fence declares the same input itself.
@@ -363,9 +378,13 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    record ExampleData is { note is String, itemCount is Natural,\n"
             "      id is String, total is Natural, grandTotal is Natural,\n"
             "      balance is Natural, recommendation is String }\n"
+            "    record ExampleUser is { hasPermission is Boolean }\n"
+            # `count` but NOT `total`: a bare `total` already resolves through
+            # the state record, and adding a second one makes it ambiguous.
             "    command ExampleCommand is { note is String, cart is ExampleData,\n"
             "      order is ExampleOrder, orderId is String, amount is Natural,\n"
-            "      limits is ExampleLimit, rate is Natural, subtotal is Natural }\n"
+            "      limits is ExampleLimit, rate is Natural, subtotal is Natural,\n"
+            "      count is Natural, user is ExampleUser }\n"
             "    entity ExampleEntity is {\n"
             "      invariant BalanceNonNegative is \"the balance must not go negative\"\n"
             "      invariant UnderLimit requires ExampleLimit is \"must stay under the limit\"\n"
@@ -464,15 +483,20 @@ def main() -> int:
             kind, rest = directive_for(text, fm.start())
             # A fence that defines what the prelude also supplies must not
             # receive it, or the two collide as duplicate content names.
+            # It applies to BOTH preludes: an in-domain fence that declares its
+            # own `context OrderContext` collides with a domain prelude
+            # supplying one, exactly as a context-level fence collides with the
+            # page prelude. The page prelude is unused at domain depth and the
+            # domain prelude unused below it, so stripping both is unambiguous.
             np = NO_PRELUDE.search(rest)
             if not np:
-                fence_prelude = prelude
+                fence_prelude, fence_dom_prelude = prelude, dom_prelude
             elif np.group("names"):
-                fence_prelude = strip_from_prelude(
-                    prelude, set(np.group("names").split(","))
-                )
+                names = set(np.group("names").split(","))
+                fence_prelude = strip_from_prelude(prelude, names)
+                fence_dom_prelude = strip_from_prelude(dom_prelude, names)
             else:
-                fence_prelude = ""
+                fence_prelude = fence_dom_prelude = ""
             if auto and kind == "standalone":
                 kind = "auto"
             if kind == "skip":
@@ -486,11 +510,11 @@ def main() -> int:
                 # do not yet carry directives.
                 ok, detail = False, ""
                 for attempt in ATTEMPTS:
-                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude, dom_prelude))
+                    ok, detail = validate(riddlc, wrap(attempt, fm.group("body"), fence_prelude, fence_dom_prelude))
                     if ok:
                         break
             else:
-                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), fence_prelude, dom_prelude))
+                ok, detail = validate(riddlc, wrap(kind, fm.group("body"), fence_prelude, fence_dom_prelude))
             if not ok:
                 failed += 1
                 print(f"\nFAIL {md}:{line}  (riddl: {kind})")
