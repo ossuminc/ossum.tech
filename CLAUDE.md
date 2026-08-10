@@ -431,22 +431,22 @@ A fence that defines a name a prelude also supplies must say
 *measurement* mode for pages that do not yet carry directives — not a
 substitute for them.
 
-**The gate has a scope, and it is not "every page".** It takes files, not
-directories, and only pages carrying at least one `<!-- riddl: -->` directive
-are expected to be green — `guides/`, `migration/` and `tutorials/rbbq/` are
-not gated yet (BACKLOG 1b) and DO fail. Run the gate exactly like this, or a
-reported number cannot be compared with the last one:
+**The gate covers ALL of `sites/riddl/docs` as of 2026-08-10** — every page
+carrying at least one `<!-- riddl: -->` directive, which is now every page that
+has RIDDL in it. It takes files, not directories. Run it exactly like this, or
+a reported number cannot be compared with the last one:
 
 ```bash
 # 2.0 -- the gated set. In zsh ${(f)...} splits on newlines;
 # a bare $files does NOT split at all.
-files=(${(f)"$(grep -rl '<!-- riddl:' sites/riddl/docs/concepts \
-  sites/riddl/docs/references sites/riddl/docs/introduction \
-  sites/riddl/docs/quickstart.md --include='*.md' | sort)"})
+files=(${(f)"$(grep -rl '<!-- riddl:' sites/riddl/docs --include='*.md' | sort)"})
 python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
 
 # 1.31 -- same shape over sites/riddl-1x/docs, with the 1.31 compiler
 ```
+
+**Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
+gate reads green. Redirect to a file, check `$?`, then read the file.
 
 **Status** (2026-08-10): the gated set is **191 validated / 36 skipped / 0
 failed**, and **every blanket `"illustrative fragment"` skip is gone** — there
@@ -456,8 +456,12 @@ green. Every remaining skip states its own reason.
 
 Gating `language-reference.md` found seven wrong examples that review had not
 — including an adaptor that violated the isolation-seam rule warned about
-immediately below it. All are fixed. `guides/`, `migration/` and
-`tutorials/rbbq/` are still ungated (BACKLOG 1b).
+immediately below it. All are fixed.
+
+Across the whole 2.0 tree the gate is **251 validated / 122 skipped / 0
+failed**. 73 of those skips are `tutorials/rbbq/`, quoted verbatim from
+riddl-models, which is still 1.x — see BACKLOG 1c, and note that reason has
+NOT been verified fence by fence.
 
 **Wrapper vocabulary is only ever ADDED — and that rule covers fields, NOT
 enumerations.** An enumeration's enumerators join the enclosing namespace, so a
