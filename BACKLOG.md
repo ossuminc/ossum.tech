@@ -32,19 +32,38 @@ python3 scripts/validate-riddl-examples.py --auto ../bin/riddlc <page>.md
 ```
 Annotate the ones that place; write one page prelude for the rest.
 
-**Progress:** `statement.md`, `value.md` and `invariant.md` done (2026-08-09/10).
-Gate-wide: **108 validated / 107 skipped**, from 84/128 when 1a was filed.
-**118 blanket skips remain** — `language-reference.md` 44, `streamlet.md` 5,
-`state.md` 4, then `type`/`outlet`/`handler`/`function`/`conditional`/
-`application` at 3 each and a long tail of 1-2.
+**Progress:** `statement.md`, `value.md`, `invariant.md` (2026-08-09/10), then
+`streamlet.md`, `state.md`, `type.md`, `message.md`, `outlet.md` and
+`standard-module.md` (2026-08-10). Gate-wide: **129 validated / 97 skipped /
+0 failed**.
+
+**100 blanket skips remain** — `language-reference.md` 44,
+`migration/1.x-to-2.0.md` 6, `guides/authors/design/command-event-patterns.md`
+6, `ui-modeling.md` 3, then `handler`/`function`/`conditional`/`application`
+at 3 each and a long tail of 1-2.
+
+**The gate's scope is a file list, not a directory**, and it was not written
+down until now — the previous session's "108/107" could not be reproduced,
+and the numbers above come from a scope measured against the parent commit
+rather than carried forward. The exact command is in CLAUDE.md
+§ "Compiling RIDDL examples". Note that `migration/` and `guides/` sit
+OUTSIDE it and have 4 pre-existing failures: doing their blanket skips means
+entering 1b's territory, so leave them for last with `language-reference.md`.
 
 Do `language-reference.md` **last**: it is the bulk, and every page done so far
 has taught the shared wrappers a new piece of vocabulary that it will benefit
 from.
 
-**Every page so far has hidden real errors** — not one was merely unannotated.
-The count is 4 in `statement.md`, 1 in `value.md`, 4 in `invariant.md`, all
-found only by compiling. Budget for fixing content, not just adding directives.
+**Most pages hide real errors** — 4 in `statement.md`, 1 in `value.md`, 4 in
+`invariant.md`, 2 in `state.md`, 2 in `type.md`, 1 in `message.md`, all found
+only by compiling. `streamlet.md`, `outlet.md` and `standard-module.md` hid
+none, so it is not universal — but budget for fixing content, not just adding
+directives.
+
+**The errors cluster where a keyword changed in 2.0.** `query … yields result`
+was documented on the two pages whose fences were skipped and correct on the
+two that were gated. A page's prose does not stay true on its own; only
+compiling it keeps it true.
 
 **Two rules the first page established:**
 

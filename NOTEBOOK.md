@@ -14,38 +14,62 @@ to the task file and note completion in this notebook.
 ## HANDOFF — as of 2026-08-10
 
 **State (verified this session, not recalled):** branch `main`, tree clean,
-**0 commits ahead of `origin/main`**, HEAD `53cee2d`.
+**unpushed commits ahead of `origin/main`** — check with `git status` and push
+when ready. HEAD is the last of six 1a commits.
 
 **Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
 `With.Riddl.library` pin matches it exactly. Both checked by command. It is
 restaged often — re-check both and keep them equal, or the docs describe a
 grammar the examples were never validated against.
 
-**Gate, re-run this session:** 2.0 — **108 validated / 107 skipped / 0 failed,
+**Gate, re-run this session:** 2.0 — **129 validated / 97 skipped / 0 failed,
 exit 0**; 1.31 — 6/0/0.
+
+**The gate's scope is a FILE LIST, and it is now written down** in CLAUDE.md
+§ "Compiling RIDDL examples". It was not before, and the previous session's
+"108/107" could not be reproduced from any scope tried — so this session
+re-measured its own baseline against the parent commit instead of trusting a
+carried-forward number. Do the same if a figure ever fails to reproduce: the
+comparison is only meaningful within one scope.
 
 **`task/` is empty** (only `done/`). Nothing awaits triage here.
 
 ### In flight — BACKLOG 1a
 
-Retiring the blanket `"illustrative fragment"` skips. **118 remain.** Done:
-`statement.md`, `value.md`, `invariant.md`. Next by size: `streamlet.md` (5),
-`state.md` (4), then several 3s. **`language-reference.md` (44) last** — each
-page done teaches the shared wrappers vocabulary it will benefit from.
+Retiring the blanket `"illustrative fragment"` skips. **100 remain**, from 118.
+Done this session: `streamlet.md`, `state.md`, `type.md`, `message.md`,
+`outlet.md`, `standard-module.md`.
+
+Next: the remaining 3s in `concepts/` — `handler`, `function`, `conditional`,
+`application` — then the long tail of 1-2. **Leave for last:**
+`language-reference.md` (44), and `migration/` + `guides/` (15 between them),
+which sit **outside the gate scope** and carry 4 pre-existing failures — those
+are 1b's problem, so touching their skips drags 1b forward.
 
 Nothing is half-edited; every page is committed at a green gate.
 
-### Traps — all four already bit here
+### Traps
 
-- **Every page hides real errors** (4, 1, 4 so far), so this is content repair,
-  not annotation. Budget accordingly.
+- **Most pages hide real errors** — 13 found so far by compiling. Three pages
+  hid none, so it is not a law, but budget for content repair.
 - **Re-run the FULL gate after any wrapper edit**, never just the page in hand.
   Wrapper changes regressed other pages three times. Wrapper-internal names must
   keep the `Example` prefix: a record named `OrderData` collided with
   `language-reference.md`'s own prelude.
+- **A page prelude must be self-contained.** It must not name anything a
+  *fence* defines either, not just anything the wrapper defines — that breaks
+  every other fence on the page, with errors pointing at innocent lines.
+- **A fence naming an outlet cannot be fixed by a prelude.** An outlet lives in
+  a processor and a prelude lands at context level, so no statement wrapper can
+  reach one. Show the owning processor, or skip with a precise reason.
 - **`scratchpad/dump.py` ignores `no-prelude`**, so its output is not what the
   gate sees; a "duplicate name" error from it is an artifact. Get the gate's own
   error before diagnosing.
+- **The gate truncates diagnostics.** It prints the `[error]` position and
+  little else. To read the real message, re-wrap with `wrap()` (import the
+  script as a module, mirror the `no-prelude` logic) and run
+  `../bin/riddlc validate <file>` yourself. Note the subcommand takes a bare
+  path — there is no `--input-file` flag.
 - **Annotate fences by LINE NUMBER.** Matching on a fence's first line put two
   directives on one fence and left two bare — two fences both began
   `entity Account is {`.
@@ -53,11 +77,15 @@ Nothing is half-edited; every page is committed at a green gate.
 ### Certainty
 
 **Verified by command this session:** branch/push state, compiler version, pin
-agreement, both gates. **Verified by compiling, earlier this session:** every
-example in the pages changed, and the rc.10-57 `foreach` behaviour.
-**Assumed, not re-verified:** the 118 remaining blanket skips are the count as
-of the last edit; BACKLOG item 5's 18 site items were carried over as written
-and none was re-checked against the current site.
+agreement, both gates, `mkdocs build --strict` on `sites/riddl`. Every gate
+figure quoted above was measured, including the pre-change baselines.
+**Verified by compiling:** every example on the six pages changed; that an
+entity-level handler satisfies a state's handler requirement; that a query
+declares its response with `replies` and that `yields` on a query is an Error;
+that predefined types do not resolve as alternation members; that
+`BottomlessPit`/`ForeverEmpty` need no import.
+**Assumed, not re-verified:** BACKLOG item 5's 18 site items were carried over
+as written and none was re-checked against the current site.
 
 ### Pointers
 
@@ -68,6 +96,45 @@ Open work is **BACKLOG.md** — 1a is the live one. Durable facts are
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### BACKLOG 1a, second pass: 118 → 100 blanket skips ✅ **2026-08-10**
+
+Six pages gated: `streamlet`, `state`, `type`, `message`, `outlet`,
+`standard-module`. Gate 111/115 → 129/97, no failures at any point.
+
+**The gate had no written scope, and that mattered.** The inherited figure
+(108/107) could not be reproduced from any file set tried — directive-bearing
+pages, whole directories, several combinations. Rather than keep guessing, the
+session measured its own baseline by stashing the change and re-running the
+same command, then wrote the command into CLAUDE.md. A progress number is
+meaningless without the scope it was taken over, and "the gate" had been
+carried across three sessions as if it were one fixed thing.
+
+**The errors cluster where a keyword changed in 2.0.** `query GetOrder yields
+result OrderInfo` was documented on `type.md` and `message.md` — the two pages
+whose fences were blanket-skipped — and correctly as `replies` on
+`language-reference.md` and `cheat-sheet.md`, which are gated. Same repo, same
+day, two answers. The compiler names the rule outright when you actually run
+it: *"a Query declares its response with `replies`, not `yields`"*. Nobody had
+run it on those two pages, because the skip said not to.
+
+**Two failures looked identical and were opposite.** Both `state.md` fences
+died on `State 'X' has no handlers`. One was a genuinely invalid model. The
+other — `state ActiveOrder of record ActiveOrderData`, the page's example
+of an optional state body — was **correct**, and failed only because the
+`in-entity` wrapper carried its handler inside a state, so a bodyless state
+the fence added had none. A minimal model settled it in one run: an
+entity-level handler satisfies the check. Read the wrapper before believing
+the fence is wrong; BACKLOG's rule about a wrapper satisfying its own shape's
+checks earned its fourth confirmation.
+
+**A prelude cannot supply an outlet.** Preludes land at context level, outlets
+live in processors, and no statement wrapper carries one — so a fence reading
+`send … to outlet alerts` is unfixable by vocabulary. It was expanded to show
+the entity that owns the outlet, which is what the prose above it already
+claimed and the one-liner could not.
 
 ---
 

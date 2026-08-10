@@ -412,6 +412,23 @@ fragments reference but do not show.
 *measurement* mode for pages that do not yet carry directives — not a
 substitute for them.
 
+**The gate has a scope, and it is not "every page".** It takes files, not
+directories, and only pages carrying at least one `<!-- riddl: -->` directive
+are expected to be green — `guides/`, `migration/` and `tutorials/rbbq/` are
+not gated yet (BACKLOG 1b) and DO fail. Run the gate exactly like this, or a
+reported number cannot be compared with the last one:
+
+```bash
+# 2.0 -- the gated set. In zsh ${(f)...} splits on newlines;
+# a bare $files does NOT split at all.
+files=(${(f)"$(grep -rl '<!-- riddl:' sites/riddl/docs/concepts \
+  sites/riddl/docs/references sites/riddl/docs/introduction \
+  sites/riddl/docs/quickstart.md --include='*.md' | sort)"})
+python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
+
+# 1.31 -- same shape over sites/riddl-1x/docs, with the 1.31 compiler
+```
+
 **Status**: `quickstart.md` is fully annotated and validates clean on both
 branches. The ~50 concept pages are not yet annotated; with `--auto`, 99 of
 their 120 fences still fail, dominated by fragments that reference definitions
@@ -721,6 +738,7 @@ without CSS.
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
 | Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` |
+| Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
 | Deploy | push to `main`; CI loops over `docs-version.yml` |
 
