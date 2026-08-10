@@ -35,29 +35,55 @@ python3 scripts/validate-riddl-examples.py --auto ../bin/riddlc <page>.md
 Annotate the ones that place; write one page prelude for the rest.
 
 **Progress:** `concepts/` and `introduction/` are **done** — not one blanket
-skip remains in either. 24 pages gated across two sessions. Gate: **159
-validated / 67 skipped / 0 failed**, from 84/128 when 1a was filed.
+skip remains in either. `language-reference.md` has had a first slice: 23
+validated / 52 skipped → **35 / 40**. Gate-wide: **171 validated / 55 skipped
+/ 0 failed**, from 84/128 when 1a was filed.
 
-**61 blanket skips remain, and they are the hard ones:**
+**49 blanket skips remain:**
 
 | Where | Count | Note |
 |---|---|---|
-| `references/language-reference.md` | 44 | in scope, deliberately left last |
+| `references/language-reference.md` | 32 | in scope; see below |
 | `migration/1.x-to-2.0.md` | 6 | **outside the gate** — 1b territory |
 | `guides/authors/design/command-event-patterns.md` | 6 | outside the gate |
 | `guides/authors/design/ui-modeling.md` | 3 | outside the gate |
 | `guides/authors/index.md` | 2 | outside the gate |
 
-`language-reference.md` is the next and last in-scope page. It benefits most
-from the vocabulary the other 24 taught, which is why it waited. The other 17
-sit in trees the gate does not cover and that carry 4 pre-existing failures —
-doing them means starting 1b, so decide that deliberately rather than drifting
-into it.
+### What the remaining 32 need (measured, do not re-derive)
 
-**The gate's scope is a file list, not a directory**, and it was not written
-down until 2026-08-10 — the older "108/107" figure could not be reproduced.
-The exact command is in CLAUDE.md § "Compiling RIDDL examples". Compare
-numbers only within one scope.
+The page's prelude has been extended once and **compiles clean on its own** —
+probe it with `wrap("in-context", "type ProbeOnly is String", prelude)` before
+blaming a fence. What is left divides roughly into:
+
+- **Statement fences** (`send`/`tell`/`set`/`let`/`match`/`foreach`/`become`)
+  that want `in-handler`. The wrapper already supplies `order`, `cart` and
+  their fields; what they lack is page vocabulary — outlets, events, target
+  entities — some of which is now in the prelude and some not.
+- **Whole-context fences** (adaptor, projector, pipeline, application, epic)
+  that declare their own `context`. These want `in-domain` plus a
+  **`riddl-domain-prelude`** holding the sibling contexts they name
+  (`PaymentContext`, `OrderContext`, `Storefront`). The page has no domain
+  prelude yet; that is the single biggest lever left.
+- **Genuinely unskippable, needing a precise reason instead of the blanket
+  one:** the two `import "commerce.bast"` fences, and the
+  `on command DoIt from context Other` pair (two spellings of the same clause,
+  which cannot share a handler — same fence as `onclause.md`).
+- **Known content bugs to fix while there:** `button Checkout activates type
+  Boolean` (fifth page with that line), and the `version` fence whose
+  `entity Order` has no handler.
+
+**Two traps this page taught, both costly:**
+
+- **Never name a prelude entry `Tax`.** The `in-function` wrapper supplies a
+  sibling `context Tax`, so a prelude `function Tax` makes every `Tax.…` path
+  ambiguous and breaks the page's in-function fences. The prelude carries a
+  comment saying so.
+- **`annotate-riddl-examples.py` places a fence against the prelude AS IT
+  WAS.** Extending the prelude afterwards can invalidate earlier placements —
+  it silently invalidated 8. Annotate, then extend, then re-run the page.
+
+**The gate's scope is a file list, not a directory.** The exact command is in
+CLAUDE.md § "Compiling RIDDL examples". Compare numbers only within one scope.
 
 **Rules the work established** (each earned by a regression):
 

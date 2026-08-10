@@ -22,32 +22,31 @@ when ready. HEAD is the last of six 1a commits.
 restaged often — re-check both and keep them equal, or the docs describe a
 grammar the examples were never validated against.
 
-**Gate, re-run this session:** 2.0 — **159 validated / 67 skipped / 0 failed,
+**Gate, re-run this session:** 2.0 — **171 validated / 55 skipped / 0 failed,
 exit 0**; 1.31 — 6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
 
 **The gate's scope is a FILE LIST, and it is now written down** in CLAUDE.md
-§ "Compiling RIDDL examples". It was not before, and the previous session's
-"108/107" could not be reproduced from any scope tried — so this session
-re-measured its own baseline against the parent commit instead of trusting a
-carried-forward number. Do the same if a figure ever fails to reproduce: the
-comparison is only meaningful within one scope.
+§ "Compiling RIDDL examples". Compare a figure only against one taken over the
+same scope; if one fails to reproduce, re-measure the baseline against the
+parent commit rather than trusting it.
 
 **`task/` is empty** (only `done/`). Nothing awaits triage here.
 
 ### In flight — BACKLOG 1a
 
-Retiring the blanket `"illustrative fragment"` skips. **61 remain**, from 118
-at the start of the session. **`concepts/` and `introduction/` are
-finished** — not one blanket skip left in either.
+**49 blanket skips remain**, from 118 at the start of the session.
+`concepts/` and `introduction/` are **finished**. `language-reference.md` has
+had a first slice (23/52 → 35/40, 12 retired); its remaining **32 are restored
+verbatim**, so the page is green and the work is still tracked.
 
-What remains splits in two, and the split matters:
+**BACKLOG 1a now carries the measured analysis of those 32** — which want
+`in-handler`, which want `in-domain` plus a domain prelude the page does not
+yet have, which are genuinely unskippable, and which hide known content bugs.
+Read it before touching the page; it cost a full pass to derive.
 
-- **`references/language-reference.md` (44)** — in scope, and the last such
-  page. Left deliberately for last: every page done so far taught the shared
-  wrappers vocabulary it will benefit from.
-- **`migration/` and `guides/` (17)** — **outside the gate scope**, and those
-  trees carry 4 pre-existing failures. Touching them starts BACKLOG 1b. Decide
-  that deliberately; do not drift into it.
+The other 17 sit in `migration/` and `guides/`, **outside the gate scope**,
+whose trees carry 4 pre-existing failures. Starting them starts BACKLOG 1b —
+decide that deliberately.
 
 Nothing is half-edited; every page is committed at a green gate.
 
@@ -62,6 +61,14 @@ Nothing is half-edited; every page is committed at a green gate.
 - **A page prelude must be self-contained.** It must not name anything a
   *fence* defines either, not just anything the wrapper defines — that breaks
   every other fence on the page, with errors pointing at innocent lines.
+- **Never name a prelude entry `Tax`.** The `in-function` wrapper supplies a
+  sibling `context Tax`; a prelude `function Tax` makes every `Tax.…` path
+  ambiguous and breaks that page's in-function fences. The known rule was the
+  mirror image — wrapper names colliding with prelude names — the same wall
+  from the other side.
+- **`annotate-riddl-examples.py` places a fence against the prelude AS IT
+  WAS**, so extending the prelude afterwards can invalidate earlier
+  placements. It silently invalidated 8 on `language-reference.md`.
 - **A context-level prelude cannot supply a sibling context**, and contexts do
   NOT nest (verified rc.10-57). A fence naming `Other.SomeEvent` must either
   show its enclosing context (making it `in-domain`, which reads the
@@ -108,6 +115,31 @@ Open work is **BACKLOG.md** — 1a is the live one. Durable facts are
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### BACKLOG 1a, pass 4: language-reference.md, first slice ✅ **2026-08-10**
+
+12 of its 44 blanket skips retired (page 23/52 → 35/40); the other 32 restored
+verbatim so the gate stays green. Gate-wide 159/67 → 171/55.
+
+**The tooling was lying about what was possible.** `annotate-riddl-examples.py`
+kept its own copy of the wrapper list — its header comment claims to keep ONE
+definition — and that copy had drifted: it never offered `in-app-context`,
+`in-group`, `in-app-clauses` or the epic wrappers. So "no wrapper fits" partly
+meant "this list is old". It now imports `ATTEMPTS` from the validator.
+
+**The prelude/wrapper collision has two directions, and only one was written
+down.** The known rule was that wrapper-internal names keep an `Example`
+prefix so they cannot collide with a page prelude. The reverse bit here: the
+`in-function` wrapper legitimately supplies a sibling `context Tax`, so adding
+`function Tax` to the page prelude made every `Tax.…` path ambiguous and broke
+fences that had nothing to do with the edit.
+
+**Order of operations matters with a generated annotation.** Annotate places
+each fence against the prelude as it stands. Extending the prelude afterwards
+invalidated 8 placements from the first pass, and the failures surfaced far
+from the edit. Annotate, extend, then re-run the whole page.
 
 ---
 
