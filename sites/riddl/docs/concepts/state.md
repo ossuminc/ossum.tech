@@ -3,6 +3,24 @@ title: "States"
 draft: false
 ---
 
+<!-- riddl-prelude
+constant Zero is Natural = "0"
+record ActiveOrderData is { total is Natural }
+record PendingData is { note is String }
+record ActiveData is { note is String }
+record ShippedData is { trackingNumber is String }
+command CancelOrder is { orderId is String }
+command ShipOrder is { trackingNumber is String }
+entity Order is {
+  initial state Pending of record PendingData is {
+    handler PendingHandler is { on command CancelOrder { ??? } }
+  }
+  state Shipped of record ShippedData is {
+    handler ShippedHandler is { on command ShipOrder { ??? } }
+  }
+}
+-->
+
 A State defines a named state of an [entity](entity.md). It
 references a **record** that defines the data structure
 for the state, and optionally contains
@@ -29,7 +47,7 @@ are active.
 
 ### Syntax
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 initial state ActiveOrder of record ActiveOrderData is {
   invariant TotalIsPositive is total > Zero
@@ -43,21 +61,30 @@ initial state ActiveOrder of record ActiveOrderData is {
 
 The state body is optional — a state can also be defined simply as:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 state ActiveOrder of record ActiveOrderData
 ```
+
+!!! warning "Every state must have a handler somewhere"
+    `State 'X' in Entity 'Y' has no handlers` is an **Error**, so a state
+    with no body is only valid when the *entity* declares a handler that
+    covers it. Handlers may sit at either level, and an entity may carry
+    both: a state-scoped handler for behavior that differs by state, and an
+    entity-level handler for behavior that does not.
 
 ## The `initial` Marker
 
 An optional `initial` keyword marks the entity's starting state:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Order -->
 ```riddl
 entity Order is {
   initial state Pending of record PendingData is { ??? }
   state Active  of record ActiveData  is { ??? }
   state Shipped of record ShippedData is { ??? }
+
+  handler OrderLifecycle is { on command CancelOrder { ??? } }
 }
 ```
 
@@ -81,7 +108,7 @@ The `morph` statement transitions an entity from one state to another,
 changing which handlers are active. Its payload is a **record** — the new
 state's data — not the message that triggered the transition:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 ```riddl
 on ship: command ShipOrder {
   morph entity Order to state Order.Shipped

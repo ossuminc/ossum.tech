@@ -349,6 +349,12 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # The entity carries a state WITH a handler: an entity having neither
         # is an Error, so a fence contributing only (say) invariants would fail
         # for the wrapper's shape rather than for anything the fence wrote.
+        # It ALSO carries an entity-level handler, because "State 'X' has no
+        # handlers" is an Error and a fence may legitimately contribute a
+        # bodyless `state X of record R` -- which is valid RIDDL exactly when
+        # the entity handles messages itself. Without this the wrapper failed
+        # such a fence for its own shape. The two handlers may both handle the
+        # same command; verified against rc.10-57.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
             "    record ExampleEntityData is { note is String, balance is Natural,\n"
@@ -359,6 +365,9 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "        handler ExampleEntityHandler is {\n"
             "          on command ExampleEntityCommand { ??? }\n"
             "        }\n      }\n"
+            "      handler ExampleEntityLifecycle is {\n"
+            "        on command ExampleEntityCommand { ??? }\n"
+            "      }\n"
             "    }\n  }\n}\n"
         )
     if kind == "in-context":
