@@ -3,6 +3,29 @@ title: "Command-Event Patterns"
 description: "Alternatives and recommendations for command handler messages"
 ---
 
+<!-- riddl-prelude
+    type OrganizationId is UUID
+    type OrgId is UUID
+    type MemberId is UUID
+    type Address is String
+    record Info is {
+      name: String,
+      address: Address?,
+      isPrivate: Boolean
+    }
+    record Contacts is {
+      primaryContacts: MemberId+,
+      billingContacts: MemberId*,
+      distributionContacts: MemberId*
+    }
+    event MemberAdded is { orgId: OrgId, memberId: MemberId }
+    command AddMember yields event MemberAdded is {
+      orgId: OrgId,
+      memberId: MemberId
+    }
+-->
+
+
 # Command-Event Patterns
 
 This guide covers design patterns for structuring commands and their
@@ -22,7 +45,7 @@ For background on messages, see the [Message concept](../../../concepts/message.
 Whichever pattern you choose below, RIDDL 2.0 lets you state the
 command→event pairing **declaratively** with a `yields` clause:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=AddMember -->
 ```riddl
 command AddMember yields event MemberAdded is {
   orgId: OrgId,
@@ -44,7 +67,7 @@ an existing model never breaks the parts you have not annotated yet.
 
 The corresponding statement is `yield`:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 ```riddl
 on cmd: command AddMember {
   yield event MemberAdded(orgId = cmd.orgId, memberId = cmd.memberId)
@@ -79,13 +102,20 @@ constraints.
 
 Throughout this guide, we'll use this Organization entity:
 
+<!-- riddl: in-context no-prelude=Info,Contacts -->
 ```riddl
 entity Organization is {
-  state Active is {
-    info: Info,
-    members: MemberId*,
-    contacts: Contacts
+  state Active of record OrganizationState is {
+    handler OrganizationHandler is {
+      on command AddMembers { ??? }
+    }
   }
+}
+
+record OrganizationState is {
+  info: Info,
+  members: MemberId*,
+  contacts: Contacts
 }
 
 type Info is {
@@ -110,7 +140,7 @@ command ModifyContacts is { orgId: OrganizationId, contacts: Contacts }
 
 **Question:** Should all commands on an entity yield the same event?
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 event OrganizationModified is {
   id: OrganizationId,
@@ -141,7 +171,7 @@ event OrganizationModified is {
 
 **Question:** Should each command have its own event containing the full entity?
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 event OrganizationEstablished is {
   id: OrganizationId,
@@ -188,7 +218,7 @@ modification events.
 
 **Question:** Should modification events use optional versions of types?
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 type InfoUpdate is {
   name: String?,
@@ -238,7 +268,7 @@ event OrganizationContactsModified is {
 
 **Question:** Should events contain only the changed fields directly?
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 event OrganizationMembersModified is {
   id: OrganizationId,
@@ -284,6 +314,7 @@ event PrimaryContactsRemoved is {
 
 Document this decision clearly:
 
+<!-- riddl: in-context -->
 ```riddl
 event MembersAdded is {
   id: OrganizationId,

@@ -7,6 +7,24 @@ description: "Using RIDDL to design user interfaces with Epics and Applications"
 
 <!-- riddl-prelude
   result OrderDetails is { total: Currency(USD) }
+    // For the checkout handler fence: what it reads, tells and shows.
+    type PaymentInfo is String
+    type ReceiptData is String
+    record ChargeData is { note is String }
+    command SubmitPayment is { note is String }
+    command Charge is { note is String }
+-->
+
+<!-- riddl-domain-prelude
+    // The checkout fence declares its own application context, so what it
+    // reaches for must sit at domain level, not in the page prelude.
+    type PaymentInfo is String
+    type ReceiptData is String
+    command SubmitPayment is { note is String }
+    command Charge is { note is String }
+    context Billing is {
+      command BillingCharge is { note is String }
+    }
 -->
 
 RIDDL provides two main constructs for modeling user interfaces:
@@ -268,7 +286,7 @@ is what makes "the application boundary" a thing the validator can locate.
 An application handler reads an input's value and publishes to an output with
 two statements added in RIDDL 2.0:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 application context StoreFront is {
   page Checkout is {
@@ -306,7 +324,7 @@ them is checked.
     Enumeration or Alternation draws a **StyleWarning**. A selection widget
     should choose among options:
 
-    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+    <!-- riddl: skip reason="two depths in one fence -- a context-level type above group-level widgets -- and the second widget is a deliberate counter-example marked StyleWarning" -->
     ```riddl
     type Country is any of { US, CA, MX, UK }
 
@@ -328,7 +346,7 @@ Beyond `shown by`, a UI definition may carry a structured
 [figma reference](../../../concepts/metadata.md#figma-references) resolving to
 one specific frame:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 ```riddl
 page Checkout is { ??? } with {
   figma "aBcD1234" node "42:1337"

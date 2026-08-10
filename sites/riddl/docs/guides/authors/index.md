@@ -29,6 +29,27 @@ weight: 5
   command RefundPayment is { note is String }
   command CreateOrder is { note is String }
   command CancelOrder is { note is String }
+    type CategoryId is UUID
+-->
+
+<!-- riddl-domain-prelude
+    // A domain may hold type definitions, and in-domain fences never see the
+    // page prelude -- so anything they reach for must be repeated here.
+    type CategoryId is UUID
+
+    // `Id(X)` requires X to be an ENTITY, and an entity may only live in a
+    // context -- so this sits in a sibling context, where a bare `Product`
+    // still resolves. The page declares `entity Product` further down; this
+    // makes the name reachable from the types fence above it.
+    context Inventory is {
+      record ProductListing is { name is String }
+      command ListProduct is { name is String }
+      entity Product is {
+        state Listed of record ProductListing is {
+          handler ProductHandler is { on command ListProduct { ??? } }
+        }
+      }
+    }
 -->
 
 
@@ -137,7 +158,7 @@ domain OnlineRetail is {
 Types define the shape of information in your model. Start with the core
 concepts in your domain—the "nouns" of your ubiquitous language.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 context Catalog is {
   type ProductId is Id(Product) with {
@@ -151,7 +172,7 @@ context Catalog is {
     briefly "Monetary amount with currency"
   }
 
-  type Product is {
+  type ProductInfo is {
     id is ProductId,
     name is String(1,200),
     description is String,
@@ -170,7 +191,7 @@ Entities are the heart of your model. They represent things with identity
 that persist over time and respond to messages. Each entity should model
 a single business concept.
 
-<!-- riddl: in-domain -->
+<!-- riddl: in-domain no-prelude=CategoryId -->
 ```riddl
 context Catalog is {
   type Money is Currency(USD)
@@ -220,6 +241,8 @@ context Catalog is {
         on command UpdatePrice {
           when prompt("price is different from current") then {
             yield event PriceUpdated
+          } else {
+            error "the new price matches the current price"
           } end
         }
 
@@ -398,7 +421,7 @@ entity Order is {
 
 For large models, split content across multiple files:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="the included files do not exist; nothing on disk can satisfy an include" -->
 ```riddl
 // main.riddl
 domain OnlineRetail is {
