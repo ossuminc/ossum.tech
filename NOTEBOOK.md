@@ -13,10 +13,10 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-08
 
-**State:** branch `main`, clean. Through `aa33647` is pushed; the rc.10-46
-upgrade on top of it is committed and **not yet pushed**.
+**State:** branch `main`, clean. Everything through the rc.10-57 upgrade is
+committed; **not yet pushed**.
 
-**Compiler: `../bin/riddlc` is `2.0.0-rc.10-46-286ef815`** — run `riddlc
+**Compiler: `../bin/riddlc` is `2.0.0-rc.10-57-e012ebb9`** — run `riddlc
 version`, it is restaged often. `build.sbt`'s `With.Riddl.library` pin must
 name the SAME version, or the docs describe a grammar the examples were never
 checked against.
@@ -34,7 +34,19 @@ looked successful. CLAUDE.md § "Things that will bite" has the recipe.
 ### What is now true
 
 `concepts/`, `quickstart.md` and `references/language-reference.md` are **fully
-gated** — 84 fences validated, 128 skipped, 0 failed, exit 0, against rc.10-46.
+gated** — 95 fences validated, 120 skipped, 0 failed, exit 0, against rc.10-57.
+
+**rc.10-57 fixed `foreach`:** the element is now bound over the loop body (and
+carries its TYPE, so `line.nosuch` is still an Error), and any resolvable path
+that lands on a collection iterates — `order.lines` works. `foreach k, v`
+destructures a mapping, arity checked both ways. Recorded as items 66-68 in
+`../RIDDL-Tools-To-Do-List.md` Part A.
+
+**Two upgrades running, two silent passes exposed.** rc.10-46's
+interaction-group fix broke `use-case.md`; rc.10-57's mapping value-type
+resolution broke `type.md`, which named a `DictionaryEntry` that never existed.
+**Expect an upgrade that closes a resolver gap to turn green fences red — that
+is the gap being closed, not a regression.**
 
 **rc.10-46 split `yield` and `reply`:** a command `yields`/`yield`s an EVENT, a
 query `replies`/`reply`s a RESULT, `yield result` is an Error, and `reply` is
