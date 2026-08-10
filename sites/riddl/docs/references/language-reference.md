@@ -105,6 +105,13 @@ description: >-
       }
       handler ShippedHandler is { on command ShipOrder { ??? } }
     }
+    // The match statement needs a CLOSED subject for its type-cases. This
+    // lives here, not in the shared wrapper: an enumeration's enumerators
+    // join the enclosing namespace, so a wrapper-level `Shipped` collides
+    // with any page that names a state `Shipped` -- statement.md does.
+    type ShipmentState is any of { Pending, Shipped, Delivered }
+    constant orderStatus is ShipmentState = "Pending"
+
     // Endpoints for the `connector` fence that discards an unused outlet.
     processor MyProcessor as source is { outlet Unused is type OrderEvent }
     processor BottomlessPit as sink is { inlet hole is type OrderEvent }
@@ -138,7 +145,23 @@ description: >-
       page ProductDetails is {
         form AddToCartForm submits type StorefrontData
       }
+      page ShoppingCart is {
+        list CartSummary shows type StorefrontData
+      }
     }
+    // Self-contained on purpose: a fence may strip Storefront with
+    // no-prelude, so nothing outside it may depend on StorefrontData.
+    context Shopping is {
+      record ShoppingCartData is { sku is String }
+      command AddToCart is { sku is String }
+      entity Cart is {
+        state Filling of record ShoppingCartData is {
+          handler CartHandler is { on command AddToCart { ??? } }
+        }
+      }
+    }
+    // A projector `updates` a repository, and a domain body may hold one.
+    repository SalesData is { ??? }
 -->
 
 
@@ -1187,7 +1210,7 @@ needs a value, it accepts any of these forms:
 |------|--------|---------|
 | Literal | `"some text"` | Opaque pseudo-code or a literal constant |
 | Value reference | `order.total` | A named field, state field, function input, or `let` local |
-| Constructor | `OrderPlaced(id = x, total)` | Builds a message or record |
+| Constructor | `OrderPlaced(total, id = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
@@ -1198,9 +1221,9 @@ needs a value, it accepts any of these forms:
 A constructor builds a message or a record inline. Arguments are positional
 first, then named:
 
-<!-- riddl: skip reason="page shows OrderPlaced with two different field sets; this one adds `currency`, while the `yield event OrderPlaced(id, total)` fence does not -- a page prelude can supply only one shape" -->
+<!-- riddl: in-handler -->
 ```riddl
-yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
+yield event OrderPlaced(orderId, total = cart.total)
 ```
 
 An **empty** argument list is an arity of zero and must match like any other,
@@ -1475,21 +1498,32 @@ when authorized then {
 Pattern matching over a typed subject. The subject is a value reference, a
 `get from`, or a legacy pseudo-code literal:
 
-<!-- riddl: skip reason="matches a String-typed `status` against type-cases and a numeric `>=` threshold; the subject would have to be an enumerated type, which conflicts with the `set field status` fence" -->
+<!-- riddl: in-handler -->
 ```riddl
-match order.status {
+match orderStatus {
   case Pending {
     tell event OrderPending to entity Order
   }
   case Shipped when order.isPaid {
     tell event OrderShipped to entity Order
   }
+  default {
+    error "Unknown order state"
+  }
+}
+```
+
+A comparison case needs a **numeric** subject, so it belongs to a different
+match than the one above — the subject's type decides which case forms are
+legal on it:
+
+<!-- riddl: in-handler -->
+```riddl
+match order.total {
   case >= HighValueThreshold {
     tell command EscalateReview to entity Review
   }
-  default {
-    error "Unknown order status"
-  }
+  default { do "no escalation needed" }
 }
 ```
 
@@ -1843,9 +1877,12 @@ Adaptors specify a direction relative to a context:
 
 ### Example
 
-<!-- riddl: skip reason="the adaptor emits `OrderPaymentReceived`, which belongs to neither its parent nor its referent context, so 2.0 rejects it as crossing the adaptor's isolation seam" -->
+<!-- riddl: in-domain no-prelude=OrderContext -->
 ```riddl
 context OrderContext is {
+  event OrderPaymentReceived is { orderId is UUID }
+  outlet OrderEvents is type OrderPaymentReceived
+
   adaptor PaymentIntegration from context PaymentContext is {
     handler InboundPayments is {
       on evt: event PaymentContext.PaymentCompleted {
@@ -1887,10 +1924,11 @@ model (projections).
 
 ### Example
 
-<!-- riddl: skip reason="a 2.0 projector requires a record definition, and this one has none" -->
+<!-- riddl: in-domain -->
 ```riddl
 context ReportingContext is {
   projector SalesDashboard is {
+    record DailySales is { day is Date, total is Decimal(10, 2) }
     updates repository SalesData
 
     handler SalesEventHandler is {
@@ -2090,26 +2128,34 @@ module is never added to your model's contents.
 RIDDL supports UI modeling. **UI may only be modeled inside an `application`
 context.**
 
-<!-- riddl: skip reason="`button ... activates type Boolean` is not valid 2.0; a known content bug shared with four other pages" -->
+<!-- riddl: in-domain no-prelude=Storefront -->
 ```riddl
 application context Storefront is {
+  command PlaceOrder is { cartId is UUID }
+  record PaymentDetails is { cardToken is String, amount is Decimal(10, 2) }
+
   page ProductDetails is { ??? } with {
     briefly as "Page showing product information"
   }
 
   page ShoppingCart is {
-    button Checkout activates type Boolean with {
+    button Checkout activates command PlaceOrder with {
       briefly as "Checkout button to proceed to payment"
     }
   }
 
   page Payment is {
-    form PaymentEntry submits type PaymentDetails
+    form PaymentEntry submits record PaymentDetails
   }
 } with {
   briefly as "User interface components for the system"
 }
 ```
+
+An input element always names a **defined** type — a command it triggers, or a
+record it submits. A predefined type such as `Boolean` will not do: the
+reference is resolved against the model, and predefined types are not
+definitions in it.
 
 ### Element Aliases
 
@@ -2142,7 +2188,7 @@ application context Storefront is {
 
 Epics model user stories:
 
-<!-- riddl: skip reason="its steps name `Storefront.AddToCartForm` and `Storefront.CartSummary` as direct children of the context, but the page's own application fence puts forms inside pages" -->
+<!-- riddl: in-domain -->
 ```riddl
 epic ShoppingCartEpic is {
   user Customer wants to "add items to a shopping cart"
@@ -2153,15 +2199,21 @@ epic ShoppingCartEpic is {
     so that "they can purchase them later"
 
     step focus user Customer on page Storefront.ProductDetails
-    step take input Storefront.AddToCartForm from user Customer
-    step send command AddToCart from user Customer to entity Cart
-    step show output Storefront.CartSummary to user Customer
+    step take input Storefront.ProductDetails.AddToCartForm from user Customer
+    step send command AddToCart from context Storefront to entity Cart
+    step show output Storefront.ShoppingCart.CartSummary to user Customer
     step entity Cart refuses user Customer "the item is out of stock"
   } with {
     briefly as "Adding products to the shopping cart"
   }
 }
 ```
+
+Two rules shape those steps. Inputs and outputs are **group** contents, so a
+step names the page that holds them, not the context directly. And a user may
+only interact at the **application boundary**: the command travels from
+`context Storefront` to the entity, not from the user to the entity. Routing a
+user's command straight at an entity is an Error.
 
 ### User Story Verbs
 
@@ -2276,14 +2328,18 @@ exactly as if it had been written there by hand. An illegal placement is an
 A `version` declares a component of a scope's version coordinate. It is either a
 name or a natural number, never both:
 
-<!-- riddl: skip reason="its `entity Order` has no handler and no state, which 2.0 rejects; the fence is about `version`, not about entities" -->
 ```riddl
 domain Garibaldi is {
   version Garibaldi
   context Ordering is {
     version 4
+    command Reorder is { orderId is UUID }
+    record OrderState is { status is String }
     entity Order is {
       version 3
+      state Open of record OrderState is {
+        handler OrderHandler is { on command Reorder { ??? } }
+      }
     }
   }
 }
