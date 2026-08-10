@@ -11,81 +11,121 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-10
+## HANDOFF — as of 2026-08-10 (late)
 
 **All figures below were run in this session, not recalled.**
 
-**State:** branch `main`, tree clean, **0 commits ahead of `origin/main`**,
-HEAD `e446a20`. Everything is pushed; CI has deployed from it.
+**State:** branch `main`, tree clean, **2 commits ahead of `origin/main`** —
+`c52287c` (validator fixes) and `faa4cbe` (the page). Not yet pushed.
 
 **Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-57-e012ebb9`** and `build.sbt`'s
-`With.Riddl.library` pin matches exactly. The Homebrew `riddlc` on PATH is
-**2.0.0-rc.5** and is the WRONG compiler for the 2.0 docs. riddlc is restaged
-often — re-check the binary against the pin at session start.
+pin matches exactly. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** and is the
+WRONG compiler for the 2.0 docs. Re-check the binary against the pin at session
+start; it is restaged often.
 
-**Gates:** 2.0 — **171 validated / 55 skipped / 0 failed, exit 0**; 1.31 —
-6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
+**Gates:** 2.0 — **183 validated / 43 skipped / 0 failed, exit 0** (was
+171/55); 1.31 — 6/0/0. `mkdocs build --strict` on `sites/riddl` clean.
 
 **`task/` holds only `done/`.** Nothing awaits triage.
 
-### In flight — BACKLOG 1a
+### BACKLOG 1a is DONE
 
-Retiring the blanket `"illustrative fragment"` skips. **49 remain**, from 118
-at session start. `concepts/` and `introduction/` are **finished**.
+**Not one blanket `"illustrative fragment"` skip remains in
+`sites/riddl/docs`** — 118 at the start of the work, 0 now. The 20 skips left
+on `language-reference.md` each state their own reason.
 
-`references/language-reference.md` is **half-done and is where to resume**: 12
-of its 44 retired (page 23/52 → 35/40), and **the other 32 were restored
-verbatim** so the page is green. That restore is deliberate, not abandoned
-work — the gate must never be left red.
+**Next is BACKLOG 1a-followup**, which is the subset of those reasons that mean
+*the example is wrong*: `OrderPlaced` shown with two different field sets on
+one page, epic steps whose paths contradict the page's own application fence,
+an adaptor that crosses its isolation seam, a projector with no record. All
+were read off real riddlc diagnostics — do not re-derive them.
 
-**BACKLOG 1a carries the measured analysis of those 32** — which want
-`in-handler`, which want `in-domain` plus a domain prelude the page still
-lacks, which are genuinely unskippable, and which hide known content bugs.
-Read it first; it cost a full pass to derive.
-
-The other 17 sit in `migration/` and `guides/`, **outside the gate scope**,
-in trees carrying 4 pre-existing failures. Starting them starts BACKLOG 1b.
+The remaining 17 blanket skips site-wide are in `migration/` and `guides/`,
+outside the gate, and are now folded into BACKLOG 1b.
 
 ### Traps
 
 - **The gate's scope is a FILE LIST, not a directory** — exact command in
   CLAUDE.md § "Compiling RIDDL examples". A figure is only comparable within
-  one scope; if one fails to reproduce, re-measure against the parent commit
-  rather than trusting it. That is why the inherited "108/107" was discarded.
+  one scope.
 - **The gate truncates diagnostics** to a position. For the real message,
-  import the script as a module, re-wrap with `wrap()` (mirroring any
-  `no-prelude`), and run `../bin/riddlc validate <file>` — a bare path, there
-  is no `--input-file` flag.
-- **Re-run the FULL gate after any wrapper or script edit.** Wrapper changes
-  have regressed unrelated pages four times.
-- **`annotate-riddl-examples.py` places a fence against the prelude AS IT
-  WAS.** Extending the prelude afterwards silently invalidated 8 placements.
+  import the script as a module, re-wrap with `wrap()`, and run
+  `../bin/riddlc validate <file>` — a bare path, there is no `--input-file`.
+- **A diagnostic filter that watches only `[error]`/`[severe]` will lie to
+  you.** The gate also fails on `[deprecated]`, so a hand-rolled probe called
+  a fence clean that the gate then rejected. Filter exactly as the gate does.
+- **Re-run the FULL gate after any wrapper or script edit**, and the 1.31 gate
+  too — a script change is not scoped to one tree. Wrapper changes have
+  regressed unrelated pages five times now.
+- **Extending a prelude regresses fences that were already green.** Adding
+  `currency` to `OrderPlaced` broke a fence in a different section; adding a
+  domain-level `Storefront` broke two more. Re-run the whole page after every
+  prelude edit, not just the fence in hand.
 - **Prelude/wrapper name collisions run both ways.** Wrapper names keep an
-  `Example` prefix; equally, a prelude must not take a name a wrapper supplies
-  — `function Tax` broke every in-function fence on its own page.
-- **Annotate fences by LINE NUMBER**, never by matching a fence's first line.
+  `Example` prefix; equally a prelude must not take a name a wrapper supplies.
+- **Annotate fences by LINE NUMBER**, never by matching a fence's first line —
+  and check the match is unique before writing, since several fences on this
+  page share an opening line.
 
 ### Certainty
 
 **Verified by command this session:** git state, both compiler versions, the
-pin, both gates, the strict build, that `task/` is empty, and that no
-unexecuted plan in `~/.claude/plans/` holds open work for this repo.
+pin, both gates, the strict build, that `task/` is empty, and that zero blanket
+skips remain.
 
-**Verified by compiling:** every example on the 25 pages changed, plus the
-rules recorded in BACKLOG 1a and in the pass entries below.
+**Verified by compiling:** every fence on `language-reference.md`, and every
+claim in BACKLOG 1a-followup.
 
-**Assumed, not re-verified:** BACKLOG item 5's 18 site items were carried over
-as written and none was re-checked against the current site. The gh-pages
-deploy triggered by the last push was not inspected.
+**Assumed, not re-verified:** BACKLOG item 5's 18 site items. The gh-pages
+deploy state — nothing has been pushed this session.
 
 ### Pointers
 
-Open work is **BACKLOG.md** — 1a is live. Durable facts are **CLAUDE.md**,
-notably § "Things that will bite" and § "Compiling RIDDL examples".
+Open work is **BACKLOG.md** — 1a-followup is live. Durable facts are
+**CLAUDE.md**, notably § "Things that will bite" and § "Compiling RIDDL
+examples".
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 The sections below are kept as the record of how the current state was reached.
+
+---
+
+### BACKLOG 1a, final pass: language-reference.md done ✅ **2026-08-10**
+
+The last 32 blanket skips retired; page 35/40 → 47/28, gate 171/55 → 183/43.
+1a is complete.
+
+**The harness was hiding work behind "no wrapper fits" — four separate ways.**
+The pattern from pass 4 (annotate kept a stale copy of the wrapper list)
+turned out not to be a one-off:
+
+- `no-prelude` reached only the page prelude, so a whole-context fence could
+  never use a domain prelude — the single biggest lever on the page was
+  unreachable, not absent.
+- `PRELUDE_ENTRY` did not match an intention prefix, so
+  `application context Storefront` was invisible to `no-prelude`.
+- **`DIRECTIVE` used `[^>]*`, so a skip reason containing `>=` ended the match
+  early and the fence silently became `standalone`.** This one fails toward
+  false confidence: a deliberate skip quietly turns into a validated fence.
+  It cost three mystery failures that looked like lost directives.
+
+**A domain prelude works because bare names resolve across sibling contexts.**
+That was worth proving rather than assuming, so it was checked in both
+directions — a bare `outlet Pings` in another context resolved, and a bogus
+name failed. A domain body may hold type definitions, which is what makes the
+stream events placeable.
+
+**Some fences cannot be made green without lying.** The adaptor example emits
+a message belonging to neither its parent nor its referent context. A prelude
+*can* silence that by hiding the event in the referent — and doing so would
+defeat exactly the check that makes the gate worth running. Those fences got
+an honest skip and a BACKLOG entry instead.
+
+**Two examples on one page can be mutually exclusive.** `match order.status`
+needs `status` to be an enumerated type; `set field status to "Active"` needs
+it to be a String. No prelude satisfies both, and that is a content decision,
+not a harness gap.
 
 ---
 

@@ -407,7 +407,19 @@ render, so readers never see them:
 | `<!-- riddl: skip -->` | not validated |
 
 A page may declare a `<!-- riddl-prelude ... -->` block of definitions that its
-fragments reference but do not show.
+fragments reference but do not show. It lands at **context** level whatever the
+wrapper's depth.
+
+Domain-level vocabulary is a **separate** `<!-- riddl-domain-prelude ... -->`
+block, read only by `in-domain`. The two cannot be one block — a `user` is
+legal only in a domain, a `record` only in a context. It is what makes
+whole-`context` fences gateable: a domain body may hold type definitions, and a
+bare name resolves upward and across sibling contexts, so a sibling context in
+the domain prelude can supply outlets and events a fence names but never
+declares.
+
+A fence that defines a name a prelude also supplies must say
+`no-prelude=Name`. This applies to **both** preludes by the same names.
 
 `--auto` tries every wrapping and reports a fence only if none works. It is a
 *measurement* mode for pages that do not yet carry directives — not a
@@ -430,11 +442,26 @@ python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
 # 1.31 -- same shape over sites/riddl-1x/docs, with the 1.31 compiler
 ```
 
-**Status**: `quickstart.md` is fully annotated and validates clean on both
-branches. The ~50 concept pages are not yet annotated; with `--auto`, 99 of
-their 120 fences still fail, dominated by fragments that reference definitions
-they deliberately do not show and so need a per-page prelude. That is a
-known gap, not a claim that those examples are wrong.
+**Status** (2026-08-10): the gated set is **183 validated / 43 skipped / 0
+failed**, and **every blanket `"illustrative fragment"` skip is gone** — there
+were 118 of them when the work started. `quickstart.md`, `concepts/`,
+`introduction/` and `references/language-reference.md` are all annotated and
+green. Every remaining skip states its own reason.
+
+A skip is not a pass in disguise: ~20 of them record examples that are
+genuinely wrong for 2.0, tracked as BACKLOG 1a-followup. `guides/`,
+`migration/` and `tutorials/rbbq/` are still ungated (BACKLOG 1b).
+
+**Two ways this gate can lie to you, both observed:**
+
+- A **hand-rolled probe that filters only `[error]`/`[severe]` will call a
+  fence clean that the gate rejects** — the gate also fails on `[deprecated]`.
+  Filter exactly as `validate()` does, or use the gate itself.
+- **A malformed directive silently degrades to `standalone`.** There is no
+  warning for a directive that does not parse, so a deliberate skip can quietly
+  become a validated fence. The `[^>]*` bug that caused this is fixed, but the
+  failure mode is structural: if a fence's result surprises you, check that its
+  directive actually parses before believing the result.
 
 **Version differences that matter for examples** (verified against both
 compilers):

@@ -6,101 +6,47 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1a. Retire the blanket "illustrative fragment" skips  ← START HERE
+## 1a-followup. Content bugs found by gating language-reference.md
 
-**What:** When filed, the gated pages reported 84 validated and **128 skipped**,
-**118 of them carrying one identical reason**: `illustrative fragment;
-references vocabulary this page does not define`. That is precisely what a
-`<!-- riddl-prelude ... -->` exists to supply, so they were bulk-skipped rather
-than annotated.
+← START HERE
 
-A skip is a legitimate outcome for a fence that genuinely cannot compile — a
-deliberate counter-example, or an `include` resolved against a file that does
-not exist. What 1a retires is the **blanket** reason applied without looking.
-Each such fence keeps a skip, but with a reason that says which of those it is.
+**What:** Retiring the blanket skips (1a, done 2026-08-10) compiled every
+fence on the page that can compile. The 20 that still carry a skip each name
+their own reason now, and these are the ones whose reason is **the example is
+wrong**, not "the harness cannot wrap it". Each was read off a real riddlc
+diagnostic, so none needs re-deriving:
 
-**Measured 2026-08-08**, not estimated: stripping that one reason from 8 sample
-concept pages (14 such skips) and re-running with `--auto` — **4 of the 14
-needed nothing but an existing wrapper** and were skipped for no reason at all.
-The other 10 need a per-page prelude, which is the documented remedy, not a
-correction to the examples.
+- **`OrderPlaced` has two different shapes on one page.** One fence yields
+  `OrderPlaced(id, total)`, another `OrderPlaced(orderId, total = cart.total,
+  currency = "USD")`. A prelude can supply only one. Decide which is the
+  event and make both fences agree.
+- **The epic's steps use paths the page's own application fence contradicts.**
+  `step take input Storefront.AddToCartForm` treats the form as a direct child
+  of the context, while the application fence puts forms inside `page`s. 2.0
+  containment agrees with the application fence, so the epic's paths are
+  wrong.
+- **The adaptor example crosses its own isolation seam.** `PaymentIntegration`
+  emits `OrderPaymentReceived`, which belongs to neither its parent context
+  nor its referent. 2.0 rejects this. The example needs the event declared in
+  `OrderContext`, which means showing it.
+- **The projector example has no record.** A 2.0 projector requires one.
+- **`button Checkout activates type Boolean`** — the fifth page carrying this
+  line. Still not valid 2.0.
+- **The `version` fence's `entity Order` has no handler and no state.**
+- **`match order.status`** matches a String against type-cases and a numeric
+  `>=` threshold. For it to compile, `status` would have to be an enumerated
+  type — which directly conflicts with the `set field status to "Active"`
+  fence. The two examples cannot both be right.
 
-**Method per page:**
-```bash
-# strip the blanket skip (WHOLE line, indentation included -- a leftover
-# indent corrupts fence matching and silently changes the counts)
-# then see which wrapper each fence fits:
-python3 scripts/validate-riddl-examples.py --auto ../bin/riddlc <page>.md
-```
-Annotate the ones that place; write one page prelude for the rest.
+**Also parked, and NOT a content bug:** the `repository CartRepository` fence
+names `record Cart` in its schema, while the page prelude must supply
+`entity Cart` for other fences. One context cannot hold both names. Fixing it
+means renaming the prelude's entity and every fence that reaches it, which is
+a bigger edit than it looks.
 
-**Progress:** `concepts/` and `introduction/` are **done** — not one blanket
-skip remains in either. `language-reference.md` has had a first slice: 23
-validated / 52 skipped → **35 / 40**. Gate-wide: **171 validated / 55 skipped
-/ 0 failed**, from 84/128 when 1a was filed.
-
-**49 blanket skips remain:**
-
-| Where | Count | Note |
-|---|---|---|
-| `references/language-reference.md` | 32 | in scope; see below |
-| `migration/1.x-to-2.0.md` | 6 | **outside the gate** — 1b territory |
-| `guides/authors/design/command-event-patterns.md` | 6 | outside the gate |
-| `guides/authors/design/ui-modeling.md` | 3 | outside the gate |
-| `guides/authors/index.md` | 2 | outside the gate |
-
-### What the remaining 32 need (measured, do not re-derive)
-
-The page's prelude has been extended once and **compiles clean on its own** —
-probe it with `wrap("in-context", "type ProbeOnly is String", prelude)` before
-blaming a fence. What is left divides roughly into:
-
-- **Statement fences** (`send`/`tell`/`set`/`let`/`match`/`foreach`/`become`)
-  that want `in-handler`. The wrapper already supplies `order`, `cart` and
-  their fields; what they lack is page vocabulary — outlets, events, target
-  entities — some of which is now in the prelude and some not.
-- **Whole-context fences** (adaptor, projector, pipeline, application, epic)
-  that declare their own `context`. These want `in-domain` plus a
-  **`riddl-domain-prelude`** holding the sibling contexts they name
-  (`PaymentContext`, `OrderContext`, `Storefront`). The page has no domain
-  prelude yet; that is the single biggest lever left.
-- **Genuinely unskippable, needing a precise reason instead of the blanket
-  one:** the two `import "commerce.bast"` fences, and the
-  `on command DoIt from context Other` pair (two spellings of the same clause,
-  which cannot share a handler — same fence as `onclause.md`).
-- **Known content bugs to fix while there:** `button Checkout activates type
-  Boolean` (fifth page with that line), and the `version` fence whose
-  `entity Order` has no handler.
-
-**Two traps this page taught, both costly:**
-
-- **Never name a prelude entry `Tax`.** The `in-function` wrapper supplies a
-  sibling `context Tax`, so a prelude `function Tax` makes every `Tax.…` path
-  ambiguous and breaks the page's in-function fences. The prelude carries a
-  comment saying so.
-- **`annotate-riddl-examples.py` places a fence against the prelude AS IT
-  WAS.** Extending the prelude afterwards can invalidate earlier placements —
-  it silently invalidated 8. Annotate, then extend, then re-run the page.
-
-**The gate's scope is a file list, not a directory.** The exact command is in
-CLAUDE.md § "Compiling RIDDL examples". Compare numbers only within one scope.
-
-**Rules the work established** (each earned by a regression):
-
-- Wrapper-internal names keep the `Example` prefix. A record named `OrderData`
-  collided with `language-reference.md`'s own prelude — a page prelude and the
-  wrapper share one context — and broke two of its fences.
-- Wrapper vocabulary is only ever ADDED, never renamed: an extra field cannot
-  break a fence that ignores it.
-- **Re-run the FULL gate after any wrapper edit**, never just the page in hand.
-  Wrapper changes have regressed other pages three times in this work.
-- A wrapper must satisfy the checks its own shape triggers: `in-entity` needs a
-  state with a handler, or a fence contributing only invariants fails for the
-  wrapper rather than for itself.
-
-**Why this outranks 1b:** these pages are already gated, so the gate reports
-green while checking barely 40% of their RIDDL. That is the same
-"green-but-measured-nothing" failure recorded in NOTEBOOK.
+**Verification:** the page and both gates are green as it stands — 2.0 at
+183/43/0, 1.31 at 6/0/0. These are skips with honest reasons, not failures,
+so nothing is red while they wait.
 
 ---
 
@@ -109,11 +55,18 @@ green while checking barely 40% of their RIDDL. That is the same
 **What:** Not yet gated: `tutorials/rbbq/` (30 pages, the most-read tree),
 `guides/`, `tools/`, and the `riddlg`/`synapify`/`shell` sites.
 
+**17 blanket skips live in these trees** and are the natural first slice:
+`migration/1.x-to-2.0.md` (6), `guides/authors/design/command-event-patterns.md`
+(6), `guides/authors/design/ui-modeling.md` (3), `guides/authors/index.md` (2).
+They are the last of the original 118. These trees also carry 4 pre-existing
+failures, so starting here means going red before green -- gate a page at a
+time.
+
 **Also open:** `check-riddl-blocks.py` flags 33 advisory items, all in
 `migration/` (which shows 1.x deliberately — arguably belongs in EXEMPT_PATHS)
 and `tutorials/rbbq/`.
 
-**Order:** After 1a, which is smaller and buys more real coverage.
+**Order:** after 1a-followup, which fixes examples readers can see today.
 
 ---
 
