@@ -331,8 +331,8 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             # so the iterable sits where an author would put it -- on `order` --
             # rather than being hoisted to a direct field of the state.
             "    record ExampleData is { note is String, itemCount is Natural,\n"
-            "      id is String, total is Natural, balance is Natural,\n"
-            "      recommendation is String }\n"
+            "      id is String, total is Natural, grandTotal is Natural,\n"
+            "      balance is Natural, recommendation is String }\n"
             "    command ExampleCommand is { note is String, cart is ExampleData,\n"
             "      order is ExampleOrder, orderId is String, amount is Natural,\n"
             "      limits is ExampleLimit, rate is Natural, subtotal is Natural }\n"

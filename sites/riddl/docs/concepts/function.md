@@ -3,6 +3,21 @@ title: "Function"
 draft: false
 ---
 
+<!-- riddl-prelude
+type Price is Natural
+record TotalInputs is { subtotal is Price }
+record TaxInput is { subtotal is Price }
+function Tax is {
+  requires TaxInput returns Price
+  function Apply is { requires TaxInput returns Price ??? }
+}
+record PricingInput is { subtotal is Price, taxRate is Price }
+function Pricing is {
+  requires PricingInput returns Price
+  function CalculateTotal is { requires PricingInput returns Price ??? }
+}
+-->
+
 A function definition provides a way to not repeat yourself in 
 other definitions. We can define functions in several places and then use 
 them in an expression or action. This way, we only need to define the logic 
@@ -14,7 +29,7 @@ A function's `requires` and `returns` may name an existing [type](type.md)
 rather than spelling out an inline aggregation, which makes unary and nullary
 functions natural to write:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 ```riddl
 function CalculateTotal is {
   requires record TotalInputs
@@ -28,7 +43,7 @@ Any type works, and the kind keyword is optional: `requires Age`,
 `requires type Age` and `requires record Args` are all valid.
 
 !!! warning "The inline aggregation form is deprecated"
-    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+    <!-- riddl: skip reason="deliberate counter-example: the inline aggregation form emits [deprecated], which the gate treats as failure" -->
     ```riddl
     requires { subtotal is Price, taxes is Price }   // still works
     ```
@@ -52,7 +67,7 @@ or another function — with no scope gate and no ordering concern.
 `call` is a [value](value.md) expression rather than a bare statement, because
 a pure function's result would otherwise be discarded:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 let total = call function Pricing.CalculateTotal(subtotal, taxRate = rate)
 set field grandTotal to call function Tax.Apply(total)

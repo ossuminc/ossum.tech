@@ -3,6 +3,15 @@ title: "Application"
 draft: false
 ---
 
+<!-- riddl-prelude
+record SignupData is { email is String }
+command PlaceOrder is { email is String }
+page CheckoutPage is {
+  form SignupForm accepts type SignupData
+  document ConfirmationPanel shows type SignupData
+}
+-->
+
 An application in RIDDL is not a separate definition type—it is a
 [Context](context.md) declared with the `application`
 [intention](context.md#intention), which is the only place
@@ -10,15 +19,21 @@ An application in RIDDL is not a separate definition type—it is a
 represents the interface portion of a system where a user (human or machine)
 initiates actions.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 ```riddl
 application context Storefront is {
+  type Clicked is Boolean
+
   page ProductDetails is { ??? }
   page ShoppingCart is {
-    button Checkout activates type Boolean
+    button Checkout activates type Clicked
   }
 }
 ```
+
+`activates` takes a **declared** type name. A predefined type such as
+`Boolean` does not resolve there — the same rule that governs
+[alternation](type.md#alternation) members — so the type is named first.
 
 !!! warning "UI outside an application context is an Error"
     In RIDDL 1.x, any context that happened to contain groups was an
@@ -66,7 +81,7 @@ messages to other components like [entities](entity.md).
 Handlers in an application context may also use the `put` statement to publish
 a value to an [output](output.md), and read one with `get from input`:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 ```riddl
 handler Checkout is {
   on command PlaceOrder {
@@ -82,7 +97,7 @@ An application context, and the groups, inputs and outputs inside it, may carry
 a `figma` reference linking the model element to the exact frame that depicts
 it:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 ```riddl
 page Checkout is { ??? } with {
   figma "aBcD1234" node "42:1337"

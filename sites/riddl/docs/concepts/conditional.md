@@ -23,9 +23,9 @@ This lets authors express conditions at the appropriate level of abstraction.
 Evaluating the condition is left to code generation.
 
 !!! warning "The bare-string form is deprecated"
-    <!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+    <!-- riddl: skip reason="deliberate counter-example: it emits [deprecated], which the gate treats as failure" -->
     ```riddl
-    when prompt("user is authenticated") then { ??? } end   // deprecated
+    when "user is authenticated" then { ??? } end   // deprecated
     ```
 
     It still parses, but draws a `[deprecated]` message. Everywhere else in
@@ -61,7 +61,7 @@ Numeric expressions involve comparisons and arithmetic:
 - **Comparison operators**: `>`, `<`, `>=`, `<=`, `==`, `!=`
 - **Arithmetic operators**: `+`, `-`, `*`, `/`
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 when prompt("order.total > 100") then {
   // apply discount
@@ -80,7 +80,7 @@ Boolean expressions combine conditions using logical operators:
 - **OR**: Either condition must be true
 - **NOT**: Negates a condition
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-handler -->
 ```riddl
 when prompt("user.isVerified AND order.total > 0") then {
   // process order

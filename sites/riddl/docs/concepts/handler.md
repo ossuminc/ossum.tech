@@ -3,6 +3,22 @@ title: "Handlers"
 draft: false
 ---
 
+<!-- riddl-prelude
+record PendingData is { note is String }
+record ShippedData is { trackingNumber is String }
+record ActiveOrderData is { total is Natural }
+record ShippedOrderData is { trackingNumber is String }
+command ShipOrder is { trackingNumber is String }
+entity Order is {
+  initial state PendingOrder of record PendingData is {
+    handler PendingOrderHandler is { on command ShipOrder { ??? } }
+  }
+  state ShippedOrder of record ShippedOrderData is {
+    handler ShippedOrderHandler is { on command ShipOrder { ??? } }
+  }
+}
+-->
+
 A *handler* is a very important definition in RIDDL because it is RIDDL's 
 way of expressing both business logic and relationships between the various
 components in a model. Handlers do that by specifying what should be done 
@@ -81,7 +97,7 @@ placements a handler can occupy.
 **into** that state, whether by [morph](statement.md#morph-and-become-entity-only)
 or at creation:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 state Pending of record PendingData is {
   initial handler PendingHandler is { ??? }
@@ -101,7 +117,7 @@ fully backward compatible with models that do not.
 does not define one of its own** — a default across the whole state machine
 rather than a per-state choice:
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=Order -->
 ```riddl
 entity Order is {
   initial handler Common is { ??? }   // initial for Shipped, and any state
@@ -141,7 +157,7 @@ foundation for modeling state machines in RIDDL. When an
 entity transitions to a new state via a `morph` statement,
 the new state's handlers become active.
 
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-entity -->
 ```riddl
 state ActiveOrder of record ActiveOrderData is {
   handler ActiveOrderHandler is {
