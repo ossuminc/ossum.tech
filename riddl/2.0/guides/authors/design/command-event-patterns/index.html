@@ -5724,6 +5724,28 @@
   
 
 
+<!-- riddl-prelude
+    type OrganizationId is UUID
+    type OrgId is UUID
+    type MemberId is UUID
+    type Address is String
+    record Info is {
+      name: String,
+      address: Address?,
+      isPrivate: Boolean
+    }
+    record Contacts is {
+      primaryContacts: MemberId+,
+      billingContacts: MemberId*,
+      distributionContacts: MemberId*
+    }
+    event MemberAdded is { orgId: OrgId, memberId: MemberId }
+    command AddMember yields event MemberAdded is {
+      orgId: OrgId,
+      memberId: MemberId
+    }
+-->
+
 <h1 id="command-event-patterns">Command-Event Patterns<a class="headerlink" href="#command-event-patterns" title="Permanent link">&para;</a></h1>
 <p>This guide covers design patterns for structuring commands and their
 corresponding events in RIDDL. Choosing the right pattern affects
@@ -5736,7 +5758,7 @@ requires careful design.</p>
 <h2 id="declaring-the-pairing">Declaring the Pairing<a class="headerlink" href="#declaring-the-pairing" title="Permanent link">&para;</a></h2>
 <p>Whichever pattern you choose below, RIDDL 2.0 lets you state the
 command→event pairing <strong>declaratively</strong> with a <code>yields</code> clause:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context no-prelude=AddMember -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">command</span> <span class="n">AddMember</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">MemberAdded</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="n">orgId</span><span class="p">:</span> <span class="n">OrgId</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="n">memberId</span><span class="p">:</span> <span class="n">MemberId</span>
@@ -5752,7 +5774,7 @@ checks conformance: a handler for a <code>yields</code>-declaring command must
 that declares none may still yield whatever it likes, so adding the clause to
 an existing model never breaks the parts you have not annotated yet.</p>
 <p>The corresponding statement is <code>yield</code>:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AddMember</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">MemberAdded</span><span class="p">(</span><span class="n">orgId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">orgId</span><span class="p">,</span> <span class="n">memberId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">memberId</span><span class="p">)</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
@@ -5809,34 +5831,41 @@ essential for designing message types that accurately represent your domain
 constraints.</p>
 <h2 id="example-entity">Example Entity<a class="headerlink" href="#example-entity" title="Permanent link">&para;</a></h2>
 <p>Throughout this guide, we'll use this Organization entity:</p>
+<!-- riddl: in-context no-prelude=Info,Contacts -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">entity</span> <span class="n">Organization</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">state</span> <span class="n">Active</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">info</span><span class="p">:</span> <span class="n">Info</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">members</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span><span class="p">,</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">contacts</span><span class="p">:</span> <span class="n">Contacts</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OrganizationState</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kd">handler</span> <span class="n">OrganizationHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">AddMembers</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="p">}</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="p">}</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="kd">type</span> <span class="n">Info</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="kr">name</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="n">address</span><span class="p">:</span> <span class="n">Address</span><span class="o">?</span><span class="p">,</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="n">isPrivate</span><span class="p">:</span> <span class="nb">Boolean</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="kd">record</span> <span class="n">OrganizationState</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="n">info</span><span class="p">:</span> <span class="n">Info</span><span class="p">,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="n">members</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="n">contacts</span><span class="p">:</span> <span class="n">Contacts</span>
 </span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">}</span>
 </span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="kd">type</span> <span class="n">Contacts</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="n">primaryContacts</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">+</span><span class="p">,</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>  <span class="n">billingContacts</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span><span class="p">,</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="n">distributionContacts</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="kd">type</span> <span class="n">Info</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="kr">name</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>  <span class="n">address</span><span class="p">:</span> <span class="n">Address</span><span class="o">?</span><span class="p">,</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="n">isPrivate</span><span class="p">:</span> <span class="nb">Boolean</span>
 </span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="p">}</span>
 </span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="kd">command</span> <span class="n">EstablishOrganization</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">info</span><span class="p">:</span> <span class="n">Info</span><span class="p">,</span> <span class="n">contacts</span><span class="p">:</span> <span class="n">Contacts</span> <span class="p">}</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="kd">command</span> <span class="n">ModifyOrganizationInfo</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Info</span> <span class="p">}</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="kd">command</span> <span class="n">AddMembers</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orgId</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span> <span class="n">members</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span> <span class="p">}</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="kd">command</span> <span class="n">ModifyContacts</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orgId</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span> <span class="n">contacts</span><span class="p">:</span> <span class="n">Contacts</span> <span class="p">}</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="kd">type</span> <span class="n">Contacts</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>  <span class="n">primaryContacts</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">+</span><span class="p">,</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>  <span class="n">billingContacts</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span><span class="p">,</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>  <span class="n">distributionContacts</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="p">}</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="kd">command</span> <span class="n">EstablishOrganization</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">info</span><span class="p">:</span> <span class="n">Info</span><span class="p">,</span> <span class="n">contacts</span><span class="p">:</span> <span class="n">Contacts</span> <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="kd">command</span> <span class="n">ModifyOrganizationInfo</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Info</span> <span class="p">}</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="kd">command</span> <span class="n">AddMembers</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orgId</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span> <span class="n">members</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span> <span class="p">}</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="kd">command</span> <span class="n">ModifyContacts</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orgId</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span> <span class="n">contacts</span><span class="p">:</span> <span class="n">Contacts</span> <span class="p">}</span>
 </span></code></pre></div>
 <h2 id="pattern-1-same-event-for-all-commands">Pattern 1: Same Event for All Commands<a class="headerlink" href="#pattern-1-same-event-for-all-commands" title="Permanent link">&para;</a></h2>
 <p><strong>Question:</strong> Should all commands on an entity yield the same event?</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">event</span> <span class="n">OrganizationModified</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="n">id</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="n">info</span><span class="p">:</span> <span class="n">Info</span><span class="p">,</span>
@@ -5863,7 +5892,7 @@ for traceability and understanding system behavior.</p>
 </ul>
 <h2 id="pattern-2-distinct-events-full-entity-data">Pattern 2: Distinct Events, Full Entity Data<a class="headerlink" href="#pattern-2-distinct-events-full-entity-data" title="Permanent link">&para;</a></h2>
 <p><strong>Question:</strong> Should each command have its own event containing the full entity?</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">event</span> <span class="n">OrganizationEstablished</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="n">id</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="n">info</span><span class="p">:</span> <span class="n">Info</span><span class="p">,</span>
@@ -5905,7 +5934,7 @@ for traceability and understanding system behavior.</p>
 modification events.</p>
 <h2 id="pattern-3-optional-parameters">Pattern 3: Optional Parameters<a class="headerlink" href="#pattern-3-optional-parameters" title="Permanent link">&para;</a></h2>
 <p><strong>Question:</strong> Should modification events use optional versions of types?</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">type</span> <span class="n">InfoUpdate</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="kr">name</span><span class="p">:</span> <span class="nb">String</span><span class="o">?</span><span class="p">,</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  <span class="n">address</span><span class="p">:</span> <span class="n">Address</span><span class="o">?</span><span class="p">,</span>
@@ -5951,7 +5980,7 @@ modification events.</p>
 </ul>
 <h2 id="pattern-4-surfaced-parameters">Pattern 4: Surfaced Parameters<a class="headerlink" href="#pattern-4-surfaced-parameters" title="Permanent link">&para;</a></h2>
 <p><strong>Question:</strong> Should events contain only the changed fields directly?</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">event</span> <span class="n">OrganizationMembersModified</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  <span class="n">id</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  <span class="n">members</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">*</span>
@@ -5994,6 +6023,7 @@ modification events.</p>
 <li>The new complete collection (full state)</li>
 </ul>
 <p>Document this decision clearly:</p>
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">event</span> <span class="n">MembersAdded</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="n">id</span><span class="p">:</span> <span class="n">OrganizationId</span><span class="p">,</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  <span class="n">addedMembers</span><span class="p">:</span> <span class="n">MemberId</span><span class="o">+</span> <span class="c1">// Only newly added members, not full list</span>

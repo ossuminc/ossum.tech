@@ -5592,6 +5592,20 @@ be split.</p>
 <p><code>send</code>, <code>tell</code>, <code>yield</code> and <code>put</code> can fail, and so can each embedded
 <code>call</code> or <code>get</code> — <code>let x = call F(get from input I)</code> counts as two.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">A saga step may not <code>ask</code></p>
+<p>An <a href="../../references/language-reference/#ask"><code>ask</code></a> anywhere in a step is
+an <strong>Error</strong>, including one nested inside a larger value expression. A saga
+must not depend on dynamic state, or the same inputs could yield different
+transaction results at different times — and compensation would then be
+reversing something other than what actually happened.</p>
+<p>Acquire the value in a handler and pass it into the saga through its
+<code>requires</code>, so the saga is closed over its inputs and the undo sees the
+same data the do saw.</p>
+<p>A step containing an <code>ask</code> is not also reported for the failure-point rule
+above: an <code>ask</code> is itself a failure point, so every such step would trip
+that rule too, and the advice to split the step would not help.</p>
+</div>
 <h2 id="a-saga-is-not-a-processor">A Saga Is Not a Processor<a class="headerlink" href="#a-saga-is-not-a-processor" title="Permanent link">&para;</a></h2>
 <p>A Saga extends the <a href="../vital/">vital definition</a> base rather than
 <a href="../processor/">Processor</a>, so it takes no <a href="../version/">version</a> and no

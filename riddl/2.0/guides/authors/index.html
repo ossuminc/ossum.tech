@@ -6043,6 +6043,27 @@
   command RefundPayment is { note is String }
   command CreateOrder is { note is String }
   command CancelOrder is { note is String }
+    type CategoryId is UUID
+-->
+
+<!-- riddl-domain-prelude
+    // A domain may hold type definitions, and in-domain fences never see the
+    // page prelude -- so anything they reach for must be repeated here.
+    type CategoryId is UUID
+
+    // `Id(X)` requires X to be an ENTITY, and an entity may only live in a
+    // context -- so this sits in a sibling context, where a bare `Product`
+    // still resolves. The page declares `entity Product` further down; this
+    // makes the name reachable from the types fence above it.
+    context Inventory is {
+      record ProductListing is { name is String }
+      command ListProduct is { name is String }
+      entity Product is {
+        state Listed of record ProductListing is {
+          handler ProductHandler is { on command ListProduct { ??? } }
+        }
+      }
+    }
 -->
 
 <p>This guide is for those who author RIDDL models. Authors are typically domain
@@ -6136,7 +6157,7 @@ self-contained area with its own ubiquitous language.</p>
 <h3 id="step-3-define-your-types">Step 3: Define Your Types<a class="headerlink" href="#step-3-define-your-types" title="Permanent link">&para;</a></h3>
 <p>Types define the shape of information in your model. Start with the core
 concepts in your domain—the "nouns" of your ubiquitous language.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">context</span> <span class="n">Catalog</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">type</span> <span class="n">ProductId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Product</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kr">briefly</span> <span class="s2">&quot;Unique identifier for a product&quot;</span>
@@ -6149,7 +6170,7 @@ concepts in your domain—the "nouns" of your ubiquitous language.</p>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="kr">briefly</span> <span class="s2">&quot;Monetary amount with currency&quot;</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="p">}</span>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>  <span class="kd">type</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>  <span class="kd">type</span> <span class="n">ProductInfo</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">id</span> <span class="kp">is</span> <span class="n">ProductId</span><span class="p">,</span>
 </span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="kr">name</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">200</span><span class="p">),</span>
 </span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="kr">description</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span>
@@ -6165,7 +6186,7 @@ concepts in your domain—the "nouns" of your ubiquitous language.</p>
 <p>Entities are the heart of your model. They represent things with identity
 that persist over time and respond to messages. Each entity should model
 a single business concept.</p>
-<!-- riddl: in-domain -->
+<!-- riddl: in-domain no-prelude=CategoryId -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">context</span> <span class="n">Catalog</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">type</span> <span class="n">Money</span> <span class="kp">is</span> <span class="nb">Currency</span><span class="p">(</span><span class="n">USD</span><span class="p">)</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="kd">type</span> <span class="n">ProductId</span> <span class="kp">is</span> <span class="nb">UUID</span>
@@ -6214,23 +6235,25 @@ a single business concept.</p>
 </span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>        <span class="k">on</span> <span class="kd">command</span> <span class="n">UpdatePrice</span> <span class="p">{</span>
 </span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>          <span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;price is different from current&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>            <span class="k">yield</span> <span class="kd">event</span> <span class="n">PriceUpdated</span>
-</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>          <span class="p">}</span> <span class="kr">end</span>
-</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>        <span class="p">}</span>
-</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>
-</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>        <span class="c1">// Events apply the change. Replay re-runs exactly these clauses.</span>
-</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>        <span class="k">on</span> <span class="kd">event</span> <span class="n">PriceUpdated</span> <span class="p">{</span>
-</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>          <span class="k">set</span> <span class="kd">field</span> <span class="n">Active</span><span class="p">.</span><span class="n">price</span> <span class="kp">to</span> <span class="n">PriceUpdated</span><span class="p">.</span><span class="n">newPrice</span>
-</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>        <span class="p">}</span>
-</span><span id="__span-3-56"><a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>
-</span><span id="__span-3-57"><a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>        <span class="k">on</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">{</span>
-</span><span id="__span-3-58"><a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>          <span class="k">set</span> <span class="kd">field</span> <span class="n">Active</span><span class="p">.</span><span class="kr">name</span> <span class="kp">to</span> <span class="n">ProductCreated</span><span class="p">.</span><span class="kr">name</span>
-</span><span id="__span-3-59"><a id="__codelineno-3-59" name="__codelineno-3-59" href="#__codelineno-3-59"></a>        <span class="p">}</span>
-</span><span id="__span-3-60"><a id="__codelineno-3-60" name="__codelineno-3-60" href="#__codelineno-3-60"></a>      <span class="p">}</span>
-</span><span id="__span-3-61"><a id="__codelineno-3-61" name="__codelineno-3-61" href="#__codelineno-3-61"></a>    <span class="p">}</span>
-</span><span id="__span-3-62"><a id="__codelineno-3-62" name="__codelineno-3-62" href="#__codelineno-3-62"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-3-63"><a id="__codelineno-3-63" name="__codelineno-3-63" href="#__codelineno-3-63"></a>    <span class="kr">briefly</span> <span class="s2">&quot;A product in the catalog&quot;</span>
-</span><span id="__span-3-64"><a id="__codelineno-3-64" name="__codelineno-3-64" href="#__codelineno-3-64"></a>  <span class="p">}</span>
-</span><span id="__span-3-65"><a id="__codelineno-3-65" name="__codelineno-3-65" href="#__codelineno-3-65"></a><span class="p">}</span>
+</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>            <span class="k">error</span> <span class="s2">&quot;the new price matches the current price&quot;</span>
+</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>          <span class="p">}</span> <span class="kr">end</span>
+</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>        <span class="p">}</span>
+</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>
+</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>        <span class="c1">// Events apply the change. Replay re-runs exactly these clauses.</span>
+</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>        <span class="k">on</span> <span class="kd">event</span> <span class="n">PriceUpdated</span> <span class="p">{</span>
+</span><span id="__span-3-56"><a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>          <span class="k">set</span> <span class="kd">field</span> <span class="n">Active</span><span class="p">.</span><span class="n">price</span> <span class="kp">to</span> <span class="n">PriceUpdated</span><span class="p">.</span><span class="n">newPrice</span>
+</span><span id="__span-3-57"><a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>        <span class="p">}</span>
+</span><span id="__span-3-58"><a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>
+</span><span id="__span-3-59"><a id="__codelineno-3-59" name="__codelineno-3-59" href="#__codelineno-3-59"></a>        <span class="k">on</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">{</span>
+</span><span id="__span-3-60"><a id="__codelineno-3-60" name="__codelineno-3-60" href="#__codelineno-3-60"></a>          <span class="k">set</span> <span class="kd">field</span> <span class="n">Active</span><span class="p">.</span><span class="kr">name</span> <span class="kp">to</span> <span class="n">ProductCreated</span><span class="p">.</span><span class="kr">name</span>
+</span><span id="__span-3-61"><a id="__codelineno-3-61" name="__codelineno-3-61" href="#__codelineno-3-61"></a>        <span class="p">}</span>
+</span><span id="__span-3-62"><a id="__codelineno-3-62" name="__codelineno-3-62" href="#__codelineno-3-62"></a>      <span class="p">}</span>
+</span><span id="__span-3-63"><a id="__codelineno-3-63" name="__codelineno-3-63" href="#__codelineno-3-63"></a>    <span class="p">}</span>
+</span><span id="__span-3-64"><a id="__codelineno-3-64" name="__codelineno-3-64" href="#__codelineno-3-64"></a>  <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-3-65"><a id="__codelineno-3-65" name="__codelineno-3-65" href="#__codelineno-3-65"></a>    <span class="kr">briefly</span> <span class="s2">&quot;A product in the catalog&quot;</span>
+</span><span id="__span-3-66"><a id="__codelineno-3-66" name="__codelineno-3-66" href="#__codelineno-3-66"></a>  <span class="p">}</span>
+</span><span id="__span-3-67"><a id="__codelineno-3-67" name="__codelineno-3-67" href="#__codelineno-3-67"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="step-5-define-handlers-and-behavior">Step 5: Define Handlers and Behavior<a class="headerlink" href="#step-5-define-handlers-and-behavior" title="Permanent link">&para;</a></h3>
 <p>Handlers specify what happens when messages are received. They contain
@@ -6367,7 +6390,7 @@ definitions should also have full <code>described as</code> blocks:</p>
 </span></code></pre></div>
 <h3 id="organization-with-includes">Organization with Includes<a class="headerlink" href="#organization-with-includes" title="Permanent link">&para;</a></h3>
 <p>For large models, split content across multiple files:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="the included files do not exist; nothing on disk can satisfy an include" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1">// main.riddl</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kd">domain</span> <span class="n">OnlineRetail</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  <span class="kn">include</span> <span class="s2">&quot;catalog.riddl&quot;</span>

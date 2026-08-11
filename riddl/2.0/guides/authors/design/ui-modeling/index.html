@@ -5847,6 +5847,24 @@
 <h1 id="user-interface-modeling">User Interface Modeling<a class="headerlink" href="#user-interface-modeling" title="Permanent link">&para;</a></h1>
 <!-- riddl-prelude
   result OrderDetails is { total: Currency(USD) }
+    // For the checkout handler fence: what it reads, tells and shows.
+    type PaymentInfo is String
+    type ReceiptData is String
+    record ChargeData is { note is String }
+    command SubmitPayment is { note is String }
+    command Charge is { note is String }
+-->
+
+<!-- riddl-domain-prelude
+    // The checkout fence declares its own application context, so what it
+    // reaches for must sit at domain level, not in the page prelude.
+    type PaymentInfo is String
+    type ReceiptData is String
+    command SubmitPayment is { note is String }
+    command Charge is { note is String }
+    context Billing is {
+      command BillingCharge is { note is String }
+    }
 -->
 
 <p>RIDDL provides two main constructs for modeling user interfaces:
@@ -6077,7 +6095,7 @@ is what makes "the application boundary" a thing the validator can locate.</p>
 <h2 id="reading-and-writing-ui-data">Reading and Writing UI Data<a class="headerlink" href="#reading-and-writing-ui-data" title="Permanent link">&para;</a></h2>
 <p>An application handler reads an input's value and publishes to an output with
 two statements added in RIDDL 2.0:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">application</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="kr">form</span> <span class="n">PaymentDetails</span> <span class="kr">accepts</span> <span class="kd">type</span> <span class="n">PaymentInfo</span>
@@ -6108,7 +6126,7 @@ them is checked.</p>
 <p>An input using <code>selects</code>, <code>chooses</code> or <code>picks</code> whose type is not an
 Enumeration or Alternation draws a <strong>StyleWarning</strong>. A selection widget
 should choose among options:</p>
-<p><!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<p><!-- riddl: skip reason="two depths in one fence -- a context-level type above group-level widgets -- and the second widget is a deliberate counter-example marked StyleWarning" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">type</span> <span class="n">Country</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span> <span class="n">US</span><span class="p">,</span> <span class="n">CA</span><span class="p">,</span> <span class="n">MX</span><span class="p">,</span> <span class="n">UK</span> <span class="p">}</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="kr">picklist</span> <span class="n">CountryChooser</span> <span class="kr">selects</span> <span class="kd">type</span> <span class="n">Country</span>   <span class="c1">// fine</span>
@@ -6125,7 +6143,7 @@ that check was removed, because all such combinations are legitimate.</p>
 <p>Beyond <code>shown by</code>, a UI definition may carry a structured
 <a href="../../../../concepts/metadata/#figma-references">figma reference</a> resolving to
 one specific frame:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">}</span>

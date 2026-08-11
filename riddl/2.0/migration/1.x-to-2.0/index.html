@@ -5957,6 +5957,17 @@
   
 
 
+<!-- riddl-prelude
+    type OrderEvent is String
+    type EnrichedOrderEvent is String
+    event Withdrawn is { amount is Natural }
+    command Withdraw yields event Withdrawn is { amount is Natural }
+    constant Zero is Natural = "0"
+    record AccountData is { balance is Natural }
+    processor MyProcessor as source is { outlet Diagnostics is type OrderEvent }
+    processor BottomlessPit as sink is { inlet hole is type OrderEvent }
+-->
+
 <h1 id="migrating-from-riddl-1x-to-20">Migrating from RIDDL 1.x to 2.0<a class="headerlink" href="#migrating-from-riddl-1x-to-20" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">The one page that spans both versions</p>
@@ -6013,7 +6024,7 @@ handled.</p>
 </table>
 <p>A state's data type must now be a <code>record</code>. The type it referenced was almost
 certainly aggregate-shaped already, so usually you redefine it:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="shows the 1.x form beside its 2.0 replacement; the 1.x half cannot compile, which is the point" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// 1.x</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">type</span> <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">OrderId</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">Currency</span><span class="p">(</span><span class="n">USD</span><span class="p">)</span> <span class="p">}</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="n">OrderData</span>
@@ -6036,7 +6047,7 @@ transition:</p>
 <code>form</code> or <code>dialog</code> — may now only appear in a context declared with the
 <code>application</code> intention. In 1.x, any context containing groups was treated as
 an application by convention.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="shows the 1.x form beside its 2.0 replacement; the 1.x half cannot compile, which is the point" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// 1.x</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">context</span> <span class="n">StoreFront</span> <span class="kp">is</span> <span class="p">{</span> <span class="kr">page</span> <span class="n">Home</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
@@ -6057,6 +6068,7 @@ fails at <em>parse</em> time:</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="m">5</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>          <span class="c1">// does not parse</span>
 </span></code></pre></div>
 <p>Name the threshold instead:</p>
+<!-- riddl: skip reason="two fragments at different depths in one fence: a context-level constant beside a handler-level statement" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span></code></pre></div>
@@ -6067,7 +6079,7 @@ it should become <code>when prompt("...")</code>.</p>
 <p>Within a single statement list, every <code>require</code> and <code>error</code> must come before
 every <code>set</code>, <code>morph</code>, <code>become</code>, <code>send</code>, <code>tell</code>, <code>yield</code> and <code>put</code>. Acting and
 then refusing would leave partial changes behind.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-app-clauses -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// 2.0 — reorder if your handler did these the other way round</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
@@ -6319,7 +6331,7 @@ checked. Flow that used to be assumed now has to be <em>stated</em>.</p>
 ports to say so. This is design work, not editing. An entity that produced
 events through a placeholder <code>source</code> streamlet in 1.x almost certainly wants
 that outlet on the entity itself now.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: skip reason="shows the 1.x form beside its 2.0 replacement; the 1.x half cannot compile, which is the point" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1">// 1.x: the outlet had to live somewhere else</span>
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kd">source</span> <span class="n">ProductFeed</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">Events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">ProductCreated</span> <span class="p">}</span>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kd">entity</span> <span class="n">Product</span> <span class="kp">is</span> <span class="p">{</span>
@@ -6364,7 +6376,7 @@ context boundary is often model correctness rather than a deployment detail.</p>
 <p><strong>Fifth, terminate every stream.</strong> Every outlet needs a connector and every
 inlet needs a feed, so dangling ports now surface as completeness warnings.
 For output you genuinely do not consume, say so explicitly:</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">connector</span> <span class="n">DiscardDiagnostics</span> <span class="kp">is</span>
 </span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">MyProcessor</span><span class="p">.</span><span class="n">Diagnostics</span>
 </span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">BottomlessPit</span><span class="p">.</span><span class="n">hole</span>
@@ -6378,7 +6390,7 @@ something untrue.</p>
 <p>Once the ports are right, add <code>as &lt;shape&gt;</code> to each processor. The shape is
 <em>derived</em> from arity, so an ascription that disagrees is an Error — which makes
 it a useful check on the work above rather than mere decoration.</p>
-<!-- riddl: skip reason="illustrative fragment; references vocabulary this page does not define" -->
+<!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  <span class="kd">inlet</span> <span class="n">RawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
 </span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>  <span class="kd">outlet</span> <span class="n">EnrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrderEvent</span>
