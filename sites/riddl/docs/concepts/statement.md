@@ -418,16 +418,26 @@ statements:
 
 | Context | Available Statements |
 |---------|---------------------|
-| All handlers | when, match, foreach, send, tell, yield, require, set, let, do, error, code |
+| All handlers | when, match, foreach, send, tell, yield, reply, require, set, let, do, error, code |
 | Entity handlers | All above + morph, become |
-| Application / context handlers | All above + put |
+| Application-context handlers | All above + put |
 | Functions | when, match, foreach, require, let, return, do, error, code |
-| `on activate` / `on passivate` | Side-effect free only — no send, tell, yield, morph, become |
+| `on activate` / `on passivate` | Side-effect free only — no send, tell, yield, reply, morph, become |
 | `on event` | No require or error — an event has happened and must be accepted |
-| Saga steps | send, tell, yield, put, do, error |
+| Saga steps | when, match, foreach, send, tell, require, let, do, error, code |
 
 The function and lifecycle bans are enforced at **parse** time, so a banned
 statement can never enter the AST at all.
+
+!!! warning "A saga step is not a handler"
+    `yield` and `reply` are **not** available in a saga step — a step is not
+    answering a message, so it has no sender to answer. Neither are `morph` and
+    `become`, which belong to an entity, nor `put`, which is rejected in a step
+    even inside an `application` context because it is handler-only.
+
+    A step *may* use `call` inside a `let` — which is what the
+    [one-failure-point rule](saga.md) counts when it says
+    `let x = call F(get from input I)` is two failure points.
 
 ## Deprecated Statements
 
