@@ -384,20 +384,21 @@ about the checkout tells you which one is meant — and the `riddlc` on PATH is
 neither of them any more, so the wrong pairing reports confident nonsense.
 
 **`../bin/riddlc` is the 2.0 compiler**, a symlink to `../riddlc-dist/`. The
-Homebrew `riddlc` on PATH lags it badly — verified 2026-08-10: PATH is
-**2.0.0-rc.5** while `../bin` is **2.0.0-rc.10-68-cd9d2835**. rc.9 deprecated
-the entity options, so validating the 2.0 docs with the PATH binary silently
-passes examples the real compiler rejects. Run both and compare; never assume.
+Homebrew `riddlc` on PATH lags it badly — verified 2026-08-11: PATH is
+**2.0.0-rc.5** while `../bin` is **2.0.0-rc.11**. rc.9 deprecated the entity
+options, so validating the 2.0 docs with the PATH binary silently passes
+examples the real compiler rejects. Run both and compare; never assume.
 
-**A tag in `riddl` does not mean a staged binary or a published JVM artifact.**
-On 2026-08-10 `2.0.0-rc.11` was tagged and its **JS and Native** artifacts were
-on Maven Central, but the **JVM `_3` artifacts were not published anywhere**
-reachable — so `With.Riddl.library(version = "2.0.0-rc.11")` fails to resolve
-and `extractGrammar` cannot run against it. The staged binary was two commits
-*before* that tag, and both were an sbt pin and a NOTEBOOK entry, so it was
-behaviourally identical. Check three things separately, because they drift
-apart: the tag, what `../bin/riddlc version` prints, and what actually resolves
-from `~/.ivy2/local`.
+**A tag in `riddl` means neither a staged binary nor a resolvable artifact.**
+These three drift apart and must be checked separately: the tag, what
+`../bin/riddlc version` prints, and what actually resolves from
+`~/.ivy2/local`. On 2026-08-10 `2.0.0-rc.11` was tagged with only its JS and
+Native artifacts published — the JVM `_3` ones were reachable nowhere, so
+`With.Riddl.library(version = "2.0.0-rc.11")` failed to resolve and
+`extractGrammar` could not run, while the staged binary was two commits *before*
+the tag. All three were reconciled on 2026-08-11 and the pin is now
+`2.0.0-rc.11` exactly. The lesson stands even though that instance is
+resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/, validated by the STAGED compiler, not the one on PATH
@@ -505,7 +506,7 @@ compilers):
 | `initial state` / `initial handler` | ❌ | ✅ |
 | query response statement | `reply` | `reply` — un-deprecated in rc.10-46; `yield` is for a command's event, and `yield result` is an **Error** |
 | query response declaration | ❌ | `query Q replies result R is …` — `yields` on a query is an Error |
-| `ask` | ❌ | ✅ `let a = ask query Q of entity E` — a **value**, not a statement; requires Q to declare `replies`; an **Error anywhere inside a saga step**, at any nesting depth (rc.10-68) |
+| `ask` | ❌ | ✅ `let a = ask query Q of entity E` — a **value**, not a statement; requires Q to declare `replies`; an **Error anywhere inside a saga step**, at any nesting depth (rc.11) |
 | outlet on an entity | ❌ — put it on a `source` | ✅ |
 | entity semantics | `option is event-sourced` | **`event-sourced entity X`** — the option form is `[deprecated]` |
 | alternation | `one of { A, B }` | also `A \| B` (identical; `prettify` emits the words) |

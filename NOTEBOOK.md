@@ -11,23 +11,22 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-10 (end of day)
+## HANDOFF — as of 2026-08-11
 
 **All figures below were run in this session, not recalled.**
 
 **State:** branch `main`, ahead of `origin/main`, tree clean. sbt is **2.0.6**
 (bumped by Reid to clear a critical vulnerability).
 
-**Compiler:** `../bin/riddlc` is **`2.0.0-rc.10-68-cd9d2835`** and `build.sbt`'s
-pin now matches it. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** — the
-WRONG compiler for the 2.0 docs. Re-check at session start; it is restaged often.
+**Compiler:** `../bin/riddlc` is **`2.0.0-rc.11`** and `build.sbt`'s pin matches
+it exactly. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** — the WRONG
+compiler for the 2.0 docs. Re-check at session start; it is restaged often.
 
-**`2.0.0-rc.11` is tagged but NOT usable here.** Its JVM `_3` artifacts are
-published nowhere reachable (Maven Central has only JS/Native; GitHub Packages
-answers unauthorized), so pinning to it fails to resolve and `extractGrammar`
-cannot run. The staged binary is 2 commits before that tag and both are an sbt
-pin and a NOTEBOOK entry, so it is behaviourally rc.11. **To actually adopt
-rc.11: publish the JVM artifacts and restage `riddlc` from the tag.**
+**rc.11 is fully adopted as of 2026-08-11.** The day before, the tag existed
+but its JVM `_3` artifacts were unpublished and the staged binary predated it;
+both were fixed by Reid. Grammar re-extracted against the real rc.11 library:
+**byte-identical**, and the gate stayed green — no compiler source changed
+between the previously-pinned build and the tag.
 
 **Gates:** 2.0 — **251 validated / 122 skipped / 0 failed, exit 0**, now over
 the WHOLE of `sites/riddl/docs`; 1.31 — 6/0/0, exit 0. All five sites build
@@ -51,17 +50,27 @@ before turning out to be mostly missing vocabulary.
 **1a-remnant** is the only other leftover: one fence needing `record Cart`
 while its page prelude must supply `entity Cart`.
 
-### The rc.11 upgrade, as far as it could go
+### The rc.11 upgrade
 
-Grammar re-extracted against the new pin and **byte-identical** — everything
-between rc.10-57 and rc.11 landed in ResolutionPass, StreamingValidation and
-ValidationPass, so meaning changed and syntax did not. The full gate stayed
-green under the new compiler, so nothing in the docs regressed.
+Grammar re-extracted against the real rc.11 library and **byte-identical** —
+everything since the previous pin landed in ResolutionPass, StreamingValidation
+and ValidationPass, so meaning changed and syntax did not. The full gate stayed
+green, so nothing in the docs regressed.
 
-One behaviour change is reader-facing and is now documented in
+One behaviour change is reader-facing and is documented in
 language-reference.md, cheat-sheet.md and concepts/saga.md: **a saga step may
-not `ask`**, at any nesting depth inside a value. Verified by compiling, not
-read off the commit message.
+not `ask`**, at any nesting depth inside a value. Verified by compiling under
+rc.11, not read off the commit message.
+
+**Six rows of CLAUDE.md's version-differences table were re-probed against
+rc.11** and all hold: `state S of record R`, the `event-sourced entity X`
+keyword, `option is event-sourced` still emitting `[deprecated]`, `one of {}`
+and `|` both accepted, `query ... replies result`, and `query ... yields` being
+an Error. Two of the first probes were wrong in ways worth remembering: an
+`author A` collided with a `type A` and looked like an alternation bug, and a
+`set` outside `on event` failed before the deprecation could be observed. A
+probe that fails for its own reasons reports a language finding that is not
+there — read the message, not the exit status.
 
 ### Traps
 
