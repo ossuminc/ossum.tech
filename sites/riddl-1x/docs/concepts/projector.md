@@ -15,7 +15,7 @@ Projectors transform update events from entities into a data set that can
 be more easily queried. Projectors have handlers that specify both how to
 apply updates to the projector's state and satisfy queries against that state.
 A projector's data is always a duplicate and not the system of record for the
-data. Typically persistent entities are the system of record.
+data. Typically, persistent entities are the system of record.
 
 
 
