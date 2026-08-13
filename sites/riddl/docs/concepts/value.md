@@ -80,9 +80,28 @@ Arguments are **positional first, then named**. Count, names, ordering and
 
 <!-- riddl: in-application -->
 ```riddl
-let email   = get from input SignupForm
-let current = get from state Active
+let email = get from input SignupForm
 ```
+
+<!-- riddl: in-context -->
+```riddl
+record BasketData is { total is Natural }
+command AddItem is { sku is String }
+
+entity Basket is {
+  state Filling of record BasketData is {
+    handler BasketHandler is {
+      on command AddItem {
+        let current = get from state Filling
+      }
+    }
+  }
+}
+```
+
+The two forms cannot appear in the same clause. An `input` exists only inside
+an `application` context, and **state may be read only inside the entity that
+owns it** — reading another definition's state is an Error as of RIDDL 2.0.
 
 ## Call
 

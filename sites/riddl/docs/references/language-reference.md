@@ -231,7 +231,8 @@ inlets and outlets, and may carry an ascribed streaming shape:
   for storage operations.
 - **Projector**: Projects events to a repository, often transforming or
   aggregating data for read models (CQRS pattern). Projectors handle events
-  only.
+  only, and may declare [correlations](#correlations) that join several events
+  into one command.
 - **Processor**: The generic streaming processor, declared with the `processor`
   keyword and an optional `as <shape>` ascription.
 - **Context**: A bounded context is itself a processor, so it may hold handlers
@@ -1232,6 +1233,48 @@ so `OrderPlaced()` against a message that has fields is an Error.
 Argument count, names, ordering and (best effort) types are all checked against
 the target's fields.
 
+### Correlations
+
+A `correlation` accumulates several events, keyed by one or more fields, into a
+single command the repository handles. It is legal only inside a
+[projector](../concepts/projector.md#correlations).
+
+```
+correlation <Id> by <field> {, <field>} yields command <CmdRef> is {
+  handler <Id> is { <on-event clauses that set the command's fields> }
+} times out after "<duration>" { <statements> }
+```
+
+<!-- riddl: skip reason="syntax template with placeholders, not a model" -->
+```riddl
+correlation FulfillmentJoin by customerId, orderId
+  yields command RecordFulfillment is {
+  handler Collect is {
+    on event OrderPlaced  { set field RecordFulfillment.total to "the total" }
+    on event PaymentTaken { set field RecordFulfillment.paidAmount to "paid" }
+  }
+} times out after "30 days" {
+  tell command ReportStalled to entity Monitor
+}
+```
+
+Four rules carry the meaning:
+
+- **Identity is the full key tuple**, ordered as written and never
+  canonicalized.
+- **Completion is derived from the target command's type** — every *required*
+  field set by some fold. Key fields are exempt, being filled from the key.
+- **`times out after` is mandatory**, so an unbounded correlation cannot be
+  written. Its duration is an ordinary string.
+- **The target must be a command**, because a repository is changed by handling
+  one; `yields record R` is deliberately not derivable.
+
+!!! warning "Errors"
+    - A required non-key field of the target that **no fold sets** — the
+      correlation could never complete.
+    - **Two folds setting the same field** — the completed value would depend
+      on arrival order, which across sources is not guaranteed.
+
 ### Get
 
 `get from` reads a value from a UI input or an entity state:
@@ -1239,8 +1282,27 @@ the target's fields.
 <!-- riddl: in-application -->
 ```riddl
 let email = get from input SignupForm
-let current = get from state Active
 ```
+
+<!-- riddl: in-context -->
+```riddl
+record HamperData is { total is Natural }
+command AddItem is { sku is String }
+
+entity Hamper is {
+  state Collecting of record HamperData is {
+    handler HamperHandler is {
+      on command AddItem {
+        let current = get from state Collecting
+      }
+    }
+  }
+}
+```
+
+The two forms cannot share a clause. An `input` exists only inside an
+`application` context, and **state may be read only inside the entity that
+owns it** — reading another definition's state is an Error.
 
 ### Call
 
