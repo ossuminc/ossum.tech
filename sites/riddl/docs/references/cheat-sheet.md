@@ -308,6 +308,10 @@ that differs from the entity's write model.
 - Handlers subscribe to events (often cross-context) and update the
   repository
 - Multiple projectors can write to the same repository
+- `correlation X by k1, k2 yields command C is { ... } times out after "30 days" { ... }`
+  joins several events into one command. Completion is derived from `C`'s
+  required fields; the timeout is **mandatory**. A projector with correlations
+  cannot be scaled round-robin — distribution must be by key.
 
 > *[For more details →](../concepts/projector.md)*
 
