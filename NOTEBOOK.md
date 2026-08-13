@@ -11,44 +11,116 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-11
+## HANDOFF — as of 2026-08-13
 
 **All figures below were run in this session, not recalled.**
 
-**State:** branch `main`, ahead of `origin/main`, tree clean. sbt is **2.0.6**
-(bumped by Reid to clear a critical vulnerability).
+**State:** branch `main`, ahead of `origin/main`, tree clean. sbt 2.0.6.
 
-**Compiler:** `../bin/riddlc` is **`2.0.0-rc.11`** and `build.sbt`'s pin matches
-it exactly. The Homebrew `riddlc` on PATH is **2.0.0-rc.5** — the WRONG
-compiler for the 2.0 docs. Re-check at session start; it is restaged often.
+**Compiler:** `../bin/riddlc` is **`2.0.0-rc.13`**, a **native binary at that
+path** — `../riddlc-dist/` is gone, so anything describing it as a symlink is
+stale. `build.sbt`'s pin matches exactly. Homebrew's `riddlc` on PATH is
+**2.0.0-rc.5** and is the WRONG compiler for the 2.0 docs.
 
-**rc.11 is fully adopted as of 2026-08-11.** The day before, the tag existed
-but its JVM `_3` artifacts were unpublished and the staged binary predated it;
-both were fixed by Reid. Grammar re-extracted against the real rc.11 library:
-**byte-identical**, and the gate stayed green — no compiler source changed
-between the previously-pinned build and the tag.
+**Gates:** 2.0 — **253 validated / 124 skipped / 0 failed, exit 0** over all
+of `sites/riddl/docs`; 1.31 — 6/0/0. All five sites `--strict` clean; 80
+cross-site links checked.
 
-**Gates:** 2.0 — **251 validated / 122 skipped / 0 failed, exit 0**, now over
-the WHOLE of `sites/riddl/docs`; 1.31 — 6/0/0, exit 0. All five sites build
-`--strict` clean; 80 cross-site links checked.
+**`task/` holds only `done/`.** Nothing awaits triage here — but see below for
+two tasks filed INTO `../riddl/task/`.
 
-**`task/` holds only `done/`.** Nothing awaits triage.
+### Open against riddl, not against this repo
 
-### 1a, 1a-followup and 1b are all DONE
+- **`2026-08-13-when-negated-identifier-crashes.md`** — rc.13 throws
+  `IllegalStateException` in `stateReadsIn` on `when !<identifier>`. It is the
+  only accepted spelling of `!` in the language, and it crashes. One fence in
+  `concepts/conditional.md` is skipped citing it; **restore that directive
+  when the fix lands.**
+- **`2026-08-11-statement-scope-holes.md`** — LANDED in rc.13 (`0f06d85d9`).
+  The new rules caught three of our own examples, all genuinely wrong.
 
-**Not one blanket `"illustrative fragment"` skip remains in the site** — 118
-at the start. Every page with RIDDL in it now carries directives, and the gate's
-documented scope in CLAUDE.md is simply `sites/riddl/docs`.
+### rc.13 in one line each
 
-**Next is BACKLOG 1c**, and it is the one that matters: `tutorials/rbbq/` is 73
-skipped / 0 validated, all under one unverified reason ("quoted verbatim from
-riddl-models, which is still 1.x"). That is the same shape as the blanket skip
-1a retired. Read 1c before assuming the tutorial is 1.x — at least one of its
-fences validates clean today, and `concepts/` looked just as bad at this stage
-before turning out to be mostly missing vocabulary.
+- **New feature: projector `correlation` (A70)** — the only grammar change.
+  Documented in `concepts/projector.md`, `language-reference.md` and the cheat
+  sheet, from the Computational Model §6.2/§6.5-§6.8.
+- **`set`/`get from state` now require a container that owns state.**
+- **Streamlet arity fixed** — sink/source take any port count. **Our table was
+  already right**; the compiler was wrong. No doc change.
 
-**1a-remnant** is the only other leftover: one fence needing `record Cart`
-while its page prelude must supply `entity Cart`.
+### Traps
+
+- **`cmd | tail` reports tail's exit status.** Redirect and check `$?`.
+- **A wrapper that only *just* fits can be evidence the compiler isn't
+  checking.** migration's state-writing fence validated only as
+  `in-app-clauses` under rc.11 — nonsense for an entity example, and rc.13
+  proved it so. Treat an odd-but-passing wrapper as a smell.
+- **The Computational Model doc is updated ahead of the docs** and is the
+  authority for semantics. Check it (and its mtime) before writing about a new
+  construct; §6 gained the whole correlation section on 2026-08-11.
+- **A commit message can be historical by release time** — `d2fcf9972` shows
+  `yields record R`, which `dd5f539f0` changed to `yields command C`. The
+  generated grammar is the authority.
+- **Re-run the FULL gate after any wrapper or script edit**, and 1.31 too.
+- **An enumeration must never go in the shared wrapper** — enumerators join
+  the enclosing namespace.
+- **Nothing in a prelude may depend on an entry a fence might strip** with
+  `no-prelude`.
+- **`in-domain` fences never see the page prelude.**
+- **A hand-rolled probe filtering only `[error]`/`[severe]` will lie**; the gate
+  also fails on `[deprecated]`. And a probe that *passes* proves only that a
+  path resolved — never that it resolved to what you assumed. Both cost a
+  wrong claim this week.
+
+### Certainty
+
+**Verified by command:** git state, compiler version, the pin, artifact
+resolution, both gates with real exit status, all five strict builds,
+cross-site links, the grammar diff, and every correlation rule documented
+(including both Errors, quoted verbatim from riddlc).
+
+**Assumed, not re-verified:** BACKLOG item 5's 18 site items.
+
+### Pointers
+
+Open work is **BACKLOG.md** — 1c is live. Durable facts are **CLAUDE.md**.
+
+**Run `/ossuminc-skills:check-tasks` in the new session.**
+
+The sections below are kept as the record of how the current state was reached.
+
+---
+
+### rc.13: correlations, scope rules, and a crash ✅ **2026-08-13**
+
+Gate 251/122/0 (rc.11) → 253/124/0 (rc.13), through four regressions.
+
+**The task filed on 2026-08-11 came back as compiler behaviour, and it caught
+us.** Three of the four regressions were our own examples breaking the very
+rules we asked for: `set` in a context handler, and `get from state` outside
+the owning entity, twice. Filing a bug against a corpus you also maintain means
+the fix arrives pointed at you — worth expecting rather than being surprised
+by.
+
+**A wrapper that barely fits is evidence, not a curiosity.** The migration
+fence that sets `balance` validated under rc.11 only as `in-app-clauses` — an
+*application* wrapper for an entity example. That was the compiler failing to
+check, showing up as a strange-but-green annotation. rc.13 made it an Error and
+the honest wrapper (`in-clauses`) now works.
+
+**`when !<identifier>` crashes rc.13**, and `!` is accepted nowhere else, so
+the feature is entirely unusable. Skipped with the bug cited rather than
+rewritten — rewriting would have erased the evidence and quietly dropped a
+documented feature.
+
+**Correlations are the first construct where a modelling choice dictates a
+deployment property**: a projector that declares one may not be scaled
+round-robin, because every event bearing a key tuple must reach the instance
+holding that partial. That, and "the timeout block is at-least-once while the
+folds are pure", are the two things a reader cannot infer from the syntax — so
+they lead the documentation rather than trailing it.
+
+---
 
 ### The rc.11 upgrade
 
