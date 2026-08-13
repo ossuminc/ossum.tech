@@ -383,9 +383,11 @@ checker above it is a **gate**: it exits non-zero on failure.
 about the checkout tells you which one is meant — and the `riddlc` on PATH is
 neither of them any more, so the wrong pairing reports confident nonsense.
 
-**`../bin/riddlc` is the 2.0 compiler**, a symlink to `../riddlc-dist/`. The
-Homebrew `riddlc` on PATH lags it badly — verified 2026-08-11: PATH is
-**2.0.0-rc.5** while `../bin` is **2.0.0-rc.11**. rc.9 deprecated the entity
+**`../bin/riddlc` is the 2.0 compiler** — since 2026-08-12 a **native binary
+installed directly at that path**; `../riddlc-dist/` is gone, so the old
+symlink description no longer holds. The Homebrew `riddlc` on PATH lags it
+badly — verified 2026-08-13: PATH is **2.0.0-rc.5** while `../bin` is
+**2.0.0-rc.13**. rc.9 deprecated the entity
 options, so validating the 2.0 docs with the PATH binary silently passes
 examples the real compiler rejects. Run both and compare; never assume.
 
@@ -459,11 +461,11 @@ python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-08-10): the gated set is **191 validated / 36 skipped / 0
-failed**, and **every blanket `"illustrative fragment"` skip is gone** — there
-were 118 of them when the work started. `quickstart.md`, `concepts/`,
-`introduction/` and `references/language-reference.md` are all annotated and
-green. Every remaining skip states its own reason.
+**Status** (2026-08-13, rc.13): the gated set is **253 validated / 124
+skipped / 0 failed**, and **every blanket `"illustrative fragment"` skip is
+gone** — there were 118 of them when the work started. `quickstart.md`,
+`concepts/`, `introduction/` and `references/language-reference.md` are all
+annotated and green. Every remaining skip states its own reason.
 
 Gating `language-reference.md` found seven wrong examples that review had not
 — including an adaptor that violated the isolation-seam rule warned about
@@ -507,6 +509,8 @@ compilers):
 | query response statement | `reply` | `reply` — un-deprecated in rc.10-46; `yield` is for a command's event, and `yield result` is an **Error** |
 | query response declaration | ❌ | `query Q replies result R is …` — `yields` on a query is an Error |
 | `ask` | ❌ | ✅ `let a = ask query Q of entity E` — a **value**, not a statement; requires Q to declare `replies`; an **Error anywhere inside a saga step**, at any nesting depth (rc.11) |
+| `set` / `get from state` | unrestricted | only where the container **owns** state (rc.13) — a context handler and a saga step own none, and state is readable only inside its own entity |
+| projector `correlation` | ❌ | ✅ rc.13 — keyed accumulation of events into one command; completion derived from the command's required fields; `times out after` mandatory |
 | outlet on an entity | ❌ — put it on a `source` | ✅ |
 | entity semantics | `option is event-sourced` | **`event-sourced entity X`** — the option form is `[deprecated]` |
 | alternation | `one of { A, B }` | also `A \| B` (identical; `prettify` emits the words) |
