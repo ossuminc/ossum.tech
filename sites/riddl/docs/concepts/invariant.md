@@ -10,8 +10,8 @@ description: >-
 command PlaceOrder is { note is String }
 -->
 <!-- riddl-prelude
-constant Zero is Natural = "0"
-constant minimumFee is Natural = "5"
+constant Zero is Whole = 0
+constant minimumFee is Natural = 5
 record OpenData is { balance is Natural, quantity is Natural,
   holdAmount is Natural }
 record ClosedData is { balance is Natural }
@@ -97,7 +97,7 @@ inline:
 
 <!-- riddl: in-entity no-prelude=Zero -->
 ```riddl
-constant Zero is Natural = "0"
+constant Zero is Whole = 0
 invariant BalanceNonNegative is balance >= Zero
 ```
 

@@ -11,7 +11,7 @@ event RawOrder is { id is Natural }
 event EnrichedOrder is { id is Natural }
 -->
 <!-- riddl-prelude
-constant AlertThreshold is Natural = "100"
+constant AlertThreshold is Natural = 100
 event TemperatureReading is { value is Natural }
 event TemperatureAlert is { value is Natural }
 event TemperatureMetric is { value is Natural }

@@ -7,9 +7,9 @@ description: >-
 ---
 
 <!-- riddl-prelude
-constant MaxItems is Natural = "100"
-constant Zero is Natural = "0"
-constant HighValueThreshold is Natural = "1000"
+constant MaxItems is Natural = 100
+constant Zero is Whole = 0
+constant HighValueThreshold is Natural = 1000
 type OrderStatus is any of { Pending, InTransit, Delivered }
 record ShippedData is { trackingNumber is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
@@ -120,7 +120,7 @@ everywhere else.
 
     <!-- riddl: in-context no-prelude=MaxItems -->
     ```riddl
-    constant MaxItems is Natural = "100"
+    constant MaxItems is Natural = 100
     ```
 
     and the comparison is a statement, written inside an on-clause:

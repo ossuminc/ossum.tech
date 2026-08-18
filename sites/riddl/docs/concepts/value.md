@@ -7,7 +7,7 @@ description: >-
 ---
 
 <!-- riddl-prelude
-constant MaxItems is Natural = "100"
+constant MaxItems is Natural = 100
 record DoneData is { note is String }
 record SignupData is { email is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
@@ -155,7 +155,7 @@ everywhere else in the language.
 
     <!-- riddl: in-context no-prelude=MaxItems -->
     ```riddl
-    constant MaxItems is Natural = "100"
+    constant MaxItems is Natural = 100
     ```
 
     and the comparison is a statement, written inside an on-clause:

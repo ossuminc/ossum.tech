@@ -343,7 +343,7 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # An `on ...` clause fragment: give it a handler to sit in.
         return (
             "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
-            "    constant ExampleZero is Natural = \"0\"\n"
+            "    constant ExampleZero is Whole = 0\n"
             "    type ExampleLimit is Natural\n"
             "    record ExampleData is { note is String, balance is Natural }\n"
             "    command ExampleCommand is { note is String, amount is Natural }\n"
@@ -377,7 +377,9 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             # rather than being hoisted to a direct field of the state.
             "    record ExampleData is { note is String, itemCount is Natural,\n"
             "      id is String, total is Natural, grandTotal is Natural,\n"
-            "      balance is Natural, recommendation is String }\n"
+            "      balance is Natural, recommendation is String,\n"
+            # A Boolean field so a bare/negated boolean condition has a subject.
+            "      isValid is Boolean }\n"
             "    record ExampleUser is { hasPermission is Boolean }\n"
             # `count` but NOT `total`: a bare `total` already resolves through
             # the state record, and adding a second one makes it ambiguous.

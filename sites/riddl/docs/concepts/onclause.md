@@ -7,7 +7,7 @@ description: >-
 ---
 
 <!-- riddl-prelude
-constant MinimumOrder is Natural = "10"
+constant MinimumOrder is Natural = 10
 record OrderInfo is { id is String, total is Natural }
 command PlaceOrder is { id is String, total is Natural }
 event OrderPlaced is { id is String, total is Natural }

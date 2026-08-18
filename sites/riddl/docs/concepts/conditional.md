@@ -47,7 +47,7 @@ when isValid then {
 
 Identifiers can be negated:
 
-<!-- riddl: skip reason="valid and gated until rc.11; rc.13 CRASHES on `when !<identifier>` (IllegalStateException in stateReadsIn). Filed as riddl task 2026-08-13-when-negated-identifier-crashes.md; restore this directive when it is fixed" -->
+<!-- riddl: in-handler -->
 ```riddl
 when !isValid then {
   error "Order must have at least one item"

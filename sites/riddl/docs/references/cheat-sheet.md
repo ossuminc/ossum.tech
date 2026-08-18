@@ -696,7 +696,7 @@ Wherever a statement needs a value, any of these is accepted:
 
     <!-- riddl: skip reason="a constant beside a condition that would use it; not one construct" -->
     ```riddl
-    constant MaxItems is Natural = "100"
+    constant MaxItems is Natural = 100
     when cart.itemCount > MaxItems then error "too many" end
     ```
 

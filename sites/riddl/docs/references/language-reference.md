@@ -16,12 +16,12 @@ description: >-
     record TotalInputs is { subtotal is Price, taxRate is Price }
     record CartItem is { sku is String, quantity is Integer }
     record ShippedData is { trackingNumber is String }
-    constant Zero is Natural = "0"
-    constant MinimumOrder is Natural = "1"
-    constant MinimumPrice is Natural = "1"
-    constant AlertThreshold is Natural = "10"
-    constant HighValueThreshold is Natural = "1000"
-    constant MaxItems is Natural = "100"
+    constant Zero is Whole = 0
+    constant MinimumOrder is Natural = 1
+    constant MinimumPrice is Natural = 1
+    constant AlertThreshold is Natural = 10
+    constant HighValueThreshold is Natural = 1000
+    constant MaxItems is Natural = 100
     event PriceUpdated is { productId is ProductId, newPrice is Price }
     event OrderPlaced is { id is OrderId, total is Price }
     result OrderInfo is { id is OrderId, total is Price }
@@ -50,7 +50,7 @@ description: >-
     record CartData is { id is CartId, total is Price, items is many CartItem }
     record Product is { id is ProductId, price is Price }
     record AvailIn is { held is Natural, total is Natural }
-    constant minimumFee is Natural = "5"
+    constant minimumFee is Natural = 5
     function Available is { requires AvailIn returns AvailIn ??? }
     record PricingInput is { subtotal is Price, taxRate is Price,
       tax is Price, shipping is Price }
@@ -87,7 +87,7 @@ description: >-
     entity Catalog is {
       state Listed of record ProductRecord is {
         handler CatalogHandler is {
-          on query GetProduct { reply result ProductInfo() }
+          on query GetProduct { reply result ProductInfo(ProductRecord.id, ProductRecord.price) }
         }
       }
     }
@@ -1042,7 +1042,7 @@ handler ProductCommandHandler is {
   }
 
   on query GetProduct {
-    reply result ProductInfo()
+    reply result ProductInfo(ProductRecord.id, ProductRecord.price)
   }
 } with {
   briefly as "Processes commands for product management"
@@ -1349,7 +1349,7 @@ everywhere else.
 
     <!-- riddl: skip reason="elided template; a context-level constant beside a statement" -->
     ```riddl
-    constant MaxItems is Natural = "100"
+    constant MaxItems is Natural = 100
     // ...
     when cart.itemCount > MaxItems then error "too many items" end
     ```
@@ -2578,7 +2578,7 @@ addressed before considering a model ready for translation or code generation.
 3. **Ascribe Shapes**: Write `as <shape>` on any processor with ports, so the
    intent is stated rather than inferred.
 4. **Name Constants**: Comparisons require typed references, so give thresholds
-   names — `constant MaxItems is Natural = "100"` — rather than embedding
+   names — `constant MaxItems is Natural = 100` — rather than embedding
    magic numbers.
 5. **Declare `yields`**: A command or query that declares its response gives
    generators a precise signature and lets the validator check conformance.

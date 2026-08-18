@@ -4,7 +4,7 @@ draft: false
 ---
 
 <!-- riddl-prelude
-constant Zero is Natural = "0"
+constant Zero is Whole = 0
 record ActiveOrderData is { total is Natural }
 record PendingData is { note is String }
 record ActiveData is { note is String }
