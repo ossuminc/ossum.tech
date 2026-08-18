@@ -58,39 +58,40 @@ constants take bare literals (`= 100`), not strings.
 
 ---
 
-## 1e. Document rc.16's new language features
+## 1e. Write USER documentation for rc.16's new features
 
-None of these are documented anywhere yet. Each is in the generated grammar,
-so the syntax is settled; the semantics for several are in
-`../RIDDL-Computational-Model.md`.
+**Correction (2026-08-18):** an earlier draft of this item said these features
+were "documented nowhere". That was wrong. **They are specified in
+`../RIDDL-Tools-To-Do-List.md`**, each as a numbered Part A item carrying the
+ruling, the rationale and an implementation status. What is missing is
+*user-facing* documentation on ossum.tech. That makes this item much cheaper
+than it looked: the semantics are settled and written down, so the work is
+translation for a reader, not reverse-engineering from the grammar.
 
-- **`terminate <value> [with (args)]`** — ends an instance, invoking its
-  `on term`. Target is a value typed `Id(entity E)`, not a processor ref.
-- **`self` / `self.<field>`** — the executing instance; synthesized record
-  (`id`, `version`).
-- **`initiate`** — a value form; the creation counterpart to `terminate`.
-- **Numeric literals** as first-class values, and in `constant` declarations.
-- **Indexed lookup**: `value_ref at <index> {, <index>}`.
-- **`on init` / `on term` take parameters**, making them invocable.
-- **Connector intentions**: `at-least-once`, `at-most-once`, `exactly-once`,
-  `persistent`, written before `connector`. Absent delivery means
-  at-least-once; `at-most-once` is the knowing downgrade.
-- **`Id(<processor-kind> Path)`** — adaptor/context/entity/projector/
-  repository/streamlet, not just entity.
-- **`prompt("...") as <type>`**.
-- **`tell ... to X by <identifier>`**.
-- **A38: a refusal step may name an invariant** rather than prose —
-  `refuses user U <invariant-ref>`.
-- **`!` and `not` are synonyms everywhere** (2026-08-14 ruling); `!` is no
-  longer a separate `when`-only form. `concepts/conditional.md` says
-  "Identifiers can be negated", which is now too narrow.
-- **New UI aliases**: groups gain `scene`/`space`/`zone`; outputs gain
-  `sound`/`speech`/`haptic`; inputs gain `voice`/`gesture`/`gaze`;
-  presentation verbs gain `plays`/`speaks`/`announces`/`vibrates`/`pulses`/
-  `nudges`/`diffuses`/`serve`/`offer`/`taste`. This is a deliberate widening
-  past the screen — worth prose in `concepts/group.md`, not just a table row.
+| Feature | Spec |
+|---|---|
+| `Id(<processor-kind> P)`, `self`, `initiate`, `terminate`, structural addressing | **A71** — five constructs closing one gap; read it whole rather than per-keyword |
+| A message operand may name its **value**, not only its type | **A72** — see 1d; also the origin of the biggest failure group |
+| `set` / `get from state` require something that OWNS state | **A75** — already partly documented; the rule we asked for |
+| Modality aliases: `sound`/`speech`/`haptic`, `voice`/`gesture`/`gaze`, `scene`/`space`/`zone` | **A43** |
+| Presentation verbs: `plays`, `speaks`, `announces`, `vibrates`, `pulses`, `nudges`, `diffuses`, `serve`, `offer`, `taste` | **A46** |
+| A refusal step may cite an **invariant** instead of prose | **A38** |
+| Connector durability/delivery intentions | **A33**, **A34**, **A35** |
+| Correlations in projectors | **A70** — DONE, documented 2026-08-13 |
 
-**Order:** 1d before 1e. A red gate first.
+**Not found in the To-Do List by name:** numeric literals as first-class
+values, indexed lookup (`x at i`), parameters on `on init`/`on term`,
+`prompt(...) as <type>`, and `tell ... by <id>`. They are in the generated
+grammar with explanatory comments; check the To-Do List again under a
+different phrasing before treating any of them as unspecified.
+
+**A43 and A46 deserve prose, not a table row.** The alias sets deliberately
+reach past the screen — sound, speech, haptics, scent, taste, spatial zones —
+and A43's framing is that the input/output/group triad is "already the
+modality-free logical core". That is a point about what RIDDL *is*, and
+`concepts/group.md` currently implies screens.
+
+**Order:** after 1d. A red gate first.
 
 ---
 
