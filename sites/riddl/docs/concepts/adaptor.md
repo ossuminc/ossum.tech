@@ -139,6 +139,21 @@ context's messages.
     Types defined at [domain](domain.md) or [root](root.md) level are shared
     vocabulary common to both sides and are never flagged.
 
+!!! info "Why only adaptors are held to `on other`"
+    `on other` is a fall-through, not a duty: for most processors the general
+    rule is *"nothing to do, omit the clause"*, and a proposal to require it
+    everywhere was **declined** in 2026-08-14. About two thirds of the handlers
+    in `riddl-models` carry one, which is a healthy majority rather than a
+    universal.
+
+    An adaptor is the exception because for a translator there is never
+    nothing to do. It exists to translate **everything** crossing the seam —
+    including messages it was not designed for, where the translation is
+    "I cannot translate that". Doing nothing with an unrecognized message is
+    to drop a turn in a conversation between two contexts, silently, with the
+    far side still waiting. So the adaptor rule is an *application* of the
+    general one, not an exception to it.
+
 ## Options
 
 `circuit-breaker` (0–2 arguments) is valid on an adaptor, tripping the

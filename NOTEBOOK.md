@@ -11,73 +11,66 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-18 — **THE GATE IS RED**
+## HANDOFF — as of 2026-08-18 (end of day)
 
-**Compiler:** `../bin/riddlc` is **2.0.0-rc.16** (restaged 2026-08-18); the
-`build.sbt` pin and the generated grammar both follow it.
+**Compiler:** `../bin/riddlc` is **2.0.0-rc.16**; the pin and the generated
+grammar follow it.
 
-**Gates:** 2.0 — **219 validated / 123 skipped / 35 FAILED, exit 1.** This is
-the first red gate in the project's history and it is **deliberate**, committed
-at `11ee4da`. Forcing green by skipping 35 fences would hide 35 real
-incompatibilities — exactly what this gate exists to catch. 1.31 and the strict
-builds were NOT re-run after the last edits.
+**Gates:** 2.0 — **254 validated / 123 skipped / 0 failed, exit 0**, over all
+of `sites/riddl/docs`. 1.31 — 6/0/0. All five sites `--strict` clean; 80
+cross-site links checked. **The gate is green again** — it was red at 35
+earlier today and no fence was skipped to get there.
 
-**Resume at BACKLOG 1d**, which carries the full grouped tally. The
-investigation is done; what remains is per-fence authoring. Do not re-measure.
+**Next is BACKLOG 1e** — user documentation for rc.16's features. They are
+NOT undocumented: `../RIDDL-Tools-To-Do-List.md` specifies each as a numbered
+Part A item, so the job is translation for a reader, not reverse-engineering.
 
-### What happened
+### The rc.16 migration, in one place
 
-rc.16 is far larger than the rc.13→rc.16 span suggests. First run: **109
-failures**. Reduced to 35 by fixing root causes, not sites:
+109 failures → 0. What it taught:
 
-- **`Natural` now EXCLUDES 0.** `constant Zero is Natural = "0"` fails twice —
-  wrong type, and a string where a numeric literal now belongs. `Whole` admits
-  0. One wrapper constant caused 9 failures by itself.
-- **One prelude line caused 31.** `reply result ProductInfo()` in
-  language-reference's prelude; empty constructors are now checked.
+**Fix preludes and wrappers before fences.** Two edits removed 40 failures:
+one wrapper constant (`ExampleZero`) and one prelude line
+(`reply result ProductInfo()`). Chasing individual fences first would have
+been 40 edits for the same result.
 
-**The pattern worth remembering: fix the prelude and the wrapper first.** Two
-edits removed 40 of the 109. Chasing individual fences first would have been
-40 edits for the same result.
+**A72's Error was deliberate, not an escape.** It emits `[error]` where both
+the item text and the implementing commit's comment say CompletenessWarning —
+because riddl-models was remedied first, which is what unblocked the flip.
+**Read a "blocked/deferred" note as a snapshot, not a standing state**, and ask
+before assuming the compiler is wrong. I nearly filed a bug on it.
 
-**Documentation can be ahead of the compiler.** language-reference already said
-"`OrderPlaced()` against a message that has fields is an Error" while riddlc
-accepted it. rc.16 caught up. When prose states a rule the compiler doesn't
-enforce, that is a pending compiler change as often as it is a doc error.
+**rc.16 proved two containers wrong, not merely incomplete.** `handler
+OrderCommands` and `handler ProductCommandHandler` both write state while
+wrapped in a context, which owns none. Both are `in-entity` now. This is the
+third time a barely-fitting wrapper turned out to be the compiler not
+checking.
 
-### The rc.13 crash is fixed
+**The message-value rule surfaced two real defects** that had been invisible:
+an adaptor clause referencing a binding (`failed.orderId`) it never declared,
+and a `morph` handing `ShippedData` a `trackingNumber` field it does not have.
 
-`when !<identifier>` — filed 2026-08-13, **fixed the same day**, shipped in
-rc.16. The task is in `../riddl/task/done/` with Results confirming every
-acceptance criterion. The fence in `concepts/conditional.md` is restored and
-green; it needed one additive wrapper field (`isValid`), because the crash had
-been masking an ordinary scope error underneath it.
+**Facts worth keeping:** `Natural` excludes 0 — use `Whole`; numeric constants
+take bare literals (`= 100`); a saga step names its input as
+`<RequiresRecord>.field`, not bare; `morph ... with record R` needs a record
+VALUE now.
 
-Its recorded lesson is worth carrying: **enumerate the domain of the FUNCTION,
-not of the nearest-looking type.** `WhenStatement.condition` admits `Identifier`,
-which appears in no other member of that domain, so auditing `Value`
-exhaustively still missed it.
+### Spec notes that are stale
+
+To-Do List items **43** and **46** say *"NOT BUILT (verified 2026-08-14)"*, but
+all their modality and presentation aliases are in the rc.16 grammar. They
+shipped after that check. Trust the generated grammar; tell Reid.
 
 ### Traps
 
 - **`cmd | tail` reports tail's exit status.** Redirect and check `$?`.
-- **Fix preludes and wrappers before fences.** See above.
+- **Fix preludes and wrappers before fences.**
 - **A wrapper that only just fits is evidence the compiler isn't checking.**
 - **Re-run the FULL gate after any wrapper or script edit**, and 1.31 too.
-- **An enumeration must never go in the shared wrapper** — enumerators join the
-  enclosing namespace. A plain field is safe; that is how `isValid` was added.
-- **A probe that passes proves only that a path resolved**, never that it means
-  what you assumed.
-- **The Computational Model doc leads the docs** and is the authority for
-  semantics; check its mtime before writing about a new construct.
-
-### Certainty
-
-**Verified by command:** compiler version, pin, grammar regeneration and diff,
-the 109→35 reduction with a per-file map, and that the rc.13 crash is fixed.
-
-**NOT verified since the last edits:** the 1.31 gate, the five strict builds,
-cross-site links. Run them before trusting anything beyond the 2.0 gate figure.
+- **An enumeration must never go in the shared wrapper**; a plain field is safe.
+- **A probe that passes proves only that a path resolved.**
+- **The Computational Model and the To-Do List lead the docs** and are the
+  authority for semantics — but their implementation notes go stale fast.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
