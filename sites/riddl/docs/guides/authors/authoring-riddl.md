@@ -18,6 +18,8 @@
   event ItemAddedToCart is { cartId: Id(Cart), quantity: Natural }
   event MoneyDeposited is { amount: Money }
   event MoneyWithdrawn is { amount: Money }
+  event OrderPlaced is { orderId: Id(Order) }
+  outlet Events is type MoneyDeposited
   event OrderCompleted is { orderId: Id(Order) }
   event OrderFailed is { orderId: Id(Order), reason: String }
 -->
@@ -435,7 +437,7 @@ event-sourced entity Order is {
 
   state Main of record Order.Fields is {
     handler Behavior is {
-      on command Order.Place { yield event Order.Placed }
+      on command Order.Place { yield event Order.Placed(total = 1) }
       on event Order.Placed { set field Main.total to "1" }
     }
   }
@@ -464,7 +466,7 @@ event-sourced entity Account is {
     handler H is {
       on command Account.Withdraw {
         when prompt("sufficient funds") then {
-          yield event Account.Withdrawn
+          yield event Account.Withdrawn(amount = 1)
         } else {
           error "Insufficient funds"
         } end
@@ -494,7 +496,7 @@ Handlers use pseudocode statements to describe behavior:
 
 ### Common Statements
 
-<!-- riddl: in-context -->
+<!-- riddl: in-entity -->
 ```riddl
 handler OrderCommands is {
   on command PlaceOrder {
@@ -504,9 +506,9 @@ handler OrderCommands is {
     // Validate with conditional
     when prompt("inventory is available") then {
       // Produce an event
-      send event OrderPlaced to outlet Events
+      send event OrderPlaced(orderId = "a value") to outlet Events
       // Update state
-      set field State.status to "Confirmed"
+      set field ExampleEntityData.note to "Confirmed"
     } else {
       // Return an error
       error "Insufficient inventory for order"
@@ -599,12 +601,12 @@ aggregate entity Account is {
   handler Commands is {
     on command Deposit {
       when prompt("amount is positive") then {
-        send event MoneyDeposited to outlet Events
+        send event MoneyDeposited(amount = 1.00) to outlet Events
       } end
     }
     on command Withdraw {
       when prompt("balance >= amount") then {
-        send event MoneyWithdrawn to outlet Events
+        send event MoneyWithdrawn(amount = 1.00) to outlet Events
       } else {
         error "Insufficient funds"
       } end

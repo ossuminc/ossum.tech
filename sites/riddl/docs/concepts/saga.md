@@ -32,15 +32,15 @@ saga CheckoutProcess is {
   returns  record CheckoutOutcome
 
   step TakePayment is {
-    tell command ProcessPayment(orderId) to entity PaymentService
+    tell command ProcessPayment(CheckoutInputs.orderId) to entity PaymentService
   } reverted by {
-    tell command RefundPayment(orderId) to entity PaymentService
+    tell command RefundPayment(CheckoutInputs.orderId) to entity PaymentService
   }
 
   step ReserveStock is {
-    tell command ReserveItems(orderId) to entity Inventory
+    tell command ReserveItems(CheckoutInputs.orderId) to entity Inventory
   } reverted by {
-    tell command ReleaseItems(orderId) to entity Inventory
+    tell command ReleaseItems(CheckoutInputs.orderId) to entity Inventory
   }
 } with {
   option is compensate

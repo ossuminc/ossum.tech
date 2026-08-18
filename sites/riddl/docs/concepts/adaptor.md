@@ -90,8 +90,8 @@ context Orders is {
       on paid: event Payments.PaymentCompleted {
         tell command MarkAsPaid(paid.orderId) to entity Order
       }
-      on event Payments.PaymentFailed {
-        tell command HandlePaymentFailure to entity Order
+      on failed: event Payments.PaymentFailed {
+        tell command HandlePaymentFailure(failed.orderId) to entity Order
       }
       on other {
         error "Unrecognized message from the Payments context"
@@ -103,8 +103,8 @@ context Orders is {
 
   adaptor InventoryAdapter to context Inventory is {
     handler OutboundInventory is {
-      on command ReserveItems {
-        tell command Inventory.ReserveStock to context Inventory
+      on req: command ReserveItems {
+        tell command Inventory.ReserveStock(req.orderId) to context Inventory
       }
       on other {
         error "Unrecognized outbound message"

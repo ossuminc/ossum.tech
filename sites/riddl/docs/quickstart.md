@@ -117,7 +117,7 @@ context Catalog is {
       handler Main is {
         on command CreateProduct {
           do "work out the new product's ID"
-          yield event ProductCreated
+          yield event ProductCreated(id = "a value", name = "a value", price = 1.00, at = "a value")
         }
         on event ProductCreated {
           set field Active.name to ProductCreated.name
@@ -202,13 +202,13 @@ context Shopping is {
       handler Main is {
         on command AddItem {
           do "work out where the item belongs in the cart"
-          yield event ItemAdded
+          yield event ItemAdded(cartId = "a value", productId = "a value", quantity = 1, at = "a value")
         }
         on event ItemAdded {
           do "add or update the item in the cart"
         }
         on query GetContents {
-          reply result CartContents
+          reply result CartContents(items = prompt("the items in the cart"))
         }
       }
     }
@@ -260,7 +260,7 @@ domain OnlineShop is {
         handler Main is {
           on command CreateProduct {
             do "work out the new product's ID"
-            yield event ProductCreated
+            yield event ProductCreated(id = "a value", name = "a value", price = 1.00, at = "a value")
           }
           on event ProductCreated {
             set field Active.name to ProductCreated.name
@@ -311,13 +311,13 @@ domain OnlineShop is {
         handler Main is {
           on command AddItem {
             do "work out where the item belongs in the cart"
-            yield event ItemAdded
+            yield event ItemAdded(cartId = "a value", productId = "a value", quantity = 1, at = "a value")
           }
           on event ItemAdded {
             do "add or update the item in the cart"
           }
           on query GetContents {
-            reply result CartContents
+            reply result CartContents(items = prompt("the items in the cart"))
           }
         }
       } with {

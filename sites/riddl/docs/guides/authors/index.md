@@ -240,7 +240,7 @@ context Catalog is {
         // Commands decide; they do not change state directly.
         on command UpdatePrice {
           when prompt("price is different from current") then {
-            yield event PriceUpdated
+            yield event PriceUpdated(productId = "a value", oldPrice = 1.00, newPrice = 1.00, at = "a value")
           } else {
             error "the new price matches the current price"
           } end
@@ -276,20 +276,20 @@ handler CartHandler is {
     } else {
       do "increment the quantity of the existing item"
     } end
-    send event ItemAdded to outlet Events
+    send event ItemAdded(note = "a value") to outlet Events
   }
 
   on command RemoveItem {
     when prompt("item exists in cart") then {
       do "remove the item from the cart"
-      send event ItemRemoved to outlet Events
+      send event ItemRemoved(note = "a value") to outlet Events
     } else {
       error "Item not found in cart"
     } end
   }
 
   on query GetCartContents {
-    reply result CartContents
+    reply result CartContents(note = "a value")
   }
 } with {
   briefly "Handles shopping cart operations"
@@ -486,7 +486,7 @@ handler OrderHandler is {
   on command CancelOrder {
     do "validate order can be cancelled"
     do "mark the order cancelled"
-    send event OrderCancelled to outlet Events
+    send event OrderCancelled(note = "a value") to outlet Events
   }
 }
 ```
@@ -511,12 +511,12 @@ entity Account is {
     handler ActiveHandler is {
       on command Deposit {
         do "add amount to balance"
-        send event Deposited to outlet Events
+        send event Deposited(amount = 1.00, balance = 1.00, at = "a value") to outlet Events
       }
       on command Withdraw {
         when prompt("sufficient balance") then {
           do "subtract amount from balance"
-          send event Withdrawn to outlet Events
+          send event Withdrawn(amount = 1.00, balance = 1.00, at = "a value") to outlet Events
         } else {
           error "Insufficient funds"
         } end
@@ -549,13 +549,13 @@ entity Order is {
     handler PendingHandler is {
       on command ConfirmPayment {
         morph entity Order to state Paid
-          with record PaidData
-        send event PaymentConfirmed to outlet Events
+          with record PaidData(orderId = "a value", paidAt = "a value")
+        send event PaymentConfirmed(orderId = "a value") to outlet Events
       }
       on command Cancel {
         morph entity Order to state Cancelled
-          with record CancelledData
-        send event OrderCancelled to outlet Events
+          with record CancelledData(orderId = "a value")
+        send event OrderCancelled(note = "a value") to outlet Events
       }
     }
   }
@@ -564,8 +564,8 @@ entity Order is {
     handler PaidHandler is {
       on command Ship {
         morph entity Order to state Shipped
-          with record ShippedData
-        send event OrderShipped to outlet Events
+          with record ShippedData(orderId = "a value", shippedAt = "a value")
+        send event OrderShipped(orderId = "a value") to outlet Events
       }
     }
   }
@@ -599,21 +599,21 @@ saga PlaceOrder is {
   requires PlaceOrderInput
 
   step ReserveInventory is {
-    send command ReserveItems to outlet Commands
+    send command ReserveItems(note = "a value") to outlet Commands
   } reverted by {
-    send command ReleaseReservation to outlet Commands
+    send command ReleaseReservation(note = "a value") to outlet Commands
   }
 
   step ChargePayment is {
-    send command ProcessPayment to outlet Commands
+    send command ProcessPayment(note = "a value") to outlet Commands
   } reverted by {
-    send command RefundPayment to outlet Commands
+    send command RefundPayment(note = "a value") to outlet Commands
   }
 
   step PlaceTheOrder is {
-    send command CreateOrder to outlet Commands
+    send command CreateOrder(note = "a value") to outlet Commands
   } reverted by {
-    send command CancelOrder to outlet Commands
+    send command CancelOrder(note = "a value") to outlet Commands
   }
 } with {
   briefly "Orchestrates the order placement process"

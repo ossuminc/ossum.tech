@@ -961,7 +961,7 @@ event PriceUpdated is {
 Commands should always result in one or more events being emitted. This follows
 the reactive principles of RIDDL:
 
-<!-- riddl: in-context -->
+<!-- riddl: in-entity -->
 ```riddl
 handler ProductCommandHandler is {
   on cmd: command UpdatePrice {
@@ -1029,12 +1029,12 @@ on command DoIt from di: context Other { ??? }
 
 ### Basic Handler Example
 
-<!-- riddl: in-context -->
+<!-- riddl: in-entity -->
 ```riddl
 handler ProductCommandHandler is {
   on upd: command UpdatePrice {
     when upd.newPrice > Zero then
-      set field price to upd.newPrice
+      set field ProductRecord.price to upd.newPrice
       send event PriceUpdated(productId = upd.productId) to outlet Events
     else
       error "Price must be greater than zero"
@@ -1378,7 +1378,7 @@ routes it to a downstream inlet:
 
 <!-- riddl: in-handler -->
 ```riddl
-send event ItemAdded to outlet CartEvents
+send event ItemAdded(sku = "the item") to outlet CartEvents
 send command ProcessPayment(orderId) to outlet PaymentRequests
 ```
 
@@ -1394,7 +1394,7 @@ Delivers a message directly to a processor:
 
 <!-- riddl: in-handler -->
 ```riddl
-tell event ItemAdded to entity Cart
+tell event ItemAdded(sku = "the item") to entity Cart
 tell command ProcessPayment(orderId) to entity PaymentService
 ```
 
@@ -1411,7 +1411,7 @@ declared response without the handler needing to know the sender's identity:
 <!-- riddl: in-handler -->
 ```riddl
 yield event OrderPlaced(id, total)      // in a command handler
-reply result ProductInfo(id, name)      // in a query handler
+reply result ProductInfo(id, price = 9.99)  // in a query handler
 ```
 
 `yield` emits a **command's** declared event. `reply` answers a **query** with
@@ -1565,7 +1565,7 @@ An `else` clause handles the false case:
 ```riddl
 let authorized = user.hasPermission
 when authorized then {
-  send event ActionCompleted to outlet Events
+  send event ActionCompleted(note = "done") to outlet Events
 } else {
   error "User not authorized"
 } end
@@ -1580,10 +1580,10 @@ Pattern matching over a typed subject. The subject is a value reference, a
 ```riddl
 match orderStatus {
   case Pending {
-    tell event OrderPending to entity Order
+    tell event OrderPending(orderId) to entity Order
   }
   case Shipped when order.isPaid {
-    tell event OrderShipped to entity Order
+    tell event OrderShipped(orderId) to entity Order
   }
   default {
     error "Unknown order state"
@@ -1599,7 +1599,7 @@ legal on it:
 ```riddl
 match order.total {
   case >= HighValueThreshold {
-    tell command EscalateReview to entity Review
+    tell command EscalateReview(orderId) to entity Review
   }
   default { do "no escalation needed" }
 }
@@ -1857,17 +1857,17 @@ saga CheckoutProcess is {
   returns record CheckoutOutcome
 
   step TakePayment is {
-    tell command ProcessPayment(orderId) to entity PaymentService
+    tell command ProcessPayment(CheckoutInputs.orderId) to entity PaymentService
   } reverted by {
-    tell command RefundPayment(orderId) to entity PaymentService
+    tell command RefundPayment(CheckoutInputs.orderId) to entity PaymentService
   } with {
     briefly as "Processes payment for the order"
   }
 
   step ReserveStock is {
-    tell command ReserveItems(orderId) to entity Inventory
+    tell command ReserveItems(CheckoutInputs.orderId) to entity Inventory
   } reverted by {
-    tell command ReleaseItems(orderId) to entity Inventory
+    tell command ReleaseItems(CheckoutInputs.orderId) to entity Inventory
   } with {
     briefly as "Holds the items until payment settles"
   }
@@ -2062,7 +2062,7 @@ context DataPipeline is {
     handler EnrichmentHandler is {
       on event OrderEvent {
         do "Look up customer details and product information"
-        send event EnrichedOrderEvent to outlet EnrichedOrders
+        send event EnrichedOrderEvent(OrderEvent.orderId, region = "EU") to outlet EnrichedOrders
       }
     }
   }

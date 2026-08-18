@@ -141,7 +141,7 @@ everywhere else.
 <!-- riddl: in-handler -->
 ```riddl
 when order.isPaid and not order.isCancelled then {
-  send event LoginSucceeded to outlet Events
+  send event LoginSucceeded(who = "the signed-in user") to outlet Events
 } else {
   error "Authentication failed"
 } end
@@ -171,10 +171,10 @@ non-Boolean condition is an **Error**.
 ```riddl
 match order.status {
   case Pending {
-    tell command ProcessOrder to entity OrderProcessor
+    tell command ProcessOrder(orderId) to entity OrderProcessor
   }
   case InTransit when order.isPaid {
-    send event OrderShipped to outlet Events
+    send event OrderShipped(orderId) to outlet Events
   }
   default {
     error "Unknown order status"
@@ -190,7 +190,7 @@ above:
 ```riddl
 match order.total {
   case >= HighValueThreshold {
-    tell command EscalateReview to entity Review
+    tell command EscalateReview(orderId) to entity Review
   }
   default {
     do "handle an ordinary order"
@@ -263,7 +263,7 @@ The arity is checked both ways, and each mistake has its own message:
 
 <!-- riddl: in-handler -->
 ```riddl
-send event ItemAdded to outlet CartEvents
+send event ItemAdded(sku = "the item added") to outlet CartEvents
 tell command ProcessPayment(orderId) to entity PaymentService
 yield event ItemAdded(cart.id)
 reply result CartInfo(cart.id, cart.total)

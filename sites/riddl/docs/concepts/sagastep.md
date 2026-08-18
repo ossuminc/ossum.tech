@@ -60,23 +60,23 @@ saga ProcessPayment is {
   returns  record PaymentOutcome
 
   step ReserveInventory is {
-    tell command ReserveItems(orderId) to entity Inventory
+    tell command ReserveItems(PaymentInputs.orderId) to entity Inventory
   } reverted by {
-    tell command ReleaseReservation(orderId) to entity Inventory
+    tell command ReleaseReservation(PaymentInputs.orderId) to entity Inventory
   } with {
     briefly as "Holds stock while payment is attempted"
   }
 
   step ChargePayment is {
-    tell command ProcessCharge(customerId, amount) to entity PaymentService
+    tell command ProcessCharge(PaymentInputs.customerId, PaymentInputs.amount) to entity PaymentService
   } reverted by {
-    tell command RefundCharge(transactionId) to entity PaymentService
+    tell command RefundCharge(PaymentInputs.transactionId) to entity PaymentService
   }
 
   step PlaceOrder is {
-    tell command CreateOrder(customerId) to entity OrderService
+    tell command CreateOrder(PaymentInputs.customerId) to entity OrderService
   } reverted by {
-    tell command CancelOrder(orderId) to entity OrderService
+    tell command CancelOrder(PaymentInputs.orderId) to entity OrderService
   }
 } with {
   option is compensate

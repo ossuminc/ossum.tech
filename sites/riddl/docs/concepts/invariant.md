@@ -19,6 +19,7 @@ record AvailIn is { held is Natural, total is Natural }
 command Withdraw is { amount is Natural }
 command PlaceOrder is { note is String }
 event PaymentReversed is { note is String }
+command FlagForReview is { reason is String }
 entity Review is { ??? }
 function Available is { requires AvailIn returns AvailIn ??? }
 -->
@@ -284,7 +285,7 @@ name the invariant in a [`when`](statement.md#when-statement) and take action:
 ```riddl
 on event PaymentReversed {
   when not invariant BalanceNonNegative then
-    tell command FlagForReview to entity Review
+    tell command FlagForReview(reason = "balance went negative") to entity Review
   end
 }
 ```

@@ -219,7 +219,7 @@ application context StoreFront is {
 
   handler OrderHandler is {
     on command PlaceOrder {
-      send command CreateOrder to outlet OrdersOut
+      send command CreateOrder(cartId = "a value") to outlet OrdersOut
     }
   }
 }
@@ -429,7 +429,7 @@ domain ECommerce is {
     // Handlers
     handler ProductHandler is {
       on command SearchProducts {
-        send query FindProducts to outlet CatalogOut
+        send query FindProducts(text = "a value") to outlet CatalogOut
       }
       on result ProductList {
         put result ProductList(matches = ProductList.matches) to output ProductGrid
@@ -438,7 +438,7 @@ domain ECommerce is {
 
     handler CartHandler is {
       on command RemoveFromCart {
-        send command RemoveCartItem to outlet CartOut
+        send command RemoveCartItem(item = "a value") to outlet CartOut
       }
     }
 
@@ -447,7 +447,7 @@ domain ECommerce is {
         do "move the user to the CheckoutFlow group"
       }
       on command ProcessPayment {
-        send command ChargePayment to outlet PaymentsOut
+        send command ChargePayment(amount = 1.00) to outlet PaymentsOut
       }
     }
   }

@@ -117,7 +117,7 @@ context Fulfillment is {
         on event PaymentTaken { set field RecordFulfillment.paidAmount to "the amount paid" }
       }
     } times out after "30 days" {
-      tell command ReportStalled to entity Monitor
+      tell command ReportStalled(orderId = "the stalled order") to entity Monitor
     }
   }
 }

@@ -55,7 +55,7 @@ processor OrderEnricher as flow is {
   handler Enrich is {
     on event OrderEvent {
       do "Look up customer details and product information"
-      send event EnrichedOrderEvent to outlet EnrichedOrders
+      send event EnrichedOrderEvent(OrderEvent.id) to outlet EnrichedOrders
     }
   }
 }

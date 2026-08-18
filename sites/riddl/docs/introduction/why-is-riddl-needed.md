@@ -120,7 +120,7 @@ handler OrderHandler is {
     do "Validate inventory availability for all items"
     do "Calculate total including tax and shipping"
     do "Reserve inventory and create order record"
-    send event OrderCreated to outlet Events
+    send event OrderCreated(id = "a value") to outlet Events
   }
 }
 ```
