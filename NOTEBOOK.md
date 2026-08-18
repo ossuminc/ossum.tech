@@ -11,83 +11,75 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-13
+## HANDOFF — as of 2026-08-18 — **THE GATE IS RED**
 
-**All figures below were run in this session, not recalled.**
+**Compiler:** `../bin/riddlc` is **2.0.0-rc.16** (restaged 2026-08-18); the
+`build.sbt` pin and the generated grammar both follow it.
 
-**State:** branch `main`, ahead of `origin/main`, tree clean. sbt 2.0.6.
+**Gates:** 2.0 — **219 validated / 123 skipped / 35 FAILED, exit 1.** This is
+the first red gate in the project's history and it is **deliberate**, committed
+at `11ee4da`. Forcing green by skipping 35 fences would hide 35 real
+incompatibilities — exactly what this gate exists to catch. 1.31 and the strict
+builds were NOT re-run after the last edits.
 
-**Compiler:** `../bin/riddlc` is **`2.0.0-rc.13`**, a **native binary at that
-path** — `../riddlc-dist/` is gone, so anything describing it as a symlink is
-stale. `build.sbt`'s pin matches exactly. Homebrew's `riddlc` on PATH is
-**2.0.0-rc.5** and is the WRONG compiler for the 2.0 docs.
+**Resume at BACKLOG 1d**, which carries the full grouped tally. The
+investigation is done; what remains is per-fence authoring. Do not re-measure.
 
-**Gates:** 2.0 — **253 validated / 124 skipped / 0 failed, exit 0** over all
-of `sites/riddl/docs`; 1.31 — 6/0/0. All five sites `--strict` clean; 80
-cross-site links checked.
+### What happened
 
-**`task/` holds only `done/`.** Nothing awaits triage here — but see below for
-two tasks filed INTO `../riddl/task/`.
+rc.16 is far larger than the rc.13→rc.16 span suggests. First run: **109
+failures**. Reduced to 35 by fixing root causes, not sites:
 
-### Open against riddl, not against this repo
+- **`Natural` now EXCLUDES 0.** `constant Zero is Natural = "0"` fails twice —
+  wrong type, and a string where a numeric literal now belongs. `Whole` admits
+  0. One wrapper constant caused 9 failures by itself.
+- **One prelude line caused 31.** `reply result ProductInfo()` in
+  language-reference's prelude; empty constructors are now checked.
 
-- **`2026-08-13-when-negated-identifier-crashes.md`** — rc.13 throws
-  `IllegalStateException` in `stateReadsIn` on `when !<identifier>`. It is the
-  only accepted spelling of `!` in the language, and it crashes. One fence in
-  `concepts/conditional.md` is skipped citing it; **restore that directive
-  when the fix lands.**
-- **`2026-08-11-statement-scope-holes.md`** — LANDED in rc.13 (`0f06d85d9`).
-  The new rules caught three of our own examples, all genuinely wrong.
+**The pattern worth remembering: fix the prelude and the wrapper first.** Two
+edits removed 40 of the 109. Chasing individual fences first would have been
+40 edits for the same result.
 
-### rc.13 in one line each
+**Documentation can be ahead of the compiler.** language-reference already said
+"`OrderPlaced()` against a message that has fields is an Error" while riddlc
+accepted it. rc.16 caught up. When prose states a rule the compiler doesn't
+enforce, that is a pending compiler change as often as it is a doc error.
 
-- **New feature: projector `correlation` (A70)** — the only grammar change.
-  Documented in `concepts/projector.md`, `language-reference.md` and the cheat
-  sheet, from the Computational Model §6.2/§6.5-§6.8.
-- **`set`/`get from state` now require a container that owns state.**
-- **Streamlet arity fixed** — sink/source take any port count. **Our table was
-  already right**; the compiler was wrong. No doc change.
+### The rc.13 crash is fixed
+
+`when !<identifier>` — filed 2026-08-13, **fixed the same day**, shipped in
+rc.16. The task is in `../riddl/task/done/` with Results confirming every
+acceptance criterion. The fence in `concepts/conditional.md` is restored and
+green; it needed one additive wrapper field (`isValid`), because the crash had
+been masking an ordinary scope error underneath it.
+
+Its recorded lesson is worth carrying: **enumerate the domain of the FUNCTION,
+not of the nearest-looking type.** `WhenStatement.condition` admits `Identifier`,
+which appears in no other member of that domain, so auditing `Value`
+exhaustively still missed it.
 
 ### Traps
 
 - **`cmd | tail` reports tail's exit status.** Redirect and check `$?`.
-- **A wrapper that only *just* fits can be evidence the compiler isn't
-  checking.** migration's state-writing fence validated only as
-  `in-app-clauses` under rc.11 — nonsense for an entity example, and rc.13
-  proved it so. Treat an odd-but-passing wrapper as a smell.
-- **The Computational Model doc is updated ahead of the docs** and is the
-  authority for semantics. Check it (and its mtime) before writing about a new
-  construct; §6 gained the whole correlation section on 2026-08-11.
-- **A commit message can be historical by release time** — `d2fcf9972` shows
-  `yields record R`, which `dd5f539f0` changed to `yields command C`. The
-  generated grammar is the authority.
+- **Fix preludes and wrappers before fences.** See above.
+- **A wrapper that only just fits is evidence the compiler isn't checking.**
 - **Re-run the FULL gate after any wrapper or script edit**, and 1.31 too.
-- **An enumeration must never go in the shared wrapper** — enumerators join
-  the enclosing namespace.
-- **Nothing in a prelude may depend on an entry a fence might strip** with
-  `no-prelude`.
-- **`in-domain` fences never see the page prelude.**
-- **A hand-rolled probe filtering only `[error]`/`[severe]` will lie**; the gate
-  also fails on `[deprecated]`. And a probe that *passes* proves only that a
-  path resolved — never that it resolved to what you assumed. Both cost a
-  wrong claim this week.
+- **An enumeration must never go in the shared wrapper** — enumerators join the
+  enclosing namespace. A plain field is safe; that is how `isValid` was added.
+- **A probe that passes proves only that a path resolved**, never that it means
+  what you assumed.
+- **The Computational Model doc leads the docs** and is the authority for
+  semantics; check its mtime before writing about a new construct.
 
 ### Certainty
 
-**Verified by command:** git state, compiler version, the pin, artifact
-resolution, both gates with real exit status, all five strict builds,
-cross-site links, the grammar diff, and every correlation rule documented
-(including both Errors, quoted verbatim from riddlc).
+**Verified by command:** compiler version, pin, grammar regeneration and diff,
+the 109→35 reduction with a per-file map, and that the rc.13 crash is fixed.
 
-**Assumed, not re-verified:** BACKLOG item 5's 18 site items.
-
-### Pointers
-
-Open work is **BACKLOG.md** — 1c is live. Durable facts are **CLAUDE.md**.
+**NOT verified since the last edits:** the 1.31 gate, the five strict builds,
+cross-site links. Run them before trusting anything beyond the 2.0 gate figure.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
-
-The sections below are kept as the record of how the current state was reached.
 
 ---
 

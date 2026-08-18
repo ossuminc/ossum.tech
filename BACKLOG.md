@@ -23,7 +23,78 @@ fixed (commit `470b436`).
 
 ---
 
-## 1c. The RBBQ tutorial is 73 skips and 0 validated  ← START HERE
+## 1d. Finish the rc.16 migration — THE GATE IS RED  ← START HERE
+
+**State:** 219 validated / 123 skipped / **35 failed**, exit 1, at commit
+`11ee4da`. This is the only red gate in the project's history and it is
+deliberate: skipping the 35 would hide real incompatibilities.
+
+**Do not re-derive the analysis.** 109 failures were reduced to 35 by fixing
+root causes; what remains is per-fence authoring, not investigation. The
+grouped tally, measured 2026-08-18 against rc.16:
+
+| n | Cause | Fix |
+|---|---|---|
+| ~24 | *"'X' in this 'send'/'tell'/'yield' names a message type, not a value, so nothing says where its N field(s) come from"* | give the message a constructor with values from scope: `send event Ev to outlet O` → `send event Ev(field = ...) to outlet O` |
+| 4 | *"Value reference 'orderId' is not a 'let'-local, an 'on init'/'on term' parameter, …"* | saga/sagastep steps referencing `requires` fields that are no longer ambient |
+| 3 | *"Context 'X' has duplicate content names"* | `guides/authors/authoring-riddl.md` fences colliding with the page prelude — needs `no-prelude=` |
+| 2 | *"'set' is not allowed in Context 'X', which owns no state to write"* | rc.13's rule, two sites still on the old shape |
+| 1 | record type named where a value is required | same as the 24, for a `morph` operand |
+
+**Failures by file:** `references/language-reference.md` 9,
+`guides/authors/index.md` 6, `guides/authors/authoring-riddl.md` 4,
+`concepts/statement.md` 4, `quickstart.md` 3,
+`guides/authors/design/ui-modeling.md` 2, and one each in
+`introduction/why-is-riddl-needed.md`, `concepts/{sagastep,saga,projector,
+processor,invariant,adaptor}.md`.
+
+**The rule behind the big group is worth stating in the docs, not just
+obeying:** a message named without a constructor says nothing about where its
+field values come from, so RIDDL now requires the constructor. That belongs in
+`concepts/message.md` and `concepts/statement.md` once the fences are fixed.
+
+**Two facts to keep:** `Natural` excludes 0 — use `Whole`; and numeric
+constants take bare literals (`= 100`), not strings.
+
+---
+
+## 1e. Document rc.16's new language features
+
+None of these are documented anywhere yet. Each is in the generated grammar,
+so the syntax is settled; the semantics for several are in
+`../RIDDL-Computational-Model.md`.
+
+- **`terminate <value> [with (args)]`** — ends an instance, invoking its
+  `on term`. Target is a value typed `Id(entity E)`, not a processor ref.
+- **`self` / `self.<field>`** — the executing instance; synthesized record
+  (`id`, `version`).
+- **`initiate`** — a value form; the creation counterpart to `terminate`.
+- **Numeric literals** as first-class values, and in `constant` declarations.
+- **Indexed lookup**: `value_ref at <index> {, <index>}`.
+- **`on init` / `on term` take parameters**, making them invocable.
+- **Connector intentions**: `at-least-once`, `at-most-once`, `exactly-once`,
+  `persistent`, written before `connector`. Absent delivery means
+  at-least-once; `at-most-once` is the knowing downgrade.
+- **`Id(<processor-kind> Path)`** — adaptor/context/entity/projector/
+  repository/streamlet, not just entity.
+- **`prompt("...") as <type>`**.
+- **`tell ... to X by <identifier>`**.
+- **A38: a refusal step may name an invariant** rather than prose —
+  `refuses user U <invariant-ref>`.
+- **`!` and `not` are synonyms everywhere** (2026-08-14 ruling); `!` is no
+  longer a separate `when`-only form. `concepts/conditional.md` says
+  "Identifiers can be negated", which is now too narrow.
+- **New UI aliases**: groups gain `scene`/`space`/`zone`; outputs gain
+  `sound`/`speech`/`haptic`; inputs gain `voice`/`gesture`/`gaze`;
+  presentation verbs gain `plays`/`speaks`/`announces`/`vibrates`/`pulses`/
+  `nudges`/`diffuses`/`serve`/`offer`/`taste`. This is a deliberate widening
+  past the screen — worth prose in `concepts/group.md`, not just a table row.
+
+**Order:** 1d before 1e. A red gate first.
+
+---
+
+## 1c. The RBBQ tutorial is 73 skips and 0 validated
 
 **What:** `tutorials/rbbq/` is the most-read tree and contributes **nothing**
 to the gate: all 73 of its fences carry one identical skip — *"quoted verbatim
