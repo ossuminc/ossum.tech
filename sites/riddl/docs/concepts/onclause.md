@@ -9,7 +9,7 @@ description: >-
 <!-- riddl-prelude
 constant MinimumOrder is Natural = 10
 record OrderInfo is { id is String, total is Natural }
-command PlaceOrder is { id is String, total is Natural }
+command PlaceOrder yields event OrderPlaced is { id is String, total is Natural }
 event OrderPlaced is { id is String, total is Natural }
 command DoIt is { note is String }
 -->
@@ -63,6 +63,8 @@ declaration `p1: String`, read as "`ord` has type `command PlaceOrder`":
 on ord: command PlaceOrder {
   when ord.total > MinimumOrder then
     yield event OrderPlaced(id = ord.id, total = ord.total)
+  else
+    error "an order must reach the minimum"
   end
 }
 ```

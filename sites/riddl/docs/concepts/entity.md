@@ -170,7 +170,7 @@ events into a stream:
 <!-- riddl: in-context -->
 ```riddl
 entity Order is {
-  outlet OrderEvents is type OrderEvent
+  outlet OrderEvents is event OrderPlaced
 
   initial state Active of record OrderData is {
     handler H is {

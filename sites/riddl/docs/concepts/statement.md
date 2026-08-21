@@ -19,12 +19,15 @@ event LoginSucceeded is { who is String }
 event OrderShipped is { orderId is String }
 event Withdrawn is { amount is Natural }
 command Withdraw yields event Withdrawn is { amount is Natural }
+command AddItem yields event ItemAdded is { sku is String }
+query GetCart replies result CartInfo is { id is String }
 command ProcessOrder is { orderId is String }
 command ProcessPayment is { orderId is String }
 command EscalateReview is { orderId is String }
 result CartInfo is { id is String, total is Natural }
 outlet CartEvents is event ItemAdded
-outlet Events is event LoginSucceeded
+type StatementEvent is LoginSucceeded | OrderShipped
+outlet Events is type StatementEvent
 outlet Shipments is event LineShipped
 entity OrderProcessor is { ??? }
 entity Review is { ??? }
@@ -92,7 +95,7 @@ A constructor builds a [message](message.md) or record inline. Arguments are
 positional first, then named, and are checked against the target's fields for
 count, name, order and (best effort) type:
 
-<!-- riddl: in-handler -->
+<!-- riddl: in-yielding-handler -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 ```
@@ -261,12 +264,22 @@ The arity is checked both ways, and each mistake has its own message:
   the sender's identity
 - **reply** — answer a **query** with its declared result
 
-<!-- riddl: in-handler -->
+<!-- riddl: in-clauses -->
 ```riddl
-send event ItemAdded(sku = "the item added") to outlet CartEvents
-tell command ProcessPayment(orderId) to entity PaymentService
-yield event ItemAdded(cart.id)
-reply result CartInfo(cart.id, cart.total)
+on add: command AddItem {
+  send event ItemAdded(sku = add.sku) to outlet CartEvents
+  tell command ProcessPayment(orderId = add.sku) to entity PaymentService
+  yield event ItemAdded(sku = add.sku)   // AddItem's declared event
+}
+```
+
+`reply` is the query half of the same idea:
+
+<!-- riddl: in-clauses -->
+```riddl
+on cart: query GetCart {
+  reply result CartInfo(id = cart.id, total = 1)   // GetCart's declared result
+}
 ```
 
 !!! warning "`send … to inlet` is deprecated"

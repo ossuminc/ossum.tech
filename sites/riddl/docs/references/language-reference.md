@@ -73,12 +73,14 @@ description: >-
     command ConfirmOrder is { id is OrderId }
     command ShipOrder is { trackingNumber is String }
     command EscalateReview is { id is OrderId }
-    command Withdraw is { amount is Natural }
-    outlet Events is type PriceUpdated
+    command Withdraw yields event Withdrawn is { amount is Natural }
+    type ExampleEvent is PriceUpdated | ActionCompleted
+    outlet Events is type ExampleEvent
     outlet CartEvents is type ItemAdded
     outlet PaymentRequests is type ProcessPayment
     outlet Shipments is type LineShipped
-    outlet OrderEvents is type OrderPlaced
+    type OrderLifecycle is OrderPlaced | OrderPaymentReceived
+    outlet OrderEvents is type OrderLifecycle
     entity Cart is {
       state Filling of record CartData is {
         handler CartHandler is { on event ItemAdded { ??? } }
@@ -1035,7 +1037,7 @@ handler ProductCommandHandler is {
   on upd: command UpdatePrice {
     when upd.newPrice > Zero then
       set field ProductRecord.price to upd.newPrice
-      send event PriceUpdated(productId = upd.productId) to outlet Events
+      yield event PriceUpdated(productId = upd.productId, newPrice = upd.newPrice)
     else
       error "Price must be greater than zero"
     end
@@ -1222,7 +1224,7 @@ needs a value, it accepts any of these forms:
 A constructor builds a message or a record inline. Arguments are positional
 first, then named:
 
-<!-- riddl: in-handler -->
+<!-- riddl: in-yielding-handler -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total)
 ```
@@ -1408,10 +1410,18 @@ These are the statement halves of the two pairings described under
 [`yields` and `replies`](#the-yields-and-replies-clauses). Both produce a
 declared response without the handler needing to know the sender's identity:
 
-<!-- riddl: in-handler -->
+<!-- riddl: in-clauses -->
 ```riddl
-yield event OrderPlaced(id, total)      // in a command handler
-reply result ProductInfo(id, price = 9.99)  // in a query handler
+on ord: command PlaceOrder {
+  yield event OrderPlaced(ord.id, ord.total)
+}
+```
+
+<!-- riddl: in-clauses -->
+```riddl
+on query GetProduct {
+  reply result ProductInfo(id, price = 9.99)
+}
 ```
 
 `yield` emits a **command's** declared event. `reply` answers a **query** with

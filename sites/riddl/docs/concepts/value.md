@@ -64,7 +64,7 @@ shadowed inside nested blocks.
 A constructor builds a [message](message.md) or record inline, rather than
 requiring it be assembled elsewhere first:
 
-<!-- riddl: in-handler -->
+<!-- riddl: in-yielding-handler -->
 ```riddl
 yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 morph entity Order to state Done with record DoneData(note = "fulfilled")

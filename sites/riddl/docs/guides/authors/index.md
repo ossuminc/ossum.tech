@@ -14,14 +14,19 @@ weight: 5
   type CartId is String
   type PaymentInfo is String
   type OrderStatus is any of { Pending, Confirmed, Cancelled }
-  outlet Events is event ItemAdded
-  outlet Commands is command ReserveItems
+  // An outlet's declared type is a CONTRACT: rc.18 makes a `send` naming a
+  // message the outlet does not admit an Error. Alternations widen it.
+  type CartEvent is ItemAdded | ItemRemoved | OrderCancelled
+  type SagaCommand is ReserveItems | ReleaseReservation | ProcessPayment
+    | RefundPayment | CreateOrder | CancelOrder
+  outlet Events is type CartEvent
+  outlet Commands is type SagaCommand
   event ItemAdded is { note is String }
   event ItemRemoved is { note is String }
   event OrderCancelled is { note is String }
   command AddItem is { note is String }
   command RemoveItem is { note is String }
-  query GetCartContents is { note is String }
+  query GetCartContents replies result CartContents is { note is String }
   result CartContents is { note is String }
   command ReserveItems is { note is String }
   command ReleaseReservation is { note is String }
@@ -506,17 +511,21 @@ entity Account is {
   event Deposited is { amount is Money, balance is Money, at is TimeStamp }
   event Withdrawn is { amount is Money, balance is Money, at is TimeStamp }
 
+  // An entity publishes through its OWN outlet, never its context's.
+  type AccountEvent is Deposited | Withdrawn
+  outlet AccountEvents is type AccountEvent
+
   record ActiveData is { balance is Money }
   state Active of record ActiveData is {
     handler ActiveHandler is {
       on command Deposit {
         do "add amount to balance"
-        send event Deposited(amount = 1.00, balance = 1.00, at = "a value") to outlet Events
+        send event Deposited(amount = 1.00, balance = 1.00, at = "a value") to outlet AccountEvents
       }
       on command Withdraw {
         when prompt("sufficient balance") then {
           do "subtract amount from balance"
-          send event Withdrawn(amount = 1.00, balance = 1.00, at = "a value") to outlet Events
+          send event Withdrawn(amount = 1.00, balance = 1.00, at = "a value") to outlet AccountEvents
         } else {
           error "Insufficient funds"
         } end
@@ -540,6 +549,10 @@ entity Order is {
   event PaymentConfirmed is { orderId is OrderId }
   event OrderShipped is { orderId is OrderId }
 
+  // OrderCancelled comes from the page vocabulary; an alternation may name it.
+  type OrderLifecycleEvent is PaymentConfirmed | OrderShipped | OrderCancelled
+  outlet OrderEvents is type OrderLifecycleEvent
+
   record PendingData is { orderId is OrderId }
   record PaidData is { orderId is OrderId, paidAt is TimeStamp }
   record ShippedData is { orderId is OrderId, shippedAt is TimeStamp }
@@ -550,12 +563,12 @@ entity Order is {
       on command ConfirmPayment {
         morph entity Order to state Paid
           with record PaidData(orderId = "a value", paidAt = "a value")
-        send event PaymentConfirmed(orderId = "a value") to outlet Events
+        send event PaymentConfirmed(orderId = "a value") to outlet OrderEvents
       }
       on command Cancel {
         morph entity Order to state Cancelled
           with record CancelledData(orderId = "a value")
-        send event OrderCancelled(note = "a value") to outlet Events
+        send event OrderCancelled(note = "a value") to outlet OrderEvents
       }
     }
   }
@@ -565,7 +578,7 @@ entity Order is {
       on command Ship {
         morph entity Order to state Shipped
           with record ShippedData(orderId = "a value", shippedAt = "a value")
-        send event OrderShipped(orderId = "a value") to outlet Events
+        send event OrderShipped(orderId = "a value") to outlet OrderEvents
       }
     }
   }

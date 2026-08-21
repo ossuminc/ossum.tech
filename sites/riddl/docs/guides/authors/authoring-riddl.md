@@ -19,7 +19,8 @@
   event MoneyDeposited is { amount: Money }
   event MoneyWithdrawn is { amount: Money }
   event OrderPlaced is { orderId: Id(Order) }
-  outlet Events is type MoneyDeposited
+  type AccountEvent is MoneyDeposited | MoneyWithdrawn | OrderPlaced
+  outlet Events is type AccountEvent
   event OrderCompleted is { orderId: Id(Order) }
   event OrderFailed is { orderId: Id(Order), reason: String }
 -->

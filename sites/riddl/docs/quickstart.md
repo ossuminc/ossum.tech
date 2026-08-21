@@ -180,7 +180,7 @@ context Shopping is {
     items is CartItem*
   }
 
-  query GetContents is { cartId is CartId }
+  query GetContents replies result CartContents is { cartId is CartId }
   result CartContents is { items is CartItem* }
 
   event-sourced entity Cart is {
@@ -289,7 +289,7 @@ domain OnlineShop is {
       items is CartItem*
     }
 
-    query GetContents is { cartId is CartId }
+    query GetContents replies result CartContents is { cartId is CartId }
     result CartContents is { items is CartItem* }
 
     event-sourced entity Cart is {

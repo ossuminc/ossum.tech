@@ -22,6 +22,10 @@ readers.
     <!-- riddl: in-app-clauses -->    as in-clauses, but an `application` handler
     <!-- riddl: in-function -->       wrap in a function body (for `return`)
     <!-- riddl: in-record -->         wrap in a record (for a bare field declaration)
+    <!-- riddl: in-yielding-handler --> as in-handler, but the handled command
+                                      declares `yields event OrderPlaced`, so a
+                                      bare `yield` fragment is tidy. The PAGE
+                                      must define `event OrderPlaced`.
     <!-- riddl: skip -->              not RIDDL, or deliberately invalid
     <!-- riddl: skip reason=... -->   same, with the reason recorded
 
@@ -99,7 +103,7 @@ ATTEMPTS = (
     "standalone", "in-domain", "in-context", "in-entity", "in-handler",
     "in-app-context", "in-group", "in-application", "in-app-clauses",
     "in-function", "in-record", "in-clauses", "in-usecase", "in-epic",
-    "in-epic-story",
+    "in-epic-story", "in-yielding-handler",
 )
 # The head of a top-level prelude entry: a keyword and the name it defines.
 PRELUDE_ENTRY = re.compile(
@@ -355,7 +359,7 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             + ind(body, 10) + "\n"
             "        }\n      }\n    }\n  }\n}\n"
         )
-    if kind == "in-handler":
+    if kind in ("in-handler", "in-yielding-handler"):
         # Statement-level fragment: give it an on-clause to live in.
         # The handled command carries a nested `cart` record so that the
         # dotted references docs actually write -- `cart.itemCount` -- have
@@ -383,8 +387,15 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    record ExampleUser is { hasPermission is Boolean }\n"
             # `count` but NOT `total`: a bare `total` already resolves through
             # the state record, and adding a second one makes it ambiguous.
-            "    command ExampleCommand is { note is String, cart is ExampleData,\n"
-            "      order is ExampleOrder, orderId is String, amount is Natural,\n"
+            # in-yielding-handler declares the response contract so a bare
+            # `yield` fragment does not draw "declares no 'yields' clause".
+            # It CANNOT be folded into in-handler: with `yields` declared,
+            # every clause that does NOT yield becomes an Error ("does not
+            # yield it on every path") -- verified against rc.20-2.
+            + ("    command ExampleCommand yields event OrderPlaced is { note is String, cart is ExampleData,\n"
+               if kind == "in-yielding-handler" else
+               "    command ExampleCommand is { note is String, cart is ExampleData,\n")
+            + "      order is ExampleOrder, orderId is String, amount is Natural,\n"
             "      limits is ExampleLimit, rate is Natural, subtotal is Natural,\n"
             "      count is Natural, user is ExampleUser }\n"
             "    entity ExampleEntity is {\n"
