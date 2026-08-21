@@ -3,6 +3,26 @@ title: "Front of House Context"
 description: "Reservations, table orders, and billing in the Restaurant domain"
 ---
 
+<!-- riddl-domain-prelude
+context Kitchen is {
+  command ReceiveTicket is { kitchenTicketId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type ReservationId is Id(Reservation)
+type GuestName is String(1,100)
+record StoredReservation is { reservationId: ReservationId }
+event ReservationMade is { reservationId: ReservationId }
+event ReservationConfirmed is { reservationId: ReservationId }
+event ConfirmReservationRejected is { reservationId: ReservationId, rejectionReason: String(1,500) }
+type ReservationEvent is ReservationMade | ReservationConfirmed | ConfirmReservationRejected
+entity Reservation is { ??? }
+repository ReservationRepository is { ??? }
+command PersistReservationConfirmed is { reservationId: ReservationId }
+record MenuItemInfo is { menuItemName: String(1,200) }
+-->
+
 # Front of House Context
 
 The Front of House context manages the customer-facing operations
@@ -35,63 +55,11 @@ reservations). Key pain points addressed:
 The context defines shared types for reservations, orders, and
 payments:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ReservationId,GuestName -->
 ```riddl
-type ReservationId is Id(FrontOfHouse.Reservation) with {
-  briefly "Reservation identifier"
-  described by "Unique identifier for a reservation."
-}
+type ReservationId is Id(Reservation)
 
-type TableOrderId is Id(FrontOfHouse.TableOrder) with {
-  briefly "Table order identifier"
-  described by "Unique identifier for a dine-in table order."
-}
-
-type TableNumber is Natural with {
-  briefly "Table number"
-  described by "Physical table number in the restaurant."
-}
-
-type PartySize is Natural with {
-  briefly "Party size"
-  described by "Number of guests in the party."
-}
-
-type ReservationStatus is any of {
-  Requested,
-  Confirmed,
-  Seated,
-  Completed,
-  Cancelled,
-  NoShow
-} with {
-  briefly "Reservation status"
-  described by "Current status of a reservation."
-}
-
-type OrderStatus is any of {
-  DraftStatus,
-  SubmittedStatus,
-  InPreparationStatus,
-  ReadyToServeStatus,
-  BillPresentedStatus,
-  PaymentCompleteStatus,
-  ClosedStatus
-} with {
-  briefly "Order status"
-  described by "Current status of a table order."
-}
-
-type PaymentMethod is any of {
-  Cash,
-  CreditCard,
-  DebitCard,
-  MobilePayment,
-  GiftCard
-} with {
-  briefly "Payment method"
-  described by "Method used to pay for the order."
-}
+type GuestName is String(1,100)
 ```
 
 Notice the `Id()` type constructor — `ReservationId` is typed as
@@ -101,68 +69,15 @@ boundaries.
 
 The context also defines record types for structured data:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=MenuItemInfo -->
 ```riddl
-type MenuItemInfo is {
-  itemCode is String(1, 50) with {
-    briefly "Item code"
-    described by "Identifier code for the menu item."
-  }
-  itemName is String(1, 200) with {
-    briefly "Item name"
-    described by "Display name of the menu item."
-  }
-  itemPrice is Decimal(8, 2) with {
-    briefly "Price"
-    described by "Price of the menu item."
-  }
-  itemCategory is String(1, 50) with {
-    briefly "Category"
-    described by "Category such as appetizer, entree, drink, dessert."
-  }
-} with {
-  briefly "Menu item"
-  described by "An item from the restaurant menu."
-}
-
-type OrderLine is {
-  orderLineItem is MenuItemInfo with {
-    briefly "Item"
-    described by "The menu item ordered."
-  }
-  orderLineQuantity is Natural with {
-    briefly "Quantity"
-    described by "Number of this item ordered."
-  }
-  orderLineNotes is optional String(1, 500) with {
-    briefly "Notes"
-    described by "Special instructions for this item."
-  }
-} with {
-  briefly "Order line"
-  described by "A single line item in an order."
-}
-
-type PaymentInfo is {
-  paymentMethod is PaymentMethod with {
-    briefly "Method"
-    described by "Payment method used."
-  }
-  paymentAmount is Decimal(10, 2) with {
-    briefly "Amount"
-    described by "Amount paid."
-  }
-  tipAmount is optional Decimal(8, 2) with {
-    briefly "Tip"
-    described by "Tip amount if applicable."
-  }
-  transactionRef is optional String(1, 100) with {
-    briefly "Transaction reference"
-    described by "External payment transaction reference."
-  }
-} with {
-  briefly "Payment information"
-  described by "Payment details for an order."
+// A LOCAL copy of what this context needs about a menu item, fed by an
+// adaptor from Corporate. Front of House does not reach into MenuManagement
+// for it -- that would bind the two contexts together.
+record MenuItemInfo is {
+  menuItemName: String(1,200)
+  menuItemPrice: Decimal(10,2)
+  menuItemAvailable: Boolean
 }
 ```
 
@@ -171,63 +86,57 @@ type PaymentInfo is {
 The `Reservation` entity models the full lifecycle from request
 through confirmation, seating, or cancellation:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=Reservation,ReservationMade,ReservationConfirmed,ConfirmReservationRejected,ReservationCommand,ReservationEvent -->
 ```riddl
-entity Reservation is {
+event-sourced entity Reservation as flow is {
 
-  command MakeReservation is {
-    reservationId is ReservationId
-    guestName is GuestName
-    guestPhone is GuestPhone
-    partySize is PartySize
-    reservationTime is TimeStamp
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command MakeReservation yields event ReservationMade is { reservationId: ReservationId }
+  command ConfirmReservation yields event ReservationConfirmed is { reservationId: ReservationId }
 
-  command ConfirmReservation is {
-    reservationId is ReservationId
-    confirmedTable is TableNumber
-  }
+  event ReservationMade is { reservationId: ReservationId }
+  event ReservationConfirmed is { reservationId: ReservationId }
+  event ConfirmReservationRejected is { reservationId: ReservationId, rejectionReason: String(1,500) }
 
-  command CancelReservation is {
-    reservationId is ReservationId
-    cancellationReason is optional String(1, 500)
-  }
+  record ReservationData is { reservationId: ReservationId }
 
-  command SeatParty is {
-    reservationId is ReservationId
-    seatedTable is TableNumber
-    seatedAt is TimeStamp
-  }
-
-  // Events mirror commands
-  event ReservationMade is { ... }
-  event ReservationConfirmed is { ... }
-  event ReservationCancelled is { ... }
-  event PartySeated is { ... }
-
-  state ActiveReservation of Reservation.ReservationStateData
-
-  handler ReservationHandler is {
-    on command MakeReservation {
-      morph entity FrontOfHouse.Reservation to state
-        FrontOfHouse.Reservation.ActiveReservation
-        with command MakeReservation
-      tell event ReservationMade to
-        entity FrontOfHouse.Reservation
-    }
-    on command ConfirmReservation {
-      tell event ReservationConfirmed to
-        entity FrontOfHouse.Reservation
-    }
-    on command CancelReservation {
-      tell event ReservationCancelled to
-        entity FrontOfHouse.Reservation
-    }
-    on command SeatParty {
-      tell event PartySeated to
-        entity FrontOfHouse.Reservation
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state Requested of record ReservationData is {
+    handler RequestedHandler is {
+      on cmd: command ConfirmReservation is {
+        yield event ReservationConfirmed(reservationId = cmd.reservationId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event ReservationConfirmed is {
+        morph entity Reservation to state Confirmed
+          with record ReservationData(reservationId = evt.reservationId)
+      }
     }
   }
+
+  state Confirmed of record ReservationData is {
+    handler ConfirmedHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command ConfirmReservation is {
+        send event ConfirmReservationRejected(reservationId = cmd.reservationId,
+          rejectionReason = "Reservation does not accept ConfirmReservation in this state")
+          to outlet ReservationEvents
+        error "Reservation does not accept ConfirmReservation in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type ReservationCommand is MakeReservation | ConfirmReservation
+  type ReservationEvent is ReservationMade | ReservationConfirmed | ConfirmReservationRejected
+
+  inlet ReservationCommands is type ReservationCommand
+  outlet ReservationEvents is type ReservationEvent
 }
 ```
 
@@ -258,21 +167,28 @@ The handler follows the same pattern — `morph` on creation,
 
 Two repositories persist the entity data:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ReservationRepository,StoredReservation,PersistReservationConfirmed -->
 ```riddl
-repository ReservationRepository is {
-  schema ReservationData is relational
-    of reservations as Reservation
-    index on field Reservation.reservationId
-    index on field Reservation.guestName
-    index on field Reservation.reservationTime
-}
+repository ReservationRepository as merge is {
+  inlet ReservationRepositoryFromReservation is type ReservationEvent
+  inlet ReservationRepositoryFromProjector is type ReservationEvent
+  outlet ReservationRepositoryResponses is type ReservationEvent
 
-repository TableOrderRepository is {
-  schema TableOrderData is relational
-    of orders as TableOrder
-    index on field TableOrder.tableOrderId
-    index on field TableOrder.tableNumber
+  record StoredReservation is { reservationId: ReservationId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema ReservationSchema is relational
+    of rows as type StoredReservation
+      index on field StoredReservation.reservationId
+
+  command PersistReservationConfirmed is { reservationId: ReservationId }
+
+  handler ReservationPersistence is {
+    on command PersistReservationConfirmed is {
+      do "update the stored reservation row for this reservationId"
+    }
+  }
 }
 ```
 
@@ -287,32 +203,18 @@ The `ReservationBoard` projector provides a real-time read
 model for the host's seating display, replacing the paper
 backup system:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ReservationBoard -->
 ```riddl
-projector ReservationBoard is {
+projector ReservationBoard as flow is {
   updates repository ReservationRepository
+  inlet ReservationBoardFromReservation is type ReservationEvent
+  outlet ReservationBoardOut is type ReservationEvent
 
-  record ReservationBoardEntry is {
-    reservationId is ReservationId
-    guestName is GuestName
-    partySize is PartySize
-    reservationTime is TimeStamp
-    reservationStatus is ReservationStatus
-    assignedTable is optional TableNumber
-  }
+  record ReservationBoardEntry is { reservationId: ReservationId }
 
   handler ReservationBoardHandler is {
-    on event Reservation.ReservationMade {
-      prompt "Add reservation to board"
-    }
-    on event Reservation.ReservationConfirmed {
-      prompt "Update board entry to confirmed"
-    }
-    on event Reservation.ReservationCancelled {
-      prompt "Remove cancelled reservation from board"
-    }
-    on event Reservation.PartySeated {
-      prompt "Update board entry to seated"
+    on evt: event ReservationMade is {
+      tell command PersistReservationConfirmed(reservationId = evt.reservationId) to repository ReservationRepository
     }
   }
 }
@@ -327,28 +229,21 @@ host's display screen.
 Front of House has three outbound adaptors that route messages
 to other contexts:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor ToKitchen to context Restaurant.Kitchen is {
-  handler KitchenRouting is {
-    on command Restaurant.Kitchen.KitchenTicket.ReceiveTicket {
-      prompt "Route food items from submitted order to kitchen"
-    }
-  }
-}
-
-adaptor ToBar to context Restaurant.Bar is {
-  handler BarRouting is {
-    on command Restaurant.Bar.DrinkOrder.ReceiveDrinkOrder {
-      prompt "Route drink items from submitted order to bar"
-    }
-  }
-}
-
-adaptor ToLoyalty to context Restaurant.Loyalty is {
-  handler LoyaltyRouting is {
-    on command Restaurant.Loyalty.LoyaltyAccount.AccruePoints {
-      prompt "Send payment event to loyalty for point accrual"
+context FrontOfHouse is {
+  // An adaptor is the translation seam at a context boundary: it is the only
+  // place that knows the OTHER context's message shapes.
+  adaptor ToKitchen to context Kitchen is {
+    handler ToKitchenIntake is {
+      on command Kitchen.ReceiveTicket is {
+        do "turn the food lines of a submitted table order into a kitchen ticket"
+      }
+      // Every adaptor handler must say what it does with what it does not
+      // recognise. Silence is not an option in 2.0.
+      on other is {
+        error "Unexpected message from Kitchen"
+      }
     }
   }
 }

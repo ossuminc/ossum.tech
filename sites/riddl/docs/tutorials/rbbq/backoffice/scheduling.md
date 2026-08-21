@@ -14,6 +14,7 @@ event AssignEmployeeRejected is { shiftId: ShiftId, rejectionReason: String(1,50
 type ShiftEvent is ShiftCreated | EmployeeAssigned | AssignEmployeeRejected
 entity Shift is { ??? }
 repository ShiftRepository is { ??? }
+command PersistEmployeeAssigned is { shiftId: ShiftId }
 -->
 
 # Scheduling Context
@@ -111,7 +112,7 @@ assigned. This matters for labor compliance and reporting.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=ShiftRepository,StoredShift -->
+<!-- riddl: in-context no-prelude=ShiftRepository,StoredShift,PersistEmployeeAssigned -->
 ```riddl
 repository ShiftRepository as flow is {
   inlet ShiftRepositoryFromShift is type ShiftEvent

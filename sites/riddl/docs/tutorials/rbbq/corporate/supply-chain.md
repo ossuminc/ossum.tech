@@ -14,6 +14,7 @@ event ApproveOrderRejected is { purchaseOrderId: PurchaseOrderId, rejectionReaso
 type PurchaseOrderEvent is BulkOrderCreated | OrderApproved | ApproveOrderRejected
 entity PurchaseOrder is { ??? }
 repository PurchaseOrderRepository is { ??? }
+command PersistOrderApproved is { purchaseOrderId: PurchaseOrderId }
 -->
 
 # Supply Chain Context
@@ -120,7 +121,7 @@ resolution process with the vendor.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=PurchaseOrderRepository,StoredPurchaseOrder -->
+<!-- riddl: in-context no-prelude=PurchaseOrderRepository,StoredPurchaseOrder,PersistOrderApproved -->
 ```riddl
 repository PurchaseOrderRepository as flow is {
   inlet PurchaseOrderRepositoryFromPurchaseOrder is type PurchaseOrderEvent

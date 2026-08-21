@@ -19,6 +19,7 @@ event ConsumeStockRejected is { inventoryItemId: InventoryItemId, rejectionReaso
 type InventoryItemEvent is StockReceived | StockConsumed | ConsumeStockRejected
 entity InventoryItem is { ??? }
 repository InventoryItemRepository is { ??? }
+command PersistStockConsumed is { inventoryItemId: InventoryItemId }
 -->
 
 # Inventory Context
@@ -118,7 +119,7 @@ querying the entity directly.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=InventoryItemRepository,StoredInventoryItem -->
+<!-- riddl: in-context no-prelude=InventoryItemRepository,StoredInventoryItem,PersistStockConsumed -->
 ```riddl
 repository InventoryItemRepository as flow is {
   inlet InventoryItemRepositoryFromInventoryItem is type InventoryItemEvent

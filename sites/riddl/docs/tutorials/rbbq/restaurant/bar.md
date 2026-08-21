@@ -3,6 +3,26 @@ title: "Bar Context"
 description: "Drink order management with push notifications"
 ---
 
+<!-- riddl-domain-prelude
+context FrontOfHouse is {
+  event OrderSubmitted is { tableOrderId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type DrinkOrderId is Id(DrinkOrder)
+type DrinkName is String(1,100)
+record StoredDrinkOrder is { drinkOrderId: DrinkOrderId }
+event DrinkOrderReceived is { drinkOrderId: DrinkOrderId }
+event DrinkPrepared is { drinkOrderId: DrinkOrderId }
+event PrepareDrinkRejected is { drinkOrderId: DrinkOrderId, rejectionReason: String(1,500) }
+type DrinkOrderEvent is DrinkOrderReceived | DrinkPrepared | PrepareDrinkRejected
+entity DrinkOrder is { ??? }
+repository DrinkOrderRepository is { ??? }
+command PersistDrinkPrepared is { drinkOrderId: DrinkOrderId }
+event ServerNotifiedDrinksReady is { drinkOrderId: DrinkOrderId }
+-->
+
 # Bar Context
 
 The Bar context manages drink order preparation and server
@@ -33,130 +53,108 @@ The `NotifyServerDrinksReady` command and its
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=DrinkOrderId,DrinkName -->
 ```riddl
-type DrinkOrderId is Id(Bar.DrinkOrder) with {
-  briefly "Drink order identifier"
-  described by "Unique identifier for a drink order."
-}
+type DrinkOrderId is Id(DrinkOrder)
 
-type DrinkOrderStatus is any of {
-  DrinkReceived,
-  DrinkInPreparation,
-  DrinkReady,
-  DrinkDelivered,
-  DrinkCompleted
-} with {
-  briefly "Drink order status"
-  described by "Current status of a drink order."
-}
-
-type DrinkItem is {
-  drinkName is String(1, 200)
-  drinkQuantity is Natural
-  drinkNotes is optional String(1, 500)
-} with {
-  briefly "Drink item"
-  described by "A single drink in an order."
-}
+type DrinkName is String(1,100)
 ```
 
 ## Entity: DrinkOrder
 
 The `DrinkOrder` entity has a 5-command lifecycle:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=DrinkOrder,DrinkOrderReceived,DrinkPrepared,PrepareDrinkRejected,DrinkOrderCommand,DrinkOrderEvent -->
 ```riddl
-entity DrinkOrder is {
+event-sourced entity DrinkOrder as flow is {
 
-  command ReceiveDrinkOrder is {
-    drinkOrderId is DrinkOrderId
-    sourceOrderId is String(1, 50)
-    drinkTableNumber is Natural
-    drinkItems is many DrinkItem
-    drinkReceivedAt is TimeStamp
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command ReceiveDrinkOrder yields event DrinkOrderReceived is { drinkOrderId: DrinkOrderId }
+  command PrepareDrink yields event DrinkPrepared is { drinkOrderId: DrinkOrderId }
 
-  command PrepareDrink is {
-    drinkOrderId is DrinkOrderId
-    drinkPreparationStartedAt is TimeStamp
-  }
+  event DrinkOrderReceived is { drinkOrderId: DrinkOrderId }
+  event DrinkPrepared is { drinkOrderId: DrinkOrderId }
+  event PrepareDrinkRejected is { drinkOrderId: DrinkOrderId, rejectionReason: String(1,500) }
 
-  command MarkDrinkReady is {
-    drinkOrderId is DrinkOrderId
-    drinkReadyAt is TimeStamp
-  }
+  record DrinkOrderData is { drinkOrderId: DrinkOrderId }
 
-  command NotifyServerDrinksReady is {
-    drinkOrderId is DrinkOrderId
-    serverNotifiedAt is TimeStamp
-  }
-
-  command CompleteDrinkOrder is {
-    drinkOrderId is DrinkOrderId
-    drinkCompletedAt is TimeStamp
-  }
-
-  // Events: DrinkOrderReceived, DrinkPrepared, DrinkMarkedReady,
-  //         ServerNotifiedDrinksReady, DrinkOrderCompleted
-
-  state ActiveDrinkOrder of DrinkOrder.DrinkOrderStateData
-
-  handler DrinkOrderHandler is {
-    on command ReceiveDrinkOrder {
-      morph entity Bar.DrinkOrder to state
-        Bar.DrinkOrder.ActiveDrinkOrder
-        with command ReceiveDrinkOrder
-      tell event DrinkOrderReceived to
-        entity Bar.DrinkOrder
-    }
-    on command PrepareDrink {
-      tell event DrinkPrepared to
-        entity Bar.DrinkOrder
-    }
-    on command MarkDrinkReady {
-      tell event DrinkMarkedReady to
-        entity Bar.DrinkOrder
-    }
-    on command NotifyServerDrinksReady {
-      tell event ServerNotifiedDrinksReady to
-        entity Bar.DrinkOrder
-    }
-    on command CompleteDrinkOrder {
-      tell event DrinkOrderCompleted to
-        entity Bar.DrinkOrder
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state Received of record DrinkOrderData is {
+    handler ReceivedHandler is {
+      on cmd: command PrepareDrink is {
+        yield event DrinkPrepared(drinkOrderId = cmd.drinkOrderId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event DrinkPrepared is {
+        morph entity DrinkOrder to state InPreparation
+          with record DrinkOrderData(drinkOrderId = evt.drinkOrderId)
+      }
     }
   }
+
+  state InPreparation of record DrinkOrderData is {
+    handler InPreparationHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command PrepareDrink is {
+        send event PrepareDrinkRejected(drinkOrderId = cmd.drinkOrderId,
+          rejectionReason = "DrinkOrder does not accept PrepareDrink in this state")
+          to outlet DrinkOrderEvents
+        error "DrinkOrder does not accept PrepareDrink in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type DrinkOrderCommand is ReceiveDrinkOrder | PrepareDrink
+  type DrinkOrderEvent is DrinkOrderReceived | DrinkPrepared | PrepareDrinkRejected
+
+  inlet DrinkOrderCommands is type DrinkOrderCommand
+  outlet DrinkOrderEvents is type DrinkOrderEvent
 }
 ```
 
 The lifecycle: **Receive → Prepare → Mark Ready → Notify Server
 → Complete**. The key event is `ServerNotifiedDrinksReady`:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ServerNotifiedDrinksReady -->
 ```riddl
+// The Bartender interview asked for a push, not a glance at the pass. The
+// event carries who to notify, so the notification is derivable from it.
 event ServerNotifiedDrinksReady is {
-  drinkOrderId is DrinkOrderId
-  drinkTableNumber is Natural
-  serverNotifiedAt is TimeStamp
-} with {
-  briefly "Server notified drinks ready"
-  described by {
-    | Emitted when the server receives a push notification
-    | that drinks are ready, solving the melting-ice problem.
-  }
+  drinkOrderId: DrinkOrderId
+  notifiedServer: String(1,100)
+  notifiedAt: TimeStamp
 }
 ```
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=DrinkOrderRepository,StoredDrinkOrder,PersistDrinkPrepared -->
 ```riddl
-repository DrinkOrderRepository is {
-  schema DrinkOrderData is relational
-    of drinkOrders as DrinkOrder
-    index on field DrinkOrder.drinkOrderId
-    index on field DrinkOrder.drinkOrderStatus
+repository DrinkOrderRepository as flow is {
+  inlet DrinkOrderRepositoryFromDrinkOrder is type DrinkOrderEvent
+  outlet DrinkOrderRepositoryResponses is type DrinkOrderEvent
+
+  record StoredDrinkOrder is { drinkOrderId: DrinkOrderId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema DrinkOrderSchema is relational
+    of rows as type StoredDrinkOrder
+      index on field StoredDrinkOrder.drinkOrderId
+
+  command PersistDrinkPrepared is { drinkOrderId: DrinkOrderId }
+
+  handler DrinkOrderPersistence is {
+    on command PersistDrinkPrepared is {
+      do "update the stored drinkOrder row for this drinkOrderId"
+    }
+  }
 }
 ```
 
@@ -164,12 +162,21 @@ repository DrinkOrderRepository is {
 
 Bar has a single inbound adaptor from Front of House:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor FromFrontOfHouse from context Restaurant.FrontOfHouse is {
-  handler DrinkIntake is {
-    on event Restaurant.FrontOfHouse.TableOrder.OrderSubmitted {
-      prompt "Extract drink items from submitted order and create drink order"
+context Bar is {
+  // An adaptor is the translation seam at a context boundary: it is the only
+  // place that knows the OTHER context's message shapes.
+  adaptor FromFrontOfHouse from context FrontOfHouse is {
+    handler FromFrontOfHouseIntake is {
+      on event FrontOfHouse.OrderSubmitted is {
+        do "convert the drinks on a submitted table order into a drink order"
+      }
+      // Every adaptor handler must say what it does with what it does not
+      // recognise. Silence is not an option in 2.0.
+      on other is {
+        error "Unexpected message from FrontOfHouse"
+      }
     }
   }
 }

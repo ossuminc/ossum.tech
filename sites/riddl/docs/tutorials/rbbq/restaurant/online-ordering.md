@@ -19,6 +19,7 @@ event AddToCartRejected is { onlineOrderId: OnlineOrderId, rejectionReason: Stri
 type OnlineOrderEvent is MenuBrowsed | ItemAddedToCart | AddToCartRejected
 entity OnlineOrder is { ??? }
 repository OnlineOrderRepository is { ??? }
+command PersistItemAddedToCart is { onlineOrderId: OnlineOrderId }
 -->
 
 # Online Ordering Context
@@ -131,7 +132,7 @@ the model.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=OnlineOrderRepository,StoredOnlineOrder -->
+<!-- riddl: in-context no-prelude=OnlineOrderRepository,StoredOnlineOrder,PersistItemAddedToCart -->
 ```riddl
 repository OnlineOrderRepository as flow is {
   inlet OnlineOrderRepositoryFromOnlineOrder is type OnlineOrderEvent

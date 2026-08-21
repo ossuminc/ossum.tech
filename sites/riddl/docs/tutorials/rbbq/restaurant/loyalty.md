@@ -19,6 +19,7 @@ event SuspendAccountRejected is { loyaltyAccountId: LoyaltyAccountId, rejectionR
 type LoyaltyAccountEvent is CustomerEnrolled | AccountSuspended | SuspendAccountRejected
 entity LoyaltyAccount is { ??? }
 repository LoyaltyAccountRepository is { ??? }
+command PersistAccountSuspended is { loyaltyAccountId: LoyaltyAccountId }
 -->
 
 # Loyalty Context
@@ -132,7 +133,7 @@ downstream systems know the current balance without querying.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=LoyaltyAccountRepository,StoredLoyaltyAccount -->
+<!-- riddl: in-context no-prelude=LoyaltyAccountRepository,StoredLoyaltyAccount,PersistAccountSuspended -->
 ```riddl
 repository LoyaltyAccountRepository as flow is {
   inlet LoyaltyAccountRepositoryFromLoyaltyAccount is type LoyaltyAccountEvent

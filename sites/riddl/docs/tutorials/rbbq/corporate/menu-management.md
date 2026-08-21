@@ -3,6 +3,27 @@ title: "Menu Management Context"
 description: "Recipe development, pricing, and atomic menu distribution"
 ---
 
+<!-- riddl-domain-prelude
+context FrontOfHouse is {
+  command RecordMenuItem is { menuItemId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type MenuItemId is Id(MenuItem)
+type MenuCategory is String(1,60)
+record StoredMenuItem is { menuItemId: MenuItemId }
+event MenuItemCreated is { menuItemId: MenuItemId }
+event PriceSet is { menuItemId: MenuItemId }
+event SetPriceRejected is { menuItemId: MenuItemId, rejectionReason: String(1,500) }
+type MenuItemEvent is MenuItemCreated | PriceSet | SetPriceRejected
+entity MenuItem is { ??? }
+repository MenuItemRepository is { ??? }
+command PersistPriceSet is { menuItemId: MenuItemId }
+event ReleasePublished is { releaseId: UUID }
+entity MenuRelease is { ??? }
+-->
+
 # Menu Management Context
 
 The Menu Management context manages the corporate menu lifecycle
@@ -33,69 +54,11 @@ changes are bundled, reviewed, and published simultaneously.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=MenuItemId,MenuCategory -->
 ```riddl
-type MenuItemId is Id(MenuManagement.MenuItem) with {
-  briefly "Menu item identifier"
-  described by "Unique identifier for a corporate menu item."
-}
+type MenuItemId is Id(MenuItem)
 
-type MenuReleaseId is Id(MenuManagement.MenuRelease) with {
-  briefly "Menu release identifier"
-  described by "Unique identifier for a menu release."
-}
-
-type MenuItemCategory is any of {
-  Appetizer,
-  Entree,
-  Side,
-  Dessert,
-  Beverage,
-  Special
-} with {
-  briefly "Menu item category"
-  described by "Category of the menu item."
-}
-
-type MenuItemLifecycle is any of {
-  Draft,
-  Active,
-  Seasonal,
-  Retired
-} with {
-  briefly "Menu item lifecycle"
-  described by "Current lifecycle stage of a menu item."
-}
-
-type MenuReleaseStatus is any of {
-  ReleaseDraftStatus,
-  ReleaseFinalizedStatus,
-  ReleasePublishedStatus,
-  ReleaseRolledBackStatus
-} with {
-  briefly "Menu release status"
-  described by "Current status of a menu release."
-}
-
-type RecipeInfo is {
-  recipeInstructions is String(1, 5000)
-  recipeIngredients is many String(1, 200)
-  prepTime is Duration
-  cookTime is Duration
-  servings is Natural
-} with {
-  briefly "Recipe information"
-  described by "Recipe details for a menu item."
-}
-
-type PriceInfo is {
-  basePrice is Decimal(8, 2)
-  costToMake is Decimal(8, 2)
-  marginPercent is Decimal(5, 2)
-} with {
-  briefly "Price information"
-  described by "Pricing and cost details for a menu item."
-}
+type MenuCategory is String(1,60)
 ```
 
 Note the `RecipeInfo` record uses `Duration` for prep and cook
@@ -106,63 +69,57 @@ ingredients list.
 
 The `MenuItem` entity manages individual menu items:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=MenuItem,MenuItemCreated,PriceSet,SetPriceRejected,MenuItemCommand,MenuItemEvent -->
 ```riddl
-entity MenuItem is {
+event-sourced entity MenuItem as flow is {
 
-  command CreateMenuItem is {
-    menuItemId is MenuItemId
-    menuItemName is String(1, 200)
-    menuItemCategory is MenuItemCategory
-    menuItemDescription is String(1, 1000)
-    recipe is RecipeInfo
-    pricing is PriceInfo
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command CreateMenuItem yields event MenuItemCreated is { menuItemId: MenuItemId }
+  command SetPrice yields event PriceSet is { menuItemId: MenuItemId }
 
-  command UpdateMenuItem is {
-    menuItemId is MenuItemId
-    updatedName is optional String(1, 200)
-    updatedDescription is optional String(1, 1000)
-    updatedRecipe is optional RecipeInfo
-  }
+  event MenuItemCreated is { menuItemId: MenuItemId }
+  event PriceSet is { menuItemId: MenuItemId }
+  event SetPriceRejected is { menuItemId: MenuItemId, rejectionReason: String(1,500) }
 
-  command SetPrice is {
-    menuItemId is MenuItemId
-    updatedPricing is PriceInfo
-    effectiveDate is Date
-  }
+  record MenuItemData is { menuItemId: MenuItemId }
 
-  command RetireMenuItem is {
-    menuItemId is MenuItemId
-    retiredReason is String(1, 500)
-  }
-
-  // Events: MenuItemCreated, MenuItemUpdated, PriceSet,
-  //         MenuItemRetired
-
-  state ActiveMenuItem of MenuItem.MenuItemStateData
-
-  handler MenuItemHandler is {
-    on command CreateMenuItem {
-      morph entity MenuManagement.MenuItem to state
-        MenuManagement.MenuItem.ActiveMenuItem
-        with command CreateMenuItem
-      tell event MenuItemCreated to
-        entity MenuManagement.MenuItem
-    }
-    on command UpdateMenuItem {
-      tell event MenuItemUpdated to
-        entity MenuManagement.MenuItem
-    }
-    on command SetPrice {
-      tell event PriceSet to
-        entity MenuManagement.MenuItem
-    }
-    on command RetireMenuItem {
-      tell event MenuItemRetired to
-        entity MenuManagement.MenuItem
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state ActiveMenuItem of record MenuItemData is {
+    handler ActiveMenuItemHandler is {
+      on cmd: command SetPrice is {
+        yield event PriceSet(menuItemId = cmd.menuItemId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event PriceSet is {
+        morph entity MenuItem to state Priced
+          with record MenuItemData(menuItemId = evt.menuItemId)
+      }
     }
   }
+
+  state Priced of record MenuItemData is {
+    handler PricedHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command SetPrice is {
+        send event SetPriceRejected(menuItemId = cmd.menuItemId,
+          rejectionReason = "MenuItem does not accept SetPrice in this state")
+          to outlet MenuItemEvents
+        error "MenuItem does not accept SetPrice in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type MenuItemCommand is CreateMenuItem | SetPrice
+  type MenuItemEvent is MenuItemCreated | PriceSet | SetPriceRejected
+
+  inlet MenuItemCommands is type MenuItemCommand
+  outlet MenuItemEvents is type MenuItemEvent
 }
 ```
 
@@ -175,54 +132,30 @@ providing all fields every time.
 The `MenuRelease` entity is the key innovation — it bundles
 menu changes into an atomic release:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=MenuRelease,ReleasePublished -->
 ```riddl
-entity MenuRelease is {
+// A release is its own entity because the ATOMIC unit is the whole menu, not
+// one item: 500+ locations must flip together or the chain is inconsistent.
+event-sourced entity MenuRelease as flow is {
+  command PublishRelease yields event ReleasePublished is { releaseId: UUID }
+  event ReleasePublished is { releaseId: UUID }
 
-  command CreateMenuRelease is {
-    menuReleaseId is MenuReleaseId
-    releaseName is String(1, 200)
-    releaseDescription is String(1, 1000)
-    effectiveDate is Date
-  }
+  record MenuReleaseData is { releaseId: UUID }
 
-  command AddItemToRelease is {
-    menuReleaseId is MenuReleaseId
-    releaseMenuItemId is MenuItemId
-    releaseAction is String(1, 50)
-  }
-
-  command FinalizeRelease is {
-    menuReleaseId is MenuReleaseId
-    finalizedAt is TimeStamp
-  }
-
-  command PublishRelease is {
-    menuReleaseId is MenuReleaseId
-    publishedAt is TimeStamp
-  }
-
-  command RollbackRelease is {
-    menuReleaseId is MenuReleaseId
-    rollbackReason is String(1, 500)
-    rolledBackAt is TimeStamp
-  }
-
-  // Events: MenuReleaseCreated, ItemAddedToRelease,
-  //         ReleaseFinalized, ReleasePublished, ReleaseRolledBack
-
-  state ActiveRelease of MenuRelease.MenuReleaseStateData
-
-  handler MenuReleaseHandler is {
-    on command CreateMenuRelease {
-      morph entity MenuManagement.MenuRelease to state
-        MenuManagement.MenuRelease.ActiveRelease
-        with command CreateMenuRelease
-      tell event MenuReleaseCreated to
-        entity MenuManagement.MenuRelease
+  initial state ActiveRelease of record MenuReleaseData is {
+    handler ActiveReleaseHandler is {
+      on cmd: command PublishRelease is {
+        yield event ReleasePublished(releaseId = cmd.releaseId)
+      }
+      on evt: event ReleasePublished is {
+        set field MenuReleaseData.releaseId to "the published release id"
+      }
     }
-    // ... remaining commands follow tell pattern
   }
+
+  type MenuReleaseEvent is ReleasePublished
+  inlet MenuReleaseCommands is type PublishRelease
+  outlet MenuReleaseEvents is type MenuReleaseEvent
 }
 ```
 
@@ -233,40 +166,38 @@ update, remove, or price-change.
 
 The `ReleasePublished` event is the key moment:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ReleasePublished -->
 ```riddl
 event ReleasePublished is {
-  menuReleaseId is MenuReleaseId
-  releaseName is String(1, 200)
-  effectiveDate is Date
-  publishedAt is TimeStamp
-} with {
-  briefly "Release published"
-  described by {
-    | Emitted when a menu release is published to all
-    | locations. This is the atomic distribution event
-    | that updates menus chain-wide simultaneously.
-  }
+  releaseId: UUID
+  releaseEffectiveAt: TimeStamp
+  releaseItemCount: Natural
 }
 ```
 
 ## Repositories
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=MenuItemRepository,StoredMenuItem,PersistPriceSet -->
 ```riddl
-repository MenuItemRepository is {
-  schema MenuItemData is relational
-    of menuItems as MenuItem
-    index on field MenuItem.menuItemId
-    index on field MenuItem.menuItemCategory
-    index on field MenuItem.menuItemLifecycle
-}
+repository MenuItemRepository as flow is {
+  inlet MenuItemRepositoryFromMenuItem is type MenuItemEvent
+  outlet MenuItemRepositoryResponses is type MenuItemEvent
 
-repository MenuReleaseRepository is {
-  schema MenuReleaseData is relational
-    of releases as MenuRelease
-    index on field MenuRelease.menuReleaseId
-    index on field MenuRelease.menuReleaseStatus
+  record StoredMenuItem is { menuItemId: MenuItemId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema MenuItemSchema is relational
+    of rows as type StoredMenuItem
+      index on field StoredMenuItem.menuItemId
+
+  command PersistPriceSet is { menuItemId: MenuItemId }
+
+  handler MenuItemPersistence is {
+    on command PersistPriceSet is {
+      do "update the stored menuItem row for this menuItemId"
+    }
+  }
 }
 ```
 
@@ -274,12 +205,21 @@ repository MenuReleaseRepository is {
 
 Menu Management has an outbound adaptor for distributing menus:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor ToRestaurants to context Restaurant.FrontOfHouse is {
-  handler MenuDistribution is {
-    on command Restaurant.FrontOfHouse.TableOrder.CreateOrder {
-      prompt "Distribute published menu updates to restaurant locations"
+context MenuManagement is {
+  // An adaptor is the translation seam at a context boundary: it is the only
+  // place that knows the OTHER context's message shapes.
+  adaptor ToRestaurants to context FrontOfHouse is {
+    handler ToRestaurantsIntake is {
+      on command FrontOfHouse.RecordMenuItem is {
+        do "push the published menu to every location at once"
+      }
+      // Every adaptor handler must say what it does with what it does not
+      // recognise. Silence is not an option in 2.0.
+      on other is {
+        error "Unexpected message from FrontOfHouse"
+      }
     }
   }
 }

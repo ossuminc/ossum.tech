@@ -14,6 +14,7 @@ event LaunchCampaignRejected is { campaignId: CampaignId, rejectionReason: Strin
 type CampaignEvent is CampaignCreated | CampaignLaunched | LaunchCampaignRejected
 entity Campaign is { ??? }
 repository CampaignRepository is { ??? }
+command PersistCampaignLaunched is { campaignId: CampaignId }
 -->
 
 # Marketing Context
@@ -126,7 +127,7 @@ awareness campaigns.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=CampaignRepository,StoredCampaign -->
+<!-- riddl: in-context no-prelude=CampaignRepository,StoredCampaign,PersistCampaignLaunched -->
 ```riddl
 repository CampaignRepository as flow is {
   inlet CampaignRepositoryFromCampaign is type CampaignEvent

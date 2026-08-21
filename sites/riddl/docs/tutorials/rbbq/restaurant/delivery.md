@@ -19,6 +19,7 @@ event AssignDriverRejected is { deliveryId: DeliveryId, rejectionReason: String(
 type DeliveryOrderEvent is DeliveryCreated | DriverAssigned | AssignDriverRejected
 entity DeliveryOrder is { ??? }
 repository DeliveryRepository is { ??? }
+command PersistDriverAssigned is { deliveryId: DeliveryId }
 -->
 
 # Delivery Context
@@ -135,7 +136,7 @@ delivery continues.
 
 ## Repository
 
-<!-- riddl: in-context no-prelude=DeliveryRepository,StoredDeliveryOrder -->
+<!-- riddl: in-context no-prelude=DeliveryRepository,StoredDeliveryOrder,PersistDriverAssigned -->
 ```riddl
 repository DeliveryRepository as flow is {
   inlet DeliveryRepositoryFromDeliveryOrder is type DeliveryOrderEvent
