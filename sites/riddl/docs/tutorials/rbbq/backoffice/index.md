@@ -12,40 +12,31 @@ system integrations.
 
 ## Domain Definition
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: standalone -->
 ```riddl
 domain BackOffice is {
-
   author OssumInc is {
-    name is "Ossum Inc."
-    email is "info@ossuminc.com"
+    name = "Ossum Inc."
+    email = "info@ossuminc.com"
   } with {
     briefly "Author"
-    described by "Ossum Inc."
+    described as {
+      |Ossum Inc., creators of RIDDL.
+    }
   }
 
-  user Manager is "Restaurant manager overseeing daily operations" with {
-    briefly "Manager"
-    described by "Manages scheduling, inventory, and reporting."
-  }
+  user Manager is "Restaurant manager overseeing daily operations"
+  user InventoryClerk is "Staff member managing stock"
 
-  user InventoryClerk is "Staff member managing stock" with {
-    briefly "Inventory Clerk"
-    described by "Receives shipments, tracks stock levels, and reorders."
-  }
-
-  include "SchedulingContext.riddl"
-  include "InventoryContext.riddl"
-  include "ReportingContext.riddl"
-  include "external-contexts.riddl"
+  // include "SchedulingContext.riddl", "InventoryContext.riddl",
+  //         "ReportingContext.riddl", "external-contexts.riddl"
 
 } with {
   briefly "Back office operations domain"
-  described by {
-    | Covers staff scheduling, inventory management, and
-    | operational reporting. Reporting is isolated in its
-    | own context with CQRS projectors so that report
-    | generation never degrades peak-hour performance.
+  described as {
+    |Covers staff scheduling, inventory management, and operational
+    |reporting. Reporting is isolated in its own context with CQRS
+    |projectors so report generation never degrades peak-hour performance.
   }
 }
 ```

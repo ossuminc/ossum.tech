@@ -14,32 +14,42 @@ bounded contexts and two external system integrations.
 The Restaurant domain includes its contexts via RIDDL's `include`
 mechanism, keeping each context in its own file for maintainability:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: standalone -->
 ```riddl
 domain Restaurant is {
-
   author OssumInc is {
-    name is "Ossum Inc."
-    email is "info@ossuminc.com"
+    name = "Ossum Inc."
+    email = "info@ossuminc.com"
   } with {
     briefly "Author"
-    described by "Ossum Inc."
+    described as {
+      |Ossum Inc., creators of RIDDL.
+    }
   }
 
-  include "FrontOfHouseContext.riddl"
-  include "KitchenContext.riddl"
-  include "BarContext.riddl"
-  include "OnlineOrderingContext.riddl"
-  include "DeliveryContext.riddl"
-  include "LoyaltyContext.riddl"
-  include "external-contexts.riddl"
+  // Each bounded context lives in its own file:
+  //   include "FrontOfHouseContext.riddl"
+  //   include "KitchenContext.riddl"   ... and four more
+
+  // Cross-context connectors are DOMAIN-scoped in 2.0, and each end lands on
+  // the context's OWN portlet -- reaching past a boundary to a contained
+  // entity's inlet is an Error.
+  context PaymentGateway is {
+    outlet PaymentGatewayToFOHOut is type PaymentOutcome
+    type PaymentOutcome is String(1,50)
+  }
+  context FrontOfHouse is {
+    inlet PaymentGatewayToFOHIn is type PaymentGateway.PaymentOutcome
+  }
+  persistent connector PaymentGatewayToFOH is
+    from outlet PaymentGateway.PaymentGatewayToFOHOut
+    to inlet FrontOfHouse.PaymentGatewayToFOHIn
 
 } with {
   briefly "Restaurant operations domain"
-  described by {
-    | Covers all in-restaurant and customer-facing operations
-    | including front-of-house, kitchen, bar, online ordering,
-    | delivery, and loyalty program.
+  described as {
+    |Covers all in-restaurant and customer-facing operations including
+    |front-of-house, kitchen, bar, online ordering, delivery, and loyalty.
   }
 }
 ```

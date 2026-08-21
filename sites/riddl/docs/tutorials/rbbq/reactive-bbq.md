@@ -3,6 +3,22 @@ title: "Reactive BBQ Domain"
 description: "Top-level domain model for the Reactive BBQ restaurant chain"
 ---
 
+<!-- riddl-domain-prelude
+user Host is "Restaurant host managing reservations and seating"
+context FrontOfHouse is {
+  result ReservationResult is { seated: Boolean }
+  command MakeReservation is { partySize: Natural }
+  command SeatParty is { partySize: Natural }
+}
+application context RestaurantApp is {
+  group RestaurantScreen is {
+    input MakeReservationInput acquires command FrontOfHouse.MakeReservation
+    input SeatPartyInput acquires command FrontOfHouse.SeatParty
+    output ReservationBoardDisplay presents result FrontOfHouse.ReservationResult
+  }
+}
+-->
+
 # Reactive BBQ Domain
 
 Everything in RIDDL revolves around creating domains and subdomains.
@@ -16,80 +32,44 @@ The `ReactiveBBQ` domain defines the entire enterprise. It includes
 an author, stakeholder personas as `user` definitions, key user
 journeys as `epic` definitions, and three subdomain includes:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: standalone -->
 ```riddl
 domain ReactiveBBQ is {
-
   author OssumInc is {
-    name is "Ossum Inc."
-    email is "info@ossuminc.com"
+    name = "Ossum Inc."
+    email = "info@ossuminc.com"
   } with {
-    briefly "Author of this model"
-    described by "Ossum Inc., creators of RIDDL."
+    briefly "Author"
+    described as {
+      |Ossum Inc., creators of RIDDL.
+    }
   }
+
+  // The chain's model version, not the RIDDL language version. A definition's
+  // precise version is its versioned ancestors composed root-to-leaf and
+  // joined with '.', so this is the leading component for everything beneath.
+  version 1
 
   // ---- Stakeholder Personas ----
-
-  user CEO is "CEO responsible for strategic initiatives and chain-wide performance" with {
-    briefly "CEO"
-    described by "Drives loyalty program, electronic menus, kitchen displays, and profitability."
-  }
-
-  user CorporateHeadChef is "Head Chef managing recipes and menus across 500+ locations" with {
-    briefly "Corporate Head Chef"
-    described by "Responsible for monthly menu updates, recipe standardization, and quality."
-  }
-
-  user Host is "Restaurant host managing reservations and seating" with {
-    briefly "Host"
-    described by "Manages walk-ins and reservations. Uses paper backup when systems slow."
-  }
-
-  user Server is "Wait staff serving tables and processing orders" with {
-    briefly "Server"
-    described by "Takes orders, coordinates with kitchen and bar, and processes payments."
-  }
-
-  user Bartender is "Bar staff preparing and serving drinks" with {
-    briefly "Bartender"
-    described by "Prepares drink orders and needs push notifications when drinks are ready."
-  }
-
-  user Chef is "Kitchen chef managing order flow and quality" with {
-    briefly "Chef"
-    described by "Oversees kitchen ticket queue, station assignments, and quality approval."
-  }
-
-  user Cook is "Line cook preparing menu items" with {
-    briefly "Cook"
-    described by "Prepares food at assigned station. Struggles with handwritten tickets."
-  }
-
-  user DeliveryDriver is "Driver delivering online orders" with {
-    briefly "Delivery Driver"
-    described by "Picks up and delivers orders. Needs offline resilience."
-  }
-
-  user OnlineCustomer is "Customer ordering through website or app" with {
-    briefly "Online Customer"
-    described by "Browses menu, builds cart, checks out, and chooses fulfillment."
-  }
+  user CEO is "CEO responsible for strategic initiatives and chain-wide performance"
+  user CorporateHeadChef is "Head Chef managing recipes and menus across 500+ locations"
+  user Host is "Restaurant host managing reservations and seating"
+  user Server is "Wait staff serving tables and processing orders"
+  user Bartender is "Bar staff preparing and serving drinks"
+  user Chef is "Kitchen chef managing order flow and quality"
+  user Cook is "Line cook preparing menu items"
+  user DeliveryDriver is "Driver delivering online orders"
+  user OnlineCustomer is "Customer ordering through website or app"
 
   // ---- Subdomain Includes ----
-
-  include "restaurant/domain.riddl"
-  include "backoffice/domain.riddl"
-  include "corporate/domain.riddl"
+  // include "restaurant/domain.riddl", "backoffice/domain.riddl",
+  //         "corporate/domain.riddl"
 
 } with {
   briefly "Reactive BBQ restaurant chain"
-  described by {
-    | A 500+ location BBQ restaurant chain modeled with
-    | reactive, event-driven bounded contexts. Addresses
-    | peak-hour performance, cascading failure isolation,
-    | independent deployability, and unblocks strategic
-    | initiatives: loyalty program, electronic menus, and
-    | kitchen display screens.
+  described as {
+    |A 500+ location BBQ restaurant chain modeled with reactive,
+    |event-driven bounded contexts.
   }
 }
 ```
@@ -115,27 +95,41 @@ The domain defines four key user journeys as `epic` definitions.
 Each epic contains `case` definitions with `step` sequences that
 trace the flow across contexts:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
 epic DineInExperience is {
-  user Host wants "to seat guests quickly"
+  user Host wants to "seat guests quickly"
     so that "tables turn over efficiently during peak hours"
+
   case WalkInSeating is {
-    user Host wants "to seat a walk-in party"
+    user Host wants to "seat a walk-in party"
       so that "the table is occupied and orders can begin"
-    step from user Host "checks table availability"
-      to context Restaurant.FrontOfHouse
-    step from user Host "seats the party and creates an order"
-      to context Restaurant.FrontOfHouse
+
+    // A user interacts ONLY at the application boundary: the steps name
+    // the app's group, inputs and outputs, and the app reaches the domain.
+    step focus user Host on group RestaurantApp.RestaurantScreen
+    step show output RestaurantApp.RestaurantScreen.ReservationBoardDisplay
+      to user Host
+
+    // A refusal is a modeled outcome, not an omission.
+    optional {
+      step context FrontOfHouse refuses user Host
+        "every table of that size is seated, so the party waits"
+    }
+
+    step take input RestaurantApp.RestaurantScreen.SeatPartyInput
+      from user Host
   } with {
     briefly "Walk-in seating"
-    described by "Host seats a walk-in party."
+    described as {
+      |Host seats a walk-in party.
+    }
   }
 } with {
   briefly "Dine-in guest experience"
-  described by {
-    | Covers the full dine-in journey from reservation
-    | or walk-in through seating, ordering, and payment.
+  described as {
+    |Covers the dine-in journey from reservation or walk-in through
+    |seating, ordering, and payment.
   }
 }
 ```

@@ -11,45 +11,31 @@ three bounded contexts and two external system integrations.
 
 ## Domain Definition
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: standalone -->
 ```riddl
 domain Corporate is {
-
   author OssumInc is {
-    name is "Ossum Inc."
-    email is "info@ossuminc.com"
+    name = "Ossum Inc."
+    email = "info@ossuminc.com"
   } with {
     briefly "Author"
-    described by "Ossum Inc."
+    described as {
+      |Ossum Inc., creators of RIDDL.
+    }
   }
 
-  user CorporateHeadChef is "Head Chef managing recipes and menus" with {
-    briefly "Corporate Head Chef"
-    described by "Develops recipes and coordinates monthly menu updates."
-  }
+  user CorporateHeadChef is "Head Chef managing recipes and menus"
+  user ProcurementManager is "Manager handling vendor relationships"
+  user MarketingManager is "Manager running promotions and campaigns"
 
-  user ProcurementManager is "Manager handling vendor relationships" with {
-    briefly "Procurement Manager"
-    described by "Manages bulk ordering and supply chain operations."
-  }
-
-  user MarketingManager is "Manager running promotions and campaigns" with {
-    briefly "Marketing Manager"
-    described by "Creates and manages marketing campaigns."
-  }
-
-  include "MenuManagementContext.riddl"
-  include "SupplyChainContext.riddl"
-  include "MarketingContext.riddl"
-  include "external-contexts.riddl"
+  // include "MenuManagementContext.riddl", "SupplyChainContext.riddl",
+  //         "MarketingContext.riddl", "external-contexts.riddl"
 
 } with {
   briefly "Corporate operations domain"
-  described by {
-    | Covers corporate-level functions including menu
-    | management with atomic distribution to all locations,
-    | supply chain and vendor management, and marketing
-    | campaigns and promotions.
+  described as {
+    |Covers menu management with atomic distribution to all locations,
+    |supply chain and vendor management, and marketing campaigns.
   }
 }
 ```
