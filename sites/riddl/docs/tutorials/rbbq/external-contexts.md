@@ -17,14 +17,20 @@ third-party system without modeling its internals. The context
 specifies the commands you can send and the events you expect to
 receive, but the implementation is someone else's responsibility.
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context PaymentGateway is {
-  // Define the interface...
-} with {
-  option is external
-  briefly "External payment gateway"
-  described by "Third-party payment processing service."
+// `external` marks a context the chain does NOT build. It still declares a
+// real interface, because everything inside must be typed against it.
+external context PaymentGateway is {
+  command AuthorizePayment yields event PaymentAuthorized is {
+    paymentGatewayTransactionId: String(1,100)
+    authorizeAmount: Decimal(10,2)
+  }
+  event PaymentAuthorized is {
+    paymentGatewayTransactionId: String(1,100)
+    authorizeAmount: Decimal(10,2)
+  }
 }
 ```
 
@@ -36,36 +42,38 @@ boundary definition only.
 
 ### PaymentGateway
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context PaymentGateway is {
+external context PaymentGateway as flow is {
 
-  command AuthorizePayment is {
-    paymentGatewayTransactionId is String(1, 100)
-    authorizeAmount is Decimal(10, 2)
-    authorizeMethod is String(1, 50)
+  // An external context that publishes declares its OWN portlets: a
+  // cross-context connector must land on the context's own outlet, never
+  // reach past the boundary to something the context contains.
+  inlet PaymentGatewayIn is type PaymentGatewayEvent
+  outlet PaymentGatewayOut is type PaymentGatewayEvent
+
+  command AuthorizePayment yields event PaymentAuthorized is {
+    paymentGatewayTransactionId: String(1,100)
+    authorizeAmount: Decimal(10,2)
   }
-
   event PaymentAuthorized is {
-    paymentGatewayTransactionId is String(1, 100)
-    authorizedAmount is Decimal(10, 2)
-    authorizationCode is String(1, 50)
+    paymentGatewayTransactionId: String(1,100)
+    authorizeAmount: Decimal(10,2)
   }
+  type PaymentGatewayEvent is PaymentAuthorized
 
-  command CapturePayment is {
-    captureTransactionId is String(1, 100)
-    captureAmount is Decimal(10, 2)
+  handler PaymentGatewayHandler is {
+    on cmd: command AuthorizePayment is {
+      yield event PaymentAuthorized(paymentGatewayTransactionId = cmd.paymentGatewayTransactionId)
+      do "submit the authorization request to the payment processor"
+    }
+    // An adaptor or boundary handler must say what it does with what it does
+    // not recognise.
+    on other is {
+      error "Unexpected message at the PaymentGateway boundary"
+    }
   }
-
-  event PaymentCaptured is {
-    captureTransactionId is String(1, 100)
-    capturedAmount is Decimal(10, 2)
-  }
-
-} with {
-  option is external
-  briefly "External payment gateway"
-  described by "Third-party payment processing service."
 }
 ```
 
@@ -76,25 +84,38 @@ authorization holds the funds, capture completes the transfer.
 
 ### NotificationService
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context NotificationService is {
+external context NotificationService as flow is {
 
-  command SendPushNotification is {
-    notificationRecipient is String(1, 100)
-    notificationTitle is String(1, 200)
-    notificationBody is String(1, 1000)
+  // An external context that publishes declares its OWN portlets: a
+  // cross-context connector must land on the context's own outlet, never
+  // reach past the boundary to something the context contains.
+  inlet NotificationServiceIn is type NotificationServiceEvent
+  outlet NotificationServiceOut is type NotificationServiceEvent
+
+  command SendPushNotification yields event NotificationSent is {
+    notificationRecipient: String(1,120)
+    notificationBody: String(1,500)
   }
-
-  event PushNotificationSent is {
-    notificationRecipient is String(1, 100)
-    sentAt is TimeStamp
+  event NotificationSent is {
+    notificationRecipient: String(1,120)
+    notificationBody: String(1,500)
   }
+  type NotificationServiceEvent is NotificationSent
 
-} with {
-  option is external
-  briefly "External notification service"
-  described by "Push notification delivery service for mobile devices."
+  handler NotificationServiceHandler is {
+    on cmd: command SendPushNotification is {
+      yield event NotificationSent(notificationRecipient = cmd.notificationRecipient)
+      do "hand the message to the push provider"
+    }
+    // An adaptor or boundary handler must say what it does with what it does
+    // not recognise.
+    on other is {
+      error "Unexpected message at the NotificationService boundary"
+    }
+  }
 }
 ```
 
@@ -108,25 +129,38 @@ of new orders.
 
 ### HRSystem
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context HRSystem is {
+external context HRSystem as flow is {
 
-  command SyncEmployeeData is {
-    hrEmployeeId is String(1, 50)
-    hrEmployeeName is String(1, 100)
-    hrEmployeeRole is String(1, 50)
+  // An external context that publishes declares its OWN portlets: a
+  // cross-context connector must land on the context's own outlet, never
+  // reach past the boundary to something the context contains.
+  inlet HRSystemIn is type HRSystemEvent
+  outlet HRSystemOut is type HRSystemEvent
+
+  command SyncEmployeeData yields event EmployeeDataSynced is {
+    employeeRecordId: String(1,50)
+    syncedAt: TimeStamp
   }
-
   event EmployeeDataSynced is {
-    hrEmployeeId is String(1, 50)
-    syncedAt is TimeStamp
+    employeeRecordId: String(1,50)
+    syncedAt: TimeStamp
   }
+  type HRSystemEvent is EmployeeDataSynced
 
-} with {
-  option is external
-  briefly "External HR system"
-  described by "Human resources management system."
+  handler HRSystemHandler is {
+    on cmd: command SyncEmployeeData is {
+      yield event EmployeeDataSynced(employeeRecordId = cmd.employeeRecordId)
+      do "reconcile the employee record with the HR system of record"
+    }
+    // An adaptor or boundary handler must say what it does with what it does
+    // not recognise.
+    on other is {
+      error "Unexpected message at the HRSystem boundary"
+    }
+  }
 }
 ```
 
@@ -138,26 +172,38 @@ contact information.
 
 ### AccountingSystem
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context AccountingSystem is {
+external context AccountingSystem as flow is {
 
-  command PostTransaction is {
-    accountingTransactionId is String(1, 100)
-    accountCode is String(1, 20)
-    transactionAmount is Decimal(12, 2)
-    transactionDescription is String(1, 500)
+  // An external context that publishes declares its OWN portlets: a
+  // cross-context connector must land on the context's own outlet, never
+  // reach past the boundary to something the context contains.
+  inlet AccountingSystemIn is type AccountingSystemEvent
+  outlet AccountingSystemOut is type AccountingSystemEvent
+
+  command PostTransaction yields event TransactionPosted is {
+    transactionId: String(1,50)
+    postedAmount: Decimal(12,2)
   }
-
   event TransactionPosted is {
-    accountingTransactionId is String(1, 100)
-    postedAt is TimeStamp
+    transactionId: String(1,50)
+    postedAmount: Decimal(12,2)
   }
+  type AccountingSystemEvent is TransactionPosted
 
-} with {
-  option is external
-  briefly "External accounting system"
-  described by "General ledger and accounting system."
+  handler AccountingSystemHandler is {
+    on cmd: command PostTransaction is {
+      yield event TransactionPosted(transactionId = cmd.transactionId)
+      do "post the transaction to the general ledger"
+    }
+    // An adaptor or boundary handler must say what it does with what it does
+    // not recognise.
+    on other is {
+      error "Unexpected message at the AccountingSystem boundary"
+    }
+  }
 }
 ```
 
@@ -170,25 +216,38 @@ financial reporting.
 
 ### PrintingService
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context PrintingService is {
+external context PrintingService as flow is {
 
-  command PrintMenus is {
-    printJobId is String(1, 100)
-    menuVersion is String(1, 50)
-    printQuantity is Natural
+  // An external context that publishes declares its OWN portlets: a
+  // cross-context connector must land on the context's own outlet, never
+  // reach past the boundary to something the context contains.
+  inlet PrintingServiceIn is type PrintingServiceEvent
+  outlet PrintingServiceOut is type PrintingServiceEvent
+
+  command PrintMenus yields event MenusPrinted is {
+    printJobId: String(1,50)
+    printQuantity: Natural
   }
-
   event MenusPrinted is {
-    printJobId is String(1, 100)
-    printedAt is TimeStamp
+    printJobId: String(1,50)
+    printQuantity: Natural
   }
+  type PrintingServiceEvent is MenusPrinted
 
-} with {
-  option is external
-  briefly "External printing service"
-  described by "Third-party printing service for physical menus."
+  handler PrintingServiceHandler is {
+    on cmd: command PrintMenus is {
+      yield event MenusPrinted(printJobId = cmd.printJobId)
+      do "send the menu artwork to the print vendor"
+    }
+    // An adaptor or boundary handler must say what it does with what it does
+    // not recognise.
+    on other is {
+      error "Unexpected message at the PrintingService boundary"
+    }
+  }
 }
 ```
 
@@ -199,25 +258,38 @@ distributed to all locations.
 
 ### PhotographyService
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
+<!-- riddl: in-domain -->
 ```riddl
-context PhotographyService is {
+external context PhotographyService as flow is {
 
-  command SchedulePhotoShoot is {
-    shootId is String(1, 100)
-    shootDate is Date
-    menuItemsToPhotograph is many String(1, 50)
+  // An external context that publishes declares its OWN portlets: a
+  // cross-context connector must land on the context's own outlet, never
+  // reach past the boundary to something the context contains.
+  inlet PhotographyServiceIn is type PhotographyServiceEvent
+  outlet PhotographyServiceOut is type PhotographyServiceEvent
+
+  command SchedulePhotoShoot yields event PhotoShootScheduled is {
+    photoShootId: String(1,50)
+    scheduledFor: TimeStamp
   }
-
-  event PhotoShootCompleted is {
-    shootId is String(1, 100)
-    completedAt is TimeStamp
+  event PhotoShootScheduled is {
+    photoShootId: String(1,50)
+    scheduledFor: TimeStamp
   }
+  type PhotographyServiceEvent is PhotoShootScheduled
 
-} with {
-  option is external
-  briefly "External photography service"
-  described by "Food photography service for menu images."
+  handler PhotographyServiceHandler is {
+    on cmd: command SchedulePhotoShoot is {
+      yield event PhotoShootScheduled(photoShootId = cmd.photoShootId)
+      do "book the photographer for the new menu items"
+    }
+    // An adaptor or boundary handler must say what it does with what it does
+    // not recognise.
+    on other is {
+      error "Unexpected message at the PhotographyService boundary"
+    }
+  }
 }
 ```
 

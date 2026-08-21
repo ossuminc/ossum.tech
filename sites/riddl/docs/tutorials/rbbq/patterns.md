@@ -3,6 +3,40 @@ title: "Patterns"
 description: "Cross-cutting RIDDL patterns demonstrated in the Reactive BBQ model"
 ---
 
+<!-- riddl-domain-prelude
+user Chef is "Kitchen chef managing order flow and quality"
+context Kitchen is {
+  command ReceiveTicket is { kitchenTicketId: String(1,50) }
+}
+context FrontOfHouse is {
+  event OrderSubmitted is { tableOrderId: String(1,50) }
+}
+application context RestaurantApp is {
+  group KitchenScreen is {
+    input AssignStationInput acquires command Kitchen.ReceiveTicket
+    output TicketQueueDisplay presents result KitchenView
+  }
+  result KitchenView is { queueDepth: Natural }
+}
+-->
+
+<!-- riddl-prelude
+type TicketItem is { ticketMenuItemId: String(1,50) }
+type KitchenTicketId is Id(KitchenTicket)
+type ReservationId is Id(Reservation)
+entity KitchenTicket is { ??? }
+entity Reservation is { ??? }
+record StoredKitchenTicket is { kitchenTicketId: KitchenTicketId, currentStation: String(1,50)? }
+event TicketReceived is { kitchenTicketId: KitchenTicketId }
+event StationAssigned is { kitchenTicketId: KitchenTicketId }
+event AssignStationRejected is { kitchenTicketId: KitchenTicketId, rejectionReason: String(1,500) }
+type KitchenTicketEvent is TicketReceived | StationAssigned | AssignStationRejected
+event ReservationMade is { reservationId: ReservationId }
+type ReservationEvent is ReservationMade
+repository KitchenTicketRepository is { ??? }
+command PersistStationAssigned is { kitchenTicketId: KitchenTicketId }
+-->
+
 # Patterns
 
 The Reactive BBQ model demonstrates seven cross-cutting RIDDL
@@ -15,34 +49,47 @@ Every entity follows the same structure: commands trigger state
 transitions, events record what happened, state captures the
 current data, and a handler wires it together.
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=KitchenTicket,TicketReceived,StationAssigned,AssignStationRejected,KitchenTicketEvent -->
 ```riddl
-entity KitchenTicket is {
-  // Commands define what can happen
-  command ReceiveTicket is { ... }
-  command AssignStation is { ... }
+// The lifecycle is NAMED STATES, not a status field: each state declares the
+// commands it accepts, so an out-of-order command is refused by construction.
+event-sourced entity KitchenTicket as flow is {
+  command AssignStation yields event StationAssigned is { kitchenTicketId: KitchenTicketId }
 
-  // Events record what did happen
-  event TicketReceived is { ... }
-  event StationAssigned is { ... }
+  event StationAssigned is { kitchenTicketId: KitchenTicketId }
+  event TicketReceived is { kitchenTicketId: KitchenTicketId }
+  event AssignStationRejected is {
+    kitchenTicketId: KitchenTicketId
+    rejectionReason: String(1,500)
+  }
 
-  // State captures current data
-  state ActiveTicket of KitchenTicket.KitchenTicketStateData
+  record KitchenTicketData is { kitchenTicketId: KitchenTicketId }
 
-  // Handler wires commands to state transitions
-  handler KitchenTicketHandler is {
-    on command ReceiveTicket {
-      morph entity Kitchen.KitchenTicket to state
-        Kitchen.KitchenTicket.ActiveTicket
-        with command ReceiveTicket
-      tell event TicketReceived to
-        entity Kitchen.KitchenTicket
-    }
-    on command AssignStation {
-      tell event StationAssigned to
-        entity Kitchen.KitchenTicket
+  initial state Received of record KitchenTicketData is {
+    handler ReceivedHandler is {
+      on cmd: command AssignStation is {
+        yield event StationAssigned(kitchenTicketId = cmd.kitchenTicketId)
+      }
+      on evt: event StationAssigned is {
+        morph entity KitchenTicket to state Assigned
+          with record KitchenTicketData(kitchenTicketId = evt.kitchenTicketId)
+      }
     }
   }
+
+  state Assigned of record KitchenTicketData is {
+    handler AssignedHandler is {
+      on cmd: command AssignStation is {
+        send event AssignStationRejected(kitchenTicketId = cmd.kitchenTicketId,
+          rejectionReason = "already assigned") to outlet KitchenTicketEvents
+        error "KitchenTicket does not accept AssignStation in this state"
+      }
+    }
+  }
+
+  type KitchenTicketEvent is TicketReceived | StationAssigned | AssignStationRejected
+  inlet KitchenTicketCommands is type AssignStation
+  outlet KitchenTicketEvents is type KitchenTicketEvent
 }
 ```
 
@@ -59,9 +106,9 @@ RIDDL provides a rich type system for modeling domain data:
 
 ### Id Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ReservationId -->
 ```riddl
-type ReservationId is Id(FrontOfHouse.Reservation)
+type ReservationId is Id(Reservation)
 ```
 
 Typed identifiers link to specific entities, enabling
@@ -69,14 +116,15 @@ compile-time validation of cross-context references.
 
 ### Enumerations
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
+// An enumeration's enumerators join the ENCLOSING namespace, so a name here
+// can collide with a state or constant elsewhere in the same context.
 type DeliveryStatus is any of {
-  DeliveryPending,
-  DriverAssignedStatus,
+  Pending,
   InTransit,
   Delivered,
-  DeliveryFailed
+  Failed
 }
 ```
 
@@ -85,12 +133,11 @@ Each value is a constant.
 
 ### Records
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
-type GeoLocation is {
-  latitude is Decimal(9, 6)
-  longitude is Decimal(9, 6)
-  recordedAt is TimeStamp
+record GeoLocation is {
+  latitude: Decimal(9,6)
+  longitude: Decimal(9,6)
 }
 ```
 
@@ -101,10 +148,9 @@ strings like `String(1, 200)`.
 
 ### Collections
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-record -->
 ```riddl
-ticketItems is many TicketItem
-deliveryAddress is optional DeliveryAddress
+ticketItems: TicketItem+
 ```
 
 The `many` keyword denotes a collection. The `optional`
@@ -119,20 +165,29 @@ comprehensive type catalog and
 
 Repositories define persistence schemas with indexes:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=KitchenTicketRepository,StoredKitchenTicket,PersistStationAssigned -->
 ```riddl
-repository KitchenTicketRepository is {
-  schema KitchenTicketData is relational
-    of tickets as KitchenTicket
-    index on field KitchenTicket.kitchenTicketId
-    index on field KitchenTicket.ticketStatus
-    index on field KitchenTicket.assignedStation
+repository KitchenTicketRepository as flow is {
+  inlet KitchenTicketRepositoryFromKitchenTicket is type KitchenTicketEvent
+  outlet KitchenTicketRepositoryResponses is type KitchenTicketEvent
+
+  record StoredKitchenTicket is {
+    kitchenTicketId: KitchenTicketId
+    currentStation: String(1,50)?
+  }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and is warned about as one.
+  schema KitchenTicketSchema is relational
+    of tickets as type StoredKitchenTicket
+      index on field StoredKitchenTicket.kitchenTicketId
+
+  command PersistStationAssigned is { kitchenTicketId: KitchenTicketId }
 
   handler KitchenTicketPersistence is {
-    on command KitchenTicket.ReceiveTicket {
-      prompt "Store new kitchen ticket"
+    on command PersistStationAssigned is {
+      do "update the stored ticket's station"
     }
-    // ... handlers for each command
   }
 }
 ```
@@ -149,28 +204,25 @@ an example with stock-level indexing.
 
 Projectors build read-optimized views from events:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
-projector ReservationBoard is {
-  updates repository ReservationRepository
+// A projector is the READ side: it owns its own shape and persists through a
+// repository, so report queries never compete with ticket processing.
+projector ReservationBoard as flow is {
+  updates repository KitchenTicketRepository
+  inlet ReservationBoardIn is type KitchenTicketEvent
+  outlet ReservationBoardOut is type KitchenTicketEvent
 
   record ReservationBoardEntry is {
-    reservationId is ReservationId
-    guestName is GuestName
-    partySize is PartySize
-    reservationTime is TimeStamp
-    reservationStatus is ReservationStatus
-    assignedTable is optional TableNumber
+    kitchenTicketId: KitchenTicketId
+    boardStation: String(1,50)?
   }
 
   handler ReservationBoardHandler is {
-    on event Reservation.ReservationMade {
-      prompt "Add reservation to board"
+    on evt: event StationAssigned is {
+      tell command PersistStationAssigned(kitchenTicketId = evt.kitchenTicketId)
+        to repository KitchenTicketRepository
     }
-    on event Reservation.ReservationConfirmed {
-      prompt "Update board entry to confirmed"
-    }
-    // ...
   }
 }
 ```
@@ -193,12 +245,17 @@ Adaptors bridge bounded contexts. There are two directions:
 
 ### Outbound (`to`)
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor ToKitchen to context Restaurant.Kitchen is {
-  handler KitchenRouting is {
-    on command Restaurant.Kitchen.KitchenTicket.ReceiveTicket {
-      prompt "Route food items from submitted order to kitchen"
+context FrontOfHouseSeam is {
+  // OUTBOUND: an adaptor `to` a context handles that context's INPUT -- a
+  // command. Handling an event here is an Error.
+  adaptor ToKitchen to context Kitchen is {
+    handler ToKitchenOuttake is {
+      on command Kitchen.ReceiveTicket is {
+        do "turn the food lines of a submitted table order into a kitchen ticket"
+      }
+      on other is { error "Unexpected message bound for Kitchen" }
     }
   }
 }
@@ -208,12 +265,17 @@ Outbound adaptors send messages from this context to another.
 
 ### Inbound (`from`)
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor FromFrontOfHouse from context Restaurant.FrontOfHouse is {
-  handler FrontOfHouseIntake is {
-    on event Restaurant.FrontOfHouse.TableOrder.OrderSubmitted {
-      prompt "Convert submitted dine-in order into kitchen ticket"
+context KitchenSeam is {
+  // INBOUND: an adaptor `from` a context handles that context's OUTPUT -- an
+  // event. It is the only place that knows the other context's shapes.
+  adaptor FromFrontOfHouse from context FrontOfHouse is {
+    handler FrontOfHouseIntake is {
+      on event FrontOfHouse.OrderSubmitted is {
+        do "convert a submitted dine-in order into a kitchen ticket"
+      }
+      on other is { error "Unexpected message from Front of House" }
     }
   }
 }
@@ -233,17 +295,27 @@ knowing about the consumer.
 
 External contexts model third-party system boundaries:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-context PaymentGateway is {
-  command AuthorizePayment is { ... }
-  event PaymentAuthorized is { ... }
-  command CapturePayment is { ... }
-  event PaymentCaptured is { ... }
-} with {
-  option is external
-  briefly "External payment gateway"
-  described by "Third-party payment processing service."
+// `external` marks a context the chain does not build. It still declares its
+// OWN portlets, because a cross-context connector may not reach past it.
+external context PaymentGateway as flow is {
+  inlet PaymentGatewayIn is type PaymentGatewayEvent
+  outlet PaymentGatewayOut is type PaymentGatewayEvent
+
+  command AuthorizePayment yields event PaymentAuthorized is {
+    paymentGatewayTransactionId: String(1,100)
+  }
+  event PaymentAuthorized is { paymentGatewayTransactionId: String(1,100) }
+  type PaymentGatewayEvent is PaymentAuthorized
+
+  handler PaymentGatewayHandler is {
+    on cmd: command AuthorizePayment is {
+      yield event PaymentAuthorized(
+        paymentGatewayTransactionId = cmd.paymentGatewayTransactionId)
+    }
+    on other is { error "Unexpected message at the PaymentGateway boundary" }
+  }
 }
 ```
 
@@ -258,22 +330,29 @@ AccountingSystem, PrintingService, PhotographyService.
 
 Epics capture user journeys across contexts:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
 epic KitchenWorkflow is {
-  user Chef wants "to manage kitchen tickets digitally"
-    so that "no orders are lost and cooks can read tickets clearly"
-  case ProcessTicket is {
-    user Chef wants "to process a kitchen ticket"
-      so that "food is prepared correctly and on time"
-    step from user Chef "receives digital ticket on kitchen display"
-      to context Restaurant.Kitchen
-    step from user Chef "assigns ticket to cooking station"
-      to context Restaurant.Kitchen
-    step from user Cook "prepares items and marks them ready"
-      to context Restaurant.Kitchen
-    step from user Chef "approves ticket and notifies server"
-      to context Restaurant.Kitchen
+  user Chef wants to "keep the ticket queue moving"
+    so that "food leaves the pass while it is hot"
+
+  case AssignAndPrepare is {
+    user Chef wants to "assign a ticket to a station"
+      so that "a cook can start on it"
+    // A user interacts ONLY at the application boundary.
+    step focus user Chef on group RestaurantApp.KitchenScreen
+    step take input RestaurantApp.KitchenScreen.AssignStationInput from user Chef
+    step show output RestaurantApp.KitchenScreen.TicketQueueDisplay to user Chef
+  } with {
+    briefly "Assign and prepare"
+    described as {
+      |The Chef assigns a ticket to a station and watches the queue.
+    }
+  }
+} with {
+  briefly "Kitchen workflow"
+  described as {
+    |Ticket intake through station assignment, preparation and approval.
   }
 }
 ```

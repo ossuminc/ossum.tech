@@ -3,6 +3,13 @@ title: "Reporting Context"
 description: "CQRS read-model projectors for sales, labor, and inventory reports"
 ---
 
+<!-- riddl-prelude
+event PaymentProcessed is { tableOrderId: String(1,50) }
+event ClockedIn is { shiftId: String(1,50) }
+event StockConsumed is { inventoryItemId: String(1,50) }
+type ReportingEvent is PaymentProcessed | ClockedIn | StockConsumed
+-->
+
 # Reporting Context
 
 The Reporting context is a **pure CQRS read-model** — it
@@ -29,33 +36,47 @@ OnlineOrdering, Scheduling, Inventory) that emit events.
 
 ## SalesReport Projector
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
-projector SalesReport is {
+// The repository is a SINK: reports are written, never read back into the
+// write side. The projector is its SOURCE.
+repository SalesReportRepository as sink is {
+  inlet SalesReportRepositoryFromSalesReport is type SalesReportCommand
+  type SalesReportCommand is RecordDineInPayment
+
+  record SalesReportRecord is {
+    reportDate: Date
+    totalRevenue: Decimal(12,2)
+    orderCount: Natural
+  }
+
+  schema SalesReportData is relational
+    of rows as type SalesReportRecord
+      index on field SalesReportRecord.reportDate
+
+  command RecordDineInPayment is { tableOrderId: String(1,50) }
+
+  handler SalesReportPersistence is {
+    on command RecordDineInPayment is {
+      do "upsert the sales row for this date: increment orderCount and add the payment to totalRevenue"
+    }
+  }
+}
+
+projector SalesReport as source is {
+  updates repository SalesReportRepository
+  outlet SalesReportOut is type SalesReportCommand
 
   record SalesReportEntry is {
-    reportDate is Date
-    totalRevenue is Decimal(12, 2)
-    dineInRevenue is Decimal(12, 2)
-    onlineRevenue is Decimal(12, 2)
-    orderCount is Natural
-    averageOrderValue is Decimal(10, 2)
+    reportDate: Date
+    totalRevenue: Decimal(12,2)
+    orderCount: Natural
   }
 
   handler SalesReportHandler is {
-    on event Restaurant.FrontOfHouse.TableOrder.PaymentProcessed {
-      prompt "Record dine-in sale in report"
+    on evt: event PaymentProcessed is {
+      tell command RecordDineInPayment(tableOrderId = evt.tableOrderId) to repository SalesReportRepository
     }
-    on event Restaurant.OnlineOrdering.OnlineOrder.OnlinePaymentProcessed {
-      prompt "Record online sale in report"
-    }
-  }
-} with {
-  briefly "Sales report projector"
-  described by {
-    | Builds sales reports from payment events across
-    | dine-in and online channels. Isolated from production
-    | so report generation never impacts peak-hour performance.
   }
 }
 ```
@@ -67,27 +88,46 @@ channel.
 
 ## LaborReport Projector
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
-projector LaborReport is {
+// The repository is a SINK: reports are written, never read back into the
+// write side. The projector is its SOURCE.
+repository LaborReportRepository as sink is {
+  inlet LaborReportRepositoryFromLaborReport is type LaborReportCommand
+  type LaborReportCommand is RecordShiftHours
+
+  record LaborReportRecord is {
+    laborReportDate: Date
+    hoursWorked: Decimal(10,2)
+    laborCost: Decimal(12,2)
+  }
+
+  schema LaborReportData is relational
+    of rows as type LaborReportRecord
+      index on field LaborReportRecord.laborReportDate
+
+  command RecordShiftHours is { shiftId: String(1,50) }
+
+  handler LaborReportPersistence is {
+    on command RecordShiftHours is {
+      do "upsert the labor row for this date: add the shift's hours and cost"
+    }
+  }
+}
+
+projector LaborReport as source is {
+  updates repository LaborReportRepository
+  outlet LaborReportOut is type LaborReportCommand
 
   record LaborReportEntry is {
-    laborReportDate is Date
-    totalHoursWorked is Decimal(8, 2)
-    shiftsCompleted is Natural
-    shiftsCancelled is Natural
-    averageShiftDuration is Decimal(6, 2)
+    laborReportDate: Date
+    hoursWorked: Decimal(10,2)
+    laborCost: Decimal(12,2)
   }
 
   handler LaborReportHandler is {
-    on event BackOffice.Scheduling.Shift.ClockedIn {
-      prompt "Record shift start in labor report"
-    }
-    on event BackOffice.Scheduling.Shift.ClockedOut {
-      prompt "Record shift end and calculate hours"
-    }
-    on event BackOffice.Scheduling.Shift.ShiftCancelled {
-      prompt "Record shift cancellation"
+    on evt: event ClockedIn is {
+      tell command RecordShiftHours(shiftId = evt.shiftId) to repository LaborReportRepository
     }
   }
 }
@@ -100,27 +140,46 @@ shift cancellation rates.
 
 ## InventoryReport Projector
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
-projector InventoryReport is {
+// The repository is a SINK: reports are written, never read back into the
+// write side. The projector is its SOURCE.
+repository InventoryReportRepository as sink is {
+  inlet InventoryReportRepositoryFromInventoryReport is type InventoryReportCommand
+  type InventoryReportCommand is RecordStockMovement
+
+  record InventoryReportRecord is {
+    inventoryReportDate: Date
+    itemsConsumed: Natural
+    stockValue: Decimal(12,2)
+  }
+
+  schema InventoryReportData is relational
+    of rows as type InventoryReportRecord
+      index on field InventoryReportRecord.inventoryReportDate
+
+  command RecordStockMovement is { inventoryItemId: String(1,50) }
+
+  handler InventoryReportPersistence is {
+    on command RecordStockMovement is {
+      do "upsert the inventory row for this date: add the consumed quantity and revalue stock"
+    }
+  }
+}
+
+projector InventoryReport as source is {
+  updates repository InventoryReportRepository
+  outlet InventoryReportOut is type InventoryReportCommand
 
   record InventoryReportEntry is {
-    inventoryReportDate is Date
-    totalItemsTracked is Natural
-    lowStockItems is Natural
-    outOfStockItems is Natural
-    totalStockValue is Decimal(14, 2)
+    inventoryReportDate: Date
+    itemsConsumed: Natural
+    stockValue: Decimal(12,2)
   }
 
   handler InventoryReportHandler is {
-    on event BackOffice.Inventory.InventoryItem.StockReceived {
-      prompt "Update inventory report with receipt"
-    }
-    on event BackOffice.Inventory.InventoryItem.StockConsumed {
-      prompt "Update inventory report with consumption"
-    }
-    on event BackOffice.Inventory.InventoryItem.StockAdjusted {
-      prompt "Update inventory report with adjustment"
+    on evt: event StockConsumed is {
+      tell command RecordStockMovement(inventoryItemId = evt.inventoryItemId) to repository InventoryReportRepository
     }
   }
 }

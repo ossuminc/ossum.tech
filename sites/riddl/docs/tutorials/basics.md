@@ -46,27 +46,30 @@ domain Greeting is {
 
 Entities are stateful objects that respond to commands and emit events:
 
+<!-- riddl: standalone -->
 ```riddl
 domain Greeting is {
   context HelloWorld is {
     type Name is String
 
     entity Greeter is {
-      state GreeterState of record Greeter.State
-
-      record State is {
-        greetingsCount: Integer
-      }
+      record GreeterState is { greetingsCount: Integer }
 
       command SayHello is { to: Name }
       event HelloSaid is { to: Name, message: String }
 
-      handler GreeterHandler is {
-        on command SayHello {
-          send event HelloSaid(
-            to = @SayHello.to,
-            message = "Hello, " + @SayHello.to + "!"
-          ) to Greeter
+      // An entity receives on its OWN inlet and publishes on its OWN outlet.
+      inlet Hellos is command SayHello
+      outlet Greetings is event HelloSaid
+
+      state Active of record GreeterState is {
+        handler GreeterHandler is {
+          // `hello:` binds the handled message, so its fields are in scope.
+          on hello: command SayHello is {
+            send event HelloSaid(to = hello.to,
+              message = prompt("a greeting addressed to this name"))
+              to outlet Greetings
+          }
         }
       }
     }

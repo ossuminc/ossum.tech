@@ -5,6 +5,10 @@ draft: false
 weight: 30
 ---
 
+<!-- riddl-domain-prelude
+user Customer is "a person buying something"
+-->
+
 The RIDDL specification language borrows concepts from:
 
 * [Domain Driven Design (DDD)](https://en.wikipedia.org/wiki/Domain-driven_design)
@@ -160,16 +164,29 @@ Key principles from Use Case 2.0 that influence RIDDL:
 
 Example of Use Case 2.0 concepts in RIDDL:
 
+<!-- riddl: in-domain -->
 ```riddl
 epic Checkout is {
   user Customer wants to "complete a purchase"
-  so that "they receive their ordered items"
+    so that "they receive their ordered items"
 
   // Each case is a "slice" of the use case
-  case EnterShippingInfo is { /* ... */ }
-  case SelectPaymentMethod is { /* ... */ }
-  case ReviewAndConfirm is { /* ... */ }
-  case ReceiveConfirmation is { /* ... */ }
+  case EnterShippingInfo is {
+    user Customer wants to "give a delivery address" so that "the order can ship"
+    ???
+  }
+  case SelectPaymentMethod is {
+    user Customer wants to "choose how to pay" so that "the order can be charged"
+    ???
+  }
+  case ReviewAndConfirm is {
+    user Customer wants to "check the order before committing" so that "mistakes are caught"
+    ???
+  }
+  case ReceiveConfirmation is {
+    user Customer wants to "be told the order was accepted" so that "they can stop worrying"
+    ???
+  }
 }
 ```
 

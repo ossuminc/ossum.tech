@@ -86,6 +86,7 @@ An Adaptor from the Server context to the Kitchen context might:
 
 In RIDDL, we use a `context` definition to implement bounded contexts:
 
+<!-- riddl: standalone -->
 ```riddl
 domain Restaurant is {
   context FrontOfHouse is {
@@ -97,7 +98,7 @@ domain Restaurant is {
     command PlaceOrder is {
       table: Table,
       seat: Seat,
-      items: OrderItem*
+      items: Integer
     }
 
     // Entities, handlers, etc.
@@ -110,14 +111,40 @@ domain Restaurant is {
     // Messages in kitchen's language
     command PrepareItem is {
       station: Station,
-      item: FoodItem,
+      item: String,
       specialInstructions: String?
     }
   }
 
-  // Adaptor between contexts
-  adaptor OrderToKitchen from context FrontOfHouse to context Kitchen is {
-    // Transform FrontOfHouse.PlaceOrder to Kitchen.PrepareItem
+}
+```
+
+An adaptor is declared **inside** the context it protects, and names the one
+peer it translates for — outbound (`to`) or inbound (`from`), never both:
+
+<!-- riddl: standalone -->
+```riddl
+domain Restaurant is {
+  context FrontOfHouse is {
+    type Table is Integer
+    command PlaceOrder is { table: Table }
+    event OrderPlaced is { table: Table }
+  }
+  context Kitchen is {
+    type Station is any of { Grill, Fryer, Salad, Dessert }
+    command PrepareItem is { station: Station }
+
+    // INBOUND adaptors handle the peer's OUTPUT -- its events and results.
+    // Outbound (`to`) adaptors handle the target's input, its commands.
+    // This is the only thing in Kitchen that knows FrontOfHouse's shapes.
+    adaptor OrderToKitchen from context FrontOfHouse is {
+      handler OrderIntake is {
+        on event FrontOfHouse.OrderPlaced is {
+          do "translate a placed order into a PrepareItem for the station"
+        }
+        on other is { error "Unexpected message from FrontOfHouse" }
+      }
+    }
   }
 }
 ```
