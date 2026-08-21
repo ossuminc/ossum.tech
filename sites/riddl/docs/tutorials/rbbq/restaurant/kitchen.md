@@ -3,6 +3,40 @@ title: "Kitchen Context"
 description: "Kitchen ticket management and display in the Restaurant domain"
 ---
 
+<!-- riddl-domain-prelude
+context FrontOfHouse is {
+  event OrderSubmitted is { tableOrderId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type KitchenTicketId is Id(KitchenTicket)
+type StationName is String(1,50)
+type StationRouting is mapping from String to StationName
+type DietaryFlags is set of String
+type TicketSource is any of { DineIn, Online }
+type TicketItem is {
+  ticketMenuItemId: String(1,50)
+  ticketItemName: String(1,200)
+  ticketItemQuantity: Natural
+  ticketItemNotes: String(1,500)?
+  ticketItemReady: Boolean
+}
+record StoredKitchenTicket is {
+  kitchenTicketId: KitchenTicketId
+  currentStation: StationName?
+}
+event TicketReceived is { kitchenTicketId: KitchenTicketId }
+event StationAssigned is { kitchenTicketId: KitchenTicketId }
+event PreparationStarted is { kitchenTicketId: KitchenTicketId }
+event ItemMarkedReady is { kitchenTicketId: KitchenTicketId }
+event TicketApproved is { kitchenTicketId: KitchenTicketId }
+event ServerNotified is { kitchenTicketId: KitchenTicketId }
+type KitchenTicketEvent is TicketReceived | StationAssigned | PreparationStarted | ItemMarkedReady | TicketApproved | ServerNotified
+entity KitchenTicket is { ??? }
+repository KitchenTicketRepository is { ??? }
+-->
+
 # Kitchen Context
 
 The Kitchen context manages the kitchen ticket queue, station
@@ -35,47 +69,30 @@ a persistent, legible, digital ticket queue.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=KitchenTicketId,StationName,StationRouting,DietaryFlags,TicketSource,TicketItem -->
 ```riddl
-type KitchenTicketId is Id(Kitchen.KitchenTicket) with {
-  briefly "Kitchen ticket identifier"
-  described by "Unique identifier for a kitchen ticket."
-}
+type KitchenTicketId is Id(KitchenTicket)
 
-type StationName is String(1, 50) with {
-  briefly "Station name"
-  described by "Name of the kitchen station such as grill, fryer, prep."
-}
+type StationName is String(1,50)
 
-type TicketStatus is any of {
-  Received,
-  Assigned,
-  InPreparation,
-  ItemsReady,
-  Approved,
-  ServerNotifiedTicket
-} with {
-  briefly "Ticket status"
-  described by "Current status of a kitchen ticket."
-}
+// Which station cooks each menu category. A mapping and not a field on the
+// item, because the same dish moves between stations as a kitchen is relaid
+// or a station goes down -- the routing is a property of THIS kitchen on
+// THIS night, not of the dish.
+type StationRouting is mapping from String to StationName
 
-type TicketSource is any of {
-  DineIn,
-  Online
-} with {
-  briefly "Ticket source"
-  described by "Whether the ticket originated from dine-in or online."
-}
+// A SET, not a list: order is meaningless and a repeat carries no extra
+// warning. A cook scanning a ticket must see each flag exactly once.
+type DietaryFlags is set of String
+
+type TicketSource is any of { DineIn, Online }
 
 type TicketItem is {
-  ticketMenuItemId is String(1, 50)
-  ticketItemName is String(1, 200)
-  ticketItemQuantity is Natural
-  ticketItemNotes is optional String(1, 500)
-  ticketItemReady is Boolean
-} with {
-  briefly "Ticket item"
-  described by "A single item on a kitchen ticket."
+  ticketMenuItemId: String(1,50)
+  ticketItemName: String(1,200)
+  ticketItemQuantity: Natural
+  ticketItemNotes: String(1,500)?
+  ticketItemReady: Boolean
 }
 ```
 
@@ -85,81 +102,97 @@ adaptors and may have different preparation priorities.
 
 ## Entity: KitchenTicket
 
-The `KitchenTicket` entity has a 6-command lifecycle with event
-sourcing:
+The `KitchenTicket` entity has a six-command lifecycle and is event-sourced.
+Each lifecycle phase is a **named state** rather than a `status` field, so the
+compiler knows which commands each phase accepts. Two of the six are shown
+here; the others follow the same shape:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=KitchenTicket,TicketReceived,StationAssigned,PreparationStarted,ItemMarkedReady,TicketApproved,ServerNotified,KitchenTicketEvent -->
 ```riddl
-entity KitchenTicket is {
+event-sourced entity KitchenTicket as flow is {
 
-  command ReceiveTicket is {
-    kitchenTicketId is KitchenTicketId
-    sourceOrderId is String(1, 50)
-    ticketSource is TicketSource
-    ticketItems is many TicketItem
-    receivedAt is TimeStamp
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it. Every command names the event it yields.
+  command ReceiveTicket yields event TicketReceived is {
+    kitchenTicketId: KitchenTicketId
+    sourceOrderId: String(1,50)
+    ticketSource: TicketSource
+    ticketItems: TicketItem+
+    receivedAt: TimeStamp
+  }
+  command AssignStation yields event StationAssigned is {
+    kitchenTicketId: KitchenTicketId
+    assignedStation: StationName
   }
 
-  command AssignStation is {
-    kitchenTicketId is KitchenTicketId
-    assignedStation is StationName
+  event TicketReceived is {
+    kitchenTicketId: KitchenTicketId
+    ticketItems: TicketItem+
+    receivedAt: TimeStamp
+  }
+  event StationAssigned is {
+    kitchenTicketId: KitchenTicketId
+    assignedStation: StationName
+    assignedAt: TimeStamp
+  }
+  // A rejection event for every command, so a refusal is recorded and not
+  // merely returned. See the handler below.
+  event AssignStationRejected is {
+    kitchenTicketId: KitchenTicketId
+    rejectionReason: String(1,500)
   }
 
-  command StartPreparation is {
-    kitchenTicketId is KitchenTicketId
-    startedAt is TimeStamp
+  record KitchenTicketData is {
+    kitchenTicketId: KitchenTicketId
+    ticketItems: TicketItem+
+    currentStation: StationName?
+    receivedAt: TimeStamp
   }
 
-  command MarkItemReady is {
-    kitchenTicketId is KitchenTicketId
-    readyMenuItemId is String(1, 50)
-    markedReadyAt is TimeStamp
-  }
-
-  command ApproveTicket is {
-    kitchenTicketId is KitchenTicketId
-    approvedAt is TimeStamp
-  }
-
-  command NotifyServer is {
-    kitchenTicketId is KitchenTicketId
-    notifiedAt is TimeStamp
-  }
-
-  // Events: TicketReceived, StationAssigned, PreparationStarted,
-  //         ItemMarkedReady, TicketApproved, ServerNotified
-
-  state ActiveTicket of KitchenTicket.KitchenTicketStateData
-
-  handler KitchenTicketHandler is {
-    on command ReceiveTicket {
-      morph entity Kitchen.KitchenTicket to state
-        Kitchen.KitchenTicket.ActiveTicket
-        with command ReceiveTicket
-      tell event TicketReceived to
-        entity Kitchen.KitchenTicket
-    }
-    on command AssignStation {
-      tell event StationAssigned to
-        entity Kitchen.KitchenTicket
-    }
-    on command StartPreparation {
-      tell event PreparationStarted to
-        entity Kitchen.KitchenTicket
-    }
-    on command MarkItemReady {
-      tell event ItemMarkedReady to
-        entity Kitchen.KitchenTicket
-    }
-    on command ApproveTicket {
-      tell event TicketApproved to
-        entity Kitchen.KitchenTicket
-    }
-    on command NotifyServer {
-      tell event ServerNotified to
-        entity Kitchen.KitchenTicket
+  initial state Received of record KitchenTicketData is {
+    handler ReceivedHandler is {
+      on assignStation: command AssignStation is {
+        yield event StationAssigned(
+          kitchenTicketId = assignStation.kitchenTicketId,
+          assignedStation = assignStation.assignedStation,
+          assignedAt = prompt("when the station was assigned"))
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause of an
+      // event-sourced entity: replay must re-apply the same change.
+      on stationAssigned: event StationAssigned is {
+        morph entity KitchenTicket to state Assigned
+          with record KitchenTicketData(
+            kitchenTicketId = stationAssigned.kitchenTicketId,
+            ticketItems = KitchenTicketData.ticketItems,
+            currentStation = KitchenTicketData.currentStation,
+            receivedAt = KitchenTicketData.receivedAt)
+      }
     }
   }
+
+  state Assigned of record KitchenTicketData is {
+    handler AssignedHandler is {
+      // A command this state does not accept is refused -- and the refusal is
+      // PUBLISHED before it is raised.
+      on assignStation: command AssignStation is {
+        send event AssignStationRejected(
+          kitchenTicketId = assignStation.kitchenTicketId,
+          rejectionReason = "KitchenTicket does not accept AssignStation in this state")
+          to outlet KitchenTicketEvents
+        error "KitchenTicket does not accept AssignStation in this state"
+      }
+    }
+  }
+
+  // An entity is a streamlet: it receives on its OWN inlet and publishes on
+  // its OWN outlet, never on its context's. A portlet's type must ADMIT
+  // everything that travels on it, rejections included -- which is what an
+  // alternation is for.
+  type KitchenTicketCommand is ReceiveTicket | AssignStation
+  type KitchenTicketEvent is TicketReceived | StationAssigned | AssignStationRejected
+
+  inlet KitchenTicketCommands is type KitchenTicketCommand
+  outlet KitchenTicketEvents is type KitchenTicketEvent
 }
 ```
 
@@ -171,58 +204,69 @@ orders.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=KitchenTicketRepository,StoredKitchenTicket -->
 ```riddl
-repository KitchenTicketRepository is {
-  schema KitchenTicketData is relational
-    of tickets as KitchenTicket
-    index on field KitchenTicket.kitchenTicketId
-    index on field KitchenTicket.ticketStatus
-    index on field KitchenTicket.assignedStation
+repository KitchenTicketRepository as merge is {
+  inlet KitchenTicketRepositoryFromKitchenTicket is type KitchenTicketEvent
+  inlet KitchenTicketRepositoryFromKitchenDisplay is type KitchenTicketEvent
+  outlet KitchenTicketRepositoryResponses is type KitchenTicketEvent
+
+  record StoredKitchenTicket is {
+    kitchenTicketId: KitchenTicketId
+    currentStation: StationName?
+  }
+
+  schema KitchenTicketSchema is relational
+    of tickets as type StoredKitchenTicket
+      index on field StoredKitchenTicket.kitchenTicketId
+      index on field StoredKitchenTicket.currentStation
+
+  command PersistStationAssigned is { kitchenTicketId: KitchenTicketId }
+
+  handler KitchenTicketPersistence is {
+    on command PersistStationAssigned is {
+      do "update KitchenTicketSchema.tickets set currentStation =
+        assignedStation where kitchenTicketId matches"
+    }
+  }
 }
 ```
 
-The index on `assignedStation` enables the kitchen display to
-quickly filter tickets by station — the grill station only sees
-grill tickets.
+The index on `currentStation` enables the kitchen display to quickly filter
+tickets by station — the grill station only sees grill tickets. A repository
+that answers queries and declares no index at all draws a warning, because it
+is a sequential scan by construction.
 
 ## Projector: KitchenDisplay
 
 The KitchenDisplay projector provides the real-time screen that
 replaces printed and handwritten tickets:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context -->
 ```riddl
-projector KitchenDisplay is {
+projector KitchenDisplay as flow is {
   updates repository KitchenTicketRepository
+  inlet KitchenDisplayFromKitchenTicket is type KitchenTicketEvent
+  outlet KitchenDisplayOut is type KitchenTicketEvent
 
   record KitchenDisplayEntry is {
-    kitchenTicketId is KitchenTicketId
-    ticketSource is TicketSource
-    ticketItems is many TicketItem
-    ticketStatus is TicketStatus
-    displayStation is optional StationName
-    receivedAt is TimeStamp
+    kitchenTicketId: KitchenTicketId
+    ticketSource: TicketSource
+    ticketItems: TicketItem+
+    ticketDisplayStatus: String(1,30)
+    displayStation: StationName?
+    receivedAt: TimeStamp
   }
 
   handler KitchenDisplayHandler is {
-    on event KitchenTicket.TicketReceived {
-      prompt "Add ticket to kitchen display"
+    on ticketReceived: event TicketReceived is {
+      do "insert a KitchenDisplayEntry for this ticket"
     }
-    on event KitchenTicket.StationAssigned {
-      prompt "Update display with station assignment"
+    on stationAssigned: event StationAssigned is {
+      do "update the display with the station assignment"
     }
-    on event KitchenTicket.PreparationStarted {
-      prompt "Update display to show preparation in progress"
-    }
-    on event KitchenTicket.ItemMarkedReady {
-      prompt "Update item readiness on display"
-    }
-    on event KitchenTicket.TicketApproved {
-      prompt "Mark ticket as approved on display"
-    }
-    on event KitchenTicket.ServerNotified {
-      prompt "Remove completed ticket from active display"
+    on serverNotified: event ServerNotified is {
+      do "remove the completed ticket from the active display"
     }
   }
 }
@@ -233,20 +277,17 @@ projector KitchenDisplay is {
 Kitchen has two inbound adaptors — one for dine-in orders from
 Front of House, one for online orders:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor FromFrontOfHouse from context Restaurant.FrontOfHouse is {
-  handler FrontOfHouseIntake is {
-    on event Restaurant.FrontOfHouse.TableOrder.OrderSubmitted {
-      prompt "Convert submitted dine-in order into kitchen ticket"
-    }
-  }
-}
-
-adaptor FromOnlineOrdering from context Restaurant.OnlineOrdering is {
-  handler OnlineIntake is {
-    on event Restaurant.OnlineOrdering.OnlineOrder.OnlineOrderSubmitted {
-      prompt "Convert submitted online order into kitchen ticket"
+context Kitchen is {
+  adaptor FromFrontOfHouse from context FrontOfHouse is {
+    handler FrontOfHouseIntake is {
+      on event FrontOfHouse.OrderSubmitted is {
+        do "convert a submitted dine-in order into a kitchen ticket"
+      }
+      on other is {
+        error "Unexpected message from Front of House"
+      }
     }
   }
 }
@@ -258,6 +299,12 @@ whether an order came from a table or a website — it just
 processes tickets.
 
 ## Design Decisions
+
+**Why named states rather than a `ticketStatus` field?** A status field is
+data the model cannot reason about: nothing stops a ticket being approved
+before preparation started. As states, each phase declares the commands it
+accepts, and one it does not is refused — after the refusal has been
+*published* as a rejection event, so the attempt is recorded rather than lost.
 
 **Why event sourcing for kitchen tickets?** The Chef's interview
 made it clear that order loss during system crashes was the
