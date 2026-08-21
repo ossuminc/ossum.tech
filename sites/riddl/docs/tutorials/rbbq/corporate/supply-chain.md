@@ -3,6 +3,19 @@ title: "Supply Chain Context"
 description: "Vendor management and bulk ordering for the restaurant chain"
 ---
 
+
+<!-- riddl-prelude
+type PurchaseOrderId is Id(PurchaseOrder)
+type VendorId is UUID
+record StoredPurchaseOrder is { purchaseOrderId: PurchaseOrderId }
+event BulkOrderCreated is { purchaseOrderId: PurchaseOrderId }
+event OrderApproved is { purchaseOrderId: PurchaseOrderId }
+event ApproveOrderRejected is { purchaseOrderId: PurchaseOrderId, rejectionReason: String(1,500) }
+type PurchaseOrderEvent is BulkOrderCreated | OrderApproved | ApproveOrderRejected
+entity PurchaseOrder is { ??? }
+repository PurchaseOrderRepository is { ??? }
+-->
+
 # Supply Chain Context
 
 The Supply Chain context manages vendor relationships and bulk
@@ -29,39 +42,11 @@ context formalizes this process with tracked purchase orders.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=PurchaseOrderId,VendorId -->
 ```riddl
-type PurchaseOrderId is Id(SupplyChain.PurchaseOrder) with {
-  briefly "Purchase order identifier"
-  described by "Unique identifier for a purchase order."
-}
+type PurchaseOrderId is Id(PurchaseOrder)
 
-type VendorId is UUID with {
-  briefly "Vendor identifier"
-  described by "Unique identifier for a vendor."
-}
-
-type PurchaseOrderStatus is any of {
-  PoDraft,
-  PoSubmitted,
-  PoApproved,
-  PoShipped,
-  PoReceived,
-  PoDisputed
-} with {
-  briefly "Purchase order status"
-  described by "Current status of a purchase order."
-}
-
-type OrderLineItem is {
-  lineItemName is String(1, 200)
-  lineItemQuantity is Decimal(10, 2)
-  lineItemUnit is String(1, 20)
-  lineItemUnitPrice is Decimal(10, 2)
-} with {
-  briefly "Order line item"
-  described by "A single item in a purchase order."
-}
+type VendorId is UUID
 ```
 
 Note the `PoDisputed` status — if a shipment has quality
@@ -72,72 +57,57 @@ accepted.
 
 The `PurchaseOrder` entity has a 5-command lifecycle:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=PurchaseOrder,BulkOrderCreated,OrderApproved,ApproveOrderRejected,PurchaseOrderCommand,PurchaseOrderEvent -->
 ```riddl
-entity PurchaseOrder is {
+event-sourced entity PurchaseOrder as flow is {
 
-  command CreateBulkOrder is {
-    purchaseOrderId is PurchaseOrderId
-    vendorId is VendorId
-    vendorName is String(1, 200)
-    orderLineItems is many OrderLineItem
-    requestedDeliveryDate is Date
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command CreateBulkOrder yields event BulkOrderCreated is { purchaseOrderId: PurchaseOrderId }
+  command ApproveOrder yields event OrderApproved is { purchaseOrderId: PurchaseOrderId }
 
-  command ApproveOrder is {
-    purchaseOrderId is PurchaseOrderId
-    approvedAt is TimeStamp
-  }
+  event BulkOrderCreated is { purchaseOrderId: PurchaseOrderId }
+  event OrderApproved is { purchaseOrderId: PurchaseOrderId }
+  event ApproveOrderRejected is { purchaseOrderId: PurchaseOrderId, rejectionReason: String(1,500) }
 
-  command ShipOrder is {
-    purchaseOrderId is PurchaseOrderId
-    shippedAt is TimeStamp
-    trackingNumber is optional String(1, 100)
-  }
+  record PurchaseOrderData is { purchaseOrderId: PurchaseOrderId }
 
-  command ReceiveShipment is {
-    purchaseOrderId is PurchaseOrderId
-    receivedAt is TimeStamp
-    receivedCondition is String(1, 200)
-  }
-
-  command ReportIssue is {
-    purchaseOrderId is PurchaseOrderId
-    purchaseOrderIssueType is String(1, 50)
-    purchaseOrderIssueDescription is String(1, 1000)
-    issueReportedAt is TimeStamp
-  }
-
-  // Events: BulkOrderCreated, OrderApproved, OrderShipped,
-  //         ShipmentReceived, IssueReported
-
-  state ActivePurchaseOrder of PurchaseOrder.PurchaseOrderStateData
-
-  handler PurchaseOrderHandler is {
-    on command CreateBulkOrder {
-      morph entity SupplyChain.PurchaseOrder to state
-        SupplyChain.PurchaseOrder.ActivePurchaseOrder
-        with command CreateBulkOrder
-      tell event BulkOrderCreated to
-        entity SupplyChain.PurchaseOrder
-    }
-    on command ApproveOrder {
-      tell event OrderApproved to
-        entity SupplyChain.PurchaseOrder
-    }
-    on command ShipOrder {
-      tell event OrderShipped to
-        entity SupplyChain.PurchaseOrder
-    }
-    on command ReceiveShipment {
-      tell event ShipmentReceived to
-        entity SupplyChain.PurchaseOrder
-    }
-    on command ReportIssue {
-      tell event IssueReported to
-        entity SupplyChain.PurchaseOrder
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state ActivePurchaseOrder of record PurchaseOrderData is {
+    handler ActivePurchaseOrderHandler is {
+      on cmd: command ApproveOrder is {
+        yield event OrderApproved(purchaseOrderId = cmd.purchaseOrderId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event OrderApproved is {
+        morph entity PurchaseOrder to state Approved
+          with record PurchaseOrderData(purchaseOrderId = evt.purchaseOrderId)
+      }
     }
   }
+
+  state Approved of record PurchaseOrderData is {
+    handler ApprovedHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command ApproveOrder is {
+        send event ApproveOrderRejected(purchaseOrderId = cmd.purchaseOrderId,
+          rejectionReason = "PurchaseOrder does not accept ApproveOrder in this state")
+          to outlet PurchaseOrderEvents
+        error "PurchaseOrder does not accept ApproveOrder in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type PurchaseOrderCommand is CreateBulkOrder | ApproveOrder
+  type PurchaseOrderEvent is BulkOrderCreated | OrderApproved | ApproveOrderRejected
+
+  inlet PurchaseOrderCommands is type PurchaseOrderCommand
+  outlet PurchaseOrderEvents is type PurchaseOrderEvent
 }
 ```
 
@@ -150,14 +120,27 @@ resolution process with the vendor.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=PurchaseOrderRepository,StoredPurchaseOrder -->
 ```riddl
-repository PurchaseOrderRepository is {
-  schema PurchaseOrderData is relational
-    of purchaseOrders as PurchaseOrder
-    index on field PurchaseOrder.purchaseOrderId
-    index on field PurchaseOrder.vendorId
-    index on field PurchaseOrder.purchaseOrderStatus
+repository PurchaseOrderRepository as flow is {
+  inlet PurchaseOrderRepositoryFromPurchaseOrder is type PurchaseOrderEvent
+  outlet PurchaseOrderRepositoryResponses is type PurchaseOrderEvent
+
+  record StoredPurchaseOrder is { purchaseOrderId: PurchaseOrderId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema PurchaseOrderSchema is relational
+    of rows as type StoredPurchaseOrder
+      index on field StoredPurchaseOrder.purchaseOrderId
+
+  command PersistOrderApproved is { purchaseOrderId: PurchaseOrderId }
+
+  handler PurchaseOrderPersistence is {
+    on command PersistOrderApproved is {
+      do "update the stored purchaseOrder row for this purchaseOrderId"
+    }
+  }
 }
 ```
 

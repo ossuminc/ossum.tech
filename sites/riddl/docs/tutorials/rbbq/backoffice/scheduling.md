@@ -3,6 +3,19 @@ title: "Scheduling Context"
 description: "Staff shift planning and time tracking"
 ---
 
+
+<!-- riddl-prelude
+type ShiftId is Id(Shift)
+type EmployeeId is UUID
+record StoredShift is { shiftId: ShiftId }
+event ShiftCreated is { shiftId: ShiftId }
+event EmployeeAssigned is { shiftId: ShiftId }
+event AssignEmployeeRejected is { shiftId: ShiftId, rejectionReason: String(1,500) }
+type ShiftEvent is ShiftCreated | EmployeeAssigned | AssignEmployeeRejected
+entity Shift is { ??? }
+repository ShiftRepository is { ??? }
+-->
+
 # Scheduling Context
 
 The Scheduling context manages staff shift planning, assignment,
@@ -20,41 +33,11 @@ or cancellations.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ShiftId,EmployeeId -->
 ```riddl
-type ShiftId is Id(Scheduling.Shift) with {
-  briefly "Shift identifier"
-  described by "Unique identifier for a shift."
-}
+type ShiftId is Id(Shift)
 
-type EmployeeId is UUID with {
-  briefly "Employee identifier"
-  described by "Unique identifier for an employee."
-}
-
-type ShiftStatus is any of {
-  ScheduledStatus,
-  AssignedStatus,
-  InProgressStatus,
-  ShiftCompletedStatus,
-  ShiftCancelledStatus
-} with {
-  briefly "Shift status"
-  described by "Current status of a shift."
-}
-
-type ShiftRole is any of {
-  HostRole,
-  ServerRole,
-  BartenderRole,
-  ChefRole,
-  CookRole,
-  DishwasherRole,
-  ManagerRole
-} with {
-  briefly "Shift role"
-  described by "The role for this shift."
-}
+type EmployeeId is UUID
 ```
 
 The `ShiftRole` enumeration maps directly to the personas
@@ -65,80 +48,57 @@ Dishwasher and Manager.
 
 The `Shift` entity has a 6-command lifecycle:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=Shift,ShiftCreated,EmployeeAssigned,AssignEmployeeRejected,ShiftCommand,ShiftEvent -->
 ```riddl
-entity Shift is {
+event-sourced entity Shift as flow is {
 
-  command CreateShift is {
-    shiftId is ShiftId
-    shiftDate is Date
-    shiftStart is TimeStamp
-    shiftEnd is TimeStamp
-    shiftRole is ShiftRole
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command CreateShift yields event ShiftCreated is { shiftId: ShiftId }
+  command AssignEmployee yields event EmployeeAssigned is { shiftId: ShiftId }
 
-  command AssignEmployee is {
-    shiftId is ShiftId
-    employeeId is EmployeeId
-    employeeName is String(1, 100)
-  }
+  event ShiftCreated is { shiftId: ShiftId }
+  event EmployeeAssigned is { shiftId: ShiftId }
+  event AssignEmployeeRejected is { shiftId: ShiftId, rejectionReason: String(1,500) }
 
-  command SwapShift is {
-    shiftId is ShiftId
-    originalEmployeeId is EmployeeId
-    replacementEmployeeId is EmployeeId
-    replacementName is String(1, 100)
-  }
+  record ShiftData is { shiftId: ShiftId }
 
-  command ClockIn is {
-    shiftId is ShiftId
-    clockedInAt is TimeStamp
-  }
-
-  command ClockOut is {
-    shiftId is ShiftId
-    clockedOutAt is TimeStamp
-  }
-
-  command CancelShift is {
-    shiftId is ShiftId
-    shiftCancelReason is String(1, 500)
-  }
-
-  // Events: ShiftCreated, EmployeeAssigned, ShiftSwapped,
-  //         ClockedIn, ClockedOut, ShiftCancelled
-
-  state ActiveShift of Shift.ShiftStateData
-
-  handler ShiftHandler is {
-    on command CreateShift {
-      morph entity Scheduling.Shift to state
-        Scheduling.Shift.ActiveShift
-        with command CreateShift
-      tell event ShiftCreated to
-        entity Scheduling.Shift
-    }
-    on command AssignEmployee {
-      tell event EmployeeAssigned to
-        entity Scheduling.Shift
-    }
-    on command SwapShift {
-      tell event ShiftSwapped to
-        entity Scheduling.Shift
-    }
-    on command ClockIn {
-      tell event ClockedIn to
-        entity Scheduling.Shift
-    }
-    on command ClockOut {
-      tell event ClockedOut to
-        entity Scheduling.Shift
-    }
-    on command CancelShift {
-      tell event ShiftCancelled to
-        entity Scheduling.Shift
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state ActiveShift of record ShiftData is {
+    handler ActiveShiftHandler is {
+      on cmd: command AssignEmployee is {
+        yield event EmployeeAssigned(shiftId = cmd.shiftId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event EmployeeAssigned is {
+        morph entity Shift to state Filled
+          with record ShiftData(shiftId = evt.shiftId)
+      }
     }
   }
+
+  state Filled of record ShiftData is {
+    handler FilledHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command AssignEmployee is {
+        send event AssignEmployeeRejected(shiftId = cmd.shiftId,
+          rejectionReason = "Shift does not accept AssignEmployee in this state")
+          to outlet ShiftEvents
+        error "Shift does not accept AssignEmployee in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type ShiftCommand is CreateShift | AssignEmployee
+  type ShiftEvent is ShiftCreated | EmployeeAssigned | AssignEmployeeRejected
+
+  inlet ShiftCommands is type ShiftCommand
+  outlet ShiftEvents is type ShiftEvent
 }
 ```
 
@@ -151,14 +111,27 @@ assigned. This matters for labor compliance and reporting.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=ShiftRepository,StoredShift -->
 ```riddl
-repository ShiftRepository is {
-  schema ShiftData is relational
-    of shifts as Shift
-    index on field Shift.shiftId
-    index on field Shift.shiftDate
-    index on field Shift.employeeId
+repository ShiftRepository as flow is {
+  inlet ShiftRepositoryFromShift is type ShiftEvent
+  outlet ShiftRepositoryResponses is type ShiftEvent
+
+  record StoredShift is { shiftId: ShiftId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema ShiftSchema is relational
+    of rows as type StoredShift
+      index on field StoredShift.shiftId
+
+  command PersistEmployeeAssigned is { shiftId: ShiftId }
+
+  handler ShiftPersistence is {
+    on command PersistEmployeeAssigned is {
+      do "update the stored shift row for this shiftId"
+    }
+  }
 }
 ```
 

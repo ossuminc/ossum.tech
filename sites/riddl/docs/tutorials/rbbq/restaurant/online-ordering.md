@@ -3,6 +3,24 @@ title: "Online Ordering Context"
 description: "Online menu browsing, cart management, and checkout"
 ---
 
+<!-- riddl-domain-prelude
+context Kitchen is {
+  command ReceiveTicket is { kitchenTicketId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type OnlineOrderId is Id(OnlineOrder)
+type CustomerId is UUID
+record StoredOnlineOrder is { onlineOrderId: OnlineOrderId }
+event MenuBrowsed is { onlineOrderId: OnlineOrderId }
+event ItemAddedToCart is { onlineOrderId: OnlineOrderId }
+event AddToCartRejected is { onlineOrderId: OnlineOrderId, rejectionReason: String(1,500) }
+type OnlineOrderEvent is MenuBrowsed | ItemAddedToCart | AddToCartRejected
+entity OnlineOrder is { ??? }
+repository OnlineOrderRepository is { ??? }
+-->
+
 # Online Ordering Context
 
 The Online Ordering context manages the online ordering experience
@@ -37,62 +55,11 @@ online menu.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=OnlineOrderId,CustomerId -->
 ```riddl
-type OnlineOrderId is Id(OnlineOrdering.OnlineOrder) with {
-  briefly "Online order identifier"
-  described by "Unique identifier for an online order."
-}
+type OnlineOrderId is Id(OnlineOrder)
 
-type CustomerId is UUID with {
-  briefly "Customer identifier"
-  described by "Unique identifier for the online customer."
-}
-
-type FulfillmentType is any of {
-  PickupFulfillment,
-  DeliveryFulfillment
-} with {
-  briefly "Fulfillment type"
-  described by "Whether the order is for pickup or delivery."
-}
-
-type OnlineOrderStatus is any of {
-  Browsing,
-  CartReady,
-  FulfillmentChosen,
-  OnlineSubmitted,
-  OnlinePaid,
-  OnlineInPreparation,
-  ReadyForPickup,
-  OutForDelivery,
-  OnlineCompleted
-} with {
-  briefly "Online order status"
-  described by "Current status of an online order."
-}
-
-type CartItem is {
-  cartMenuItemId is String(1, 50)
-  cartItemName is String(1, 200)
-  cartItemPrice is Decimal(8, 2)
-  cartItemQuantity is Natural
-  cartItemNotes is optional String(1, 500)
-} with {
-  briefly "Cart item"
-  described by "An item in the online shopping cart."
-}
-
-type DeliveryAddress is {
-  streetAddress is String(1, 200)
-  deliveryCity is String(1, 100)
-  deliveryState is String(2, 2)
-  deliveryZipCode is String(5, 10)
-  deliveryInstructions is optional String(1, 500)
-} with {
-  briefly "Delivery address"
-  described by "Address for delivery fulfillment."
-}
+type CustomerId is UUID
 ```
 
 Note the 9-value `OnlineOrderStatus` enumeration — online orders
@@ -103,78 +70,57 @@ fulfillment tracking.
 
 The `OnlineOrder` entity has a 6-command lifecycle:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=OnlineOrder,MenuBrowsed,ItemAddedToCart,AddToCartRejected,OnlineOrderCommand,OnlineOrderEvent -->
 ```riddl
-entity OnlineOrder is {
+event-sourced entity OnlineOrder as flow is {
 
-  command BrowseMenu is {
-    onlineOrderId is OnlineOrderId
-    customerId is CustomerId
-    browsedAt is TimeStamp
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command BrowseMenu yields event MenuBrowsed is { onlineOrderId: OnlineOrderId }
+  command AddToCart yields event ItemAddedToCart is { onlineOrderId: OnlineOrderId }
 
-  command AddToCart is {
-    onlineOrderId is OnlineOrderId
-    cartItem is CartItem
-  }
+  event MenuBrowsed is { onlineOrderId: OnlineOrderId }
+  event ItemAddedToCart is { onlineOrderId: OnlineOrderId }
+  event AddToCartRejected is { onlineOrderId: OnlineOrderId, rejectionReason: String(1,500) }
 
-  command RemoveFromCart is {
-    onlineOrderId is OnlineOrderId
-    removedCartItemId is String(1, 50)
-  }
+  record OnlineOrderData is { onlineOrderId: OnlineOrderId }
 
-  command SelectFulfillment is {
-    onlineOrderId is OnlineOrderId
-    fulfillmentType is FulfillmentType
-    deliveryAddress is optional DeliveryAddress
-    requestedTime is optional TimeStamp
-  }
-
-  command SubmitOnlineOrder is {
-    onlineOrderId is OnlineOrderId
-    onlineSubmittedAt is TimeStamp
-  }
-
-  command ProcessOnlinePayment is {
-    onlineOrderId is OnlineOrderId
-    onlinePayment is OnlinePaymentInfo
-  }
-
-  // Events: MenuBrowsed, ItemAddedToCart, ItemRemovedFromCart,
-  //         FulfillmentSelected, OnlineOrderSubmitted,
-  //         OnlinePaymentProcessed
-
-  state ActiveOnlineOrder of OnlineOrder.OnlineOrderStateData
-
-  handler OnlineOrderHandler is {
-    on command BrowseMenu {
-      morph entity OnlineOrdering.OnlineOrder to state
-        OnlineOrdering.OnlineOrder.ActiveOnlineOrder
-        with command BrowseMenu
-      tell event MenuBrowsed to
-        entity OnlineOrdering.OnlineOrder
-    }
-    on command AddToCart {
-      tell event ItemAddedToCart to
-        entity OnlineOrdering.OnlineOrder
-    }
-    on command RemoveFromCart {
-      tell event ItemRemovedFromCart to
-        entity OnlineOrdering.OnlineOrder
-    }
-    on command SelectFulfillment {
-      tell event FulfillmentSelected to
-        entity OnlineOrdering.OnlineOrder
-    }
-    on command SubmitOnlineOrder {
-      tell event OnlineOrderSubmitted to
-        entity OnlineOrdering.OnlineOrder
-    }
-    on command ProcessOnlinePayment {
-      tell event OnlinePaymentProcessed to
-        entity OnlineOrdering.OnlineOrder
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state Browsing of record OnlineOrderData is {
+    handler BrowsingHandler is {
+      on cmd: command AddToCart is {
+        yield event ItemAddedToCart(onlineOrderId = cmd.onlineOrderId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event ItemAddedToCart is {
+        morph entity OnlineOrder to state FulfillmentChosen
+          with record OnlineOrderData(onlineOrderId = evt.onlineOrderId)
+      }
     }
   }
+
+  state FulfillmentChosen of record OnlineOrderData is {
+    handler FulfillmentChosenHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command AddToCart is {
+        send event AddToCartRejected(onlineOrderId = cmd.onlineOrderId,
+          rejectionReason = "OnlineOrder does not accept AddToCart in this state")
+          to outlet OnlineOrderEvents
+        error "OnlineOrder does not accept AddToCart in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type OnlineOrderCommand is BrowseMenu | AddToCart
+  type OnlineOrderEvent is MenuBrowsed | ItemAddedToCart | AddToCartRejected
+
+  inlet OnlineOrderCommands is type OnlineOrderCommand
+  outlet OnlineOrderEvents is type OnlineOrderEvent
 }
 ```
 
@@ -185,14 +131,27 @@ the model.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=OnlineOrderRepository,StoredOnlineOrder -->
 ```riddl
-repository OnlineOrderRepository is {
-  schema OnlineOrderData is relational
-    of onlineOrders as OnlineOrder
-    index on field OnlineOrder.onlineOrderId
-    index on field OnlineOrder.customerId
-    index on field OnlineOrder.onlineOrderStatus
+repository OnlineOrderRepository as flow is {
+  inlet OnlineOrderRepositoryFromOnlineOrder is type OnlineOrderEvent
+  outlet OnlineOrderRepositoryResponses is type OnlineOrderEvent
+
+  record StoredOnlineOrder is { onlineOrderId: OnlineOrderId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema OnlineOrderSchema is relational
+    of rows as type StoredOnlineOrder
+      index on field StoredOnlineOrder.onlineOrderId
+
+  command PersistItemAddedToCart is { onlineOrderId: OnlineOrderId }
+
+  handler OnlineOrderPersistence is {
+    on command PersistItemAddedToCart is {
+      do "update the stored onlineOrder row for this onlineOrderId"
+    }
+  }
 }
 ```
 
@@ -204,35 +163,21 @@ already."
 
 Online Ordering has three outbound adaptors:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor ToKitchen to context Restaurant.Kitchen is {
-  handler OnlineKitchenRouting is {
-    on command Restaurant.Kitchen.KitchenTicket.ReceiveTicket {
-      prompt "Convert submitted online order into kitchen ticket"
-    }
-  }
-}
-
-adaptor ToDelivery to context Restaurant.Delivery is {
-  handler DeliveryRouting is {
-    on command Restaurant.Delivery.DeliveryOrder.CreateDelivery {
-      prompt "Create delivery when delivery fulfillment is selected"
-    }
-  }
-} with {
-  briefly "Delivery adaptor"
-  described by {
-    | Sends orders with delivery fulfillment to the
-    | delivery context. This decoupling enables electronic
-    | menus to operate independently of delivery.
-  }
-}
-
-adaptor ToLoyalty to context Restaurant.Loyalty is {
-  handler OnlineLoyaltyRouting is {
-    on command Restaurant.Loyalty.LoyaltyAccount.AccruePoints {
-      prompt "Send online payment event to loyalty for point accrual"
+context OnlineOrdering is {
+  // An adaptor is the translation seam at a context boundary: it is the only
+  // place that knows the OTHER context's message shapes.
+  adaptor ToKitchen to context Kitchen is {
+    handler ToKitchenIntake is {
+      on command Kitchen.ReceiveTicket is {
+        do "turn a submitted online order into a kitchen ticket"
+      }
+      // Every adaptor handler must say what it does with what it does not
+      // recognise. Silence is not an option in 2.0.
+      on other is {
+        error "Unexpected message from Kitchen"
+      }
     }
   }
 }

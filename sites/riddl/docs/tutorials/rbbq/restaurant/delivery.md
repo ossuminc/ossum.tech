@@ -3,6 +3,24 @@ title: "Delivery Context"
 description: "Driver dispatch, GPS tracking, and offline-resilient delivery"
 ---
 
+<!-- riddl-domain-prelude
+context OnlineOrdering is {
+  event OnlineOrderSubmitted is { onlineOrderId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type DeliveryId is Id(DeliveryOrder)
+type DriverId is UUID
+record StoredDeliveryOrder is { deliveryId: DeliveryId }
+event DeliveryCreated is { deliveryId: DeliveryId }
+event DriverAssigned is { deliveryId: DeliveryId }
+event AssignDriverRejected is { deliveryId: DeliveryId, rejectionReason: String(1,500) }
+type DeliveryOrderEvent is DeliveryCreated | DriverAssigned | AssignDriverRejected
+entity DeliveryOrder is { ??? }
+repository DeliveryRepository is { ??? }
+-->
+
 # Delivery Context
 
 The Delivery context manages delivery driver dispatch, GPS
@@ -33,49 +51,11 @@ and synced when connectivity resumes.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=DeliveryId,DriverId -->
 ```riddl
-type DeliveryId is Id(Delivery.DeliveryOrder) with {
-  briefly "Delivery identifier"
-  described by "Unique identifier for a delivery."
-}
+type DeliveryId is Id(DeliveryOrder)
 
-type DriverId is UUID with {
-  briefly "Driver identifier"
-  described by "Unique identifier for a delivery driver."
-}
-
-type DeliveryStatus is any of {
-  DeliveryPending,
-  DriverAssignedStatus,
-  InTransit,
-  Delivered,
-  DeliveryFailed
-} with {
-  briefly "Delivery status"
-  described by "Current status of a delivery."
-}
-
-type GeoLocation is {
-  latitude is Decimal(9, 6)
-  longitude is Decimal(9, 6)
-  recordedAt is TimeStamp
-} with {
-  briefly "Geographic location"
-  described by "GPS coordinates with timestamp."
-}
-
-type DeliveryIssueType is any of {
-  AddressNotFound,
-  CustomerUnavailable,
-  FoodDamaged,
-  VehicleBreakdown,
-  TrafficDelay,
-  OtherIssue
-} with {
-  briefly "Delivery issue type"
-  described by "Type of issue reported during delivery."
-}
+type DriverId is UUID
 ```
 
 The `GeoLocation` type combines coordinates with a timestamp,
@@ -89,70 +69,57 @@ interview.
 The `DeliveryOrder` entity has a 7-command lifecycle — the
 longest of any entity in the model:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=DeliveryOrder,DeliveryCreated,DriverAssigned,AssignDriverRejected,DeliveryOrderCommand,DeliveryOrderEvent -->
 ```riddl
-entity DeliveryOrder is {
+event-sourced entity DeliveryOrder as flow is {
 
-  command CreateDelivery is {
-    deliveryId is DeliveryId
-    sourceOnlineOrderId is String(1, 50)
-    deliveryCustomerName is String(1, 100)
-    deliveryCustomerPhone is String(7, 20)
-    deliveryDestination is DeliveryAddress
-    requestedDeliveryTime is optional TimeStamp
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command CreateDelivery yields event DeliveryCreated is { deliveryId: DeliveryId }
+  command AssignDriver yields event DriverAssigned is { deliveryId: DeliveryId }
 
-  command AssignDriver is {
-    deliveryId is DeliveryId
-    driverId is DriverId
-    driverName is String(1, 100)
-  }
+  event DeliveryCreated is { deliveryId: DeliveryId }
+  event DriverAssigned is { deliveryId: DeliveryId }
+  event AssignDriverRejected is { deliveryId: DeliveryId, rejectionReason: String(1,500) }
 
-  command DispatchDriver is {
-    deliveryId is DeliveryId
-    dispatchedAt is TimeStamp
-  }
+  record DeliveryOrderData is { deliveryId: DeliveryId }
 
-  command RecordDeliveryLocation is {
-    deliveryId is DeliveryId
-    driverLocation is GeoLocation
-  }
-
-  command ConfirmDelivery is {
-    deliveryId is DeliveryId
-    confirmedAt is TimeStamp
-    deliverySignature is optional String(1, 200)
-  }
-
-  command RecordDeliveryPayment is {
-    deliveryId is DeliveryId
-    deliveryTip is optional Decimal(8, 2)
-    deliveryPaidAt is TimeStamp
-  }
-
-  command ReportDeliveryIssue is {
-    deliveryId is DeliveryId
-    issueType is DeliveryIssueType
-    issueDescription is String(1, 1000)
-    reportedAt is TimeStamp
-  }
-
-  // Events: DeliveryCreated, DriverAssigned, DriverDispatched,
-  //         DeliveryLocationRecorded, DeliveryConfirmed,
-  //         DeliveryPaymentRecorded, DeliveryIssueReported
-
-  state ActiveDelivery of DeliveryOrder.DeliveryStateData
-
-  handler DeliveryHandler is {
-    on command CreateDelivery {
-      morph entity Restaurant.Delivery.DeliveryOrder to state
-        Restaurant.Delivery.DeliveryOrder.ActiveDelivery
-        with command CreateDelivery
-      tell event DeliveryCreated to
-        entity Restaurant.Delivery.DeliveryOrder
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state Pending of record DeliveryOrderData is {
+    handler PendingHandler is {
+      on cmd: command AssignDriver is {
+        yield event DriverAssigned(deliveryId = cmd.deliveryId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event DriverAssigned is {
+        morph entity DeliveryOrder to state DriverAssignedState
+          with record DeliveryOrderData(deliveryId = evt.deliveryId)
+      }
     }
-    // ... remaining commands use tell pattern
   }
+
+  state DriverAssignedState of record DeliveryOrderData is {
+    handler DriverAssignedStateHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command AssignDriver is {
+        send event AssignDriverRejected(deliveryId = cmd.deliveryId,
+          rejectionReason = "DeliveryOrder does not accept AssignDriver in this state")
+          to outlet DeliveryOrderEvents
+        error "DeliveryOrder does not accept AssignDriver in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type DeliveryOrderCommand is CreateDelivery | AssignDriver
+  type DeliveryOrderEvent is DeliveryCreated | DriverAssigned | AssignDriverRejected
+
+  inlet DeliveryOrderCommands is type DeliveryOrderCommand
+  outlet DeliveryOrderEvents is type DeliveryOrderEvent
 }
 ```
 
@@ -168,14 +135,27 @@ delivery continues.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=DeliveryRepository,StoredDeliveryOrder -->
 ```riddl
-repository DeliveryRepository is {
-  schema DeliveryData is relational
-    of deliveries as DeliveryOrder
-    index on field DeliveryOrder.deliveryId
-    index on field DeliveryOrder.deliveryStatus
-    index on field DeliveryOrder.assignedDriverId
+repository DeliveryRepository as flow is {
+  inlet DeliveryRepositoryFromDeliveryOrder is type DeliveryOrderEvent
+  outlet DeliveryRepositoryResponses is type DeliveryOrderEvent
+
+  record StoredDeliveryOrder is { deliveryId: DeliveryId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema DeliveryOrderSchema is relational
+    of rows as type StoredDeliveryOrder
+      index on field StoredDeliveryOrder.deliveryId
+
+  command PersistDriverAssigned is { deliveryId: DeliveryId }
+
+  handler DeliveryOrderPersistence is {
+    on command PersistDriverAssigned is {
+      do "update the stored deliveryOrder row for this deliveryId"
+    }
+  }
 }
 ```
 
@@ -187,12 +167,21 @@ app dashboard.
 
 Delivery has a single inbound adaptor:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor FromOnlineOrdering from context Restaurant.OnlineOrdering is {
-  handler OnlineDeliveryIntake is {
-    on event Restaurant.OnlineOrdering.OnlineOrder.FulfillmentSelected {
-      prompt "Create delivery when delivery fulfillment is selected"
+context Delivery is {
+  // An adaptor is the translation seam at a context boundary: it is the only
+  // place that knows the OTHER context's message shapes.
+  adaptor FromOnlineOrdering from context OnlineOrdering is {
+    handler FromOnlineOrderingIntake is {
+      on event OnlineOrdering.OnlineOrderSubmitted is {
+        do "create a delivery for a submitted online order"
+      }
+      // Every adaptor handler must say what it does with what it does not
+      // recognise. Silence is not an option in 2.0.
+      on other is {
+        error "Unexpected message from OnlineOrdering"
+      }
     }
   }
 }

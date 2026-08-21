@@ -3,6 +3,19 @@ title: "Marketing Context"
 description: "Multi-channel campaign management and promotions"
 ---
 
+
+<!-- riddl-prelude
+type CampaignId is Id(Campaign)
+type CampaignName is String(1,120)
+record StoredCampaign is { campaignId: CampaignId }
+event CampaignCreated is { campaignId: CampaignId }
+event CampaignLaunched is { campaignId: CampaignId }
+event LaunchCampaignRejected is { campaignId: CampaignId, rejectionReason: String(1,500) }
+type CampaignEvent is CampaignCreated | CampaignLaunched | LaunchCampaignRejected
+entity Campaign is { ??? }
+repository CampaignRepository is { ??? }
+-->
+
 # Marketing Context
 
 The Marketing context manages marketing campaigns, promotions,
@@ -32,55 +45,11 @@ connecting marketing efforts directly to customer retention.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=CampaignId,CampaignName -->
 ```riddl
-type CampaignId is Id(Marketing.Campaign) with {
-  briefly "Campaign identifier"
-  described by "Unique identifier for a marketing campaign."
-}
+type CampaignId is Id(Campaign)
 
-type CampaignStatus is any of {
-  CampaignDraftStatus,
-  CampaignScheduledStatus,
-  CampaignLiveStatus,
-  CampaignPausedStatus,
-  CampaignEndedStatus
-} with {
-  briefly "Campaign status"
-  described by "Current status of a marketing campaign."
-}
-
-type CampaignChannel is any of {
-  Email,
-  SocialMedia,
-  InStore,
-  MobileApp,
-  Website
-} with {
-  briefly "Campaign channel"
-  described by "Marketing channel for the campaign."
-}
-
-type PromotionType is any of {
-  PercentDiscount,
-  FixedDiscount,
-  BuyOneGetOne,
-  FreeItem,
-  LoyaltyBonus
-} with {
-  briefly "Promotion type"
-  described by "Type of promotional offer."
-}
-
-type CampaignPromotion is {
-  promotionType is PromotionType
-  promotionValue is optional Decimal(8, 2)
-  promotionDescription is String(1, 500)
-  applicableItems is many optional String(1, 50)
-} with {
-  briefly "Campaign promotion"
-  described by "A promotional offer within a campaign."
-}
+type CampaignName is String(1,120)
 ```
 
 The `CampaignChannel` enumeration captures the five channels
@@ -92,69 +61,57 @@ applies to.
 
 The `Campaign` entity has a 5-command lifecycle:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=Campaign,CampaignCreated,CampaignLaunched,LaunchCampaignRejected,CampaignCommand,CampaignEvent -->
 ```riddl
-entity Campaign is {
+event-sourced entity Campaign as flow is {
 
-  command CreateCampaign is {
-    campaignId is CampaignId
-    campaignName is String(1, 200)
-    campaignDescription is String(1, 2000)
-    campaignChannels is many CampaignChannel
-    campaignPromotion is optional CampaignPromotion
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command CreateCampaign yields event CampaignCreated is { campaignId: CampaignId }
+  command LaunchCampaign yields event CampaignLaunched is { campaignId: CampaignId }
 
-  command ScheduleCampaign is {
-    campaignId is CampaignId
-    campaignStartDate is Date
-    campaignEndDate is Date
-  }
+  event CampaignCreated is { campaignId: CampaignId }
+  event CampaignLaunched is { campaignId: CampaignId }
+  event LaunchCampaignRejected is { campaignId: CampaignId, rejectionReason: String(1,500) }
 
-  command LaunchCampaign is {
-    campaignId is CampaignId
-    launchedAt is TimeStamp
-  }
+  record CampaignData is { campaignId: CampaignId }
 
-  command PauseCampaign is {
-    campaignId is CampaignId
-    pauseReason is String(1, 500)
-  }
-
-  command EndCampaign is {
-    campaignId is CampaignId
-    endedAt is TimeStamp
-  }
-
-  // Events: CampaignCreated, CampaignScheduled, CampaignLaunched,
-  //         CampaignPaused, CampaignEnded
-
-  state ActiveCampaign of Campaign.CampaignStateData
-
-  handler CampaignHandler is {
-    on command CreateCampaign {
-      morph entity Marketing.Campaign to state
-        Marketing.Campaign.ActiveCampaign
-        with command CreateCampaign
-      tell event CampaignCreated to
-        entity Marketing.Campaign
-    }
-    on command ScheduleCampaign {
-      tell event CampaignScheduled to
-        entity Marketing.Campaign
-    }
-    on command LaunchCampaign {
-      tell event CampaignLaunched to
-        entity Marketing.Campaign
-    }
-    on command PauseCampaign {
-      tell event CampaignPaused to
-        entity Marketing.Campaign
-    }
-    on command EndCampaign {
-      tell event CampaignEnded to
-        entity Marketing.Campaign
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state ActiveCampaign of record CampaignData is {
+    handler ActiveCampaignHandler is {
+      on cmd: command LaunchCampaign is {
+        yield event CampaignLaunched(campaignId = cmd.campaignId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event CampaignLaunched is {
+        morph entity Campaign to state Launched
+          with record CampaignData(campaignId = evt.campaignId)
+      }
     }
   }
+
+  state Launched of record CampaignData is {
+    handler LaunchedHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command LaunchCampaign is {
+        send event LaunchCampaignRejected(campaignId = cmd.campaignId,
+          rejectionReason = "Campaign does not accept LaunchCampaign in this state")
+          to outlet CampaignEvents
+        error "Campaign does not accept LaunchCampaign in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type CampaignCommand is CreateCampaign | LaunchCampaign
+  type CampaignEvent is CampaignCreated | CampaignLaunched | LaunchCampaignRejected
+
+  inlet CampaignCommands is type CampaignCommand
+  outlet CampaignEvents is type CampaignEvent
 }
 ```
 
@@ -169,13 +126,27 @@ awareness campaigns.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=CampaignRepository,StoredCampaign -->
 ```riddl
-repository CampaignRepository is {
-  schema CampaignData is relational
-    of campaigns as Campaign
-    index on field Campaign.campaignId
-    index on field Campaign.campaignStatus
+repository CampaignRepository as flow is {
+  inlet CampaignRepositoryFromCampaign is type CampaignEvent
+  outlet CampaignRepositoryResponses is type CampaignEvent
+
+  record StoredCampaign is { campaignId: CampaignId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema CampaignSchema is relational
+    of rows as type StoredCampaign
+      index on field StoredCampaign.campaignId
+
+  command PersistCampaignLaunched is { campaignId: CampaignId }
+
+  handler CampaignPersistence is {
+    on command PersistCampaignLaunched is {
+      do "update the stored campaign row for this campaignId"
+    }
+  }
 }
 ```
 

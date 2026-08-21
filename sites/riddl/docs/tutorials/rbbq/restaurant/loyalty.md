@@ -3,6 +3,24 @@ title: "Loyalty Context"
 description: "Loyalty program enrollment, point accrual, and redemption"
 ---
 
+<!-- riddl-domain-prelude
+context FrontOfHouse is {
+  event PaymentProcessed is { tableOrderId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type LoyaltyAccountId is Id(LoyaltyAccount)
+type LoyaltyCustomerId is UUID
+record StoredLoyaltyAccount is { loyaltyAccountId: LoyaltyAccountId }
+event CustomerEnrolled is { loyaltyAccountId: LoyaltyAccountId }
+event AccountSuspended is { loyaltyAccountId: LoyaltyAccountId }
+event SuspendAccountRejected is { loyaltyAccountId: LoyaltyAccountId, rejectionReason: String(1,500) }
+type LoyaltyAccountEvent is CustomerEnrolled | AccountSuspended | SuspendAccountRejected
+entity LoyaltyAccount is { ??? }
+repository LoyaltyAccountRepository is { ??? }
+-->
+
 # Loyalty Context
 
 The Loyalty context manages loyalty program enrollment, point
@@ -39,36 +57,11 @@ those events.
 
 ## Types
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=LoyaltyAccountId,LoyaltyCustomerId -->
 ```riddl
-type LoyaltyAccountId is Id(Loyalty.LoyaltyAccount) with {
-  briefly "Loyalty account identifier"
-  described by "Unique identifier for a loyalty account."
-}
+type LoyaltyAccountId is Id(LoyaltyAccount)
 
-type LoyaltyCustomerId is UUID with {
-  briefly "Loyalty customer identifier"
-  described by "Unique identifier for the loyalty customer."
-}
-
-type LoyaltyAccountStatus is any of {
-  LoyaltyActive,
-  LoyaltySuspended
-} with {
-  briefly "Account status"
-  described by "Current status of a loyalty account."
-}
-
-type PointTransaction is {
-  transactionId is UUID
-  pointsChanged is Integer
-  transactionReason is String(1, 200)
-  sourceOrderRef is optional String(1, 50)
-  transactionTimestamp is TimeStamp
-} with {
-  briefly "Point transaction"
-  described by "A single loyalty point accrual or redemption."
-}
+type LoyaltyCustomerId is UUID
 ```
 
 Note that `pointsChanged` is an `Integer` (not `Natural`) —
@@ -78,69 +71,57 @@ it can be positive for accruals or negative for redemptions.
 
 The `LoyaltyAccount` entity has a 5-command lifecycle:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=LoyaltyAccount,CustomerEnrolled,AccountSuspended,SuspendAccountRejected,LoyaltyAccountCommand,LoyaltyAccountEvent -->
 ```riddl
-entity LoyaltyAccount is {
+event-sourced entity LoyaltyAccount as flow is {
 
-  command EnrollCustomer is {
-    loyaltyAccountId is LoyaltyAccountId
-    loyaltyCustomerId is LoyaltyCustomerId
-    customerDisplayName is String(1, 100)
-    customerEmail is String(5, 254)
-  }
+  // An event-sourced entity OWNS the commands and events that change it, so
+  // they are declared INSIDE it, and every command names the event it yields.
+  command EnrollCustomer yields event CustomerEnrolled is { loyaltyAccountId: LoyaltyAccountId }
+  command SuspendAccount yields event AccountSuspended is { loyaltyAccountId: LoyaltyAccountId }
 
-  command AccruePoints is {
-    loyaltyAccountId is LoyaltyAccountId
-    accrualPoints is Natural
-    accrualReason is String(1, 200)
-    accrualOrderRef is optional String(1, 50)
-  }
+  event CustomerEnrolled is { loyaltyAccountId: LoyaltyAccountId }
+  event AccountSuspended is { loyaltyAccountId: LoyaltyAccountId }
+  event SuspendAccountRejected is { loyaltyAccountId: LoyaltyAccountId, rejectionReason: String(1,500) }
 
-  command RedeemPoints is {
-    loyaltyAccountId is LoyaltyAccountId
-    redemptionPoints is Natural
-    redemptionReason is String(1, 200)
-  }
+  record LoyaltyAccountData is { loyaltyAccountId: LoyaltyAccountId }
 
-  command SuspendAccount is {
-    loyaltyAccountId is LoyaltyAccountId
-    suspensionReason is String(1, 500)
-  }
-
-  command ReactivateAccount is {
-    loyaltyAccountId is LoyaltyAccountId
-  }
-
-  // Events: CustomerEnrolled, PointsAccrued, PointsRedeemed,
-  //         AccountSuspended, AccountReactivated
-
-  state ActiveAccount of LoyaltyAccount.LoyaltyAccountStateData
-
-  handler LoyaltyAccountHandler is {
-    on command EnrollCustomer {
-      morph entity Loyalty.LoyaltyAccount to state
-        Loyalty.LoyaltyAccount.ActiveAccount
-        with command EnrollCustomer
-      tell event CustomerEnrolled to
-        entity Loyalty.LoyaltyAccount
-    }
-    on command AccruePoints {
-      tell event PointsAccrued to
-        entity Loyalty.LoyaltyAccount
-    }
-    on command RedeemPoints {
-      tell event PointsRedeemed to
-        entity Loyalty.LoyaltyAccount
-    }
-    on command SuspendAccount {
-      tell event AccountSuspended to
-        entity Loyalty.LoyaltyAccount
-    }
-    on command ReactivateAccount {
-      tell event AccountReactivated to
-        entity Loyalty.LoyaltyAccount
+  // Lifecycle phases are named STATES, not a status field: each state
+  // declares the commands it accepts, so the compiler knows the machine.
+  initial state Active of record LoyaltyAccountData is {
+    handler ActiveHandler is {
+      on cmd: command SuspendAccount is {
+        yield event AccountSuspended(loyaltyAccountId = cmd.loyaltyAccountId)
+      }
+      // `set` and `morph` may appear ONLY in an `on event` clause here:
+      // replay has to re-apply exactly the same change.
+      on evt: event AccountSuspended is {
+        morph entity LoyaltyAccount to state Suspended
+          with record LoyaltyAccountData(loyaltyAccountId = evt.loyaltyAccountId)
+      }
     }
   }
+
+  state Suspended of record LoyaltyAccountData is {
+    handler SuspendedHandler is {
+      // A command this state does not accept is refused -- and the refusal
+      // is PUBLISHED before it is raised, so the attempt is recorded.
+      on cmd: command SuspendAccount is {
+        send event SuspendAccountRejected(loyaltyAccountId = cmd.loyaltyAccountId,
+          rejectionReason = "LoyaltyAccount does not accept SuspendAccount in this state")
+          to outlet LoyaltyAccountEvents
+        error "LoyaltyAccount does not accept SuspendAccount in this state"
+      }
+    }
+  }
+
+  // A processor receives on its OWN inlet and publishes on its OWN outlet,
+  // and a portlet's type must ADMIT everything that travels on it.
+  type LoyaltyAccountCommand is EnrollCustomer | SuspendAccount
+  type LoyaltyAccountEvent is CustomerEnrolled | AccountSuspended | SuspendAccountRejected
+
+  inlet LoyaltyAccountCommands is type LoyaltyAccountCommand
+  outlet LoyaltyAccountEvents is type LoyaltyAccountEvent
 }
 ```
 
@@ -151,14 +132,27 @@ downstream systems know the current balance without querying.
 
 ## Repository
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-context no-prelude=LoyaltyAccountRepository,StoredLoyaltyAccount -->
 ```riddl
-repository LoyaltyAccountRepository is {
-  schema LoyaltyAccountData is relational
-    of accounts as LoyaltyAccount
-    index on field LoyaltyAccount.loyaltyAccountId
-    index on field LoyaltyAccount.loyaltyCustomerId
-    index on field LoyaltyAccount.customerEmail
+repository LoyaltyAccountRepository as flow is {
+  inlet LoyaltyAccountRepositoryFromLoyaltyAccount is type LoyaltyAccountEvent
+  outlet LoyaltyAccountRepositoryResponses is type LoyaltyAccountEvent
+
+  record StoredLoyaltyAccount is { loyaltyAccountId: LoyaltyAccountId }
+
+  // A repository that answers queries and declares NO index at all is a
+  // sequential scan by construction, and draws a warning saying so.
+  schema LoyaltyAccountSchema is relational
+    of rows as type StoredLoyaltyAccount
+      index on field StoredLoyaltyAccount.loyaltyAccountId
+
+  command PersistAccountSuspended is { loyaltyAccountId: LoyaltyAccountId }
+
+  handler LoyaltyAccountPersistence is {
+    on command PersistAccountSuspended is {
+      do "update the stored loyaltyAccount row for this loyaltyAccountId"
+    }
+  }
 }
 ```
 
@@ -170,20 +164,21 @@ enrollment to prevent duplicate accounts.
 Loyalty has two inbound adaptors — one for dine-in payments,
 one for online payments:
 
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
+<!-- riddl: in-domain -->
 ```riddl
-adaptor FromPayment from context Restaurant.FrontOfHouse is {
-  handler DineInLoyaltyIntake is {
-    on event Restaurant.FrontOfHouse.TableOrder.PaymentProcessed {
-      prompt "Accrue loyalty points from dine-in payment"
-    }
-  }
-}
-
-adaptor FromOnlinePayment from context Restaurant.OnlineOrdering is {
-  handler OnlineLoyaltyIntake is {
-    on event Restaurant.OnlineOrdering.OnlineOrder.OnlinePaymentProcessed {
-      prompt "Accrue loyalty points from online payment"
+context Loyalty is {
+  // An adaptor is the translation seam at a context boundary: it is the only
+  // place that knows the OTHER context's message shapes.
+  adaptor FromPayment from context FrontOfHouse is {
+    handler FromPaymentIntake is {
+      on event FrontOfHouse.PaymentProcessed is {
+        do "accrue loyalty points for the paying customer"
+      }
+      // Every adaptor handler must say what it does with what it does not
+      // recognise. Silence is not an option in 2.0.
+      on other is {
+        error "Unexpected message from FrontOfHouse"
+      }
     }
   }
 }
