@@ -40,6 +40,21 @@ repository CartRepository is {
 }
 ```
 
+!!! warning "A queried repository with no index at all"
+    A repository that answers `on query` clauses but whose schemas declare **no
+    index** draws a **CompletenessWarning**: a store queried without any index
+    is a sequential scan by construction.
+
+    It is a warning and not an Error because the model may be under-specified
+    rather than self-contradictory — the author may know the table is small. It
+    stays silent for a `???` stub, a repository with no schema, and a
+    write-only repository that answers no queries.
+
+    The check does **not** name which field to index, and that is a limit of
+    what models say rather than caution: a repository's `on query` body is
+    prose by design, so nothing in the model states which field the query
+    filters on.
+
 !!! warning "`as type T` is strict — changed in RIDDL 2.0"
     The clause says `as type`, so `T` must genuinely **be** a
     [Type](type.md). A path that lands on an Entity, or on anything else,

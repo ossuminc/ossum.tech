@@ -1235,6 +1235,16 @@ so `OrderPlaced()` against a message that has fields is an Error.
 Argument count, names, ordering and (best effort) types are all checked against
 the target's fields.
 
+!!! warning "Duplicates are Errors"
+    A **repeated field name** in an aggregate — `command C is { x is String, x
+    is Integer }` — is an **Error**. A repeated name makes the aggregate's
+    shape ambiguous, so every consumer would have to pick one silently. Both
+    locations are named in the diagnostic, because the author is looking at one
+    and needs the other.
+
+    A **repeated constructor argument** — `C(x = 1, x = 2)` — is the same
+    mistake at the call site, and is likewise an Error.
+
 ### Correlations
 
 A `correlation` accumulates several events, keyed by one or more fields, into a
@@ -1390,6 +1400,26 @@ send command ProcessPayment(orderId) to outlet PaymentRequests
     inlet form still parses and emits a `[deprecated]` message; it is slated
     for removal in 3.0.
 
+!!! warning "The portlet's type is a contract"
+    A `send` naming a message the portlet's declared type does **not** admit is
+    an **Error**. The portlet's type is what the connector and every downstream
+    consumer are built on, so a consumer typed by it simply cannot receive the
+    value.
+
+    Both portlet kinds are checked, and both sides expand through alias chains.
+    To carry more than one message on an outlet, declare its type as an
+    **alternation** of everything that may travel on it:
+
+    <!-- riddl: in-context -->
+    ```riddl
+    type CartTraffic is ItemAdded | LineShipped
+    outlet MixedCartEvents is type CartTraffic
+    ```
+
+    The same rule applies to [`forward`](#forward-statement) on its portlet
+    shape. `tell` is not checked this way — it names a processor, which has no
+    single declared type.
+
 ### Tell Statement
 
 Delivers a message directly to a processor:
@@ -1403,6 +1433,51 @@ tell command ProcessPayment(orderId) to entity PaymentService
 !!! warning "Validation"
     A `tell` whose target is not reachable through any modeled connector draws
     a **Warning**.
+
+### Forward Statement
+
+Passes the handled message on to somewhere else **and discharges this clause's
+response obligation**, because whatever handles it downstream is what produces
+the declared `yields` event or `replies` result.
+
+It takes both transmission shapes — a portlet like [`send`](#send-statement),
+a processor like [`tell`](#tell-statement):
+
+<!-- riddl: in-clauses -->
+```riddl
+on ord: command PlaceOrder {
+  forward ord to entity PaymentService     // processor shape
+}
+```
+
+Without it, a boundary handler that merely passes a command along had **nothing
+it could say**. `yields` is declared on the message, so every handler of a
+command declaring `yields event E` owes an `E` — even one whose entire job is
+delegation and which produces nothing itself.
+
+!!! warning "Validation"
+    `forward` is legal **only** in a clause handling a command that declares
+    [`yields`](#the-yields-and-replies-clauses) or a query that declares
+    `replies`. You cannot forward an **event** or a **result**: those record
+    what happened and owe no answer, so there is no obligation to pass on.
+
+    The operand's **type** must match the handled message. Values are not
+    compared, so a handler may adjust field contents and still be forwarding
+    the same message.
+
+    It is **not terminal**, but the response has been delegated — so a `yield`
+    or `reply` after it is an **Error**, since this clause cannot also produce
+    what it just handed away. A `send` or `tell` after it is legal and draws a
+    style warning.
+
+    On the portlet shape the [outlet's declared type](#inlets-and-outlets) must
+    admit the message, exactly as for `send`.
+
+!!! info "What settles a path"
+    Only `yield`/`reply`, `error`/`require`, and `forward` discharge a
+    response obligation. A `send` of the handled message does **not** — not
+    even to an outlet that admits it. Emitting some *other* message does not
+    either.
 
 ### Yield and Reply Statements
 
@@ -1711,16 +1786,65 @@ Refuses to proceed, with a reason:
 error "Price must be greater than zero"
 ```
 
+`error` **ends its statement list.** It refuses unconditionally, so anything
+written after it can never run, and a following statement is an **Error**. Use
+[`require`](#require-statement) instead when the refusal is conditional —
+`require` refuses only when its condition fails, so statements after it are
+ordinary and reachable.
+
+[`terminate`](#terminate-statement) ends a list the same way, for a different
+reason: the instance is gone, so a later statement has nothing to act on. An
+`on term` clause is unaffected — it is a separate statement list that runs
+*because* of the termination, never after it.
+
+### Terminate Statement
+
+Ends the life of the entity instance handling the message. It names the
+identity being terminated, and may carry closing values the way a constructor
+does:
+
+<!-- riddl: in-clauses -->
+```riddl
+on cmd: command ExampleCommand {
+  require cmd.amount > ExampleZero   // refusals first
+  terminate self.id
+}
+```
+
+Like [`error`](#error-statement), `terminate` **ends its statement list**: the
+instance no longer exists, so a statement written after it can never run and is
+an **Error**. Unlike `error`, the way to react to it is not a conditional
+refusal but an [`on term`](#on-clause-types) clause, which is a separate list
+that runs *because* the instance ended.
+
+`terminate` **is** an effect for the [refusals-before-effects](#refusals-before-effects)
+rule — ending the instance is the most complete local state change there is.
+
 ### Refusals Before Effects
 
 Within any single linear statement list, every **refusal** (`require`, `error`)
-must come before every **effect** (`set`, `morph`, `become`, `send`, `tell`,
-`yield`, `put`). Performing effects and then refusing would leave partial
-changes behind.
+must come before every **effect** — and for this rule an "effect" is a change to
+**this definition's own state**: `set`, `morph` and `terminate`. Performing one
+and then refusing would leave a partial change behind.
 
 Each statement list is checked independently, so each branch of a `when`,
 `match` or `foreach` body is its own list. A refusal after an effect in the same
 list is an **Error**.
+
+!!! note "Why `send`, `tell`, `yield`, `become` and `put` are not effects here"
+    This rule asks *"would refusing now leave a partial change?"*, which is a
+    narrower question than *"is this pure?"* — the one asked of
+    [functions](#purity).
+
+    `send`, `tell` and `yield` are **transmissions**: any state they cause is
+    somewhere else and later, which is a remote "maybe" a locally-refusing
+    statement can live with. `become` changes *behaviour*, not state. `put`
+    delivers to an [output](#put-statement). None of them can leave this
+    definition half-changed, so none of them has to come after the refusals.
+
+    This matters in practice: "refuse **and** publish a rejection event" is a
+    common idiom, and it is expressible precisely because a `send` may sit
+    before an `error`.
 
 <!-- riddl: in-clauses -->
 ```riddl
@@ -2163,9 +2287,27 @@ different contexts, in the enclosing Domain.
       (over-scoped) — move it into that context.
     - **Error**: a context-scoped connector whose ends cross contexts
       (under-scoped) — promote it to domain scope.
-    - **CompletenessWarning**: a domain-scoped cross-context connector without
-      the `persistent` option. Durability at a context boundary can be model
-      correctness, not merely deployment.
+    - **CompletenessWarning**: a domain-scoped connector that **crosses**
+      between two different contexts without the `persistent` option.
+      Durability at a context boundary can be model correctness, not merely
+      deployment. A connector with both ends inside the *same* external context
+      does not cross anything and is not asked for it.
+    - **Error**: a cross-context connector that reaches **past** a context
+      boundary. Each end must land on the context's **own** portlet — the
+      source context's outlet, the target context's inlet — never on a portlet
+      declared by something the context contains.
+
+!!! info "Why the boundary rule is an Error"
+    A context publishes a public API — its message set — while its
+    representations stay private. Wiring a cross-context connector to a
+    contained entity's inlet binds a peer to that entity's existence and to its
+    current command set, so the entity can no longer change without breaking a
+    stranger. That contradicts the bounded context rather than under-stating
+    it.
+
+    **Inside** one context the rule does not engage at all: any processor,
+    streamlet or connector may talk to any other, and a connector may drive a
+    contained entity's inlet directly.
 
 ### Pipeline Pattern
 

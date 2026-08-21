@@ -80,11 +80,47 @@ are in different contexts, in the enclosing [Domain](domain.md).
       over-scoped; move it into that context.
     - **Error** — a context-scoped connector whose ends cross contexts. It is
       under-scoped; promote it to domain scope.
-    - **CompletenessWarning** — a domain-scoped cross-context connector without
-      the `persistent` option. Durability at a context boundary can be model
-      correctness, not merely a deployment concern.
+    - **CompletenessWarning** — a domain-scoped connector that **crosses**
+      between two different contexts without the `persistent` option.
+      Durability at a context boundary can be model correctness, not merely a
+      deployment concern. A connector with both ends inside the *same*
+      external context crosses nothing and is not asked for it.
+    - **Error** — a cross-context connector that reaches **past** a boundary.
+      Each end must land on the context's **own** portlet: the source context's
+      outlet, the target context's inlet.
 
     These checks are conservative: they only fire when both ends resolve.
+
+!!! info "Crossing out, and staying in"
+    A [context](context.md) publishes a public API — its message set — while
+    its representations stay private. A cross-context connector wired to a
+    contained [entity](entity.md)'s inlet binds a peer to that entity's
+    existence and current command set, so the entity can no longer change
+    without breaking a stranger. That is why reaching past the boundary is an
+    Error rather than advice.
+
+    **Inside** a single context, none of this applies: any processor,
+    streamlet or connector may communicate with any other, and a connector may
+    drive a contained entity's inlet directly.
+
+    Nothing requires a dedicated `sink` or `source` streamlet to make this
+    work. An **entity is a streamlet** — it may carry its own inlets and
+    outlets and needs nothing from its context to process messages. A
+    **context is a streamlet** too: given an inlet and handlers, *the context
+    is the sink*. Crossing out of a context, the context is the source;
+    crossing in, it is the sink.
+
+!!! warning "A processor uses its OWN ports"
+    A message reaches a processor through **that processor's** inlet — not a
+    sibling's, and not its container's. Likewise it publishes through its own
+    outlet: a projector's inlet does not make an entity reachable, and an
+    entity cannot publish on its context's outlet.
+
+    Getting a message out of an entity therefore runs *entity outlet →
+    connector → context inlet → handler → context outlet*, and the first step
+    is the entity's own outlet. An entity that handles messages but declares no
+    inlet, or emits messages but declares no outlet, draws a
+    CompletenessWarning. A `???` stub is exempt.
 
 ## Options
 

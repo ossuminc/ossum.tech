@@ -394,6 +394,39 @@ Choosing `event-sourced` brings four rules with it — see
 `finite-state-machine` is a genuine option and stays in `with { }`; it is not
 an intention.
 
+#### `option is snapshots`
+
+An event-sourced entity may declare that it wants **snapshots** — periodic
+saved states, so rebuilding does not always replay the journal from zero:
+
+<!-- riddl: in-context no-prelude=Order -->
+```riddl
+event-sourced entity Order is {
+  event Placed is { total is Integer }
+  command Place yields event Placed is { total is Integer }
+  record OrderData is { total is Integer }
+  state Active of record OrderData is {
+    handler OrderHandler is {
+      on command Place { yield event Placed(total = 1) }
+      on event Placed { set field OrderData.total to "the order total" }
+    }
+  }
+} with { option is snapshots }
+```
+
+The option says **whether**, never how often or by what mechanism — those turn
+on update rate, read/write mix and physical layout, none of which is in the
+model. The model knows the entity wants the capability; the generator knows
+what it costs.
+
+**Leaving it out is a real choice, not an omission.** The default is to take no
+snapshots and replay the whole log, which is preferable for an entity that sees
+a few dozen events in its life or is ephemeral. There is deliberately no
+diagnostic for an event-sourced entity that omits it.
+
+It is an **Error** on an entity that is not `event-sourced`: with no journal
+there is nothing to snapshot.
+
 ### Event Sourcing Rules
 
 Replay rebuilds an entity's state by re-applying its recorded events in order,

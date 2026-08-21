@@ -258,6 +258,10 @@ in the `with { }` metadata block, not in the body.)*
 - Options: `event-sourced`, `aggregate`, `transient`, `available`,
   `consistent`, `message-queue`, `value`, `auto-id` (auto-assign ULID at
   instantiation)
+- `option is snapshots` — an **event-sourced** entity wants periodic
+  snapshots so replay need not start from zero. Whether, never how often.
+  Omitting it means "replay the whole log", which is often right. An
+  **Error** on an entity that is not event-sourced
 - The primary unit of consistency in a reactive system
 
 **Syntax**: `entity Order is { initial state Active of record OrderData ... }`
@@ -728,6 +732,7 @@ non-exhaustive match over a closed subject without `default` draws a
 | `tell` | `tell command X to entity Y` | Deliver a message directly to a processor (point-to-point). |
 | `yield` | `yield event ProductAdded(id)` | Produce a **command's** declared event, without knowing the sender. |
 | `reply` | `reply result ProductInfo(id, name)` | Answer a **query** with its declared result. |
+| `forward` | `forward ord to entity Payments` | Pass the handled message on and **discharge** its `yields`/`replies` obligation. Portlet or processor target. Only in a clause handling a command with `yields` or a query with `replies`. |
 | `ask` | `let a = ask query GetInfo of entity Catalog` | A value: a query paired with the reply that answers it. **Never inside a saga.** |
 
 The message operand may be a bare reference or an inline constructor.
@@ -740,6 +745,7 @@ The message operand may be a bare reference or an inline constructor.
 | `let` | `let total = <value>` | Create a local binding. Optional annotation: `let total: Decimal = ...`; otherwise inferred. Lexically scoped and statement-ordered. |
 | `put` | `put order.number to output Panel` | Publish a value to a UI output. Application and context handlers only. |
 | `return` | `return <value>` | Return a function's result. Function bodies only. |
+| `terminate` | `terminate self.id [with (...)]` | End this instance's life. Ends its statement list. |
 
 #### Preconditions
 
@@ -752,10 +758,24 @@ The message operand may be a bare reference or an inline constructor.
 
 !!! warning "Refusals before effects"
     Within any single linear statement list, every refusal (`require`,
-    `error`) must precede every effect (`set`, `morph`, `become`, `send`,
-    `tell`, `yield`, `put`). Acting and then refusing would leave partial
-    changes behind. Each branch of a `when`, `match` or `foreach` body is its
-    own list. A refusal after an effect is an **Error**.
+    `error`) must precede every effect — where an effect is a change to **this
+    definition's own state**: `set`, `morph`, `terminate`. Acting and then
+    refusing would leave a partial change behind. Each branch of a `when`,
+    `match` or `foreach` body is its own list. A refusal after an effect is an
+    **Error**.
+
+    `send`, `tell` and `yield` are transmissions, `become` changes behaviour,
+    and `put` writes to an output — none can leave this definition
+    half-changed, so none of them is an effect for this rule.
+
+!!! warning "`error` and `terminate` end their block"
+    A statement after either is unreachable and is an **Error**. `require` is
+    *not* terminal — it refuses only when its condition fails. An `on term`
+    clause is a separate list and is unaffected.
+
+!!! info "What discharges a response obligation"
+    Only `yield`/`reply`, `error`/`require`, and `forward`. A `send` of the
+    handled message does **not** settle it.
 
 #### Description / Implementation
 

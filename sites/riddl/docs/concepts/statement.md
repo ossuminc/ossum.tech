@@ -53,6 +53,7 @@ of your system in a structured but abstract way.
 | `foreach` | Bounded iteration over a collection | `foreach line in field lines { ... }` |
 | `send` | Emit a message on one of this processor's outlets | `send event X to outlet Events` |
 | `tell` | Deliver a message directly to a processor | `tell command X to entity Y` |
+| `forward` | Pass the handled message on, **discharging** its response obligation | `forward ord to entity Payments` |
 | `yield` | Produce a command's declared **event** | `yield event Placed(id)` |
 | `reply` | Answer a query with its declared **result** | `reply result Info(id)` |
 | `set` | Assign a value to a field or state | `set field status to "Active"` |
@@ -72,6 +73,7 @@ These statements are only valid within Entity handlers:
 |-----------|-------------|---------|
 | `morph` | Change entity to a different state | `morph entity X to state Y with record Z()` |
 | `become` | Switch entity to a different handler | `become entity X to handler Y` |
+| `terminate` | End this instance's life | `terminate self.id` |
 
 ## Value Expressions
 
@@ -282,6 +284,33 @@ on cart: query GetCart {
 }
 ```
 
+#### Forward
+
+- **forward** — hand the handled message onward and **discharge** its response
+  obligation, because whatever handles it downstream produces the answer
+
+A command declaring `yields event E` obliges *every* handler of it to produce an
+`E`. A boundary handler that only passes the command along produces nothing, and
+before `forward` existed it had no way to say so:
+
+<!-- riddl: in-clauses -->
+```riddl
+on add: command AddItem {
+  forward add to entity PaymentService
+}
+```
+
+It takes both transmission shapes — `to outlet ...` like `send`, or
+`to entity ...` like `tell`. It is legal only in a clause handling a command
+that declares `yields` or a query that declares `replies`; an **event** or a
+**result** answers nothing, so neither can be forwarded. Because the response
+has been delegated, a `yield` or `reply` after a `forward` is an **Error**.
+
+!!! info "What settles a path"
+    Only `yield`/`reply`, `error`/`require`, and `forward` discharge a response
+    obligation. A `send` of the handled message does **not**, even to an outlet
+    that admits it.
+
 !!! warning "`send … to inlet` is deprecated"
     Sending directly into another processor's inlet bypasses the streaming
     model — that is `tell`'s job. The inlet form still parses and emits a
@@ -324,6 +353,12 @@ require invariant UnderLimit with limits
 error "Price must be greater than zero"
 ```
 
+`error` **ends its statement list.** It refuses unconditionally, so anything
+after it is unreachable and is an **Error**. `require` is deliberately *not*
+terminal — it refuses only when its condition fails, so later statements are
+ordinary. `terminate` ends a list for the other reason: the instance is gone.
+An `on term` clause is unaffected; it runs *because* of the termination.
+
 A `require invariant` is an explicit **restatement** — an
 [invariant](invariant.md) already applies implicitly across its declaring
 scope. The `with <value>` form is the exception that does real work: it hands a
@@ -332,9 +367,15 @@ ambient scope cannot supply.
 
 !!! warning "Refusals before effects"
     Within any single linear statement list, every **refusal** (`require`,
-    `error`) must appear before every **effect** (`set`, `morph`, `become`,
-    `send`, `tell`, `yield`, `put`). Acting and then refusing would leave
-    partial changes behind.
+    `error`) must appear before every **effect** — and an "effect" here is a
+    change to **this definition's own state**: `set`, `morph` and `terminate`.
+    Acting and then refusing would leave a partial change behind.
+
+    `send`, `tell` and `yield` are **transmissions**, not local changes: any
+    state they cause is elsewhere and later. `become` changes behaviour rather
+    than state, and `put` writes to an [output](output.md). None of them can
+    leave this definition half-changed, so none has to wait for the refusals —
+    which is what makes "refuse **and** publish a rejection event" expressible.
 
     Each statement list is checked independently, so each branch of a `when`,
     `match` or `foreach` body is its own list. A refusal after an effect in the
