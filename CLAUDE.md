@@ -386,10 +386,13 @@ neither of them any more, so the wrong pairing reports confident nonsense.
 **`../bin/riddlc` is the 2.0 compiler** — since 2026-08-12 a **native binary
 installed directly at that path**; `../riddlc-dist/` is gone, so the old
 symlink description no longer holds. The Homebrew `riddlc` on PATH lags it
-badly — verified 2026-08-13: PATH is **2.0.0-rc.5** while `../bin` is
-**2.0.0-rc.13**. rc.9 deprecated the entity
-options, so validating the 2.0 docs with the PATH binary silently passes
-examples the real compiler rejects. Run both and compare; never assume.
+badly — verified 2026-08-21: PATH is **2.0.0-rc.5** while `../bin` is
+**2.0.0-rc.20-2-c1212d73**, which is two commits PAST the rc.20 tag. rc.9
+deprecated the entity options, so validating the 2.0 docs with the PATH binary
+silently passes examples the real compiler rejects. Run both and compare;
+never assume — and note the staged binary is often not a clean tag, so
+`build.sbt` pins the exact `git describe` version to keep grammar, gate and
+docs describing one build.
 
 **A tag in `riddl` means neither a staged binary nor a resolvable artifact.**
 These three drift apart and must be checked separately: the tag, what
@@ -450,10 +453,10 @@ has RIDDL in it. It takes files, not directories. Run it exactly like this, or
 a reported number cannot be compared with the last one:
 
 ```bash
-# 2.0 -- the gated set. In zsh ${(f)...} splits on newlines;
-# a bare $files does NOT split at all.
-files=(${(f)"$(grep -rl '<!-- riddl:' sites/riddl/docs --include='*.md' | sort)"})
-python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
+# 2.0 -- the WHOLE tree, not just annotated pages (see Status below for why)
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
+  $(find sites/riddl/docs -name '*.md' | sort) > /tmp/gate.txt 2>&1
+echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 # 1.31 -- same shape over sites/riddl-1x/docs, with the 1.31 compiler
 ```
@@ -461,20 +464,41 @@ python3 scripts/validate-riddl-examples.py ../bin/riddlc "${files[@]}"
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-08-13, rc.13): the gated set is **253 validated / 124
-skipped / 0 failed**, and **every blanket `"illustrative fragment"` skip is
-gone** — there were 118 of them when the work started. `quickstart.md`,
-`concepts/`, `introduction/` and `references/language-reference.md` are all
-annotated and green. Every remaining skip states its own reason.
+**Status** (2026-08-21, rc.20-2): the whole 2.0 tree is **347 validated / 50
+skipped / 0 failed**, and **every blanket skip is gone** — both the 118
+`"illustrative fragment"` ones and the 73 `tutorials/rbbq/` ones. Every
+remaining skip states its own reason.
+
+**Run the gate over the whole tree, not over "files with a directive".** The
+old scope was `grep -rl '<!-- riddl:'`, which silently excluded any page that
+had never been annotated — and three such pages existed while CLAUDE.md
+claimed every RIDDL-bearing page was covered (`tutorials/basics.md`,
+`guides/authors/design/contexts.md`,
+`introduction/what-is-riddl-based-on.md`). All three failed the moment they
+were included. A scope defined by "has an annotation" can never report a
+missing annotation:
+
+```bash
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
+  $(find sites/riddl/docs -name '*.md' | sort) > /tmp/gate.txt 2>&1
+echo "EXIT=$?"; tail -2 /tmp/gate.txt
+```
 
 Gating `language-reference.md` found seven wrong examples that review had not
 — including an adaptor that violated the isolation-seam rule warned about
 immediately below it. All are fixed.
 
-Across the whole 2.0 tree the gate is **251 validated / 122 skipped / 0
-failed**. 73 of those skips are `tutorials/rbbq/`, quoted verbatim from
-riddl-models, which is still 1.x — see BACKLOG 1c, and note that reason has
-NOT been verified fence by fence.
+**The RBBQ tutorial is authored, not quoted** (2026-08-21). Its fences used to
+be excused as "quoted verbatim from riddl-models, which is still RIDDL 1.x".
+riddl-models is clean on rc.20, so that was false — but re-quoting was never
+possible either: the model carries `briefly`/`described as` on nearly every
+field and is **20,882 lines against the tutorial's 2,069**, roughly 10:1.
+`KitchenTicket.riddl` alone is 901 lines where the fence is 70. Each fence is
+now a condensed 2.0 excerpt whose structure comes from the source and whose
+correctness comes from the gate. **When the model moves, re-derive the
+excerpt; do not paste the source in.** `scripts/` has no tool for this; the
+session used a throwaway metadata-stripper to read structure at a readable
+size.
 
 **Wrapper vocabulary is only ever ADDED — and that rule covers fields, NOT
 enumerations.** An enumeration's enumerators join the enclosing namespace, so a
@@ -482,6 +506,37 @@ wrapper-level `any of { Pending, Shipped }` collides with any page naming a
 state `Shipped`. Put enumerations in the page prelude. Likewise **no prelude
 entry may depend on another that a fence might strip** with `no-prelude`, or
 that fence loses both.
+
+**More prelude rules, each found by a gate failure pointing somewhere else:**
+
+- **A prelude entry must fit on ONE line.** `no-prelude` withholds an entry by
+  removing its first line only, so a wrapped alternation leaves an orphan
+  `| More | Members` behind and the parse error lands far from the cause.
+- **A prelude may not declare an alternation over messages that live INSIDE an
+  entity.** The prelude can only stub the entity, so the members do not
+  resolve. Only the entity's own fence should declare that alternation.
+- **A `projector X is { ??? }` stub is not valid at all** — a projector
+  requires a record and exactly one handler. Entities and repositories stub
+  fine; projectors cannot, so nothing may reference one from a prelude.
+- **A prelude event redeclared inside an event-sourced entity is ambiguous**,
+  and it surfaces as the *event-sourcing* rule — "handles an event declared
+  outside it" — rather than as ambiguity. Withhold the prelude copy by name.
+- **A `with { }` block's `described as { |… }` needs its content on its own
+  lines.** The one-line form does not parse and the error points at the
+  closing brace.
+- **An `as <shape>` ascription is checked against real port arity**, so a
+  condensed excerpt that drops an inlet fails on its *shape*, not its content:
+  1-in/1-out is `flow`, 2-in/1-out `merge`, 1-in/0-out `sink`, 0-in/1-out
+  `source`.
+
+**The shared `in-handler` wrapper cannot declare `yields`.** Adding it turns
+every fence that does NOT yield into an Error ("does not yield it on every
+path") — verified by probe against rc.20-2. `in-yielding-handler` exists for
+fences that do yield; it is otherwise identical.
+
+**Regenerating a page that was already rebuilt inserts a SECOND prelude**, and
+two preludes still validate, so the gate will not tell you. Restore the page
+to its pre-rebuild commit first, and count preludes when in doubt.
 
 **Three ways this gate can lie to you, all observed:**
 
@@ -514,7 +569,19 @@ compilers):
 | outlet on an entity | ❌ — put it on a `source` | ✅ |
 | entity semantics | `option is event-sourced` | **`event-sourced entity X`** — the option form is `[deprecated]` |
 | alternation | `one of { A, B }` | also `A \| B` (identical; `prettify` emits the words) |
-| `command C yields event E is …` | ❌ | ✅ — **required** on every command an event-sourced entity handles |
+| `command C yields event E is …` | ❌ | ✅ — **required** on every command an event-sourced entity handles. Goes between the name and `is`, and takes a **concrete Event** — an alternation is an Error |
+| `forward` | ❌ | ✅ rc.18 — `forward m to outlet X` / `to entity Y`. Passes the handled message on and **discharges** its `yields`/`replies` obligation. Only in a clause handling a command with `yields` or a query with `replies`; an event or result cannot be forwarded; a `yield`/`reply` after it is an Error |
+| what discharges a response | — | only `yield`/`reply`, `error`/`require`, `forward`. A `send` of the handled message does **not** (rc.18) |
+| `error` / `terminate` | not terminal | **terminal** (rc.19, rc.20) — a statement after either is an Error. `require` is deliberately not terminal; `on term` is a separate list and unaffected |
+| refusals-before-effects set | `set`,`morph`,`become`,`send`,`tell`,`yield`,`put` | **`set`, `morph`, `terminate` only** (rc.19) — local state change, not purity. Which is what makes "refuse AND publish a rejection event" legal |
+| `option is snapshots` | ❌ | ✅ rc.19 — event-sourced entities only; an **Error** elsewhere. Whether, never how often; absence means "replay the whole log" and is a real choice |
+| portlet type | unchecked | a `send`/`forward` naming a message the portlet does not **admit** is an Error (rc.18). Widen the portlet to an alternation |
+| cross-context connector | any port | must land on each context's **OWN** portlet; reaching past the boundary is an Error (rc.18). Intra-context, anything may talk to anything |
+| sink/source streamlet | required for messaging | not required — an **entity IS a streamlet**, a **context IS the sink**. Per-entity: handles messages → needs its own inlet; emits → its own outlet |
+| adaptor direction | — | **inbound (`from`) handles the peer's OUTPUT** (events, results); **outbound (`to`) handles the target's INPUT** (commands). Backwards is an Error. One peer per adaptor — `from X to Y` does not parse |
+| duplicate field / ctor arg | silent | **Error** (rc.18) — a repeated name makes the aggregate's shape ambiguous |
+| repository with no index | — | CompletenessWarning if it answers queries (rc.17); it cannot name which field, because an `on query` body is prose |
+| user interaction | — | only at the **application boundary** — steps name an app's group/input/output, never a context directly |
 
 **`event-sourced` is not decoration in 2.0.** It turns on four Errors: every
 handled command's type must declare `yields`; every event so named needs an

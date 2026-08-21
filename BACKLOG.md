@@ -25,6 +25,14 @@ fixed (commit `470b436`).
 
 ## 1e. Write USER documentation for rc.16's new features  ← START HERE
 
+**Progress (2026-08-21, rc.20-2):** the rc.17-rc.20 delta is fully
+documented — `forward`, `option is snapshots`, `error`/`terminate`
+terminality, the discharge rule, portlet-admits, the cross-context
+boundary Error, entity-is-a-streamlet, the repository index warning and
+duplicate-field Errors. **`terminate` from A71 is now documented** (it had
+no section at all, in either the reference or `concepts/`). What remains
+below is the rest of A71 plus the modality items.
+
 **Correction (2026-08-18):** an earlier draft of this item said these features
 were "documented nowhere". That was wrong. **They are specified in
 `../RIDDL-Tools-To-Do-List.md`**, each as a numbered Part A item carrying the
@@ -43,6 +51,7 @@ translation for a reader, not reverse-engineering from the grammar.
 | A refusal step may cite an **invariant** instead of prose | **A38** |
 | Connector durability/delivery intentions | **A33**, **A34**, **A35** |
 | Correlations in projectors | **A70** — DONE, documented 2026-08-13 |
+| `terminate` | **A71** — DONE, documented 2026-08-21; it is terminal in its block |
 
 **Not found in the To-Do List by name:** numeric literals as first-class
 values, indexed lookup (`x at i`), parameters on `on init`/`on term`,
@@ -63,44 +72,8 @@ but every one of their aliases is in the rc.16 grammar — `scene`/`space`/
 presentation verbs. They shipped after that verification. Trust the generated
 grammar over an implementation note, and tell Reid so the item can be marked.
 
-**Order:** 1d is done — the gate is green at 254/123/0.
-
----
-
-## 1c. The RBBQ tutorial is 73 skips and 0 validated
-
-**What:** `tutorials/rbbq/` is the most-read tree and contributes **nothing**
-to the gate: all 73 of its fences carry one identical skip — *"quoted verbatim
-from riddl-models, which is still RIDDL 1.x"*. Everything else in
-`sites/riddl/docs` is gated now, so this is the last blind spot.
-
-**That reason has never been checked fence by fence, and it is the same shape
-as the blanket skip 1a spent four passes retiring.** Measured 2026-08-10:
-stripping it and running `--auto` with no prelude places **4 of 76**. That
-number means very little on its own — `concepts/` scored 21 of 120 at the same
-stage and finished fully gated, because most failures were missing page
-vocabulary, not wrong RIDDL. At least one tutorial fence
-(`external-contexts.md`, the `context HRSystem` one) validates clean under
-`in-domain` today.
-
-**So the open question is genuinely open:** how much of the tutorial is
-actually 1.x, and how much merely needs a prelude? Answer it by gating two or
-three pages the way `concepts/` was done, then extrapolate.
-
-**Why it matters beyond coverage:** if a real part of it *is* 1.x, then the 2.0
-documentation's flagship tutorial is teaching retired syntax. That is a content
-problem, not a tooling one, and it is invisible today because the skip reason
-sounds like a decision rather than an assumption.
-
-**Prerequisite to check first:** the pages are transcribed from
-`riddl-models`, which still builds against riddl 1.13.1. If that repo has not
-migrated, fixing the tutorial means either diverging from its source or
-migrating the models — a cross-project call. See the parent `CLAUDE.md`
-dependency table.
-
-**Also open:** `check-riddl-blocks.py` flags 33 advisory items, all in
-`migration/` (which shows 1.x deliberately — arguably belongs in EXEMPT_PATHS)
-and `tutorials/rbbq/`.
+**Order:** 1c and 1d are done. The whole 2.0 tree gates at **347 validated
+/ 50 skipped / 0 failed** on rc.20-2, with no blanket skips anywhere.
 
 ---
 
