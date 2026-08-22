@@ -37,8 +37,14 @@ persistence is an intention (33). What survives as **1e-remnant** is riddlc
 work, not documentation — the alias-specific UI validations items 43 and 46
 call "useful later work". Nothing here is blocked on it.
 
-**Next:** BACKLOG 1a-remnant, then 2 (promote 2.0 to `latest`) when 2.0 ships
-final.
+**BACKLOG 1a-remnant is also DONE.** Its premise was that gating the
+`CartRepository` fence meant renaming the prelude's `entity Cart` and every
+fence reaching it. It did not: `no-prelude=Cart` withdraws the entity, and the
+fence declares its own `record Cart` plus the `CartLine` its schema links
+through. **The item had been sized without probing it** — the fix is six lines
+and the reasoning it was "bigger than it looks" was never tested.
+
+**Next:** BACKLOG 2 — promote 2.0 to `latest` — when 2.0 ships final.
 
 ### Three value forms were missing from BOTH tables
 

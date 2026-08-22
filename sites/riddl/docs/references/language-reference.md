@@ -2217,8 +2217,12 @@ A saga is sequential by default, so there is no `sequential` option.
 
 Repositories define persistence:
 
-<!-- riddl: skip reason="its schema names `record Cart`, while the page prelude must supply `entity Cart` for other fences; one context cannot hold both" -->
+<!-- riddl: in-context no-prelude=Cart -->
 ```riddl
+// `record Cart` here, not the page's `entity Cart`: a schema stores DATA.
+record CartLine is { id: ProductId, quantity: Natural }
+record Cart is { items: many CartLine }
+
 repository CartRepository is {
   schema CartData is relational of
     cart as record Cart

@@ -6,23 +6,6 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1a-remnant. `repository CartRepository` cannot be gated as written
-
-**What:** One fence on `references/language-reference.md` still carries a
-skip that is *not* a content bug. Its schema names `record Cart`, while the
-page prelude must supply `entity Cart` for other fences on the page. One
-context cannot hold both names, and `no-prelude=Cart` withdraws the entity
-without providing the record.
-
-**Fixing it** means renaming the prelude's `entity Cart` and every fence that
-reaches it — bigger than it looks, and worth doing only if that page's
-vocabulary is being reworked anyway. Everything else 1a-followup listed is
-fixed (commit `470b436`).
-
-**Not urgent:** the fence is a skip with an honest reason, so nothing is red.
-
----
-
 ## 1e-remnant. Alias-specific UI validations are unbuilt, by intent
 
 **1e is otherwise DONE (2026-08-22).** Every feature it listed is now
