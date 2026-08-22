@@ -151,6 +151,16 @@ Removing the burden of persistence is likely to make a connector considerably
 more performant, since storage latency is no longer involved — which is why it
 is opt-in rather than the default.
 
+!!! info "Why ordering is an option when persistence is not"
+    The default is **ordered**; `unordered` is *permission, not mandate* —
+    best-effort unordered delivery, with ordered delivery remaining a
+    conforming implementation. A generator may decline to honour it and still
+    conform, which is exactly why ordering stayed an **option**.
+
+    Persistence and delivery guarantees fail that test: a delivery guarantee is
+    not something a generator may quietly decline. That is the line between an
+    option and an intention.
+
 ### Delivery semantics
 
 `at-least-once` requires the implementation to make handling idempotent, so

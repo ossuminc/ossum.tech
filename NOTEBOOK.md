@@ -29,8 +29,32 @@ unreachability, boundary.
 
 **No blanket skips remain anywhere.** The RBBQ tutorial went 0 → 73 of 73.
 
-**Next is BACKLOG 1e** — the rest of A71 plus the modality items (A43, A46).
-The rc.17–rc.20 delta is fully documented, and `terminate` is now done.
+**BACKLOG 1e is DONE (2026-08-22).** Every feature it listed is documented and
+gated: `Id(P)`/`self`/`initiate`/structural addressing (item 71), value
+operands (72), `set` ownership (75), the modality aliases and presentation
+verbs (43, 46), refusal-by-invariant (38), and why ordering is an option while
+persistence is an intention (33). What survives as **1e-remnant** is riddlc
+work, not documentation — the alias-specific UI validations items 43 and 46
+call "useful later work". Nothing here is blocked on it.
+
+**Next:** BACKLOG 1a-remnant, then 2 (promote 2.0 to `latest`) when 2.0 ships
+final.
+
+### Three value forms were missing from BOTH tables
+
+`ask`, `initiate` and `self` were absent from the value-form tables in
+`concepts/value.md` ("The Seven Forms" — actually ten) and in the cheat sheet,
+though `ask` had a full reference section. **A table that enumerates a closed
+set is a claim, and it was wrong.** When the grammar's `value` production
+gains an alternative, check both tables.
+
+### Two To-Do List notes are stale, and contradict themselves
+
+Items 43 and 46 are marked "NOT BUILT (verified 2026-08-14)" while item 43's
+own implementation note says SHIPPED `5072bad5b`. Re-verified against the
+rc.20 grammar: all nineteen aliases are present. Recorded in BACKLOG
+1e-remnant so it can be corrected upstream. Same lesson as A72 last week —
+**a status note in that file is a snapshot, not a standing state.**
 
 ### What this session established
 

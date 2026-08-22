@@ -26,6 +26,11 @@ Every interaction is introduced by the `step` keyword, followed by one of the
 ten step forms:
 
 <!-- riddl-prelude
+record HamperData is { onHand: Natural }
+entity Hamper is {
+  invariant MustHaveStock is "the item must be in stock"
+  state Holding of record HamperData is { handler HamperHandler is { ??? } }
+}
 record OrderData is { confirmationNumber is String }
 command ProcessPayment is { note is String }
 entity PaymentService is { ??? }
@@ -58,7 +63,7 @@ case PlaceOrder is {
 | **Select** | `step <user> selects <input>` | User → Input |
 | **Take input** | `step take <input> from <user>` | Input ← User |
 | **Show output** | `step show <output> to <user>` | Output → User |
-| **Refusal** | `step <source> refuses <user> "<reason>"` | Any → User |
+| **Refusal** | `step <source> refuses <user> "<reason>"` — or `… invariant <ref>` | Any → User |
 | **Send message** | `step send <message> from <source> to <target>` | Any → Processor |
 | **Self-processing** | `step for <ref> is "<description>"` | Any, alone |
 | **Arbitrary** | `step from <source> "<relationship>" to <target>` | Any → Any |
@@ -91,6 +96,26 @@ step entity Cart refuses user Customer "the item is out of stock"
 Before it existed, the error branch of a use case — often the most interesting
 one — could only be written as free prose, which meant it was also the least
 checkable part of the model.
+
+A refusal may cite the **invariant** it violates instead of prose, which is
+what closes that gap completely:
+
+<!-- riddl: in-epic -->
+```riddl
+case OutOfStock is {
+  user Customer wants to "add an item to the basket"
+    so that "they can buy it"
+  step entity Hamper refuses user Customer invariant Hamper.MustHaveStock
+}
+```
+
+That one reference ties three things together that were previously only
+related by intention: the requirement's named [invariant](invariant.md), the
+[`require`](statement.md) statement that enforces it, and the
+`InvariantViolated` result a generated test asserts. Prose stays valid and
+draws no warning — the invariant form is an additional option, not a
+replacement, and refusal paths may still be organised as separate use cases or
+inside `optional { … }`.
 
 ## Grouping
 

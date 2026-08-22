@@ -29,14 +29,15 @@ nested groups, enabling hierarchical organization of the user interface.
 
 Groups have many aliases in RIDDL to accommodate different UI paradigms:
 `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
-`window`, `section`, `tab`, `flow` and `block`.
+`window`, `section`, `tab`, `flow`, `block`, `scene`, `space` and `zone`.
 
 ### Input
 
 An input takes data *from* the user. It is written as an input alias, a name,
 an **acquisition verb**, and the type acquired:
 
-`input`, `form`, `text`, `button`, `picklist`, `selector`, `item`
+`input`, `form`, `text`, `button`, `picklist`, `selector`, `item`,
+`voice`, `gesture`, `gaze`
 
 The acquisition verbs are interchangeable — pick whichever reads best:
 
@@ -49,9 +50,12 @@ The acquisition verbs are interchangeable — pick whichever reads best:
 An output presents data *to* the user, written as an output alias, a name, a
 **presentation verb**, and what is presented:
 
-`output`, `document`, `list`, `table`, `graph`, `animation`, `picture`
+`output`, `document`, `list`, `table`, `graph`, `animation`, `picture`,
+`sound`, `speech`, `haptic`
 
-Presentation verbs: `presents`, `shows`, `displays`, `writes`, `emits`
+Presentation verbs: `presents`, `shows`, `displays`, `writes`, `emits`,
+`plays`, `speaks`, `announces`, `vibrates`, `pulses`, `nudges`, `diffuses`,
+`serve`, `offer`, `taste`
 
 ## Navigation
 

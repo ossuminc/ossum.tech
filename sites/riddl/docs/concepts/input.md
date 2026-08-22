@@ -57,7 +57,8 @@ button Checkout activates type Clicked
 picklist Country selects type CountryCode
 ```
 
-**Aliases**: `input`, `form`, `text`, `button`, `picklist`, `selector`, `item`
+**Aliases**: `input`, `form`, `text`, `button`, `picklist`, `selector`,
+`item`, `voice`, `gesture`, `gaze`
 
 **Acquisition verbs**: `acquires`, `reads`, `takes`, `accepts`, `admits`,
 `enters`, `provides`, `selects`, `chooses`, `picks`, `initiates`, `submits`,

@@ -441,7 +441,12 @@ messages, states, and parameters in RIDDL.
 - **Parameterized predefined types** — **require parenthesized
   arguments**; using these without parameters is invalid:
     - `String(min, max, enc)` — constrained string
-    - `Id(entity)` — unique identifier for an entity type
+    - `Id(<kind> Path)` — runtime identity of ONE INSTANCE of a
+      processor: adaptor, context, entity, projector, repository or
+      streamlet. `Id(entity Order)` is canonical, `Id(Order)`
+      shorthand; a keyword contradicting the referent's kind is an
+      **Error**. Only entities can be `initiate`d and `terminate`d,
+      but every processor can be named
     - `URL(scheme)` — URL with a specific scheme
     - `Range(min, max)` — bounded integer range
     - `LatLong(lat, long)` — geographic coordinates
@@ -692,6 +697,9 @@ Wherever a statement needs a value, any of these is accepted:
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
 | Boolean | `a > b and not c` | A structured boolean expression |
+| Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it. **Never inside a saga.** |
+| Initiate | `initiate entity Order` | Creates an instance; the value is its `Id`. Entity-only; an effect. |
+| Self | `self`, `self.id` | The instance running now (`id`, `version`). Pass `self.id`, never `self`. |
 
 !!! warning "Comparisons are type-safe and ref-only"
     Both operands must be a value reference, a `get from`, or a named
@@ -947,7 +955,7 @@ interaction.
 | Select | `step <user> selects <input>` |
 | Take input | `step take <input> from <user>` |
 | Show output | `step show <output> to <user>` |
-| Refusal | `step <source> refuses <user> "<reason>"` |
+| Refusal | `step <source> refuses <user> "<reason>"` or `… invariant Cart.MustHaveStock` |
 | Send message | `step send <message> from <source> to <target>` |
 | Self-processing | `step for <ref> is "<description>"` |
 | Arbitrary | `step from <source> "<relationship>" to <target>` |
@@ -1024,7 +1032,8 @@ of UI containers.
 **Contains**: Group, Input, Output, Type.
 
 **Aliases**: `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`,
-`column`, `window`, `section`, `tab`, `flow`, `block`.
+`column`, `window`, `section`, `tab`, `flow`, `block`, `scene`, `space`,
+`zone`.
 
 **Key details**:
 
@@ -1043,7 +1052,7 @@ providing information (form submission, button tap, voice response, etc.).
 **Contains**: Type, Message (command).
 
 **Aliases**: `input`, `form`, `text`, `button`, `picklist`, `selector`,
-`item`.
+`item`, `voice`, `gesture`, `gaze`.
 
 **Acquisition verbs**: `acquires`, `reads`, `takes`, `accepts`, `admits`,
 `enters`, `provides`, `selects`, `chooses`, `picks`, `initiates`, `submits`,
@@ -1069,9 +1078,11 @@ information to a user (text, chart, audio, etc.).
 **Contains**: Type, Message (result).
 
 **Aliases**: `output`, `document`, `list`, `table`, `graph`, `animation`,
-`picture`.
+`picture`, `sound`, `speech`, `haptic`.
 
-**Presentation verbs**: `presents`, `shows`, `displays`, `writes`, `emits`.
+**Presentation verbs**: `presents`, `shows`, `displays`, `writes`, `emits`,
+`plays`, `speaks`, `announces`, `vibrates`, `pulses`, `nudges`, `diffuses`,
+`serve`, `offer`, `taste`.
 
 **Writes**: A handler publishes to an output with `put <value> to output
 <Name>`.

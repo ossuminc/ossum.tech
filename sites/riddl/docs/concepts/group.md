@@ -18,10 +18,30 @@ implementation concepts:
 * HTML forms, pages, containers, and sections
 * mobile application screens, pages, forms and containers
 * accordions (vertically stacked list of items with show/hide functionality)
+* a spatial **zone** in a 3D or AR scene
+* a **voice** dialogue turn, which has structure but no pixels
 
 A UI designer is free to arrange the contained
 elements in any fashion, but presumably in a way that is consistent with
 their overall UI design theme.
+
+!!! info "The triad is modality-free, and that is the point"
+    It is tempting to read [group](group.md), [input](input.md) and
+    [output](output.md) as *container*, *widget* and *widget* — screen things.
+    They are not. The triad is the **modality-free logical core**: something
+    is acquired from a user, something is presented to them, and things are
+    grouped for cohesion. None of that mentions a screen.
+
+    The alias sets say so out loud. A group may be a `scene`, a `space` or a
+    `zone`; an input may be `voice`, `gesture` or `gaze`; an output may be
+    `sound`, `speech` or `haptic`. A model that `speaks` a confirmation and
+    `vibrates` on error is using exactly the same three concepts as one that
+    renders a form — which is what lets a single model target a screen, a
+    voice assistant and a headset without restructuring.
+
+    The aliases are **closed lists** and carry **no structural difference**:
+    they are directional heuristics for the reader and for a generator's
+    choice of representation.
 
 ## Aliases
 
@@ -29,7 +49,7 @@ A group may be written with any of these keywords, all of which mean the same
 thing structurally. Pick whichever reads best for what you are modeling:
 
 `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`,
-`window`, `section`, `tab`, `flow`, `block`
+`window`, `section`, `tab`, `flow`, `block`, `scene`, `space`, `zone`
 
 <!-- riddl: in-app-context -->
 ```riddl

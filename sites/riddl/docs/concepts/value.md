@@ -31,7 +31,7 @@ RIDDL 2.0 replaced what had been a mostly-opaque quoted string with a real
 value-expression system. A literal string is still accepted everywhere, so
 pseudo-code remains available where structure would be false precision.
 
-## The Seven Forms
+## The Ten Forms
 
 | Form | Syntax | Meaning |
 |------|--------|---------|
@@ -42,6 +42,9 @@ pseudo-code remains available where structure would be false precision.
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
 | Boolean | `a > b and not c` | A structured boolean expression |
+| Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it |
+| Initiate | `initiate entity Order` | Brings an instance into being; **yields its `Id`** |
+| Self | `self`, `self.id` | The instance executing right now |
 
 ## Value References
 
@@ -172,6 +175,48 @@ everywhere else in the language.
 
     `true` and `false` remain valid boolean *atoms* — usable with `and`, `or`,
     `not`, and standalone — just not as comparison operands.
+
+## Initiate
+
+`initiate` brings a new instance of an entity into being, and its **value is
+that instance's identity**:
+
+<!-- riddl: in-handler -->
+```riddl
+let fresh = initiate entity ExampleEntity
+```
+
+It is not a second way to exist — construction still completes only when
+`on init` finishes. But without it no `Id` value could ever come into being,
+so nothing could be addressed.
+
+`initiate` and [`terminate`](statement.md) are **entity-only** and are both
+**effects**: banned in a function body, in `on activate`/`on passivate`, and
+in a correlation fold; legal in a saga step.
+
+!!! warning "Discarding the id is a warning"
+    The id is the only thing `initiate` produces, so binding it and never
+    using it means the instance was created and immediately made unreachable.
+
+## Self
+
+`self` is the instance executing right now. Its type is a **synthesized
+record** carrying `id` and `version`:
+
+<!-- riddl: in-handler -->
+```riddl
+let me  = self
+let who = self.id
+```
+
+Because that type is an ordinary record, `self.id` resolves by the same path
+walk as any other value — which is why no resolution rule has to know `self`
+exists.
+
+The type is not user-nameable, though: `self.id` is `Id(Order)` in an Order
+handler and `Id(Shipping)` in a Shipping one. So `let me: T = self` has no `T`
+to write, and **`self` cannot be assigned into a message field — pass
+`self.id`.** The field set is closed; adding to it is a language change.
 
 ## Where Values Are Used
 

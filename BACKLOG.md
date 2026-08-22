@@ -23,57 +23,43 @@ fixed (commit `470b436`).
 
 ---
 
-## 1e. Write USER documentation for rc.16's new features  ← START HERE
+## 1e-remnant. Alias-specific UI validations are unbuilt, by intent
 
-**Progress (2026-08-21, rc.20-2):** the rc.17-rc.20 delta is fully
-documented — `forward`, `option is snapshots`, `error`/`terminate`
-terminality, the discharge rule, portlet-admits, the cross-context
-boundary Error, entity-is-a-streamlet, the repository index warning and
-duplicate-field Errors. **`terminate` from A71 is now documented** (it had
-no section at all, in either the reference or `concepts/`). What remains
-below is the rest of A71 plus the modality items.
+**1e is otherwise DONE (2026-08-22).** Every feature it listed is now
+documented on the site and gated against `../bin/riddlc`:
 
-**Correction (2026-08-18):** an earlier draft of this item said these features
-were "documented nowhere". That was wrong. **They are specified in
-`../RIDDL-Tools-To-Do-List.md`**, each as a numbered Part A item carrying the
-ruling, the rationale and an implementation status. What is missing is
-*user-facing* documentation on ossum.tech. That makes this item much cheaper
-than it looked: the semantics are settled and written down, so the work is
-translation for a reader, not reverse-engineering from the grammar.
+| Feature | Spec | Where |
+|---|---|---|
+| `Id(P)` over all six processor kinds, keyword form, truth-check | 71 | language-reference § Instance Identity; cheat-sheet types |
+| `self` / `self.id` | 71 | language-reference § Instance Identity; `concepts/value.md` |
+| `initiate` | 71 | same, plus both value-form tables |
+| `terminate` | 71 | language-reference § Terminate Statement (2026-08-21) |
+| Structural addressing and `tell … by` | 71 | language-reference § Tell → Addressing is structural |
+| Message operand may name its VALUE | 72 | language-reference § Constructors |
+| `set`/`get from state` need an OWNER | 75 | language-reference § Set Statement |
+| Modality aliases | 43 | `concepts/group.md`, `element.md`, `input.md`, `output.md`, both references |
+| Presentation verbs | 46 | `concepts/output.md`, `element.md`, cheat-sheet |
+| Refusal citing an invariant | 38 | `concepts/interaction.md`; all three step tables |
+| Ordering is an option, persistence an intention | 33 | `concepts/connector.md` |
+| Connector scope and cross-context persistence | 34, 35 | `concepts/connector.md` (2026-08-21) |
+| Correlations in projectors | 70 | documented 2026-08-13 |
 
-| Feature | Spec |
-|---|---|
-| `Id(<processor-kind> P)`, `self`, `initiate`, `terminate`, structural addressing | **A71** — five constructs closing one gap; read it whole rather than per-keyword |
-| A message operand may name its **value**, not only its type | **A72** — see 1d; also the origin of the biggest failure group |
-| `set` / `get from state` require something that OWNS state | **A75** — already partly documented; the rule we asked for |
-| Modality aliases: `sound`/`speech`/`haptic`, `voice`/`gesture`/`gaze`, `scene`/`space`/`zone` | **A43** |
-| Presentation verbs: `plays`, `speaks`, `announces`, `vibrates`, `pulses`, `nudges`, `diffuses`, `serve`, `offer`, `taste` | **A46** |
-| A refusal step may cite an **invariant** instead of prose | **A38** |
-| Connector durability/delivery intentions | **A33**, **A34**, **A35** |
-| Correlations in projectors | **A70** — DONE, documented 2026-08-13 |
-| `terminate` | **A71** — DONE, documented 2026-08-21; it is terminal in its block |
+**What remains is not documentation.** Items 43 and 46 both call for
+alias-specific validations that do not exist: checking that a `popup` is
+reachable, that a `menu` contains selectable inputs, and warning on noun/verb
+inconsistency across a compound output's parts (a sound, a window and a haptic
+inside one output). Item 43 calls these "useful later work" and item 46 wants
+them symmetric with item 44. **That is riddlc work, not ossum.tech work** — it
+belongs in `riddl/BACKLOG.md`, and nothing here is blocked on it.
 
-**Not found in the To-Do List by name:** numeric literals as first-class
-values, indexed lookup (`x at i`), parameters on `on init`/`on term`,
-`prompt(...) as <type>`, and `tell ... by <id>`. They are in the generated
-grammar with explanatory comments; check the To-Do List again under a
-different phrasing before treating any of them as unspecified.
-
-**A43 and A46 deserve prose, not a table row.** The alias sets deliberately
-reach past the screen — sound, speech, haptics, scent, taste, spatial zones —
-and A43's framing is that the input/output/group triad is "already the
-modality-free logical core". That is a point about what RIDDL *is*, and
-`concepts/group.md` currently implies screens.
-
-**Two spec notes are STALE, verified 2026-08-18 against rc.16's grammar:**
-items **43** and **46** are both marked *"NOT BUILT (verified 2026-08-14)"*,
-but every one of their aliases is in the rc.16 grammar — `scene`/`space`/
-`zone`, `sound`/`speech`/`haptic`, `voice`/`gesture`/`gaze`, and the ten
-presentation verbs. They shipped after that verification. Trust the generated
-grammar over an implementation note, and tell Reid so the item can be marked.
-
-**Order:** 1c and 1d are done. The whole 2.0 tree gates at **347 validated
-/ 50 skipped / 0 failed** on rc.20-2, with no blanket skips anywhere.
+**Two spec notes in `../RIDDL-Tools-To-Do-List.md` are STALE and should be
+corrected there.** Items 43 and 46 are marked *"NOT BUILT (verified
+2026-08-14)"*. Re-verified against the **rc.20** grammar on 2026-08-22: every
+alias is present — `group_aliases` carries `scene`/`space`/`zone`,
+`output_aliases` carries `sound`/`speech`/`haptic`, `input_aliases` carries
+`voice`/`gesture`/`gaze`, and `presentation_aliases` carries all ten verbs.
+Item 43's own implementation note says SHIPPED `5072bad5b`, so the two halves
+of that entry contradict each other. Trust the generated grammar.
 
 ---
 

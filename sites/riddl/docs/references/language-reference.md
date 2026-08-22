@@ -71,6 +71,8 @@ description: >-
     event CartCreated is { id is CartId }
     event OrderPaymentReceived is { id is OrderId }
     command ConfirmOrder is { id is OrderId }
+    type OrderRef is Id(entity Order)
+    command Reprice is { orderId: OrderRef, newTotal: Price }
     command ShipOrder is { trackingNumber is String }
     command EscalateReview is { id is OrderId }
     command Withdraw yields event Withdrawn is { amount is Natural }
@@ -371,7 +373,8 @@ The keyword that introduces an aggregate says what kind of thing it is:
 **Special Types:**
 
 - **Entity Reference**: `reference to entity Path`
-- **Unique ID**: `Id(entity Path)` — Type-safe entity identifier
+- **Unique ID**: `Id(<kind> Path)` — runtime identity of one *instance* of a
+  processor. Not entity-only; see [Instance Identity](#instance-identity)
 
 ### Messages and Records
 
@@ -1235,6 +1238,29 @@ so `OrderPlaced()` against a message that has fields is an Error.
 Argument count, names, ordering and (best effort) types are all checked against
 the target's fields.
 
+!!! info "An operand may name a VALUE, not only a type"
+    `send`, `tell`, `yield`, `reply` and `morph` all take an operand saying
+    **which** message or record is being delivered. That operand may be a bare
+    name already in hand — an on-clause binding, a state field, a `let` local,
+    or a function input:
+
+    <!-- riddl: in-clauses -->
+    ```riddl
+    on evt: event ItemAdded is {
+      send evt to outlet CartEvents      // the VALUE, not the type
+    }
+    ```
+
+    Naming a message **type** says nothing about where the value comes from,
+    which is most of what a generator needs to know. A bare type reference
+    still parses and still means "some value of this type", but it draws a
+    **CompletenessWarning** — and the intended end state is an Error, deferred
+    only because the reference corpus holds over fourteen thousand of them.
+
+    `morph` gets the same freedom with a different rule: its operand is checked
+    for type-conformance against the target state's record, since the
+    message-operand test would reject every correct use.
+
 !!! warning "Duplicates are Errors"
     A **repeated field name** in an aggregate — `command C is { x is String, x
     is Integer }` — is an **Error**. A repeated name makes the aggregate's
@@ -1434,6 +1460,48 @@ tell command ProcessPayment(orderId) to entity PaymentService
     A `tell` whose target is not reachable through any modeled connector draws
     a **Warning**.
 
+#### Addressing is structural
+
+A `tell` names a processor *type* — but an entity has many instances, so
+something must say **which one**. RIDDL takes that from the message itself:
+the address is the message's field typed [`Id(target)`](#instance-identity),
+found without annotation.
+
+<!-- riddl: in-context no-prelude=OrderRef,Reprice -->
+```riddl
+type OrderRef is Id(entity Order)
+
+// `orderId` is typed Id(entity Order), so it IS the address. Nothing
+// needs to be declared, and nothing needs to be written at the call site.
+command Reprice is { orderId: OrderRef, newTotal: Price }
+```
+
+`tell … by <field>` exists only to **disambiguate** when more than one field
+qualifies:
+
+<!-- riddl: in-handler -->
+```riddl
+tell command Reprice(orderId = prompt("the order to reprice"),
+  newTotal = cart.total) to entity Order by orderId
+```
+
+Two rules make this predictable:
+
+- Candidates match by **resolved identity**, never by the path's last segment,
+  so two entities named `Order` in different contexts cannot collide.
+- The search **follows alias chains but never nesting**. A field typed
+  `OrderId`, where `type OrderId is Id(Order)`, is an address — that alias is
+  ordinary house style. A field whose *nested record* carries the id is not,
+  because descending into an aggregate is an unbounded search with no
+  principled place to stop. **Renaming is followed; containment is not.**
+
+**Zero candidates is a CompletenessWarning, and only when the target is an
+entity** — an entity is the only multiply-instantiated processor. It is not an
+Error for a measured reason: the reference corpus held 7,556 `tell`s against
+7 `Id`-typed fields, so an Error would have condemned essentially every model
+in existence. **Ambiguity, by contrast, *is* an Error** — it is a
+contradiction rather than an omission.
+
 ### Forward Statement
 
 Passes the handled message on to somewhere else **and discharges this clause's
@@ -1521,6 +1589,22 @@ set field total to call function Pricing.Total(subtotal, tax)
 set state ActiveOrder to record ActiveOrderData()
 ```
 
+!!! warning "`set` requires something that OWNS state"
+    `set` — and `get from state` — are legal only where the container actually
+    owns state: an **Entity**, which owns its `State`, or a **Projector**,
+    which owns the read-model record its folds build.
+
+    Everywhere else it is an **Error**: a **Context** (state lives in the
+    entities, repositories and projectors it contains, never in the context
+    itself), a **Saga** (whose state is housekeeping with no domain meaning), a
+    **Repository**, an **Adaptor**, and the streamlets. A **Function** is
+    rejected at the keyword — functions are pure, so the caller passes state in
+    through `requires`.
+
+    State is also readable only inside the entity that owns it. Reaching into
+    another entity's state is not a scoping inconvenience; it is the thing
+    entity boundaries exist to prevent.
+
 ### Let Statement
 
 Creates a local variable binding, with an optional type annotation. When no
@@ -1592,6 +1676,98 @@ rather than on every query.
     The prohibition reaches **every `ask` embedded in a value expression, at
     any depth** — it is not enough to keep `ask` off the right-hand side of a
     `let`.
+
+### Instance Identity
+
+RIDDL could describe processors but not **instances** of them. A model could
+say what an `Order` entity does, and could not say *which* Order, could not
+bring one into being, and could not name the one it is currently running as.
+Four constructs close that gap.
+
+#### `Id(P)` — the identity of one instance
+
+`Id` names any **processor**, not only an entity: adaptor, context, entity,
+projector, repository or streamlet. The keyword form is canonical and a bare
+path is shorthand:
+
+<!-- riddl: in-context no-prelude=OrderRef -->
+```riddl
+type OrderRef   is Id(entity Order)      // canonical
+type PlainRef   is Id(Order)             // shorthand for the same thing
+type CatalogRef is Id(entity Catalog)
+```
+
+The keyword is stored **as written**, so `prettify` is byte-exact — and
+validation makes it tell the truth. A keyword contradicting the referent's
+actual kind is an **Error**, because a wrong keyword is worse than none: a
+reader believes it.
+
+<!-- riddl: skip reason="a deliberate counter-example: the keyword contradicts the referent" -->
+```riddl
+type WrongRef is Id(entity Ordering)   // fails: Ordering is a context
+```
+
+!!! info "Why `Id` covers a singleton too"
+    A context or repository has exactly one instance, so its `Id` may look
+    pointless. It is not: an `Id` is **how you address something**. For a
+    singleton it denotes the deployment, and addressing it means "select the
+    right shard and forward". Only entities may be created and ended, but
+    every processor may be named.
+
+This is **runtime** identity, and it is not the definition's model-time
+identity. Two `Order` instances share one definition but never share an
+`Id(Order)`. The value is opaque and system-generated, so a **business** key —
+an order number, an email — belongs in state, supplied through `on init`.
+
+#### `self` — the instance running right now
+
+<!-- riddl: in-handler -->
+```riddl
+let me  = self
+let who = self.id
+```
+
+`self`'s type is a **synthesized record** with `id` and `version`. That it is
+an ordinary record is load-bearing: `self.id` resolves through the same path
+walk as every other value, so no resolution rule anywhere has to know `self`
+exists.
+
+Two consequences follow from the type not being user-nameable — `self.id` is
+`Id(Order)` inside an Order handler and `Id(Shipping)` inside a Shipping one:
+
+- `let me: T = self` has no `T` you could write.
+- `self` is not assignable into a message field. **Pass `self.id`.**
+
+The field set is **closed**. Adding to it is a language change, and the test is
+*runtime-only*: anything a generator can know statically it should inline,
+which is why `version` qualifies and, say, cluster placement does not.
+
+#### `initiate` — bring an instance into being
+
+`initiate` is a **value**: it yields the new instance's `Id`, so it is used
+through `let`.
+
+<!-- riddl: in-handler -->
+```riddl
+let fresh = initiate entity ExampleEntity
+```
+
+It does **not** add a second way for an instance to exist — construction still
+completes only when [`on init`](#on-clause-types) finishes. Without it, no
+`Id(P)` value could ever come into being and the whole addressing story would
+be inert.
+
+`initiate` and [`terminate`](#terminate-statement) are **entity-only**, by an
+explicit check rather than as a side effect of the type system. Both are
+**effects**, so both are banned in a function body, in `on activate` /
+`on passivate`, and in a correlation fold. Both are legal in a saga step.
+
+!!! note "The asymmetry is the design"
+    `initiate` names a **type** and yields an id; `terminate` consumes an
+    **id** and yields nothing. So `initiate` is a value and `terminate` is a
+    statement, and `on term` needs no parameter naming the instance — `self`
+    is in scope for the whole body and stays live to its very end, so
+    `self.id` already says which one is ending.
 
 ### Put Statement
 
@@ -2391,9 +2567,9 @@ definitions in it.
 
 | Role | Keyword and aliases |
 |------|---------------------|
-| Group | `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`, `window`, `section`, `tab`, `flow`, `block` |
-| Output | `output`, `document`, `list`, `table`, `graph`, `animation`, `picture` |
-| Input | `input`, `form`, `text`, `button`, `picklist`, `selector`, `item` |
+| Group | `group`, `page`, `pane`, `dialog`, `menu`, `popup`, `frame`, `column`, `window`, `section`, `tab`, `flow`, `block`, `scene`, `space`, `zone` |
+| Output | `output`, `document`, `list`, `table`, `graph`, `animation`, `picture`, `sound`, `speech`, `haptic` |
+| Input | `input`, `form`, `text`, `button`, `picklist`, `selector`, `item`, `voice`, `gesture`, `gaze` |
 
 ### Interaction Verbs
 
@@ -2460,7 +2636,7 @@ vocabulary, not captured data.
 | Select | `step <user> selects <input>` |
 | Take input | `step take <input> from <user>` |
 | Show output | `step show <output> to <user>` |
-| Refusal | `step <source> refuses <user> "<reason>"` |
+| Refusal | `step <source> refuses <user> "<reason>"` or `… invariant <ref>` — the invariant form ties the step to the `require` that enforces it |
 | Send message | `step send <message> from <source> to <target>` |
 | Self-processing | `step for <ref> is "<description>"` |
 | Arbitrary | `step from <source> "<relationship>" to <target>` |

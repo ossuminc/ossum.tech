@@ -43,9 +43,12 @@ picture  Avatar    presents type ImageRef
 ```
 
 **Aliases**: `output`, `document`, `list`, `table`, `graph`, `animation`,
-`picture`
+`picture`, `sound`, `speech`, `haptic`
 
-**Presentation verbs**: `presents`, `shows`, `displays`, `writes`, `emits`
+**Presentation verbs**: `presents`, `shows`, `displays`, `writes`, `emits`,
+`plays` (sound and animation), `speaks` and `announces` (speech),
+`vibrates`, `pulses` and `nudges` (haptics), `diffuses` (scent), and
+`serve`, `offer` and `taste`
 
 ## Writing to an Output
 
