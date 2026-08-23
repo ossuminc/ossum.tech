@@ -228,6 +228,11 @@ repository KitchenTicketRepository as merge is {
       do "update KitchenTicketSchema.tickets set currentStation =
         assignedStation where kitchenTicketId matches"
     }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
+    }
   }
 }
 ```
@@ -267,6 +272,11 @@ projector KitchenDisplay as flow is {
     }
     on serverNotified: event ServerNotified is {
       do "remove the completed ticket from the active display"
+    }
+    // The inlet admits an alternation, so the projector must say what
+    // ARRIVING means -- handling each member individually is not enough.
+    on other is {
+      do "ignore any other event on this stream"
     }
   }
 }

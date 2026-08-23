@@ -156,6 +156,11 @@ repository DeliveryRepository as flow is {
     on command PersistDriverAssigned is {
       do "update the stored deliveryOrder row for this deliveryId"
     }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
+    }
   }
 }
 ```

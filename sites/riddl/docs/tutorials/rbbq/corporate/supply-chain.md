@@ -141,6 +141,11 @@ repository PurchaseOrderRepository as flow is {
     on command PersistOrderApproved is {
       do "update the stored purchaseOrder row for this purchaseOrderId"
     }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
+    }
   }
 }
 ```

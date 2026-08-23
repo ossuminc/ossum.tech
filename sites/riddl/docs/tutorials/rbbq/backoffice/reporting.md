@@ -60,6 +60,11 @@ repository SalesReportRepository as sink is {
     on command RecordDineInPayment is {
       do "upsert the sales row for this date: increment orderCount and add the payment to totalRevenue"
     }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
+    }
   }
 }
 
@@ -112,6 +117,11 @@ repository LaborReportRepository as sink is {
     on command RecordShiftHours is {
       do "upsert the labor row for this date: add the shift's hours and cost"
     }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
+    }
   }
 }
 
@@ -163,6 +173,11 @@ repository InventoryReportRepository as sink is {
   handler InventoryReportPersistence is {
     on command RecordStockMovement is {
       do "upsert the inventory row for this date: add the consumed quantity and revalue stock"
+    }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
     }
   }
 }

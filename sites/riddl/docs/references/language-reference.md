@@ -107,7 +107,13 @@ description: >-
       state Placed of record OrderData is {
         handler PlacedHandler is { on command ConfirmOrder { ??? } }
       }
-      handler ShippedHandler is { on command ShipOrder { ??? } }
+      // Fences on this page `tell` Order these, so it must receive them.
+      handler ShippedHandler is {
+        on command ShipOrder { ??? }
+        on command Reprice { ??? }
+        on event OrderPending { ??? }
+        on event OrderShipped { ??? }
+      }
     }
     // The match statement needs a CLOSED subject for its type-cases. This
     // lives here, not in the shared wrapper: an enumeration's enumerators
@@ -1456,9 +1462,37 @@ tell event ItemAdded(sku = "the item") to entity Cart
 tell command ProcessPayment(orderId) to entity PaymentService
 ```
 
+`tell` may also address **one instance** rather than a statically named
+processor, by naming a value typed [`Id(...)`](#instance-identity):
+
+<!-- riddl: in-handler -->
+```riddl
+let fresh = initiate entity ExampleEntity
+tell command ExampleCommand(note = "welcome") to fresh
+```
+
+The two forms are told apart by the **keyword**: every processor reference is
+keyword-led (`to entity Order`), so a bare path is unambiguously a value. The
+instance is deliberately **never resolved** — a model cannot know *which*
+`Order` an `Id(entity Order)` holds, that being a runtime value, and nothing
+needs to: every question asked of a `tell` target is answered by the processor
+*kind*, which the `Id` names structurally.
+
+Unlike [`terminate`](#terminate-statement), this is **not** entity-only. Only
+an entity can be *ended*, but any processor can be *addressed* — a singleton's
+`Id` denotes its singular deployment. [`send`](#send-statement) is untouched:
+it takes a portlet, not a processor, so an `Id` cannot apply.
+
 !!! warning "Validation"
     A `tell` whose target is not reachable through any modeled connector draws
     a **Warning**.
+
+    A `tell` whose target declares **no clause receiving that message type**
+    draws a **CompletenessWarning** — nothing would happen when it arrived. The
+    mirror check fires on the receiving end too: an inlet admitting a type the
+    processor handles nowhere is reported even if nothing sends to it. An
+    `on other` clause satisfies both, because stating a policy for anything
+    unmatched *is* saying what arriving means.
 
 #### Addressing is structural
 
@@ -1750,6 +1784,7 @@ through `let`.
 <!-- riddl: in-handler -->
 ```riddl
 let fresh = initiate entity ExampleEntity
+tell command ExampleCommand(note = "welcome") to fresh
 ```
 
 It does **not** add a second way for an instance to exist — construction still

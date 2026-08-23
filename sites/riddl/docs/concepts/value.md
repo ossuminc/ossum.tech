@@ -184,6 +184,7 @@ that instance's identity**:
 <!-- riddl: in-handler -->
 ```riddl
 let fresh = initiate entity ExampleEntity
+tell command ExampleCommand(note = "welcome") to fresh
 ```
 
 It is not a second way to exist — construction still completes only when

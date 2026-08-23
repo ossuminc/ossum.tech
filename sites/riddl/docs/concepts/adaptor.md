@@ -11,6 +11,12 @@ context Payments is {
 context Inventory is {
   record StockData is { orderId is String }
   command ReserveStock is { orderId is String }
+  // The tell addresses the CONTEXT, so the context is the sink and needs its
+  // own clause -- a contained entity's handler does not receive on its behalf.
+  handler InventoryBoundary is {
+    on command ReserveStock { ??? }
+    on other { error "Unexpected message at the Inventory boundary" }
+  }
   entity Stock is {
     state Held of record StockData is {
       handler StockHandler is { on command ReserveStock { ??? } }
@@ -81,7 +87,11 @@ context Orders is {
 
   entity Order is {
     state Active of record OrderData is {
-      handler OrderHandler is { on command MarkAsPaid { ??? } }
+      handler OrderHandler is {
+        on command MarkAsPaid { ??? }
+        // A `tell` needs a clause at the far end, or nothing receives it.
+        on command HandlePaymentFailure { ??? }
+      }
     }
   }
 
@@ -101,6 +111,7 @@ context Orders is {
     briefly as "Translates payment messages between Orders and Payments"
   }
 
+  // Declared so the outbound `tell` below has somewhere to land.
   adaptor InventoryAdapter to context Inventory is {
     handler OutboundInventory is {
       on req: command ReserveItems {

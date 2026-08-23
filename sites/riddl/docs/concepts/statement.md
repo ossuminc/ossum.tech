@@ -52,7 +52,7 @@ of your system in a structured but abstract way.
 | `match` | Pattern matching over a typed subject | `match status { case Pending { ... } }` |
 | `foreach` | Bounded iteration over a collection | `foreach line in field lines { ... }` |
 | `send` | Emit a message on one of this processor's outlets | `send event X to outlet Events` |
-| `tell` | Deliver a message directly to a processor | `tell command X to entity Y` |
+| `tell` | Deliver a message directly to a processor, or to one **instance** | `tell command X to entity Y` · `tell command X to order.id` |
 | `forward` | Pass the handled message on, **discharging** its response obligation | `forward ord to entity Payments` |
 | `yield` | Produce a command's declared **event** | `yield event Placed(id)` |
 | `reply` | Answer a query with its declared **result** | `reply result Info(id)` |

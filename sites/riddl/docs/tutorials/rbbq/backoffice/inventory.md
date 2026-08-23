@@ -139,6 +139,11 @@ repository InventoryItemRepository as flow is {
     on command PersistStockConsumed is {
       do "update the stored inventoryItem row for this inventoryItemId"
     }
+    // An inlet admitting an alternation needs a clause that receives it.
+    // Handling each member is not enough -- say what ARRIVING means.
+    on other is {
+      do "persist whatever else arrives on this inlet"
+    }
   }
 }
 ```

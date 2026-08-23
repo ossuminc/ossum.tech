@@ -19,17 +19,26 @@ command CreateOrder is { customerId is String }
 command CancelOrder is { orderId is String }
 entity Inventory is {
   state Held of record InventoryData is {
-    handler InventoryHandler is { on command ReserveItems { ??? } }
+    handler InventoryHandler is {
+      on command ReserveItems { ??? }
+      on command ReleaseReservation { ??? }
+    }
   }
 }
 entity PaymentService is {
   state Charging of record InventoryData is {
-    handler PaymentHandler is { on command ProcessCharge { ??? } }
+    handler PaymentHandler is {
+      on command ProcessCharge { ??? }
+      on command RefundCharge { ??? }
+    }
   }
 }
 entity OrderService is {
   state Placing of record InventoryData is {
-    handler OrderHandler is { on command CreateOrder { ??? } }
+    handler OrderHandler is {
+      on command CreateOrder { ??? }
+      on command CancelOrder { ??? }
+    }
   }
 }
 -->

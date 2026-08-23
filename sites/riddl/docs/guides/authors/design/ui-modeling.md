@@ -24,6 +24,12 @@ description: "Using RIDDL to design user interfaces with Epics and Applications"
     command Charge is { note is String }
     context Billing is {
       command BillingCharge is { note is String }
+      record BillingData is { note is String }
+      // The checkout handler tells `Charge` here, so Billing must receive it.
+      handler BillingHandler is {
+        on command Charge { ??? }
+        on other { error "Unrecognized message at the Billing boundary" }
+      }
     }
 -->
 

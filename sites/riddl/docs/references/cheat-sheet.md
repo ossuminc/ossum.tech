@@ -738,12 +738,19 @@ non-exhaustive match over a closed subject without `default` draws a
 |---|---|---|
 | `send` | `send event X to outlet Y` | Emit on one of *this* processor's own outlets; a connector routes it onward. |
 | `tell` | `tell command X to entity Y` | Deliver a message directly to a processor (point-to-point). |
+| `tell` (instance) | `tell command X to order.id` | Address ONE instance by a value typed `Id(...)`. Keyword-led = processor, bare path = value. Not entity-only. |
 | `yield` | `yield event ProductAdded(id)` | Produce a **command's** declared event, without knowing the sender. |
 | `reply` | `reply result ProductInfo(id, name)` | Answer a **query** with its declared result. |
 | `forward` | `forward ord to entity Payments` | Pass the handled message on and **discharge** its `yields`/`replies` obligation. Portlet or processor target. Only in a clause handling a command with `yields` or a query with `replies`. |
 | `ask` | `let a = ask query GetInfo of entity Catalog` | A value: a query paired with the reply that answers it. **Never inside a saga.** |
 
 The message operand may be a bare reference or an inline constructor.
+
+!!! warning "Something must RECEIVE it"
+    A `tell` whose target declares no clause receiving that type draws a
+    CompletenessWarning, and so does an inlet admitting a type its processor
+    handles nowhere — the same defect seen from each end. An `on other`
+    clause satisfies both.
 
 #### Data
 

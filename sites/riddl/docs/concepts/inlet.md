@@ -16,6 +16,14 @@ processor.
 <!-- riddl: in-entity -->
 ```riddl
 inlet readings is type TemperatureReading
+
+// An inlet is only half of it: something must RECEIVE what arrives, or
+// nothing happens when it does. RIDDL says so as a CompletenessWarning.
+handler ReadingsHandler is {
+  on event TemperatureReading is {
+    do "record the reading"
+  }
+}
 ```
 
 ## Where Inlets May Be Declared
