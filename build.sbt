@@ -24,7 +24,7 @@ lazy val root = Root(
   // Keep these two lines in step: bumping the riddl version may require
   // bumping this one to whatever riddl built with.
   With.Scala3.configure(version = Some("3.9.0-RC4")),
-  With.Riddl.library(version = "2.0.0-rc.24-33-f4076e2c", nonJVMDependency = false)
+  With.Riddl.library(version = "2.0.0-rc.25-1-76cb9eab", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 

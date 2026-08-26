@@ -311,6 +311,27 @@ crawlers that every version of every page is the same URL.
   Bumping the pin may require bumping `With.Scala3` to whatever riddl built
   with — the two lines in `build.sbt` are commented to stay in step.
 
+  **Regenerate the grammar LAST, after the fences are green — or verify it
+  again before committing.** `git checkout -- sites/riddl/docs` reverts the
+  regenerated grammar along with everything else, and a fence migration
+  routinely needs one. On 2026-08-25 the rc.24-33 upgrade did exactly that:
+  two reverts during the migration undid `extractGrammar`, nothing re-ran it,
+  and the commit shipped **rc.21's grammar** under a message claiming it was
+  regenerated. Nothing caught it — the gate validates fences against the
+  BINARY, never against the .ebnf, so a stale grammar is invisible to every
+  check in this repo. Found only because the next upgrade's diff was
+  suspiciously identical to the previous one's.
+
+  Cheapest check, before any upgrade commit:
+
+  ```bash
+  git log --oneline -1 -- sites/riddl/docs/references/riddl-grammar.ebnf
+  ```
+
+  If that names an older upgrade than the one in flight, `extractGrammar` did
+  not survive. Same family as every other trap here: the signal that something
+  was skipped is ABSENT rather than wrong.
+
   **The sbt build exists only for this task** — it produces no site content
   and is on no CI publishing path. It is **sbt 2.0.6** (bumped from 2.0.2 on
   2026-08-10 to clear a critical vulnerability), sbt-ossuminc 3.1.0, and
@@ -386,13 +407,19 @@ neither of them any more, so the wrong pairing reports confident nonsense.
 **`../bin/riddlc` is the 2.0 compiler** — since 2026-08-12 a **native binary
 installed directly at that path**; `../riddlc-dist/` is gone, so the old
 symlink description no longer holds. The Homebrew `riddlc` on PATH lags it
-badly — verified 2026-08-21: PATH is **2.0.0-rc.5** while `../bin` is
-**2.0.0-rc.20-2-c1212d73**, which is two commits PAST the rc.20 tag. rc.9
+badly — verified 2026-08-26: PATH is **2.0.0-rc.5** while `../bin` is
+**2.0.0-rc.25-1-76cb9eab**, one commit PAST the rc.25 tag. rc.9
 deprecated the entity options, so validating the 2.0 docs with the PATH binary
 silently passes examples the real compiler rejects. Run both and compare;
-never assume — and note the staged binary is often not a clean tag, so
-`build.sbt` pins the exact `git describe` version to keep grammar, gate and
-docs describing one build.
+never assume.
+
+**The staged binary is USUALLY not a clean tag, and the clean tag usually does
+not resolve.** rc.20, rc.24 and rc.25 were each staged one-to-thirty-three
+commits past their tag, with only the staged version's JVM `_3` artifacts in
+`~/.ivy2/local`. So `build.sbt` pins the exact `git describe` version — asking
+for "rc.25" and pinning `2.0.0-rc.25` would fail to resolve AND describe a
+different build than the gate runs. Check all three separately (tag, binary,
+artifact) and pin what is staged.
 
 **A tag in `riddl` means neither a staged binary nor a resolvable artifact.**
 These three drift apart and must be checked separately: the tag, what
@@ -464,7 +491,7 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-08-21, rc.20-2): the whole 2.0 tree is **347 validated / 50
+**Status** (2026-08-26, rc.25-1): the whole 2.0 tree is **366 validated / 51
 skipped / 0 failed**, and **every blanket skip is gone** — both the 118
 `"illustrative fragment"` ones and the 73 `tutorials/rbbq/` ones. Every
 remaining skip states its own reason.

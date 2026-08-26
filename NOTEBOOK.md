@@ -13,19 +13,25 @@ to the task file and note completion in this notebook.
 
 ## HANDOFF — as of 2026-08-21 (end of day)
 
-**Compiler:** `../bin/riddlc` is **2.0.0-rc.20-2-c1212d73** — two commits PAST
-the rc.20 tag, carrying the `terminate`-is-terminal rule. `build.sbt` pins that
-exact `git describe` version, not the tag: the tag's JVM `_3` artifacts are not
-in `~/.ivy2/local` and would not resolve, and pinning what is actually staged
-is the only way grammar, gate and docs describe one build. Scala stays
-**3.9.0-RC4** — riddl's `V.scala` is still that at `c1212d73`, whatever the
-stale `// 3.8.4` comment at the top of its `build.sbt` says.
+**Compiler:** `../bin/riddlc` is **2.0.0-rc.25-1-76cb9eab** — one commit PAST
+the rc.25 tag. `build.sbt` pins that exact `git describe` version, not the tag:
+the clean tag's JVM `_3` artifacts are not in `~/.ivy2/local` and would not
+resolve, and pinning what is actually staged is the only way grammar, gate and
+docs describe one build. **This has been true of rc.20, rc.24 and rc.25 —
+treat "the tag" as a request for whatever is staged, and check tag, binary and
+artifact separately.** Scala stays **3.9.0-RC4** — riddl's `V.scala` is still
+that, whatever the stale `// 3.8.4` comment in its `build.sbt` says.
 
-**Gates:** 2.0 — **347 validated / 50 skipped / 0 failed, exit 0**, over the
+**Gates:** 2.0 — **366 validated / 51 skipped / 0 failed, exit 0**, over the
 WHOLE of `sites/riddl/docs`. 1.31 — 6/0/0, untouched. Five sites `--strict`
-clean, 80 cross-site links, 0 dangling intra-page anchors. Every rc.17–rc.20
-check reports zero: admits, yields/replies declaration, discharge,
-unreachability, boundary.
+clean, 80 cross-site links, 0 dangling intra-page anchors.
+
+**`task/` is EMPTY** — all seven files closed 2026-08-25.
+
+**Diagnostics now carry stable rule ids** (`[warning] [saga-no-timeout] …`),
+and `validate --json` emits them as data. The id is the durable handle;
+wording is not. Census by id rather than by message text — 76 distinct rules
+across the tree.
 
 **No blanket skips remain anywhere.** The RBBQ tutorial went 0 → 73 of 73.
 

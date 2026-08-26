@@ -341,9 +341,28 @@ let_statement = "let" identifier [":" type_ref] "=" value ;
    ordering is LOAD-BEARING now that `comparand` (widened 2026-08-14) accepts numeric_literal:
    trying boolean_expression first is what keeps `5 > 3` parsing as a comparison rather than
    numeric_literal matching the bare `5` and leaving `> 3` dangling. *)
+(* `empty_value` sits BEFORE boolean_expression: that rule's atom accepts a bare path and would
+   otherwise swallow `empty` as a value_ref, leaving any ascription dangling. *)
 value = literal_string | prompt_value | call | ask | initiate | constructor | get_value
-      | boolean_expression | numeric_literal ;
-prompt_value = "prompt" "(" literal_string ")" [ "as" type_expression ] ;
+      | empty_value | boolean_expression | numeric_literal ;
+
+(* The minimum-cardinality inhabitant of a type. `none` is a SYNONYM, not a second construct: both
+   spellings produce the identical AST and prettify converges them to `empty`. Legal exactly where
+   the minimum cardinality is zero -- `T?`, `T*`, `T{0,n}` -- and an error on `T+`, `T{1,n}` or a
+   bare `T`. The ascription is what lets it be written where the position supplies no expected
+   type, notably a constructor argument. *)
+empty_value = ( "empty" | "none" ) [ !statement_start type_expression ] ;
+
+(* The ascription is OPTIONAL and an aliased type expression is a bare path, while RIDDL statements
+   are whitespace-separated with no terminator -- so without this guard `set x to empty` followed by
+   `set y to ...` parses the second statement as the first's ascription. Every statement begins with
+   a reserved keyword, so refusing those is a complete fix rather than a heuristic: a type can never
+   be named one. Kept in step with `statementStart` in StatementParser.scala. *)
+statement_start = ( "set" | "tell" | "send" | "forward" | "yield" | "reply" | "morph" | "become"
+                  | "do" | "prompt" | "let" | "call" | "foreach" | "when" | "match" | "error"
+                  | "require" | "put" | "return" | "terminate" | "code" | "focus" | "stop"
+                  | "read" | "write" | "ask" | "initiate" | "if" | "else" ) ;
+prompt_value = "prompt" "(" literal_string_block ")" [ "as" type_expression ] ;
 (* Numeric literals - integers and reals, written directly. No digit separators and no radix     *)
 (* prefixes: declined deliberately, and pure additions later if wanted.                           *)
 (*                                                                                                 *)
@@ -400,7 +419,9 @@ boolean_expression = and_expression {"or" and_expression} ;
 and_expression = not_expression {"and" not_expression} ;
 not_expression = ("not" | "!") not_expression | comparison ;
 comparison = comparand comparison_operator comparand | boolean_atom ;
-comparand = get_value | constant_ref | numeric_literal | ref_or_lookup ;
+(* system_value precedes ref_or_lookup for the same reason it does in boolean_atom: ordered
+   choice means a bare `system` would otherwise be consumed as an ordinary path. *)
+comparand = get_value | constant_ref | numeric_literal | system_value | ref_or_lookup ;
 (* `<collection> at <index>[, <index>...]` -- a mapping by key, a sequence by ordinal, or a table  *)
 (* by one ordinal per dimension. Expressed as a value_ref with an OPTIONAL `at` clause rather than *)
 (* as a separate alternative alongside value_ref, mirroring the fastparse rule: anything that makes *)
@@ -415,12 +436,18 @@ comparison_operator = "==" | "!=" | "<=" | ">=" | "<" | ">" ;
    via value_ref, and always has. `self_value` likewise MUST precede value_ref: `self` is not a
    definition keyword, so a bare `self` would otherwise be consumed as an ordinary path. *)
 boolean_atom = boolean_literal | "(" boolean_expression ")" | get_value | invariant_test
-             | self_value | ref_or_lookup ;
+             | self_value | system_value | ref_or_lookup ;
 invariant_test = "invariant" path_identifier ["with" value] ;
 boolean_literal = "true" | "false" ;
 (* `self` -- the currently executing processor instance -- and `self.<field>` on it. Its type is
    a synthesized record (`id`, `version`), not a user-nameable type. *)
 self_value = "self" ["." identifier] ;
+(* `system` -- values supplied by the running SYSTEM rather than by the model, the exact parallel
+   of `self_value`. `system.now` yields a TimeStamp and `system.random` a Real. Its type is
+   synthesized, not a user-nameable type, and the member set is closed. It carries the SAME
+   ordering constraint as `self_value`: `system` is not a definition keyword, so a bare `system`
+   would otherwise be consumed as an ordinary path. *)
+system_value = "system" ["." identifier] ;
 
 (* A45/A57: boundary value operations. `put` (application/context handlers only) publishes a value
    to a UI output; `return` (function bodies only) returns the function's result value. *)
@@ -441,7 +468,7 @@ return_statement = "return" value ;
 terminate_statement = "terminate" value [ "with" "(" [constructor_arg {"," constructor_arg}] ")" ] ;
 
 (* General statements. A54: `do` is canonical; the `prompt` statement is a deprecated synonym. *)
-prompt_statement = ("do" | "prompt") literal_string ;
+prompt_statement = ("do" | "prompt") literal_string_block ;
 code_statement = "```" ("scala" | "java" | "python" | "mojo") code_contents "```" ;
 code_contents = {any_char_except_triple_backtick} ;
 error_statement = "error" literal_string ;
@@ -635,5 +662,9 @@ doc_block = "{" {markdown_lines | literal_strings | undefined} "}" | literal_str
 markdown_lines = {markdown_line}+ ;
 markdown_line = "|" /[^\n]*\n?/ ;
 literal_strings = {literal_string}+ ;
+(* One string bare, or several inside braces -- the same shape doc_block uses for prose. The bare
+   form takes EXACTLY ONE string: admitting juxtaposition would leave nothing but the next keyword
+   to mark where the statement ends. *)
+literal_string_block = "{" literal_strings "}" | literal_string ;
 shown_by = "shown" "by" "{" {http_url} "}" ;
 mime_type = ("application" | "audio" | "example" | "font" | "image" | "model" | "text" | "video") "/" /[a-z.*-]*/ ;
