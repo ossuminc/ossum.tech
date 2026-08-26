@@ -51,7 +51,7 @@ repository SalesReportRepository as sink is {
   }
 
   schema SalesReportData is relational
-    of rows as type SalesReportRecord
+    of rows as record SalesReportRecord
       index on field SalesReportRecord.reportDate
 
   command RecordDineInPayment is { tableOrderId: String(1,50) }
@@ -108,7 +108,7 @@ repository LaborReportRepository as sink is {
   }
 
   schema LaborReportData is relational
-    of rows as type LaborReportRecord
+    of rows as record LaborReportRecord
       index on field LaborReportRecord.laborReportDate
 
   command RecordShiftHours is { shiftId: String(1,50) }
@@ -165,7 +165,7 @@ repository InventoryReportRepository as sink is {
   }
 
   schema InventoryReportData is relational
-    of rows as type InventoryReportRecord
+    of rows as record InventoryReportRecord
       index on field InventoryReportRecord.inventoryReportDate
 
   command RecordStockMovement is { inventoryItemId: String(1,50) }

@@ -207,9 +207,12 @@ orders.
 <!-- riddl: in-context no-prelude=KitchenTicketRepository,StoredKitchenTicket -->
 ```riddl
 repository KitchenTicketRepository as merge is {
-  inlet KitchenTicketRepositoryFromKitchenTicket is type KitchenTicketEvent
-  inlet KitchenTicketRepositoryFromKitchenDisplay is type KitchenTicketEvent
-  outlet KitchenTicketRepositoryResponses is type KitchenTicketEvent
+  inlet KitchenTicketRepositoryFromKitchenTicket is command PersistStationAssigned
+  inlet KitchenTicketRepositoryFromKitchenDisplay is command PersistStationAssigned
+  outlet KitchenTicketRepositoryResponses is result KitchenTicketResult
+
+  // A repository answers with a RESULT, never an event.
+  result KitchenTicketResult is { found: Boolean }
 
   record StoredKitchenTicket is {
     kitchenTicketId: KitchenTicketId
@@ -217,7 +220,7 @@ repository KitchenTicketRepository as merge is {
   }
 
   schema KitchenTicketSchema is relational
-    of tickets as type StoredKitchenTicket
+    of tickets as record StoredKitchenTicket
       index on field StoredKitchenTicket.kitchenTicketId
       index on field StoredKitchenTicket.currentStation
 

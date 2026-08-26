@@ -88,7 +88,7 @@ event-sourced entity KitchenTicket as flow is {
   }
 
   type KitchenTicketEvent is TicketReceived | StationAssigned | AssignStationRejected
-  inlet KitchenTicketCommands is type AssignStation
+  inlet KitchenTicketCommands is command AssignStation
   outlet KitchenTicketEvents is type KitchenTicketEvent
 }
 ```
@@ -168,8 +168,11 @@ Repositories define persistence schemas with indexes:
 <!-- riddl: in-context no-prelude=KitchenTicketRepository,StoredKitchenTicket,PersistStationAssigned -->
 ```riddl
 repository KitchenTicketRepository as flow is {
-  inlet KitchenTicketRepositoryFromKitchenTicket is type KitchenTicketEvent
-  outlet KitchenTicketRepositoryResponses is type KitchenTicketEvent
+  inlet KitchenTicketRepositoryFromKitchenTicket is command PersistStationAssigned
+  outlet KitchenTicketRepositoryResponses is result KitchenTicketResult
+
+  // A repository answers with a RESULT, never an event.
+  result KitchenTicketResult is { found: Boolean }
 
   record StoredKitchenTicket is {
     kitchenTicketId: KitchenTicketId
@@ -179,7 +182,7 @@ repository KitchenTicketRepository as flow is {
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and is warned about as one.
   schema KitchenTicketSchema is relational
-    of tickets as type StoredKitchenTicket
+    of tickets as record StoredKitchenTicket
       index on field StoredKitchenTicket.kitchenTicketId
 
   command PersistStationAssigned is { kitchenTicketId: KitchenTicketId }

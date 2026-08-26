@@ -9,8 +9,8 @@ description: >-
 <!-- riddl-prelude
 event Diagnostic is { note is String }
 processor MyProcessor as flow is {
-  inlet incoming is type Diagnostic
-  outlet Diagnostics is type Diagnostic
+  inlet incoming is event Diagnostic
+  outlet Diagnostics is event Diagnostic
 }
 -->
 

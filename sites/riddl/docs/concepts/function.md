@@ -8,13 +8,13 @@ type Price is Natural
 record TotalInputs is { subtotal is Price }
 record TaxInput is { subtotal is Price }
 function Tax is {
-  requires TaxInput returns Price
-  function Apply is { requires TaxInput returns Price ??? }
+  requires record TaxInput returns Price
+  function Apply is { requires record TaxInput returns Price ??? }
 }
 record PricingInput is { subtotal is Price, taxRate is Price }
 function Pricing is {
-  requires PricingInput returns Price
-  function CalculateTotal is { requires PricingInput returns Price ??? }
+  requires record PricingInput returns Price
+  function CalculateTotal is { requires record PricingInput returns Price ??? }
 }
 -->
 

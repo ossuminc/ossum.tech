@@ -122,15 +122,18 @@ querying the entity directly.
 <!-- riddl: in-context no-prelude=InventoryItemRepository,StoredInventoryItem,PersistStockConsumed -->
 ```riddl
 repository InventoryItemRepository as flow is {
-  inlet InventoryItemRepositoryFromInventoryItem is type InventoryItemEvent
-  outlet InventoryItemRepositoryResponses is type InventoryItemEvent
+  inlet InventoryItemRepositoryFromInventoryItem is command PersistStockConsumed
+  outlet InventoryItemRepositoryResponses is result InventoryItemResult
+
+  // A repository answers with a RESULT, never an event.
+  result InventoryItemResult is { found: Boolean }
 
   record StoredInventoryItem is { inventoryItemId: InventoryItemId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema InventoryItemSchema is relational
-    of rows as type StoredInventoryItem
+    of rows as record StoredInventoryItem
       index on field StoredInventoryItem.inventoryItemId
 
   command PersistStockConsumed is { inventoryItemId: InventoryItemId }

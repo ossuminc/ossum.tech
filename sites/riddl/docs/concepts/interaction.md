@@ -37,8 +37,8 @@ entity PaymentService is { ??? }
 entity OrderService is { ??? }
 page Storefront is {
   page Cart is { ??? }
-  form PaymentDetails acquires type OrderData
-  document Confirmation shows type OrderData
+  form PaymentDetails acquires record OrderData
+  document Confirmation shows record OrderData
 }
 -->
 <!-- riddl: in-epic -->

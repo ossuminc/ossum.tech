@@ -137,15 +137,18 @@ event ServerNotifiedDrinksReady is {
 <!-- riddl: in-context no-prelude=DrinkOrderRepository,StoredDrinkOrder,PersistDrinkPrepared -->
 ```riddl
 repository DrinkOrderRepository as flow is {
-  inlet DrinkOrderRepositoryFromDrinkOrder is type DrinkOrderEvent
-  outlet DrinkOrderRepositoryResponses is type DrinkOrderEvent
+  inlet DrinkOrderRepositoryFromDrinkOrder is command PersistDrinkPrepared
+  outlet DrinkOrderRepositoryResponses is result DrinkOrderResult
+
+  // A repository answers with a RESULT, never an event.
+  result DrinkOrderResult is { found: Boolean }
 
   record StoredDrinkOrder is { drinkOrderId: DrinkOrderId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema DrinkOrderSchema is relational
-    of rows as type StoredDrinkOrder
+    of rows as record StoredDrinkOrder
       index on field StoredDrinkOrder.drinkOrderId
 
   command PersistDrinkPrepared is { drinkOrderId: DrinkOrderId }

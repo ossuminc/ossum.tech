@@ -609,7 +609,7 @@ record PlaceOrderInput is {
 }
 
 saga PlaceOrder is {
-  requires PlaceOrderInput
+  requires record PlaceOrderInput
 
   step ReserveInventory is {
     send command ReserveItems(note = "a value") to outlet Commands

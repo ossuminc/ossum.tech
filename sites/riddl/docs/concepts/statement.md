@@ -33,9 +33,13 @@ entity OrderProcessor is { ??? }
 entity Review is { ??? }
 entity PaymentService is { ??? }
 entity Order is {
+  state Packing of record ShippedData is {
+    handler PackingHandler is { ??? }
+  }
   state Shipped of record ShippedData is {
     handler ShippedHandler is { ??? }
   }
+  handler DispatchHandler is { ??? }
 }
 -->
 

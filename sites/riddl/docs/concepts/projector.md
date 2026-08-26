@@ -40,7 +40,7 @@ context Sales is {
   record SalesTotals is { day is String, amount is Natural }
 
   repository SalesData is {
-    schema Totals is relational of totals as type SalesTotals
+    schema Totals is relational of totals as record SalesTotals
   }
 
   projector SalesDashboard is {

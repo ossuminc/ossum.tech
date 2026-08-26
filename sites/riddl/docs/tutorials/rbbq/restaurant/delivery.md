@@ -139,15 +139,18 @@ delivery continues.
 <!-- riddl: in-context no-prelude=DeliveryRepository,StoredDeliveryOrder,PersistDriverAssigned -->
 ```riddl
 repository DeliveryRepository as flow is {
-  inlet DeliveryRepositoryFromDeliveryOrder is type DeliveryOrderEvent
-  outlet DeliveryRepositoryResponses is type DeliveryOrderEvent
+  inlet DeliveryRepositoryFromDeliveryOrder is command PersistDriverAssigned
+  outlet DeliveryRepositoryResponses is result DeliveryResult
+
+  // A repository answers with a RESULT, never an event.
+  result DeliveryResult is { found: Boolean }
 
   record StoredDeliveryOrder is { deliveryId: DeliveryId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema DeliveryOrderSchema is relational
-    of rows as type StoredDeliveryOrder
+    of rows as record StoredDeliveryOrder
       index on field StoredDeliveryOrder.deliveryId
 
   command PersistDriverAssigned is { deliveryId: DeliveryId }

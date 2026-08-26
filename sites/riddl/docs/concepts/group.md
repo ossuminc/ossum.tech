@@ -54,7 +54,7 @@ thing structurally. Pick whichever reads best for what you are modeling:
 <!-- riddl: in-app-context -->
 ```riddl
 page ShoppingCart is {
-  list Items shows type CartLine
+  list Items shows record CartLine
   button Checkout activates type Clicked
 }
 ```

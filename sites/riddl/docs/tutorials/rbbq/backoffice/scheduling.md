@@ -115,15 +115,18 @@ assigned. This matters for labor compliance and reporting.
 <!-- riddl: in-context no-prelude=ShiftRepository,StoredShift,PersistEmployeeAssigned -->
 ```riddl
 repository ShiftRepository as flow is {
-  inlet ShiftRepositoryFromShift is type ShiftEvent
-  outlet ShiftRepositoryResponses is type ShiftEvent
+  inlet ShiftRepositoryFromShift is command PersistEmployeeAssigned
+  outlet ShiftRepositoryResponses is result ShiftResult
+
+  // A repository answers with a RESULT, never an event.
+  result ShiftResult is { found: Boolean }
 
   record StoredShift is { shiftId: ShiftId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema ShiftSchema is relational
-    of rows as type StoredShift
+    of rows as record StoredShift
       index on field StoredShift.shiftId
 
   command PersistEmployeeAssigned is { shiftId: ShiftId }

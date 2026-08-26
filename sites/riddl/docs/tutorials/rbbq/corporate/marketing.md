@@ -130,15 +130,18 @@ awareness campaigns.
 <!-- riddl: in-context no-prelude=CampaignRepository,StoredCampaign,PersistCampaignLaunched -->
 ```riddl
 repository CampaignRepository as flow is {
-  inlet CampaignRepositoryFromCampaign is type CampaignEvent
-  outlet CampaignRepositoryResponses is type CampaignEvent
+  inlet CampaignRepositoryFromCampaign is command PersistCampaignLaunched
+  outlet CampaignRepositoryResponses is result CampaignResult
+
+  // A repository answers with a RESULT, never an event.
+  result CampaignResult is { found: Boolean }
 
   record StoredCampaign is { campaignId: CampaignId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema CampaignSchema is relational
-    of rows as type StoredCampaign
+    of rows as record StoredCampaign
       index on field StoredCampaign.campaignId
 
   command PersistCampaignLaunched is { campaignId: CampaignId }

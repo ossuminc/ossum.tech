@@ -136,15 +136,18 @@ downstream systems know the current balance without querying.
 <!-- riddl: in-context no-prelude=LoyaltyAccountRepository,StoredLoyaltyAccount,PersistAccountSuspended -->
 ```riddl
 repository LoyaltyAccountRepository as flow is {
-  inlet LoyaltyAccountRepositoryFromLoyaltyAccount is type LoyaltyAccountEvent
-  outlet LoyaltyAccountRepositoryResponses is type LoyaltyAccountEvent
+  inlet LoyaltyAccountRepositoryFromLoyaltyAccount is command PersistAccountSuspended
+  outlet LoyaltyAccountRepositoryResponses is result LoyaltyAccountResult
+
+  // A repository answers with a RESULT, never an event.
+  result LoyaltyAccountResult is { found: Boolean }
 
   record StoredLoyaltyAccount is { loyaltyAccountId: LoyaltyAccountId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema LoyaltyAccountSchema is relational
-    of rows as type StoredLoyaltyAccount
+    of rows as record StoredLoyaltyAccount
       index on field StoredLoyaltyAccount.loyaltyAccountId
 
   command PersistAccountSuspended is { loyaltyAccountId: LoyaltyAccountId }

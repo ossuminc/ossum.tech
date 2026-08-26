@@ -21,7 +21,7 @@ command PlaceOrder is { note is String }
 event PaymentReversed is { note is String }
 command FlagForReview is { reason is String }
 entity Review is { ??? }
-function Available is { requires AvailIn returns AvailIn ??? }
+function Available is { requires record AvailIn returns record AvailIn ??? }
 -->
 
 An invariant is a named business rule: a boolean condition that must always be

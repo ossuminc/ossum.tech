@@ -6,16 +6,23 @@ description: >-
 
 <!-- riddl-prelude
     type Price is Decimal(10, 2)
-    type OrderId is UUID
+    type OrderId is String   // String, to match the shared wrapper's orderId
     type ProductId is UUID
     type CartId is UUID
-    type OrderEvent is String
-    type EnrichedOrderEvent is String
+    // Declared as EVENTS to match the domain prelude: an `on event X`
+    // clause rejects a String-typed X, and a portlet reference must name
+    // the declared kind (rc.24). Context-level copies are needed because
+    // the domain prelude reaches only in-domain fences.
+    event OrderEvent is { orderId is UUID, amount is Decimal(10, 2) }
+    event EnrichedOrderEvent is { orderId is UUID, region is String }
+    event RawEvent is { note is String }
+    event ValidatedEvent is { note is String }
     result ProductInfo is { id is ProductId, price is Price }
     record OrderData is { id is OrderId, total is Price }
     record TotalInputs is { subtotal is Price, taxRate is Price }
     record CartItem is { sku is String, quantity is Integer }
     record ShippedData is { trackingNumber is String }
+    record DoneData is { note is String }
     constant Zero is Whole = 0
     constant MinimumOrder is Natural = 1
     constant MinimumPrice is Natural = 1
@@ -38,8 +45,6 @@ description: >-
     entity Inventory is { ??? }
 
     // --- added for the statement and definition fences below ---
-    type RawEvent is String
-    type ValidatedEvent is String
     record Item is { sku is String, quantity is Integer }
     record ProductRecord is { id is ProductId, price is Price, status is String }
     record PendingData is { note is String }
@@ -51,13 +56,13 @@ description: >-
     record Product is { id is ProductId, price is Price }
     record AvailIn is { held is Natural, total is Natural }
     constant minimumFee is Natural = 5
-    function Available is { requires AvailIn returns AvailIn ??? }
+    function Available is { requires record AvailIn returns record AvailIn ??? }
     record PricingInput is { subtotal is Price, taxRate is Price,
       tax is Price, shipping is Price }
     function Pricing is {
-      requires PricingInput returns PricingInput
-      function CalculateTotal is { requires PricingInput returns PricingInput ??? }
-      function Total is { requires PricingInput returns PricingInput ??? }
+      requires record PricingInput returns record PricingInput
+      function CalculateTotal is { requires record PricingInput returns record PricingInput ??? }
+      function Total is { requires record PricingInput returns record PricingInput ??? }
     }
     // NOTE: do NOT define `Tax` here. The in-function wrapper supplies a
     // sibling `context Tax`, and a prelude entry of that name makes every
@@ -78,9 +83,9 @@ description: >-
     command Withdraw yields event Withdrawn is { amount is Natural }
     type ExampleEvent is PriceUpdated | ActionCompleted
     outlet Events is type ExampleEvent
-    outlet CartEvents is type ItemAdded
-    outlet PaymentRequests is type ProcessPayment
-    outlet Shipments is type LineShipped
+    outlet CartEvents is event ItemAdded
+    outlet PaymentRequests is command ProcessPayment
+    outlet Shipments is event LineShipped
     type OrderLifecycle is OrderPlaced | OrderPaymentReceived
     outlet OrderEvents is type OrderLifecycle
     entity Cart is {
@@ -107,6 +112,15 @@ description: >-
       state Placed of record OrderData is {
         handler PlacedHandler is { on command ConfirmOrder { ??? } }
       }
+      // A second state and handler: rc.24 Errors on a `morph`/`become` with
+      // nowhere to go, so a one-state entity cannot demonstrate either.
+      state Shipped of record ShippedData is {
+        handler ShippedStateHandler is { on command ShipOrder { ??? } }
+      }
+      state Done of record DoneData is {
+        handler DoneHandler is { on command ConfirmOrder { ??? } }
+      }
+      handler DispatchHandler is { on command ShipOrder { ??? } }
       // Fences on this page `tell` Order these, so it must receive them.
       handler ShippedHandler is {
         on command ShipOrder { ??? }
@@ -123,8 +137,8 @@ description: >-
     constant orderStatus is ShipmentState = "Pending"
 
     // Endpoints for the `connector` fence that discards an unused outlet.
-    processor MyProcessor as source is { outlet Unused is type OrderEvent }
-    processor BottomlessPit as sink is { inlet hole is type OrderEvent }
+    processor MyProcessor as source is { outlet Unused is event OrderEvent }
+    processor BottomlessPit as sink is { inlet hole is event OrderEvent }
 -->
 
 <!-- riddl-domain-prelude
@@ -153,10 +167,10 @@ description: >-
     application context Storefront is {
       record StorefrontData is { sku is String }
       page ProductDetails is {
-        form AddToCartForm submits type StorefrontData
+        form AddToCartForm submits record StorefrontData
       }
       page ShoppingCart is {
-        list CartSummary shows type StorefrontData
+        list CartSummary shows record StorefrontData
       }
     }
     // Self-contained on purpose: a fence may strip Storefront with
@@ -276,8 +290,8 @@ from the number of ports the processor declares, and may optionally be
 <!-- riddl: in-context -->
 ```riddl
 processor OrderEnricher as flow is {
-  inlet RawOrders is type OrderEvent
-  outlet EnrichedOrders is type EnrichedOrderEvent
+  inlet RawOrders is event OrderEvent
+  outlet EnrichedOrders is event EnrichedOrderEvent
 }
 ```
 
@@ -1468,7 +1482,7 @@ processor, by naming a value typed [`Id(...)`](#instance-identity):
 <!-- riddl: in-handler -->
 ```riddl
 let fresh = initiate entity ExampleEntity
-tell command ExampleCommand(note = "welcome") to fresh
+tell command ExampleWelcome(target = fresh) to fresh
 ```
 
 The two forms are told apart by the **keyword**: every processor reference is
@@ -1784,7 +1798,7 @@ through `let`.
 <!-- riddl: in-handler -->
 ```riddl
 let fresh = initiate entity ExampleEntity
-tell command ExampleCommand(note = "welcome") to fresh
+tell command ExampleWelcome(target = fresh) to fresh
 ```
 
 It does **not** add a second way for an instance to exist — construction still
@@ -2308,7 +2322,7 @@ Adaptors specify a direction relative to a context:
 ```riddl
 context OrderContext is {
   event OrderPaymentReceived is { orderId is UUID }
-  outlet OrderEvents is type OrderPaymentReceived
+  outlet OrderEvents is event OrderPaymentReceived
 
   adaptor PaymentIntegration from context PaymentContext is {
     handler InboundPayments is {
@@ -2399,14 +2413,14 @@ own an outlet; a projector may own an inlet.
 ```riddl
 context DataPipeline is {
   processor OrderEventSource as source is {
-    outlet OrderEvents is type OrderEvent
+    outlet OrderEvents is event OrderEvent
   } with {
     briefly as "Streams order events from the event store"
   }
 
   processor OrderEnricher as flow is {
-    inlet RawOrders is type OrderEvent
-    outlet EnrichedOrders is type EnrichedOrderEvent
+    inlet RawOrders is event OrderEvent
+    outlet EnrichedOrders is event EnrichedOrderEvent
 
     handler EnrichmentHandler is {
       on event OrderEvent {
@@ -2417,7 +2431,7 @@ context DataPipeline is {
   }
 
   processor AnalyticsSink as sink is {
-    inlet AnalyticsEvents is type EnrichedOrderEvent
+    inlet AnalyticsEvents is event EnrichedOrderEvent
 
     handler AnalyticsHandler is {
       on event EnrichedOrderEvent {
@@ -2529,12 +2543,12 @@ different contexts, in the enclosing Domain.
 <!-- riddl: in-domain -->
 ```riddl
 context EventProcessing is {
-  processor Events as source is { outlet Raw is type RawEvent }
+  processor Events as source is { outlet Raw is event RawEvent }
   processor Validate as flow is {
-    inlet In is type RawEvent
-    outlet Out is type ValidatedEvent
+    inlet In is event RawEvent
+    outlet Out is event ValidatedEvent
   }
-  processor Store as sink is { inlet In is type ValidatedEvent }
+  processor Store as sink is { inlet In is event ValidatedEvent }
 
   connector Step1 is from outlet Events.Raw to inlet Validate.In
   connector Step2 is from outlet Validate.Out to inlet Store.In

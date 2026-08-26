@@ -10,10 +10,10 @@ description: >-
 event Order is { id is String }
 event OrderEvent is { id is String }
 event RawOrder is { id is String }
-processor OrderEventSource as source is { outlet OrderEvents is type OrderEvent }
-processor OrderEnricher as sink is { inlet RawOrders is type OrderEvent }
-processor Home as sink is { inlet incoming is type Order }
-processor Abroad as sink is { inlet incoming is type Order }
+processor OrderEventSource as source is { outlet OrderEvents is event OrderEvent }
+processor OrderEnricher as sink is { inlet RawOrders is event OrderEvent }
+processor Home as sink is { inlet incoming is event Order }
+processor Abroad as sink is { inlet incoming is event Order }
 -->
 
 # Connector
@@ -55,9 +55,9 @@ attaching several connectors to a single port.
 ```riddl
 // Correct: a split declares two outlets, each with its own connector
 processor Router as split is {
-  inlet incoming is type Order
-  outlet domestic is type Order
-  outlet international is type Order
+  inlet incoming is event Order
+  outlet domestic is event Order
+  outlet international is event Order
 }
 connector ToDomestic      is from outlet Router.domestic      to inlet Home.incoming
 connector ToInternational is from outlet Router.international to inlet Abroad.incoming

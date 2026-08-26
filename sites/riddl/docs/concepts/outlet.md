@@ -11,7 +11,7 @@ event TemperatureAlert is { value is Natural }
 event TemperatureReading is { value is Natural }
 record ReadingData is { value is Natural }
 processor MyProcessor as source is {
-  outlet Diagnostics is type TemperatureAlert
+  outlet Diagnostics is event TemperatureAlert
 }
 -->
 
@@ -21,7 +21,7 @@ processor.
 
 <!-- riddl: in-entity -->
 ```riddl
-outlet alerts is type TemperatureAlert
+outlet alerts is event TemperatureAlert
 ```
 
 ## Where Outlets May Be Declared
@@ -38,7 +38,7 @@ the message to a downstream inlet:
 <!-- riddl: in-context -->
 ```riddl
 entity Thermometer is {
-  outlet alerts is type TemperatureAlert
+  outlet alerts is event TemperatureAlert
 
   state Watching of record ReadingData is {
     handler WatchTemperature is {

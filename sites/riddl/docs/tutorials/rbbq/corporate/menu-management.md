@@ -154,7 +154,7 @@ event-sourced entity MenuRelease as flow is {
   }
 
   type MenuReleaseEvent is ReleasePublished
-  inlet MenuReleaseCommands is type PublishRelease
+  inlet MenuReleaseCommands is command PublishRelease
   outlet MenuReleaseEvents is type MenuReleaseEvent
 }
 ```
@@ -180,15 +180,18 @@ event ReleasePublished is {
 <!-- riddl: in-context no-prelude=MenuItemRepository,StoredMenuItem,PersistPriceSet -->
 ```riddl
 repository MenuItemRepository as flow is {
-  inlet MenuItemRepositoryFromMenuItem is type MenuItemEvent
-  outlet MenuItemRepositoryResponses is type MenuItemEvent
+  inlet MenuItemRepositoryFromMenuItem is command PersistPriceSet
+  outlet MenuItemRepositoryResponses is result MenuItemResult
+
+  // A repository answers with a RESULT, never an event.
+  result MenuItemResult is { found: Boolean }
 
   record StoredMenuItem is { menuItemId: MenuItemId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema MenuItemSchema is relational
-    of rows as type StoredMenuItem
+    of rows as record StoredMenuItem
       index on field StoredMenuItem.menuItemId
 
   command PersistPriceSet is { menuItemId: MenuItemId }

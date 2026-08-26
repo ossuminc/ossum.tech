@@ -189,12 +189,12 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "domain Example is {\n" + AUTHOR +
             "  context Tax is {\n"
             "    record TaxIn is { subtotal is Natural }\n"
-            "    function Compute is { requires TaxIn returns TaxIn ??? }\n"
+            "    function Compute is { requires record TaxIn returns record TaxIn ??? }\n"
             "  }\n"
             "  context Example is {\n" + pre + "\n"
             "    record FnInput is { note is String, subtotal is Natural }\n"
             "    function ExampleFunction is {\n"
-            "      requires FnInput returns Tax.TaxIn\n"
+            "      requires record FnInput returns record Tax.TaxIn\n"
             + ind(body, 6) + "\n"
             "    }\n  }\n}\n"
         )
@@ -231,12 +231,13 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    record ExampleData is { note is String }\n"
             "    command ExampleCommand is { note is String, order is ExampleOrder }\n"
             "    page ExamplePage is {\n"
-            # `shows type X` needs a resolvable Type: a predefined name like
+            # rc.24 (ref-wrong-keyword): the prefix must name the target's
+            # DECLARED kind, so these say `record`. A predefined name like
             # String is not in the symbol table here.
-            "      document ExampleOutput shows type ExampleData\n"
-            "      document ConfirmationPanel shows type ExampleOrder\n"
-            "      form ExampleInput accepts type ExampleData\n"
-            "      form SignupForm accepts type ExampleData\n"
+            "      document ExampleOutput shows record ExampleData\n"
+            "      document ConfirmationPanel shows record ExampleOrder\n"
+            "      form ExampleInput accepts record ExampleData\n"
+            "      form SignupForm accepts record ExampleData\n"
             "    }\n"
             # `get from input X` and `get from state Y` are documented together,
             # so an application wrapper needs a state to read as well as a form.
@@ -261,7 +262,7 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    record ExampleOrder is { confirmationNumber is String }\n"
             "    query GetReceipt is { order is ExampleOrder }\n"
             "    page ExamplePage is {\n"
-            "      document Receipt shows type ExampleOrder\n"
+            "      document Receipt shows record ExampleOrder\n"
             "    }\n"
             "    handler ExampleHandler is {\n"
             + ind(body, 6) + "\n"
@@ -398,11 +399,13 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             + "      order is ExampleOrder, orderId is String, amount is Natural,\n"
             "      limits is ExampleLimit, rate is Natural, subtotal is Natural,\n"
             "      count is Natural, user is ExampleUser }\n"
+            "    command ExampleWelcome is { target is Id(entity ExampleEntity) }\n"
             "    entity ExampleEntity is {\n"
             "      invariant BalanceNonNegative is \"the balance must not go negative\"\n"
             "      invariant UnderLimit requires ExampleLimit is \"must stay under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
             "        handler ExampleHandler is {\n"
+            "          on command ExampleWelcome { ??? }\n"
             "          on command ExampleCommand {\n"
             + ind(body, 12) + "\n"
             "          }\n        }\n      }\n    }\n  }\n}\n"

@@ -13,11 +13,12 @@ record SignupData is { email is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
 record PricingInput is { subtotal is Natural, taxRate is Natural }
 function Pricing is {
-  requires PricingInput returns PricingInput
-  function CalculateTotal is { requires PricingInput returns PricingInput ??? }
+  requires record PricingInput returns record PricingInput
+  function CalculateTotal is { requires record PricingInput returns record PricingInput ??? }
 }
 entity Order is {
-  state Done of record DoneData is { handler H is { ??? } }
+  state Started of record DoneData is { handler StartedHandler is { ??? } }
+  state Done of record DoneData is { handler DoneHandler is { ??? } }
 }
 -->
 
@@ -184,7 +185,7 @@ that instance's identity**:
 <!-- riddl: in-handler -->
 ```riddl
 let fresh = initiate entity ExampleEntity
-tell command ExampleCommand(note = "welcome") to fresh
+tell command ExampleWelcome(target = fresh) to fresh
 ```
 
 It is not a second way to exist — construction still completes only when

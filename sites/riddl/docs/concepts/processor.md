@@ -49,8 +49,8 @@ optional shape ascription:
 <!-- riddl: in-context -->
 ```riddl
 processor OrderEnricher as flow is {
-  inlet RawOrders is type OrderEvent
-  outlet EnrichedOrders is type EnrichedOrderEvent
+  inlet RawOrders is event OrderEvent
+  outlet EnrichedOrders is event EnrichedOrderEvent
 
   handler Enrich is {
     on event OrderEvent {

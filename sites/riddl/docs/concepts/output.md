@@ -37,8 +37,8 @@ it presents:
 
 <!-- riddl: in-group -->
 ```riddl
-document Receipt   shows    type ReceiptData
-list     CartLines displays type CartLine
+document Receipt   shows record ReceiptData
+list     CartLines displays record CartLine
 picture  Avatar    presents type ImageRef
 ```
 

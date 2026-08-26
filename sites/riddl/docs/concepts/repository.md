@@ -34,7 +34,7 @@ storage layout the repository uses.
 ```riddl
 repository CartRepository is {
   schema CartData is relational
-    of cart as type Cart
+    of cart as record Cart
     link cartItems as field Cart.items.id to field Product.id
     index on field Cart.id
 }

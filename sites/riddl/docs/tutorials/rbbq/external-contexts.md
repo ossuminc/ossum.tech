@@ -65,7 +65,9 @@ external context PaymentGateway as flow is {
 
   handler PaymentGatewayHandler is {
     on cmd: command AuthorizePayment is {
-      yield event PaymentAuthorized(paymentGatewayTransactionId = cmd.paymentGatewayTransactionId)
+      yield event PaymentAuthorized(
+        paymentGatewayTransactionId = cmd.paymentGatewayTransactionId,
+        authorizeAmount = cmd.authorizeAmount)
       do "submit the authorization request to the payment processor"
     }
     // An adaptor or boundary handler must say what it does with what it does
@@ -107,7 +109,9 @@ external context NotificationService as flow is {
 
   handler NotificationServiceHandler is {
     on cmd: command SendPushNotification is {
-      yield event NotificationSent(notificationRecipient = cmd.notificationRecipient)
+      yield event NotificationSent(
+        notificationRecipient = cmd.notificationRecipient,
+        notificationBody = cmd.notificationBody)
       do "hand the message to the push provider"
     }
     // An adaptor or boundary handler must say what it does with what it does
@@ -152,7 +156,9 @@ external context HRSystem as flow is {
 
   handler HRSystemHandler is {
     on cmd: command SyncEmployeeData is {
-      yield event EmployeeDataSynced(employeeRecordId = cmd.employeeRecordId)
+      yield event EmployeeDataSynced(
+        employeeRecordId = cmd.employeeRecordId,
+        syncedAt = cmd.syncedAt)
       do "reconcile the employee record with the HR system of record"
     }
     // An adaptor or boundary handler must say what it does with what it does
@@ -195,7 +201,9 @@ external context AccountingSystem as flow is {
 
   handler AccountingSystemHandler is {
     on cmd: command PostTransaction is {
-      yield event TransactionPosted(transactionId = cmd.transactionId)
+      yield event TransactionPosted(
+        transactionId = cmd.transactionId,
+        postedAmount = cmd.postedAmount)
       do "post the transaction to the general ledger"
     }
     // An adaptor or boundary handler must say what it does with what it does
@@ -239,7 +247,9 @@ external context PrintingService as flow is {
 
   handler PrintingServiceHandler is {
     on cmd: command PrintMenus is {
-      yield event MenusPrinted(printJobId = cmd.printJobId)
+      yield event MenusPrinted(
+        printJobId = cmd.printJobId,
+        printQuantity = cmd.printQuantity)
       do "send the menu artwork to the print vendor"
     }
     // An adaptor or boundary handler must say what it does with what it does
@@ -281,7 +291,9 @@ external context PhotographyService as flow is {
 
   handler PhotographyServiceHandler is {
     on cmd: command SchedulePhotoShoot is {
-      yield event PhotoShootScheduled(photoShootId = cmd.photoShootId)
+      yield event PhotoShootScheduled(
+        photoShootId = cmd.photoShootId,
+        scheduledFor = cmd.scheduledFor)
       do "book the photographer for the new menu items"
     }
     // An adaptor or boundary handler must say what it does with what it does

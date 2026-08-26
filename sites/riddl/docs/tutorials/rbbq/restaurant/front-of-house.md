@@ -170,16 +170,19 @@ Two repositories persist the entity data:
 <!-- riddl: in-context no-prelude=ReservationRepository,StoredReservation,PersistReservationConfirmed -->
 ```riddl
 repository ReservationRepository as merge is {
-  inlet ReservationRepositoryFromReservation is type ReservationEvent
-  inlet ReservationRepositoryFromProjector is type ReservationEvent
-  outlet ReservationRepositoryResponses is type ReservationEvent
+  inlet ReservationRepositoryFromReservation is command PersistReservationConfirmed
+  inlet ReservationRepositoryFromProjector is command PersistReservationConfirmed
+  outlet ReservationRepositoryResponses is result ReservationResult
+
+  // A repository answers with a RESULT, never an event.
+  result ReservationResult is { found: Boolean }
 
   record StoredReservation is { reservationId: ReservationId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema ReservationSchema is relational
-    of rows as type StoredReservation
+    of rows as record StoredReservation
       index on field StoredReservation.reservationId
 
   command PersistReservationConfirmed is { reservationId: ReservationId }

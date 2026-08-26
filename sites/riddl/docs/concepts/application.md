@@ -7,8 +7,8 @@ draft: false
 record SignupData is { email is String }
 command PlaceOrder is { email is String }
 page CheckoutPage is {
-  form SignupForm accepts type SignupData
-  document ConfirmationPanel shows type SignupData
+  form SignupForm accepts record SignupData
+  document ConfirmationPanel shows record SignupData
 }
 -->
 

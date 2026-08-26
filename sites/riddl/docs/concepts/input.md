@@ -11,7 +11,7 @@ record AccountData is { email is String }
 command Register is { email is String }
 command CreateAccount is { details is SignupDetails }
 page SignupPage is {
-  form Signup accepts type SignupDetails
+  form Signup accepts record SignupDetails
 }
 entity Account is {
   state Registered of record AccountData is {
@@ -52,7 +52,7 @@ type it takes in:
 
 <!-- riddl: in-group no-prelude=SignupPage -->
 ```riddl
-form  Signup   accepts type SignupDetails
+form  Signup   accepts record SignupDetails
 button Checkout activates type Clicked
 picklist Country selects type CountryCode
 ```

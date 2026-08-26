@@ -124,15 +124,18 @@ resolution process with the vendor.
 <!-- riddl: in-context no-prelude=PurchaseOrderRepository,StoredPurchaseOrder,PersistOrderApproved -->
 ```riddl
 repository PurchaseOrderRepository as flow is {
-  inlet PurchaseOrderRepositoryFromPurchaseOrder is type PurchaseOrderEvent
-  outlet PurchaseOrderRepositoryResponses is type PurchaseOrderEvent
+  inlet PurchaseOrderRepositoryFromPurchaseOrder is command PersistOrderApproved
+  outlet PurchaseOrderRepositoryResponses is result PurchaseOrderResult
+
+  // A repository answers with a RESULT, never an event.
+  result PurchaseOrderResult is { found: Boolean }
 
   record StoredPurchaseOrder is { purchaseOrderId: PurchaseOrderId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema PurchaseOrderSchema is relational
-    of rows as type StoredPurchaseOrder
+    of rows as record StoredPurchaseOrder
       index on field StoredPurchaseOrder.purchaseOrderId
 
   command PersistOrderApproved is { purchaseOrderId: PurchaseOrderId }

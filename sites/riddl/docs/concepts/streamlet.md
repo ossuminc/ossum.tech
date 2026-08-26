@@ -32,9 +32,9 @@ an optional shape ascription. The shape is otherwise **derived** from how many
 <!-- riddl: in-context -->
 ```riddl
 processor TemperatureProcessor as split is {
-  inlet readings is type TemperatureReading
-  outlet alerts is type TemperatureAlert
-  outlet metrics is type TemperatureMetric
+  inlet readings is event TemperatureReading
+  outlet alerts is event TemperatureAlert
+  outlet metrics is event TemperatureMetric
 
   handler ProcessReading is {
     on reading: event TemperatureReading {
@@ -75,7 +75,7 @@ files and databases.
 <!-- riddl: in-context -->
 ```riddl
 processor OrderEventSource as source is {
-  outlet orders is type OrderEvent
+  outlet orders is event OrderEvent
 
   handler GenerateEvents is {
     on init {
@@ -93,7 +93,7 @@ send notifications, update external systems, or log and archive data.
 <!-- riddl: in-context -->
 ```riddl
 processor NotificationSink as sink is {
-  inlet notifications is type UserNotification
+  inlet notifications is event UserNotification
 
   handler SendNotifications is {
     on event UserNotification {
@@ -110,8 +110,8 @@ Flows transform data from one shape to another:
 <!-- riddl: in-context -->
 ```riddl
 processor OrderEnricher as flow is {
-  inlet rawOrders is type RawOrder
-  outlet enrichedOrders is type EnrichedOrder
+  inlet rawOrders is event RawOrder
+  outlet enrichedOrders is event EnrichedOrder
 
   handler EnrichOrder is {
     on raw: event RawOrder {
@@ -130,12 +130,12 @@ outlet to an inlet:
 <!-- riddl: in-domain -->
 ```riddl
 context DataPipeline is {
-  processor Ingest    as source is { outlet events is type RawOrder }
+  processor Ingest    as source is { outlet events is event RawOrder }
   processor Transform as flow   is {
-    inlet input is type RawOrder
-    outlet output is type EnrichedOrder
+    inlet input is event RawOrder
+    outlet output is event EnrichedOrder
   }
-  processor Store     as sink   is { inlet data is type EnrichedOrder }
+  processor Store     as sink   is { inlet data is event EnrichedOrder }
 
   connector IngestToTransform is
     from outlet Ingest.events to inlet Transform.input

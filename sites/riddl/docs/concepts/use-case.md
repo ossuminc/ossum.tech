@@ -91,8 +91,8 @@ entity Billing is { ??? }
 entity Inventory is { ??? }
 entity Shipping is { ??? }
 page Storefront is {
-  form Payment acquires type OrderData
-  document GiftOptions shows type OrderData
+  form Payment acquires record OrderData
+  document GiftOptions shows record OrderData
 }
 -->
 <!-- riddl: in-epic -->
@@ -129,10 +129,10 @@ application context Storefront is {
   record DashboardData is { note is String }
   command Authenticate is { username is String }
   page LoginPage is {
-    form Credentials accepts type Credential
+    form Credentials accepts record Credential
   }
   page DashboardPage is {
-    document Dashboard shows type DashboardData
+    document Dashboard shows record DashboardData
   }
   entity AuthService is {
     state Ready of record Credential is {

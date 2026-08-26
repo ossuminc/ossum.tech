@@ -135,15 +135,18 @@ the model.
 <!-- riddl: in-context no-prelude=OnlineOrderRepository,StoredOnlineOrder,PersistItemAddedToCart -->
 ```riddl
 repository OnlineOrderRepository as flow is {
-  inlet OnlineOrderRepositoryFromOnlineOrder is type OnlineOrderEvent
-  outlet OnlineOrderRepositoryResponses is type OnlineOrderEvent
+  inlet OnlineOrderRepositoryFromOnlineOrder is command PersistItemAddedToCart
+  outlet OnlineOrderRepositoryResponses is result OnlineOrderResult
+
+  // A repository answers with a RESULT, never an event.
+  result OnlineOrderResult is { found: Boolean }
 
   record StoredOnlineOrder is { onlineOrderId: OnlineOrderId }
 
   // A repository that answers queries and declares NO index at all is a
   // sequential scan by construction, and draws a warning saying so.
   schema OnlineOrderSchema is relational
-    of rows as type StoredOnlineOrder
+    of rows as record StoredOnlineOrder
       index on field StoredOnlineOrder.onlineOrderId
 
   command PersistItemAddedToCart is { onlineOrderId: OnlineOrderId }

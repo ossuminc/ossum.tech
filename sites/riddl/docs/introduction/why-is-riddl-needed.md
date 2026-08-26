@@ -8,7 +8,7 @@ weight: 60
 <!-- riddl-prelude
 event OrderCreated is { id is String }
 command CreateOrder is { id is String }
-outlet Events is type OrderCreated
+outlet Events is event OrderCreated
 -->
 
 ## The Problem
