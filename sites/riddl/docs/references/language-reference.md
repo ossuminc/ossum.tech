@@ -670,6 +670,34 @@ definitions.
 Numeric arguments accept a sign: `range(-5, 5)` and `Decimal(-3, 2)` mean what
 they say.
 
+#### The three integer types differ by range
+
+| Type | Range | Use it for |
+|---|---|---|
+| `Integer` | any whole number, signed — `… -2, -1, 0, 1, 2 …` | a quantity that may go negative: a delta, a balance, a temperature |
+| `Whole` | non-negative — `0, 1, 2 …` | **the counting type**: how many, where none is a legitimate answer |
+| `Natural` | positive — `1, 2 …`, **excluding zero** | **the ordinal type**: a position, or a quantity for which zero is meaningless |
+
+<!-- riddl: in-context -->
+```riddl
+type Delta    is Integer   // may be negative
+type ItemCount is Whole    // zero items is a real answer
+type LineNumber is Natural // there is no line zero
+```
+
+The distinction is **enforced**, not merely conventional: a numeric literal
+assigned to one of these is range-checked, so `constant N: Natural = 0` is an
+Error. A *reference* is not range-checked — only literals are, because only a
+literal has a value the compiler can see.
+
+!!! warning "`Natural` excludes zero"
+    This catches people out. If zero is a legitimate value — an empty cart, a
+    balance paid off, a retry count before the first retry — the type you want
+    is `Whole`.
+
+`Number` and `Real` are separate: `Number` is the unconstrained numeric type
+and `Real` is floating-point. Neither participates in this ranking.
+
 ### Complex Types
 
 - **Record Types**: Named collections of fields
@@ -1024,6 +1052,37 @@ that match specific message kinds and execute statements.
 must be side-effect free: `send`, `tell`, `yield`, `morph` and `become` are
 rejected inside them at parse time.
 
+#### Lifecycle clauses take parameters
+
+`on init` and `on term` may declare a parameter list. Neither is required to:
+
+<!-- riddl: in-clauses -->
+```riddl
+on init (startedAt: TimeStamp) is { do "seed the new instance" }
+```
+
+`on init`'s parameters are how a **business key** — an order number, an email —
+reaches an instance whose [`Id`](#instance-identity) is opaque and
+system-generated. `on term`'s parameters are **pure payload**: a clause needing
+the instance it is ending reads `self.id`, which is in scope for the whole body
+and stays live to its very end.
+
+#### `on other` can bind the envelope
+
+`on other` may bind the residual message's **envelope** — not a message, since
+what arrived did not match any clause:
+
+<!-- riddl: skip reason="needs `option message_envelope` on an enclosing scope; shown whole in the standard-module page" -->
+```riddl
+on other as envelope is { do "log the residual message" }
+```
+
+This is legal only where an `option message_envelope(...)` is in scope: without
+one there is no envelope type, and `envelope` would have nothing to be. RIDDL's
+predefined `Riddl.Envelope` carries the CloudEvents v1.0 context attributes —
+note its id field is spelled **`messageId`**. The option is scope-inherited, so
+declaring it on a context covers everything within.
+
 ### Naming the Handled Message
 
 An `on` clause may bind a local name to the message it is handling, using
@@ -1187,6 +1246,16 @@ The clause then hands it the value:
 require invariant UnderLimit with record Limits(ceiling = "10", used = "1")
 ```
 
+#### A nested function is private
+
+A path identifier **may descend into a function** to reach a definition nested
+inside it — the path grammar is generic and needs no special case.
+
+But **a function nested inside another function is that function's private
+implementation.** Calling it from outside its parent draws a **StyleWarning**:
+the nesting is how a model says "this is an internal step", and reaching past
+it ignores what the author said.
+
 ### Purity
 
 An invariant block may contain only the statements a pure function may contain:
@@ -1239,7 +1308,7 @@ needs a value, it accepts any of these forms:
 | Constructor | `OrderPlaced(total, id = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
-| Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
+| Prompt | `prompt("compute the discount") [as <type>]` | A value computed by AI at generation time; the optional ascription states its type |
 | Boolean | `a > b and not c` | A structured boolean expression |
 
 ### Constructors
@@ -1333,6 +1402,32 @@ Four rules carry the meaning:
     - **Two folds setting the same field** — the completed value would depend
       on arrival order, which across sources is not guaranteed.
 
+#### Typed holes: `prompt("…") as <type>`
+
+`prompt(...)` may carry an optional type ascription:
+
+<!-- riddl: in-handler -->
+```riddl
+let price = prompt("a plausible price for this item") as Real
+```
+
+<!-- riddl: in-context -->
+```riddl
+constant Greeting: String = prompt("a friendly greeting")
+```
+
+That is a **typed hole**, and it is the seam between RIDDL's two tiers: the
+**type is known and checkable at compile time**, while the computation that
+produces a value of that type is prose an AI fills in at generation time. The
+deterministic tier parses, validates and type-checks; the AI tier is the string
+inside the parentheses.
+
+The ascription **restates the position's type; it never overrides it.** A
+`let` takes its type from the ascription, but in a position that already
+determines the type — a constructor argument, a field — the ascription must
+agree with it. Writing one is opt-in: unascribed `prompt(...)` is unchanged and
+still valid, and is the right form wherever the position already says enough.
+
 ### Get
 
 `get from` reads a value from a UI input or an entity state:
@@ -1396,6 +1491,33 @@ invariant InStock is quantity >= Zero
 `and`, `or`, `not`, `true` and `false` are **context-sensitive**: they are
 recognized only inside a boolean expression, so they remain legal identifiers
 everywhere else.
+
+#### `!` is another spelling of `not`
+
+`!` is a prefix operator and a plain alternative spelling of `not`, legal
+wherever a boolean expression is — a `when` condition, a `require`, a `let`
+initializer, inside parentheses, and applied before a comparison:
+
+<!-- riddl: in-handler -->
+```riddl
+when !order.isPaid then error "not paid" end
+require !order.isCancelled
+let stillOpen = !(order.isPaid and order.isCancelled)
+when !!order.isPaid then ??? end
+```
+
+The two are **fully interchangeable**. There is no difference in meaning,
+precedence or associativity, and both produce the identical AST node — there is
+no hidden "which spelling was written" flag a generator could observe.
+
+**The pretty-printer emits `not`.** A model written with `!` converges to `not`
+on output, the same way `A | B` converges to `one of { A or B }`: RIDDL is meant
+to stay readable by people who are not computer scientists.
+
+!!! warning "`!` and `!=` are unrelated"
+    `a != b` is the ordinary "not equal" **comparison operator**. The `!` in it
+    is part of one two-character token — it is not the negation operator being
+    applied to `= b`. `!x` and `x != y` share a character and nothing else.
 
 !!! warning "Comparisons are type-safe"
     Both operands of a comparison must be **typed references** — a value
@@ -2242,8 +2364,35 @@ saga CheckoutProcess is {
 |--------|---------|
 | `compensate` | On failure, run the accumulated steps' undo blocks in reverse |
 | `parallel` | Start all steps at once; the coordinator gathers results asynchronously. Any one failure compensates in reverse order of the original sends. |
+| `timeout("<duration>")` | How long the saga's run may take before compensation fires |
 
 A saga is sequential by default, so there is no `sequential` option.
+
+#### What an absent `timeout` means
+
+A saga's `timeout` bounds how long its run may take before compensation fires.
+
+**Absence does not mean "no bound".** It means the bound is left to whatever
+executes the saga, and *that executor's choice decides when compensation runs* —
+so two conforming generators may compensate at different times for the same
+model.
+
+That is why a saga with no `timeout` draws a **CompletenessWarning**
+(`saga-no-timeout`) rather than an Error: the model is **under-specified**, not
+self-contradictory. RIDDL specifies meaning, and an unstated bound is a meaning
+the model declined to give. A saga whose body is `???` is exempt, under the
+standing rule that a body declaring itself incomplete earns at most a Missing
+warning.
+
+<!-- riddl: in-context -->
+```riddl
+saga Checkout is {
+  step ReserveItems is { do "reserve the items" }
+    reverted by { do "release the reservation" }
+  step ChargeCard is { do "charge the card" }
+    reverted by { do "refund the charge" }
+} with { option timeout("PT5M") }
+```
 
 !!! warning "Saga Validation"
     **Errors:**
@@ -3104,6 +3253,16 @@ blocks and doc blocks.
 14. Attach at most one connector to any port.
 
 ## Incomplete Definitions
+
+`???` means **"known to be incomplete"**, and validation treats it as such: a
+definition whose body is `???` earns at most a **Missing** warning saying the
+body should be provided, and **every other check is skipped for it** —
+structural requirements, completeness, wiring, cross-references. The author has
+already said *don't expect much*, so the validator does not pile on.
+
+That exemption is why `???` stubs are safe to use liberally while a model is
+being drafted, and why a `???` entity is never reported as failing to receive a
+message told to it.
 
 Use `???` as a placeholder for incomplete definitions:
 

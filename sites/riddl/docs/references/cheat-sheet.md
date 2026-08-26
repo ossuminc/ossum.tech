@@ -255,6 +255,8 @@ in the `with { }` metadata block, not in the body.)*
 - Supports `morph` (change state) and `become` (change handler)
 - `on activate` / `on passivate` handle rehydration and eviction, and must
   be side-effect free
+- Integer family by range: `Integer` signed, `Whole` >= 0 (**the counting
+  type**), `Natural` >= 1 (**excludes zero**). Literals are range-checked
 - Options: `event-sourced`, `aggregate`, `transient`, `available`,
   `consistent`, `message-queue`, `value`, `auto-id` (auto-assign ULID at
   instantiation)
@@ -695,8 +697,8 @@ Wherever a statement needs a value, any of these is accepted:
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record; positional args first, then named |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
-| Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
-| Boolean | `a > b and not c` | A structured boolean expression |
+| Prompt | `prompt("compute the discount") [as <type>]` | A typed hole: the type is checked at compile time, the computation is prose an AI fills in |
+| Boolean | `a > b and not c` | A structured boolean expression. `!` is a synonym for `not`; prettify emits `not`. Unrelated to `!=`. |
 | Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it. **Never inside a saga.** |
 | Initiate | `initiate entity Order` | Creates an instance; the value is its `Id`. Entity-only; an effect. |
 | Self | `self`, `self.id` | The instance running now (`id`, `version`). Pass `self.id`, never `self`. |

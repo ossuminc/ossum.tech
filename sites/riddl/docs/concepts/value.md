@@ -41,7 +41,7 @@ pseudo-code remains available where structure would be false precision.
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
-| Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
+| Prompt | `prompt("compute the discount") [as <type>]` | A value computed by AI at generation time; the ascription states its type |
 | Boolean | `a > b and not c` | A structured boolean expression |
 | Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it |
 | Initiate | `initiate entity Order` | Brings an instance into being; **yields its `Id`** |
@@ -133,6 +133,32 @@ set field recommendation to prompt("suggest a complementary product")
 It is distinguished from the `do` **statement** by its parentheses. The
 statement describes an action for a human to implement; the value denotes
 something AI computes.
+
+## Typed holes: `prompt("…") as <type>`
+
+`prompt(...)` may carry an optional type ascription:
+
+<!-- riddl: in-handler -->
+```riddl
+let price = prompt("a plausible price for this item") as Real
+```
+
+<!-- riddl: in-context -->
+```riddl
+constant Greeting: String = prompt("a friendly greeting")
+```
+
+That is a **typed hole**, and it is the seam between RIDDL's two tiers: the
+**type is known and checkable at compile time**, while the computation that
+produces a value of that type is prose an AI fills in at generation time. The
+deterministic tier parses, validates and type-checks; the AI tier is the string
+inside the parentheses.
+
+The ascription **restates the position's type; it never overrides it.** A
+`let` takes its type from the ascription, but in a position that already
+determines the type — a constructor argument, a field — the ascription must
+agree with it. Writing one is opt-in: unascribed `prompt(...)` is unchanged and
+still valid, and is the right form wherever the position already says enough.
 
 ## Boolean Expressions
 
