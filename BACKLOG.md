@@ -6,52 +6,116 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1e-remnant. Alias-specific UI validations are unbuilt, by intent
+## 1g. Upgrade to riddl 2.0.0-rc.26 — the gate is RED at 6  ← START HERE
 
-**1e is otherwise DONE (2026-08-22).** Every feature it listed is now
-documented on the site and gated against `../bin/riddlc`:
+**The staged binary moved under us.** `../bin/riddlc` is now **2.0.0-rc.26**
+while `build.sbt` still pins `2.0.0-rc.25-1-76cb9eab`. Nothing is wrong with
+the docs — the last commit was verified green at 366/51/0 against rc.25-1.
+**These six are an un-started upgrade, not a regression.**
 
-| Feature | Spec | Where |
+Measured 2026-08-26 against the restaged binary: **360 validated / 51 skipped /
+6 failed**. Three families, all from `5c377b9fd` *"[1.13] Type-check put,
+return and require — and give literals a type"*:
+
+**A. `put` now type-checks against the output's declared record (3 sites)**
+
+```
+'put' value is declared 'record { confirmationNumber: String }'
+but the value is 'String'
+```
+
+- `concepts/output.md:59` · `concepts/statement.md:339` ·
+  `references/language-reference.md:1949`
+
+All three are `put order.confirmationNumber to output X`. The output is
+declared `shows record ExampleOrder`, so `put` now wants the **record**, not a
+field of it. Either pass the whole record, or declare an output that shows a
+`String`. **Decide which the docs should teach before editing three pages** —
+they are illustrating `put`, not record-vs-field.
+
+**B. String literals no longer satisfy a `UUID` field (2 sites)**
+
+```
+Field 'cartId' of Command 'CreateOrder' is declared 'UUID'
+but the value is 'String'
+```
+
+- `guides/authors/design/ui-modeling.md:220` · `guides/authors/index.md:200`
+
+Same family already hit in the rc.24 migration, where the fix was to declare
+the id alias as `String` because UUID-vs-String was not what the fence taught.
+The same reasoning likely applies here; check what each page is demonstrating.
+
+**C. A `when` condition must be Boolean (1 site)**
+
+```
+A 'when' condition must be a Boolean value; 'isValid' has type string
+```
+
+- `concepts/conditional.md:41`
+
+Some `isValid` in scope is a String where the fence needs a Boolean. Check
+whether it is the page prelude or the shared wrapper — the `in-handler`
+wrapper's `ExampleData` does carry `isValid is Boolean`, so this is probably
+page vocabulary shadowing it.
+
+**Do the pin and the grammar together**, and regenerate the grammar **last** —
+see the trap in CLAUDE.md, which this repo has already been bitten by once.
+
+---
+
+## 1e-remnant. SUPERSEDED — riddl built the modality checks
+
+**Closed 2026-08-26, by riddl, not by us.** The task filed that morning
+(`riddl/task/done/2026-08-26-modality-aliases-parse-but-mean-nothing.md`) was
+acted on the same day, and all three cases are settled:
+
+| Case | Outcome | Rule id |
 |---|---|---|
-| `Id(P)` over all six processor kinds, keyword form, truth-check | 71 | language-reference § Instance Identity; cheat-sheet types |
-| `self` / `self.id` | 71 | language-reference § Instance Identity; `concepts/value.md` |
-| `initiate` | 71 | same, plus both value-form tables |
-| `terminate` | 71 | language-reference § Terminate Statement (2026-08-21) |
-| Structural addressing and `tell … by` | 71 | language-reference § Tell → Addressing is structural |
-| Message operand may name its VALUE | 72 | language-reference § Constructors |
-| `set`/`get from state` need an OWNER | 75 | language-reference § Set Statement |
-| Modality aliases | 43 | `concepts/group.md`, `element.md`, `input.md`, `output.md`, both references |
-| Presentation verbs | 46 | `concepts/output.md`, `element.md`, cheat-sheet |
-| Refusal citing an invariant | 38 | `concepts/interaction.md`; all three step tables |
-| Ordering is an option, persistence an intention | 33 | `concepts/connector.md` |
-| Connector scope and cross-context persistence | 34, 35 | `concepts/connector.md` (2026-08-21) |
-| Correlations in projectors | 70 | documented 2026-08-13 |
+| 1. Verb inconsistent with output modality | **Built** — StyleWarning | `app-verb-modality-mismatch` |
+| 2. Compound output mixing modalities | **DECLINED** — must not warn | — |
+| 3a. A `menu` with no selectable input | **Built** — CompletenessWarning | `app-menu-has-no-choice` |
+| 3b. An unreachable `popup`/`dialog` | **Built** — CompletenessWarning | `app-group-unreachable` |
 
-**What remains is not documentation, and is now FILED UPSTREAM.** Items 43 and
-46 both call for alias-specific validations that do not exist: that a `popup`
-is reachable, that a `menu` contains selectable inputs, and noun/verb
-consistency across a compound output's parts. Item 43 calls these "useful later
-work"; item 46 wants them symmetric with item 44, whose input-side half IS
-built.
+Verified here: the four-defect fixture from that task now reports all four
+against rc.26 — 2x `app-verb-modality-mismatch`, 1x `app-menu-has-no-choice`,
+1x `app-group-unreachable`.
 
-Filed 2026-08-26 as
-`riddl/task/2026-08-26-modality-aliases-parse-but-mean-nothing.md`, with the
-three cases stated explicitly and a ready-made fixture — four deliberate
-modality defects that riddlc validates with **zero errors, exit 0**, measured
-against rc.25-1.
+### What that leaves US, and it is a real correction
 
-**Nothing here is blocked on it.** The docs describe the aliases as closed
-lists carrying no structural difference, which is exactly what is true today;
-when the checks land the docs need an addition, not a correction.
+**`concepts/group.md:42` is now FALSE.** It says the aliases *"carry no
+structural difference: they are directional heuristics for the reader and for a
+generator's choice of representation."* That was true when written and is not
+true now — three checks exist.
 
-**Two spec notes in `../RIDDL-Tools-To-Do-List.md` are STALE and should be
-corrected there.** Items 43 and 46 are marked *"NOT BUILT (verified
-2026-08-14)"*. Re-verified against the **rc.20** grammar on 2026-08-22: every
-alias is present — `group_aliases` carries `scene`/`space`/`zone`,
-`output_aliases` carries `sound`/`speech`/`haptic`, `input_aliases` carries
-`voice`/`gesture`/`gaze`, and `presentation_aliases` carries all ten verbs.
-Item 43's own implementation note says SHIPPED `5072bad5b`, so the two halves
-of that entry contradict each other. Trust the generated grammar.
+The replacement is not simply "they are checked", because the verb map is
+**deliberately partial**, and riddl's reasoning is worth carrying:
+
+- `presents` and `emits` are broad by meaning — a system may present through
+  any channel — so mapping them would invent a rule the language never stated.
+  **Silent, always.**
+- `diffuses`, `serve`, `offer`, `taste` imply scent and taste, and **there is
+  no scent or taste output kind at all**. Four verbs with no modality to
+  contradict. Silent, and pinned by a test so nobody "completes" the map.
+- `plays` maps to sound **and** animation, because both play.
+- Mapped: `shows`/`displays`/`writes` visual · `plays` sound+animation ·
+  `speaks`/`announces` speech · `vibrates`/`pulses`/`nudges` haptic.
+
+Case 3's scoping also needs stating: `app-group-unreachable` covers **`popup`
+and `dialog` only**, because those names promise something that appears in
+response to an action. A `page` or `window` is a destination and may be entered
+by means the model does not describe. A nested group is reached through its
+parent and is never reported.
+
+Do this **with or after 1g**, since it needs rc.26 to demonstrate.
+
+### Upstream, not ours
+
+Item 46 in `../RIDDL-Tools-To-Do-List.md` should be **struck**, not left open:
+riddl ruled case 2 will not be built. Reid's framing, worth keeping: *a warning
+must name something the author could plausibly want to change* — a model that
+deliberately delivers through three modalities has nothing to fix, and a
+diagnostic there trains people to ignore diagnostics.
 
 ---
 

@@ -11,139 +11,78 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-21 (end of day)
+## HANDOFF — as of 2026-08-26
 
-**Compiler:** `../bin/riddlc` is **2.0.0-rc.25-1-76cb9eab** — one commit PAST
-the rc.25 tag. `build.sbt` pins that exact `git describe` version, not the tag:
-the clean tag's JVM `_3` artifacts are not in `~/.ivy2/local` and would not
-resolve, and pinning what is actually staged is the only way grammar, gate and
-docs describe one build. **This has been true of rc.20, rc.24 and rc.25 —
-treat "the tag" as a request for whatever is staged, and check tag, binary and
-artifact separately.** Scala stays **3.9.0-RC4** — riddl's `V.scala` is still
-that, whatever the stale `// 3.8.4` comment in its `build.sbt` says.
+**Branch `main`, tree clean, 28 commits unpushed.**
 
-**Gates:** 2.0 — **366 validated / 51 skipped / 0 failed, exit 0**, over the
-WHOLE of `sites/riddl/docs`. 1.31 — 6/0/0, untouched. Five sites `--strict`
-clean, 80 cross-site links, 0 dangling intra-page anchors.
+**The pin and the staged binary DISAGREE, and that is the first thing to
+know.** `build.sbt` pins `2.0.0-rc.25-1-76cb9eab`; `../bin/riddlc` is now
+**`2.0.0-rc.26`** — it was restaged after the last commit. Run
+`riddlc version` before trusting anything below.
 
-**`task/` is EMPTY** — all seven files closed 2026-08-25.
+**Gate against rc.26: RED at 6** (360 validated / 51 skipped / 6 failed).
+**Nothing is wrong with the docs.** The last commit was verified green at
+366/51/0 against rc.25-1; these six are an **un-started upgrade**. Full
+diagnosis, with the exact messages and file:line for each, is **BACKLOG 1g** —
+three families, all from riddl's `5c377b9fd` type-checking `put`/`return`/
+`require` and giving literals a type.
 
-**Diagnostics now carry stable rule ids** (`[warning] [saga-no-timeout] …`),
-and `validate --json` emits them as data. The id is the durable handle;
-wording is not. Census by id rather than by message text — 76 distinct rules
-across the tree.
+### In flight
 
-**The rc.22–rc.25 CLI surface is documented** (2026-08-26): `find`, `dump
---json/--jsonl`, `validate --fail-on/--json/--fix/--fix-rule/--fix-dry-run`,
-`--no-msg-ids`, `prettify --check`, and `unbastify -o` now being required.
-Every example was run against the binary before being written down — which
-caught two of my own errors, a `jq` pipeline missing `.[]` and a claim that
-`advise`/`--provide-tips` had been superseded when they had not.
+Nothing half-edited. The tree is clean and every claim in the last commit was
+true when made. What is *outstanding* is 1g (the rc.26 upgrade) and the
+`group.md` correction it enables — see BACKLOG.
 
-**No blanket skips remain anywhere.** The RBBQ tutorial went 0 → 73 of 73.
+### The one thing a fresh session would get wrong
 
-**BACKLOG 1e is DONE (2026-08-22).** Every feature it listed is documented and
-gated: `Id(P)`/`self`/`initiate`/structural addressing (item 71), value
-operands (72), `set` ownership (75), the modality aliases and presentation
-verbs (43, 46), refusal-by-invariant (38), and why ordering is an option while
-persistence is an intention (33). What survives as **1e-remnant** is riddlc
-work, not documentation — the alias-specific UI validations items 43 and 46
-call "useful later work". Nothing here is blocked on it.
+**`concepts/group.md:42` is now factually false.** It says the modality aliases
+*"carry no structural difference"*. riddl built the checks on 2026-08-26
+(`641b93e44`), so there are now three: `app-verb-modality-mismatch`,
+`app-menu-has-no-choice`, `app-group-unreachable`.
 
-**BACKLOG 1a-remnant is also DONE.** Its premise was that gating the
-`CartRepository` fence meant renaming the prelude's `entity Cart` and every
-fence reaching it. It did not: `no-prelude=Cart` withdraws the entity, and the
-fence declares its own `record Cart` plus the `CartLine` its schema links
-through. **The item had been sized without probing it** — the fix is six lines
-and the reasoning it was "bigger than it looks" was never tested.
+Do **not** replace it with "they are checked" — the verb map is deliberately
+partial and the reasoning matters. BACKLOG 1e-remnant carries it in full:
+`presents`/`emits` are silent by design, and `diffuses`/`serve`/`offer`/`taste`
+have no modality to contradict because no scent or taste output kind exists.
 
-**Next:** BACKLOG 2 — promote 2.0 to `latest` — when 2.0 ships final.
+### Traps, each of which has already bitten someone here
 
-### Three value forms were missing from BOTH tables
+- **Regenerate the grammar LAST.** `git checkout -- sites/riddl/docs` reverts
+  it along with everything else, and a fence migration routinely needs one. The
+  rc.24 commit shipped rc.21's grammar this way, under a message claiming
+  otherwise, and nothing could catch it — the gate validates against the
+  BINARY, never the `.ebnf`. Check with
+  `git log --oneline -1 -- sites/riddl/docs/references/riddl-grammar.ebnf`.
+- **A scratch copy of the validator goes stale.** Twice this cost real time,
+  reporting fixes as unapplied. Use
+  `/private/tmp/.../scratchpad/gate`, which re-copies from the live script
+  every run — or re-copy by hand.
+- **The staged binary is usually NOT the clean tag** and the clean tag usually
+  does not resolve from `~/.ivy2/local`. True of rc.20, rc.24 and rc.25. Pin
+  what `riddlc version` prints.
+- **Never check `$?` through a pipe.** `… | tail` reports tail's status, so a
+  red gate reads green. Redirect, check, then read.
 
-`ask`, `initiate` and `self` were absent from the value-form tables in
-`concepts/value.md` ("The Seven Forms" — actually ten) and in the cheat sheet,
-though `ask` had a full reference section. **A table that enumerates a closed
-set is a claim, and it was wrong.** When the grammar's `value` production
-gains an alternative, check both tables.
+### Certainty
 
-### Two To-Do List notes are stale, and contradict themselves
+- **Verified this session:** the rc.26 version and all six failures (run);
+  BACKLOG 1g's three families (each message captured verbatim); that the four
+  modality checks fire on riddl's fixture; that `group.md:42` contradicts them;
+  that `task/` is empty and `BACKLOG.md` is tracked.
+- **Assumed, not verified:** that BACKLOG 1g's suggested *fixes* are right. The
+  diagnosis is measured; the remedy for each family is a judgement call about
+  what those fences are teaching, and is written as a question, not an answer.
 
-Items 43 and 46 are marked "NOT BUILT (verified 2026-08-14)" while item 43's
-own implementation note says SHIPPED `5072bad5b`. Re-verified against the
-rc.20 grammar: all nineteen aliases are present. Recorded in BACKLOG
-1e-remnant so it can be corrected upstream. Same lesson as A72 last week —
-**a status note in that file is a snapshot, not a standing state.**
+### Pointers
 
-### What this session established
+- **BACKLOG.md** — all open work. **1g first**, then the `group.md` correction.
+- **CLAUDE.md** — durable facts: the gate's scope, prelude rules, the grammar
+  trap, the version-differences table.
+- **`task/` is EMPTY.** Seven files closed 2026-08-25; the modality task filed
+  into `riddl/` was answered and is in `riddl/task/done/`.
 
-**The gate's scope was the bug.** It ran over `grep -rl '<!-- riddl:'` — files
-that already carry a directive — so a page that had *never* been annotated
-could not be reported. Three existed while CLAUDE.md claimed every
-RIDDL-bearing page was covered, and all three failed once included. **A scope
-defined by "has an annotation" can never find a missing annotation.** Run it
-over `find sites/riddl/docs -name '*.md'`.
-
-**The RBBQ tutorial is authored, not quoted — and the old skip reason was
-false twice over.** It said the fences were "quoted verbatim from riddl-models,
-which is still RIDDL 1.x". riddl-models is clean on rc.20, so the premise was
-gone; but re-quoting was never possible either, because the model is
-**20,882 lines against the tutorial's 2,069** — `KitchenTicket.riddl` alone is
-901 lines where the fence is 70. Every field now carries `briefly`/`described
-as`. Each fence is a condensed 2.0 excerpt taken from the source's structure
-and proved by the gate. **When the model moves, re-derive; do not paste.**
-
-**Measure before believing a skip.** Stripping the skips and running `--auto`
-placed **2 of 73**, and name-drift was **24 of 340 definitions (7%)** — one
-repeated pattern, the 1.x "single `Active` state + `*Status` enum" becoming
-named 2.0 states across 7 entities. Both numbers took minutes and set the
-whole plan.
-
-**Ten of the eleven original gate failures were ONE rule in PRELUDES**, not
-eleven separate content problems — rc.18's portlet-admits check against
-outlets declared as a single concrete message type. Same lesson as the rc.16
-migration: fix preludes and wrappers first. riddl-models made the identical
-migration upstream (`a1925574`, "Widen 187 alternations to admit what emitters
-actually publish").
-
-### Traps found here, all recorded in CLAUDE.md
-
-- A prelude entry must fit on **one line** — `no-prelude` strips only the first
-  line, orphaning a wrapped alternation's continuation.
-- A prelude may not declare an alternation over messages that live **inside**
-  an entity; the prelude can only stub the entity.
-- A `projector X is { ??? }` stub is **not valid at all** (needs a record and
-  exactly one handler). Entities and repositories stub fine.
-- A prelude event redeclared inside an event-sourced entity is ambiguous, and
-  surfaces as the *event-sourcing* rule, not as ambiguity.
-- `described as { |… }` on one line does not parse; the error points at the
-  closing brace.
-- `as <shape>` is checked against real port arity, so a condensed excerpt that
-  drops an inlet fails on shape, not content.
-- The shared `in-handler` wrapper **cannot** declare `yields` — every
-  non-yielding fence would then Error. `in-yielding-handler` exists for that.
-- Regenerating an already-rebuilt page inserts a **second** prelude, and two
-  preludes still validate. Restore to the pre-rebuild commit first.
-- `yields` goes between the name and `is`, and takes a **concrete Event** — an
-  alternation is an Error.
-
-### The incident worth remembering
-
-A commit message passed to `git commit -m` contained backticked identifiers.
-zsh treated them as **command substitution**, ran `set`, and wrote the entire
-shell environment — `ANTHROPIC_API_KEY`, `GITHUB_TOKEN`, `AKKA_LICENSE_KEY`,
-`COVERALLS_REPO_TOKEN`, `PGP_PASSPHRASE` — into the commit. `git commit` exited
-0; the only sign was three stray `command not found` lines that read as noise.
-Nothing was pushed. Fixed with `commit --amend -F`, then `reflog expire
---expire-unreachable=now` and `gc --prune=now`; the object is purged and all
-reachable messages scan clean.
-
-**The rule now lives in `../CLAUDE.md`: always `git commit -F <file>`.** Never
-`-m`, never a heredoc. It generalizes to PR bodies (`--body-file`) and release
-notes (`--notes-file`).
-
-**Start the next session with `/ossuminc-skills:check-tasks`** — triage is the
-driver's call, and this handoff never runs it.
+**Run `/ossuminc-skills:check-tasks` in the new session** — triage is the
+driver's call, and this handoff deliberately does not do it.
 
 ---
 
