@@ -27,13 +27,22 @@ documented on the site and gated against `../bin/riddlc`:
 | Connector scope and cross-context persistence | 34, 35 | `concepts/connector.md` (2026-08-21) |
 | Correlations in projectors | 70 | documented 2026-08-13 |
 
-**What remains is not documentation.** Items 43 and 46 both call for
-alias-specific validations that do not exist: checking that a `popup` is
-reachable, that a `menu` contains selectable inputs, and warning on noun/verb
-inconsistency across a compound output's parts (a sound, a window and a haptic
-inside one output). Item 43 calls these "useful later work" and item 46 wants
-them symmetric with item 44. **That is riddlc work, not ossum.tech work** — it
-belongs in `riddl/BACKLOG.md`, and nothing here is blocked on it.
+**What remains is not documentation, and is now FILED UPSTREAM.** Items 43 and
+46 both call for alias-specific validations that do not exist: that a `popup`
+is reachable, that a `menu` contains selectable inputs, and noun/verb
+consistency across a compound output's parts. Item 43 calls these "useful later
+work"; item 46 wants them symmetric with item 44, whose input-side half IS
+built.
+
+Filed 2026-08-26 as
+`riddl/task/2026-08-26-modality-aliases-parse-but-mean-nothing.md`, with the
+three cases stated explicitly and a ready-made fixture — four deliberate
+modality defects that riddlc validates with **zero errors, exit 0**, measured
+against rc.25-1.
+
+**Nothing here is blocked on it.** The docs describe the aliases as closed
+lists carrying no structural difference, which is exactly what is true today;
+when the checks land the docs need an addition, not a correction.
 
 **Two spec notes in `../RIDDL-Tools-To-Do-List.md` are STALE and should be
 corrected there.** Items 43 and 46 are marked *"NOT BUILT (verified
