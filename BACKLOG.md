@@ -46,41 +46,6 @@ of that entry contradict each other. Trust the generated grammar.
 
 ---
 
-## 1f. The riddlc CLI surface has moved; `tools/riddlc/` has not
-
-**What:** rc.22–rc.24 reorganised riddlc's command surface, and
-`docs/riddl/tools/riddlc/` still describes the older one.
-
-What changed, all verified against `../bin/riddlc` 2.0.0-rc.24-33 on
-2026-08-25:
-
-- **Every diagnostic carries a stable rule id** — `[warning]
-  [saga-no-timeout] …`. The id is the durable handle; message wording is
-  free to change and the id is not. `--no-msg-ids` turns them off.
-- **`validate --json`** emits diagnostics as a JSON array, ids included.
-- **`validate --fail-on <severity>`** exits non-zero at or above a
-  severity — the obvious CI lever, and better than the `$?`-vs-`tail`
-  trap this repo already records.
-- **`validate --fix` / `--fix-rule <id>`** applies a rule's codemod.
-  **Only `abstract-type` and `prompt-statement` carry one** — measured,
-  because the rc.24 migration hoped `ref-wrong-keyword` did and it does
-  not. `--fix-rule` names the rules that qualify when given a bad one.
-- **`riddlc find`** — Unix-find over RIDDL definitions, with `-exec`,
-  `-replace` and `-delete`.
-- **`riddlc dump --json`** — a scriptable projection of the model.
-- **Corpus mode** — one riddlc process over many models.
-- **`unbastify` now requires `-o`; `prettify` gains `--check`.**
-
-**Why it is not urgent:** none of this is the language, and the
-language reference is correct. It is `tools/riddlc/command-reference.md`
-that is stale.
-
-**Worth doing together with:** the superseded `advise` / `--provide-tips`
-material, which the 2026-08-18 task listed and rc.24 replaced. See
-`task/done/2026-08-18-riddl-2.0-language-changes.md` § Results.
-
----
-
 ## 2. Promote RIDDL 2.0 to `latest` when it ships final
 
 **What:** `latest` points at 1.31, which is correct while 2.0 is an RC.

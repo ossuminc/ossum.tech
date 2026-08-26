@@ -60,7 +60,7 @@ Creators of the [Saga Pattern](https://microservices.io/patterns/data/saga.html)
 ### [Jonas Bonér](https://www.linkedin.com/in/jonasboner/) {#jonas-boner}
 Creator of [Akka](https://akka.io) and many distributed system patterns
 
-### [Kent Beck](https://www.linkedin.com/in/kentbeck/)
+### [Kent Beck](https://www.linkedin.com/in/kentbeck/) {#kent-beck}
 Creator of [eXtreme Programming](http://www.extremeprogramming.org/)
 
 ### [Li Haoyi](http://www.lihaoyi.com/)

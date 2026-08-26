@@ -18,7 +18,8 @@ riddlc [common-options] command [command-options]
 | `about` | Print out information about RIDDL |
 | `advise` | Report remediation advice for a model |
 | `bastify` | Convert a RIDDL file to BAST (Binary AST) format |
-| `dump` | Dump the AST of the input file |
+| `dump` | Dump the AST, or with `--json` a machine-readable projection |
+| `find` | Search a model for definitions, in the manner of Unix `find` |
 | `flatten` | Flatten all includes into a single file |
 | `from` | Load options from a configuration file |
 | `help` | Print usage information |
@@ -29,7 +30,7 @@ riddlc [common-options] command [command-options]
 | `repeat` | Repeatedly run a command for edit-build-check cycles |
 | `stats` | Generate statistics about a RIDDL model |
 | `unbastify` | Convert a BAST file back to RIDDL source |
-| `validate` | Parse and validate the input file |
+| `validate` | Parse and validate; reports a one-line summary of what it checked |
 | `version` | Print the version and exit |
 
 !!! info
@@ -49,6 +50,7 @@ These options apply to all commands:
 | `-D`, `--debug` | Enable debug output (for developers) |
 | `-q`, `--quiet` | No output, just execute the command |
 | `-a`, `--no-ansi-messages` | Disable ANSI formatting in messages |
+| `--no-msg-ids` | Do not print the stable rule id beside each message |
 | `-w`, `--show-warnings` | Control warning message display |
 | `-m`, `--show-missing-warnings` | Control missing definition warnings |
 | `-s`, `--show-style-warnings` | Control style warning display |
@@ -61,7 +63,7 @@ These options apply to all commands:
 | `-c`, `--show-completeness-warnings` | Control completeness warning display |
 | `--warnings-are-fatal` | Treat warnings as errors |
 | `-B`, `--auto-generate-bast` | Auto-generate .bast files after parsing |
-| `--provide-tips` | Include a remediation suggestion with each message that has one, for AI-assisted fixing |
+| `-P`, `--provide-tips` | Include a remediation suggestion with each message that has one, for AI-assisted fixing |
 | `--check-figma-drift` | Check `figma` references against the Figma REST API |
 
 ### Completeness Warnings
@@ -95,6 +97,37 @@ no client available, one informational message says so, and that is the whole
 consequence.
 
 The HOCON equivalent for a `from` configuration file is `check-figma-drift`.
+
+### Every message carries a rule id
+
+Every diagnostic riddlc emits is prefixed with its **severity** and a **stable
+rule id**:
+
+```
+[missing] [stream-no-error-sink] model.riddl(1:1->12):
+Domain 'Shop' declares no 'error-sink' inlet, so hard errors have no destination:
+domain Shop is {
+```
+
+**The id is the durable handle; the wording is not.** Message text is free to
+change between releases — the id is not. Anything that needs to name a
+particular diagnostic (a CI filter, a suppression list, a docs cross-reference,
+a spreadsheet of what a model still owes) should key on the id.
+
+`--no-msg-ids` turns the prefix off, for output meant only for human reading:
+
+```bash
+riddlc --no-msg-ids validate model.riddl
+```
+
+!!! tip "Count by id, not by message text"
+    Grouping a large model's diagnostics by rule id tells you what kind of work
+    is outstanding; grouping by message text splits one rule across every
+    definition name it mentions.
+
+    ```bash
+    riddlc validate model.riddl --json | jq -r '.[].rule' | sort | uniq -c | sort -rn
+    ```
 
 ### Deprecation Messages
 
@@ -138,6 +171,74 @@ This performs full validation including:
 - Containment rules
 - Style checks (optional)
 
+It finishes with a one-line summary of **what it checked**, so a silent run is
+distinguishable from a run that examined nothing.
+
+| Option | Description |
+|--------|-------------|
+| `--fail-on <severity>` | Exit non-zero if any message is at or above `info`, `warning`, `error` or `severe` |
+| `--json` | Emit diagnostics as a JSON array on stdout instead of the human summary |
+| `--fix` | Apply every rule that carries a mechanical fix, then re-validate |
+| `--fix-rule <id>` | Apply only this rule's fix (implies `--fix`) |
+| `--fix-dry-run` | Show the diff `--fix` would apply and write nothing (implies `--fix`) |
+
+#### `--fail-on` is the CI lever
+
+Without it, `validate` exits 0 for anything short of a hard error, so a build
+gate has to parse output to decide. `--fail-on` moves that decision into the
+exit status:
+
+```bash
+riddlc validate model.riddl --fail-on warning
+```
+
+!!! warning "Check `$?` directly, never through a pipe"
+    `riddlc validate … | tail` reports **`tail`'s** status, not riddlc's, so a
+    red run reads green. Redirect to a file, check `$?`, then read the file:
+
+    ```bash
+    riddlc validate model.riddl --fail-on warning > report.txt 2>&1
+    echo "EXIT=$?"
+    ```
+
+#### `--json` for tooling
+
+Each element separates **severity** from **class**, and keeps riddl's raw
+`kind` beside them so a consumer that already reads it is unaffected:
+
+```json
+{
+  "rule": "stream-no-error-sink",
+  "severity": "warning",
+  "class": "missing",
+  "kind": "Missing",
+  "message": "Domain 'Shop' declares no 'error-sink' inlet, so hard errors have no destination",
+  "file": "model.riddl",
+  "line": 1,
+  "col": 1
+}
+```
+
+Before this split, a consumer handed `"kind": "MissingWarning"` had to know
+riddl's taxonomy to work out that it was a warning.
+
+#### `--fix` applies only mechanical rules
+
+Most diagnostics have no mechanical fix — they need a judgement call, or a
+rewrite outside the span that was reported. `--fix` applies the ones that do,
+and **says what it did not fix and why**, grouped by reason with the rules
+named:
+
+```
+validate --fix: 31 not fixed:
+  31 x no mechanical fix: needs a judgement call, or a rewrite outside the
+      reported span [doc-no-description, entity-no-id-type, name-too-short, …]
+```
+
+`--fix-rule <id>` narrows it to one rule, and naming a rule that has no
+mechanical fix reports which rules do. Use `--fix-dry-run` first: it prints the
+diff and writes nothing.
+
 ### prettify
 
 Reformat RIDDL source to a standard layout:
@@ -152,7 +253,15 @@ Options:
 |--------|-------------|
 | `-o`, `--output-dir` | Required output directory |
 | `--project-name` | Project name for the output |
+| `--check` | Report files not in canonical form and exit non-zero; write nothing |
 | `-s`, `--single-file` | Merge all includes into a single file |
+
+`--check` is the CI form: it asserts that a model is already formatted, the way
+`scalafmtCheck` or `gofmt -l` do, without rewriting anything.
+
+```bash
+riddlc prettify model.riddl --check
+```
 
 ### bastify
 
@@ -178,7 +287,167 @@ Options:
 
 | Option | Description |
 |--------|-------------|
-| `-o`, `--output-dir` | Output directory (default: next to input) |
+| `-o`, `--output-dir` | **Required.** Output directory |
+| `-s`, `--single-file` | Resolve all includes and write one flattened file |
+
+!!! warning "`-o` has no default, deliberately"
+    It used to default to the input's own directory — which **silently
+    overwrote the very sources the `.bast` was generated from**. Omitting it
+    now fails with a non-zero exit rather than destroying anything.
+
+    (riddlc's own `--help` still advertises the old default. The runtime is the
+    authority; it rejects the call.)
+
+### dump
+
+Print the model's AST. With `--json`, print a flat, machine-readable
+**projection** of it instead — one record per definition, which is what makes
+a model scriptable:
+
+```bash
+riddlc dump model.riddl --json
+```
+
+```json
+{
+  "kind": "domain",
+  "id": "Shop",
+  "path": "Shop",
+  "file": "model.riddl",
+  "span": { "start": { "line": 1, "col": 1, "offset": 0 },
+            "end":   { "line": 24, "offset": 610 } },
+  "brief": "p"
+}
+```
+
+| Option | Description |
+|--------|-------------|
+| `--json` | Emit the flat projection instead of the indented AST |
+| `--jsonl` | One record per line, for streaming a large corpus |
+| `--include-spans <bool>` | Include source spans (default: true) |
+| `--resolve <bool>` | Resolve references, emitting `null` for ones that do not (default: true) |
+| `-o`, `--output` | Write to this file instead of stdout |
+
+Use `--jsonl` when piping a whole corpus through `jq` or a script: it streams
+rather than requiring the entire array to be parsed at once.
+
+```bash
+# --json is one ARRAY, so jq needs `.[]` to iterate it
+riddlc dump model.riddl --json  | jq -r '.[] | select(.kind=="entity") | .path'
+
+# --jsonl is one record per line, so it does not
+riddlc dump model.riddl --jsonl | jq -r 'select(.kind=="entity") | .path'
+```
+
+!!! tip "`dump --json` versus `find`"
+    They answer different questions. `find` asks *"which definitions match?"*
+    and can act on the answer; `dump --json` hands you **everything** and lets
+    a script decide. Reach for `find` for a query, `dump --json` for an
+    inventory or a report.
+
+### find
+
+Search a model for definitions, in the manner of Unix `find`. The expression
+follows a `--` separator, which keeps riddlc's own options from competing with
+the expression's:
+
+```bash
+riddlc find model.riddl -- -type entity -name 'Order*'
+```
+
+```
+model.riddl:7:5: entity Order is {
+[info] 1 matched
+```
+
+`find` operates on the **resolved model**, not on the text, so it sees what the
+compiler sees: a definition's kind, its path, what it carries, whether it is a
+stub. That is the difference between it and `grep`.
+
+#### Predicates
+
+| Predicate | Matches |
+|---|---|
+| `-type <kind>` | definitions of that kind — `entity`, `context`, `command`, `handler`, … |
+| `-name <glob>` | identifier matches the glob; `-iname` is the case-insensitive form |
+| `-path <glob>` | full path matches the glob; `-ipath` case-insensitive |
+| `-regex <re>` | identifier matches the regex; `-iregex` case-insensitive |
+| `-source-regex <re>` | the definition's **source text** matches |
+| `-under-name <id>` | contained anywhere beneath a definition with that name |
+| `-under-a <kind>` | contained anywhere beneath a definition of that kind |
+| `-in <path>` | declared within that path |
+| `-mindepth <n>` / `-maxdepth <n>` | bound the containment depth |
+| `-intention <i>` | carries that intention — `event-sourced`, `application`, … |
+| `-option <o>` | carries that option |
+| `-shape <s>` | the streamlet shape: `flow`, `sink`, `source`, `merge`, … |
+| `-arity <n>` | that port arity |
+| `-cardinality <c>` | that cardinality |
+| `-carries <type>` | a portlet carrying that type |
+| `-operand-kind <k>` | a statement whose operand is of that kind |
+| `-reads-state` | reads state |
+| `-stub` | the body is `???` |
+| `-empty` | the body is empty |
+| `-unresolved` | holds a reference that does not resolve |
+
+#### Combining them
+
+Predicates juxtaposed are **and**-ed. `-o` (or `-or`) is disjunction, `!` (or
+`-not`) negates, and parentheses group — quoted, so the shell does not eat
+them:
+
+```bash
+riddlc find model.riddl -- -type command -o -type event
+riddlc find model.riddl -- '(' -type entity -o -type context ')' -stub
+riddlc find model.riddl -- -type entity '!' -name 'Test*'
+```
+
+#### Actions
+
+| Action | Does |
+|---|---|
+| `-print` | print the match (the default) |
+| `-location` | print `file:line:col` only |
+| `-path` | print the definition's full path |
+| `-printpath` | print the path, one per line |
+| `-printf <fmt>` | print a format string — `%n` name, `%l` line, and friends |
+| `-list` | list matches |
+| `-quit` | stop at the first match |
+| `-expect-min <n>` | **exit non-zero if fewer than `n` matched** |
+| `-exec <cmd> ;` | run a command per match; `{}` is the match, `+` batches |
+| `-replace <cmd> ;` | replace each match with the command's stdout |
+| `-delete` | delete each match |
+
+`-expect-min` is the one worth knowing for CI. It turns a search into an
+assertion:
+
+```bash
+riddlc find model.riddl -- -type entity -expect-min 3
+echo "EXIT=$?"     # 7 if fewer than three entities exist
+```
+
+!!! warning "Check `$?` directly"
+    As everywhere else, a pipe replaces riddlc's exit status with the last
+    command's. `riddlc find … | head` always looks successful.
+
+#### Editing actions rewrite your model
+
+`-replace`, `-delete` and `-exec` **mutate the source**. They exist for
+codemods — renaming a construct across a corpus, stripping a retired option —
+and they carry their own safety options:
+
+| Option | Effect |
+|---|---|
+| `-dry-run` | show what would change, write nothing |
+| `-keep-going` | continue after a failed edit rather than stopping |
+| `-allow-empty` | permit an edit that produces an empty result |
+
+```bash
+# See what it would do, first
+riddlc find model.riddl -- -type entity -name 'Legacy*' -delete -dry-run
+```
+
+!!! danger "Run `-dry-run` first, and have the file in version control"
+    These actions edit files in place. `-dry-run` is not the default.
 
 ### flatten
 

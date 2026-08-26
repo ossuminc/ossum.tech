@@ -71,6 +71,33 @@ riddlc from riddl.conf validate
 riddlc bastify mymodel.riddl
 ```
 
+### Search the Model
+
+`riddlc find` searches the **resolved** model, so it sees definitions the way
+the compiler does rather than as text:
+
+```bash
+riddlc find mymodel.riddl -- -type entity -name 'Order*'
+```
+
+See [find](command-reference.md#find) for the full predicate and action
+vocabulary, including the editing actions.
+
+### Fail a Build on Warnings
+
+```bash
+riddlc validate mymodel.riddl --fail-on warning
+```
+
+### Diagnostics as Data
+
+Every message carries a [stable rule id](command-reference.md#every-message-carries-a-rule-id),
+and `--json` emits them for tooling:
+
+```bash
+riddlc validate mymodel.riddl --json | jq -r '.[].rule' | sort | uniq -c | sort -rn
+```
+
 ## Common Workflows
 
 ### Development Cycle

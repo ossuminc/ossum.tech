@@ -33,6 +33,13 @@ and `validate --json` emits them as data. The id is the durable handle;
 wording is not. Census by id rather than by message text — 76 distinct rules
 across the tree.
 
+**The rc.22–rc.25 CLI surface is documented** (2026-08-26): `find`, `dump
+--json/--jsonl`, `validate --fail-on/--json/--fix/--fix-rule/--fix-dry-run`,
+`--no-msg-ids`, `prettify --check`, and `unbastify -o` now being required.
+Every example was run against the binary before being written down — which
+caught two of my own errors, a `jq` pipeline missing `.[]` and a claim that
+`advise`/`--provide-tips` had been superseded when they had not.
+
 **No blanket skips remain anywhere.** The RBBQ tutorial went 0 → 73 of 73.
 
 **BACKLOG 1e is DONE (2026-08-22).** Every feature it listed is documented and
