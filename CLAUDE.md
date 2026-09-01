@@ -329,7 +329,33 @@ crawlers that every version of every page is the same URL.
   ```
 
   If that names an older upgrade than the one in flight, `extractGrammar` did
-  not survive. Same family as every other trap here: the signal that something
+  not survive.
+
+  **A direct check exists, and it is stronger than the log check.** Compare the
+  committed file against riddl's canonical grammar *at the tag*, read out of
+  git rather than off the working tree:
+
+  ```bash
+  cd ../riddl && git cat-file -p 2.0.0:language/src/main/resources/riddl/grammar/ebnf-grammar.ebnf | md5 -q
+  md5 -q sites/riddl/docs/references/riddl-grammar.ebnf
+  ```
+
+  Equal hashes mean the docs describe exactly that release's grammar. This is
+  a **verification, not an update path** — `git cat-file` at a TAG is immutable
+  and so avoids the working-tree hazard that makes `cp` wrong, but it still
+  bypasses the build, so it cannot replace `extractGrammar` for producing the
+  file. Used on 2026-08-31 to confirm the rc.25-1 grammar was already
+  byte-identical to 2.0.0's, which is how that upgrade shipped a provably
+  correct grammar while `extractGrammar` was unavailable (below).
+
+  **`sbt extractGrammar` can hang indefinitely against a contended sbt server.**
+  On 2026-08-31 it sat at **0.0% CPU for ~40 minutes** across two attempts,
+  with riddl 2.0.0 never reaching the Coursier cache; the log ended at an
+  IDE `sbt-structure` dump whose temp filename was *identical* between runs.
+  `sbt -batch shutdown` first did **not** help. Symptoms of a hang rather than
+  a slow build: flat log size, no `[info] compiling`, 0.0% CPU. Do **not**
+  `pkill -f sbt` to clear it — that kills the user's IDE and every other
+  project's server. Verify the grammar by hash instead and say so plainly. Same family as every other trap here: the signal that something
   was skipped is ABSENT rather than wrong.
 
   **The sbt build exists only for this task** — it produces no site content
@@ -404,22 +430,41 @@ checker above it is a **gate**: it exits non-zero on failure.
 about the checkout tells you which one is meant — and the `riddlc` on PATH is
 neither of them any more, so the wrong pairing reports confident nonsense.
 
-**`../bin/riddlc` is the 2.0 compiler** — since 2026-08-12 a **native binary
-installed directly at that path**; `../riddlc-dist/` is gone, so the old
-symlink description no longer holds. The Homebrew `riddlc` on PATH lags it
-badly — verified 2026-08-26: PATH is **2.0.0-rc.5** while `../bin` is
-**2.0.0-rc.25-1-76cb9eab**, one commit PAST the rc.25 tag. rc.9
-deprecated the entity options, so validating the 2.0 docs with the PATH binary
-silently passes examples the real compiler rejects. Run both and compare;
-never assume.
+**Since RIDDL 2.0.0 shipped (2026-08-27), the 2.0 gate compiler is the
+`riddlc` on PATH — and this REVERSED.** Verified 2026-08-31: PATH (Homebrew)
+is **`2.0.0`**, the release; `../bin/riddlc` is **`2.0.0-9-e895537f`**, nine
+commits PAST the tag. The pin in `build.sbt` names the release, so the release
+is what the fences must be checked against.
 
-**The staged binary is USUALLY not a clean tag, and the clean tag usually does
-not resolve.** rc.20, rc.24 and rc.25 were each staged one-to-thirty-three
-commits past their tag, with only the staged version's JVM `_3` artifacts in
-`~/.ivy2/local`. So `build.sbt` pins the exact `git describe` version — asking
-for "rc.25" and pinning `2.0.0-rc.25` would fail to resolve AND describe a
-different build than the gate runs. Check all three separately (tag, binary,
-artifact) and pin what is staged.
+Throughout the release candidates the rule was the exact opposite, and it was
+just as emphatic: PATH was **2.0.0-rc.5** against a staged **rc.25**, twenty
+releases behind, and validating with it silently passed examples the real
+compiler rejected. **The instruction inverted without a word of it changing.**
+
+So the durable rule is not "use PATH" and never was "use `../bin`":
+**re-measure which binary is authoritative every time, and run both.**
+
+```bash
+riddlc version          # PATH  -- the released compiler
+../bin/riddlc version   # staged -- a development build, ahead OR behind
+```
+
+`../bin/riddlc` remains a **native binary installed directly at that path**
+(since 2026-08-12; `../riddlc-dist/` is gone). It is the right choice for
+checking behaviour that has not been released yet — and the wrong one for
+gating docs that describe the release.
+
+**Through the RCs the staged binary was usually not a clean tag, and the clean
+tag usually did not resolve.** rc.20, rc.24 and rc.25 were each staged
+one-to-thirty-three commits past their tag, with only the staged version's JVM
+`_3` artifacts in `~/.ivy2/local`, so `build.sbt` had to pin the exact
+`git describe` version.
+
+**The 2.0.0 release ended that, for now:** the tag, a JVM `_3` artifact on
+GitHub Packages, and a working PATH compiler all exist together, so the pin is
+the clean `2.0.0`. Expect the RC pattern to return the moment 2.1 development
+starts. Check all three separately (tag, binary, artifact) and pin what the
+gate actually runs.
 
 **A tag in `riddl` means neither a staged binary nor a resolvable artifact.**
 These three drift apart and must be checked separately: the tag, what
@@ -433,11 +478,17 @@ the tag. All three were reconciled on 2026-08-11 and the pin is now
 resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
-# 2.0 -- sites/riddl/, validated by the STAGED compiler, not the one on PATH
-python3 scripts/validate-riddl-examples.py ../bin/riddlc \
+# 2.0 -- sites/riddl/, validated by the RELEASED compiler on PATH (see above;
+# this was `../bin/riddlc` throughout the RCs and flipped when 2.0.0 shipped)
+python3 scripts/validate-riddl-examples.py riddlc \
   sites/riddl/docs/quickstart.md
 
-# 1.31 -- sites/riddl-1x/, validated by the 1.31 build, NOT the one on PATH
+# 1.31 -- sites/riddl-1x/. THIS PATH NO LONGER EXISTS on Reid's Mac: Homebrew
+# upgraded the `riddlc` formula to 2.0.0 and removed the 1.31.0 keg, so the
+# 1.x gate currently CANNOT BE RUN. Verified 2026-08-31 -- the Cellar holds
+# `riddlc` 2.0.0 and `riddlc-rc` 2.0.0-rc.5, and nothing 1.x. See BACKLOG.
+# Never substitute a 2.0 binary here; it would reject valid 1.x and look like
+# a docs regression.
 python3 scripts/validate-riddl-examples.py \
   /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc \
   sites/riddl-1x/docs/quickstart.md
@@ -481,7 +532,7 @@ a reported number cannot be compared with the last one:
 
 ```bash
 # 2.0 -- the WHOLE tree, not just annotated pages (see Status below for why)
-python3 scripts/validate-riddl-examples.py ../bin/riddlc \
+python3 scripts/validate-riddl-examples.py riddlc \
   $(find sites/riddl/docs -name '*.md' | sort) > /tmp/gate.txt 2>&1
 echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
@@ -491,10 +542,10 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-08-26, rc.25-1): the whole 2.0 tree is **366 validated / 51
-skipped / 0 failed**, and **every blanket skip is gone** — both the 118
-`"illustrative fragment"` ones and the 73 `tutorials/rbbq/` ones. Every
-remaining skip states its own reason.
+**Status** (2026-08-31, riddl **2.0.0** release): the whole 2.0 tree is
+**372 validated / 51 skipped / 0 failed**, exit 0, and **every blanket skip is
+gone** — both the 118 `"illustrative fragment"` ones and the 73
+`tutorials/rbbq/` ones. Every remaining skip states its own reason.
 
 **Run the gate over the whole tree, not over "files with a directive".** The
 old scope was `grep -rl '<!-- riddl:'`, which silently excluded any page that
@@ -609,6 +660,19 @@ compilers):
 | duplicate field / ctor arg | silent | **Error** (rc.18) — a repeated name makes the aggregate's shape ambiguous |
 | repository with no index | — | CompletenessWarning if it answers queries (rc.17); it cannot name which field, because an `on query` body is prose |
 | user interaction | — | only at the **application boundary** — steps name an app's group/input/output, never a context directly |
+| `empty` / `none` | ❌ | ✅ 2.0.0 — the minimum-cardinality inhabitant of a type. `none` is a **synonym**, identical AST, and `prettify` converges both on `empty`. Legal where min cardinality is 0 (`T?`, `T*`, `T{0,n}`). The optional ascription (`empty String*`) is what lets it sit where the position gives no type |
+| `put` value | unchecked | **type-checked against the output's declaration** (2.0.0) — `put order.field to output X` is a `value-type-mismatch` Error when `X` shows the whole record |
+| multi-line `do` / `prompt` | — | brace a sequence of strings: `do { "one" "two" }`, `prompt({ "one" "two" }) as T`. The bare form takes **exactly one** string — statements have no terminator, so juxtaposition would be unparseable |
+| `prompt` statement | ✅ | `[deprecated] [prompt-statement]` — `do` is canonical. Unrelated to the `prompt(...)` **value**, which is current |
+
+**The grammar's comment on `empty` overstates what 2.0.0 enforces.** It says
+`empty` is "an error on `T+`, `T{1,n}` or a bare `T`". Probed against the
+release: the **ascribed** form is checked (`empty String` in a constructor arg
+→ `value-empty-needs-zero-cardinality` Error), while `set field X to empty`
+against a `String+` field draws **nothing**. The docs state the rule where it
+is actually enforced. General lesson: **a grammar comment describes intent;
+only a probe describes behaviour** — the same family as the enumerated-table
+trap, since no fence gate can catch a prose claim that is merely too strong.
 
 **`event-sourced` is not decoration in 2.0.** It turns on four Errors: every
 handled command's type must declare `yields`; every event so named needs an
@@ -894,8 +958,8 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` |
-| Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py riddlc sites/riddl/docs/quickstart.md` (PATH = the 2.0.0 release; see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
 | Deploy | push to `main`; CI loops over `docs-version.yml` |

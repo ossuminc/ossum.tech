@@ -6,64 +6,6 @@ what is durably true goes to CLAUDE.md.
 
 ---
 
-## 1g. Upgrade to riddl 2.0.0-rc.26 — the gate is RED at 6  ← START HERE
-
-**The staged binary moved under us.** `../bin/riddlc` is now **2.0.0-rc.26**
-while `build.sbt` still pins `2.0.0-rc.25-1-76cb9eab`. Nothing is wrong with
-the docs — the last commit was verified green at 366/51/0 against rc.25-1.
-**These six are an un-started upgrade, not a regression.**
-
-Measured 2026-08-26 against the restaged binary: **360 validated / 51 skipped /
-6 failed**. Three families, all from `5c377b9fd` *"[1.13] Type-check put,
-return and require — and give literals a type"*:
-
-**A. `put` now type-checks against the output's declared record (3 sites)**
-
-```
-'put' value is declared 'record { confirmationNumber: String }'
-but the value is 'String'
-```
-
-- `concepts/output.md:59` · `concepts/statement.md:339` ·
-  `references/language-reference.md:1949`
-
-All three are `put order.confirmationNumber to output X`. The output is
-declared `shows record ExampleOrder`, so `put` now wants the **record**, not a
-field of it. Either pass the whole record, or declare an output that shows a
-`String`. **Decide which the docs should teach before editing three pages** —
-they are illustrating `put`, not record-vs-field.
-
-**B. String literals no longer satisfy a `UUID` field (2 sites)**
-
-```
-Field 'cartId' of Command 'CreateOrder' is declared 'UUID'
-but the value is 'String'
-```
-
-- `guides/authors/design/ui-modeling.md:220` · `guides/authors/index.md:200`
-
-Same family already hit in the rc.24 migration, where the fix was to declare
-the id alias as `String` because UUID-vs-String was not what the fence taught.
-The same reasoning likely applies here; check what each page is demonstrating.
-
-**C. A `when` condition must be Boolean (1 site)**
-
-```
-A 'when' condition must be a Boolean value; 'isValid' has type string
-```
-
-- `concepts/conditional.md:41`
-
-Some `isValid` in scope is a String where the fence needs a Boolean. Check
-whether it is the page prelude or the shared wrapper — the `in-handler`
-wrapper's `ExampleData` does carry `isValid is Boolean`, so this is probably
-page vocabulary shadowing it.
-
-**Do the pin and the grammar together**, and regenerate the grammar **last** —
-see the trap in CLAUDE.md, which this repo has already been bitten by once.
-
----
-
 ## 1e-remnant. SUPERSEDED — riddl built the modality checks
 
 **Closed 2026-08-26, by riddl, not by us.** The task filed that morning
@@ -131,8 +73,16 @@ is gone.
 `riddl` entry** in `docs-version.yml` decides where `/riddl/` redirects. Move
 the entries, not just the alias.
 
-**Blocked on:** RIDDL 2.0 final. `../bin/riddlc` is `2.0.0-rc.10-57-e012ebb9`
-(verified 2026-08-10); do not trust a version written here, run it.
+**No longer blocked — RIDDL 2.0.0 shipped on 2026-08-27** (tag `2.0.0` on
+riddl `main`, GitHub release marked Latest, JVM `_3` artifacts on GitHub
+Packages). The docs side is ready: the 2.0 tree gates green against the 2.0.0
+release compiler and the grammar is generated from it.
+
+**This is a deployment change and has not been made — it is Reid's call.**
+Promoting moves what every unqualified `/riddl/` visitor lands on from 1.31 to
+2.0, so it wants deciding rather than inferring.
+
+Do not trust any version written here; run `riddlc version`.
 
 ---
 
@@ -148,9 +98,12 @@ the riddl version pinned in `build.sbt`. It moves often while 2.0 is in RC.
 sbt extractGrammar
 ```
 
-The pin and `../bin/riddlc` must name the SAME version, or the docs describe a
-grammar the validated examples were never checked against. Bumping the pin may
-require bumping `With.Scala3` to whatever riddl built with.
+The pin and the GATE COMPILER must name the same version, or the docs describe
+a grammar the validated examples were never checked against. Since 2.0.0
+shipped that compiler is the **`riddlc` on PATH** (Homebrew, `2.0.0`), NOT
+`../bin/riddlc` — the staged binary is a post-release build and runs ahead of
+the tag (`2.0.0-9-e895537f` on 2026-08-31). Bumping the pin may require bumping
+`With.Scala3` to whatever riddl built with.
 
 **Never `cp` it from `../riddl`.** That is a live working tree. Verified
 2026-08-08: it held an uncommitted `yields`/`replies` split that exists in no
@@ -160,8 +113,47 @@ exist, and looked successful. See CLAUDE.md § "Things that will bite".
 The file is generated wholesale, so partial syncs are not an option — expect
 unrelated rules to come along.
 
-**When:** Any time riddl restages `../bin/riddlc`. Compare `riddlc version`
-against the pin in `build.sbt` at session start.
+**When:** Any time the gate compiler moves. Compare `riddlc version` against
+the pin in `build.sbt` at session start, and check `../bin/riddlc version` too
+— they are different builds and the staged one moves independently.
+
+---
+
+## 3b. The 1.31 gate has no compiler — `sites/riddl-1x/` is ungated
+
+**Found 2026-08-31**, while verifying the 2.0.0 upgrade had not disturbed the
+1.x tree. It had not; the gate simply cannot run any more.
+
+Homebrew upgraded the `riddlc` formula to **2.0.0** and removed the 1.31.0
+keg, so `/opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc` — the path CLAUDE.md
+and this file both name — does not exist:
+
+```
+$ brew list --versions | grep riddl
+riddlc 2.0.0
+riddlc-rc 2.0.0-rc.5      # the stale RC formula; NOT a 1.x build either
+```
+
+`python3 scripts/validate-riddl-examples.py /opt/homebrew/.../1.31.0/bin/riddlc …`
+now dies with `FileNotFoundError`, which at least fails loudly rather than
+silently passing.
+
+**Do NOT point it at a 2.0 binary.** 2.0 rejects constructs that are correct
+1.x (the entity options, `one of`-only alternations, `state S of R` shapes),
+so the run would report a pile of failures that are not defects in the 1.31
+docs — the classic "confident nonsense from the wrong pairing".
+
+**Options, in order of preference:**
+
+1. Get a 1.31.0 binary back — a versioned Homebrew formula, a tarball from the
+   riddl `1.31.0` release, or a local `sbt riddlc/stage` from that tag.
+2. Pin the path in a variable so there is one place to fix.
+3. Accept that the 1.x line is frozen and gate it only before a 1.x edit,
+   recording that decision here.
+
+**Why it matters:** `latest` still points at 1.31, so this is the tree most
+readers currently land on. Its content is unchanged and was green when last
+gated — the exposure is that nothing would catch a *future* edit to it.
 
 ---
 

@@ -11,75 +11,88 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-26
+## HANDOFF — as of 2026-08-31
 
-**Branch `main`, tree clean, 28 commits unpushed.**
+**Branch `main`.** Run `git status` for tree/push state — a number written
+here is wrong the moment anyone commits.
 
-**The pin and the staged binary DISAGREE, and that is the first thing to
-know.** `build.sbt` pins `2.0.0-rc.25-1-76cb9eab`; `../bin/riddlc` is now
-**`2.0.0-rc.26`** — it was restaged after the last commit. Run
-`riddlc version` before trusting anything below.
+**RIDDL 2.0.0 shipped 2026-08-27 and this repo is upgraded to it.**
+`build.sbt` pins riddl `2.0.0` and Scala `3.9.0` (final, LTS — the RC4
+experimental-TASTy hazard is gone). Whole 2.0 tree gates **green: 372
+validated / 51 skipped / 0 failed, exit 0**.
 
-**Gate against rc.26: RED at 6** (360 validated / 51 skipped / 6 failed).
-**Nothing is wrong with the docs.** The last commit was verified green at
-366/51/0 against rc.25-1; these six are an **un-started upgrade**. Full
-diagnosis, with the exact messages and file:line for each, is **BACKLOG 1g** —
-three families, all from riddl's `5c377b9fd` type-checking `put`/`return`/
-`require` and giving literals a type.
+**The gate compiler INVERTED, and it is the thing to get right.** It is now
+the **`riddlc` on PATH** (Homebrew, `2.0.0`) — *not* `../bin/riddlc`, which is
+a post-release staged build ahead of the tag (`2.0.0-9-e895537f`). Throughout
+the RCs the rule was the exact opposite and just as emphatic. Same words,
+opposite meaning. **Run both, every time:**
+
+```bash
+riddlc version && ../bin/riddlc version
+python3 scripts/validate-riddl-examples.py riddlc \
+  $(find sites/riddl/docs -name '*.md' | sort) > /tmp/gate.txt 2>&1
+echo "EXIT=$?"; tail -2 /tmp/gate.txt
+```
 
 ### In flight
 
-Nothing half-edited. The tree is clean and every claim in the last commit was
-true when made. What is *outstanding* is 1g (the rc.26 upgrade) and the
-`group.md` correction it enables — see BACKLOG.
+Nothing half-edited.
 
-### The one thing a fresh session would get wrong
+### The two things a fresh session would get wrong
 
-**`concepts/group.md:42` is now factually false.** It says the modality aliases
-*"carry no structural difference"*. riddl built the checks on 2026-08-26
-(`641b93e44`), so there are now three: `app-verb-modality-mismatch`,
-`app-menu-has-no-choice`, `app-group-unreachable`.
-
-Do **not** replace it with "they are checked" — the verb map is deliberately
-partial and the reasoning matters. BACKLOG 1e-remnant carries it in full:
-`presents`/`emits` are silent by design, and `diffuses`/`serve`/`offer`/`taste`
-have no modality to contradict because no scent or taste output kind exists.
+- **`concepts/group.md:42` is still factually false.** It says the modality
+  aliases *"carry no structural difference"*; riddl built three checks for them
+  on 2026-08-26. The 2.0.0 upgrade did not touch it — **no gate can see a wrong
+  prose claim.** BACKLOG 1e-remnant carries the reasoning that must survive the
+  edit: the verb map is deliberately PARTIAL, `presents`/`emits` are silent by
+  design, and `diffuses`/`serve`/`offer`/`taste` have no modality to contradict.
+- **The 1.31 gate cannot run.** Homebrew's upgrade to `riddlc` 2.0.0 removed the
+  1.31.0 keg, so the documented command dies with `FileNotFoundError`.
+  `sites/riddl-1x/` is unchanged and was green when last gated, but nothing
+  would catch a future edit — and `latest` still points there. **Never
+  substitute a 2.0 binary**; it rejects valid 1.x. See BACKLOG 3b.
 
 ### Traps, each of which has already bitten someone here
 
 - **Regenerate the grammar LAST.** `git checkout -- sites/riddl/docs` reverts
-  it along with everything else, and a fence migration routinely needs one. The
-  rc.24 commit shipped rc.21's grammar this way, under a message claiming
-  otherwise, and nothing could catch it — the gate validates against the
-  BINARY, never the `.ebnf`. Check with
-  `git log --oneline -1 -- sites/riddl/docs/references/riddl-grammar.ebnf`.
+  it along with everything else. The rc.24 commit shipped rc.21's grammar this
+  way under a message claiming otherwise, and nothing could catch it — the gate
+  validates against the BINARY, never the `.ebnf`.
+  **Stronger check now available:** compare hashes against riddl's canonical
+  file *at the tag* (`git cat-file -p <tag>:language/.../ebnf-grammar.ebnf |
+  md5 -q`). Immutable, so unlike `cp` it is safe — but it VERIFIES only, and
+  never replaces `extractGrammar` as the way to produce the file.
+- **`sbt extractGrammar` can hang indefinitely.** 2026-08-31: ~40 min at
+  **0.0% CPU** across two attempts; `sbt -batch shutdown` first did not help.
+  Tells are flat log size, no `[info] compiling`, no CPU. **Do not
+  `pkill -f sbt`** — it kills Reid's IDE and every other project's server.
+- **A grammar comment describes intent; only a probe describes behaviour.**
+  2.0.0's comment claims `empty` errors on a bare `T`; it does so only in the
+  **ascribed** form. Probe before documenting.
 - **A scratch copy of the validator goes stale.** Twice this cost real time,
-  reporting fixes as unapplied. Use
-  `/private/tmp/.../scratchpad/gate`, which re-copies from the live script
-  every run — or re-copy by hand.
-- **The staged binary is usually NOT the clean tag** and the clean tag usually
-  does not resolve from `~/.ivy2/local`. True of rc.20, rc.24 and rc.25. Pin
-  what `riddlc version` prints.
+  reporting fixes as unapplied. Re-copy from the live script every run.
 - **Never check `$?` through a pipe.** `… | tail` reports tail's status, so a
   red gate reads green. Redirect, check, then read.
 
 ### Certainty
 
-- **Verified this session:** the rc.26 version and all six failures (run);
-  BACKLOG 1g's three families (each message captured verbatim); that the four
-  modality checks fire on riddl's fixture; that `group.md:42` contradicts them;
-  that `task/` is empty and `BACKLOG.md` is tracked.
-- **Assumed, not verified:** that BACKLOG 1g's suggested *fixes* are right. The
-  diagnosis is measured; the remedy for each family is a judgement call about
-  what those fences are teaching, and is written as a question, not an answer.
+- **Verified this session (run, not recalled):** riddl tag `2.0.0` exists and
+  its JVM `_3` artifact resolves; PATH `riddlc` is `2.0.0` and `../bin` is
+  `2.0.0-9-e895537f`; riddl 2.0.0 builds with Scala 3.9.0 / sbt 2.0.6 / JDK 25;
+  all six gate failures and their fixes; the grammar hash equality; every
+  `empty`/`none`/`do`/`prompt` claim documented; that the 1.31 keg is gone.
+- **Assumed, not verified:** that leaving the unascribed `set … to empty` case
+  unchecked is intended upstream rather than an oversight. Stated as an
+  observation in the task Results, not as a bug.
 
 ### Pointers
 
-- **BACKLOG.md** — all open work. **1g first**, then the `group.md` correction.
-- **CLAUDE.md** — durable facts: the gate's scope, prelude rules, the grammar
-  trap, the version-differences table.
-- **`task/` is EMPTY.** Seven files closed 2026-08-25; the modality task filed
-  into `riddl/` was answered and is in `riddl/task/done/`.
+- **BACKLOG.md** — all open work. **2** (promote `latest`, Reid's call),
+  **1e-remnant** (`group.md`), **3b** (1.31 gate).
+- **CLAUDE.md** — durable facts: the gate's scope and compiler, prelude rules,
+  the grammar traps, the version-differences table.
+- **`task/` is EMPTY** — `upgrade-riddl-2.0.0.md` closed 2026-08-31 with full
+  Results in `task/done/`.
 
 **Run `/ossuminc-skills:check-tasks` in the new session** — triage is the
 driver's call, and this handoff deliberately does not do it.
@@ -1251,6 +1264,102 @@ The CI gate stays off until this reaches zero.
 
 Documentation site is deployed at https://ossum.tech. All major
 sections are documented with proper RIDDL syntax highlighting.
+
+### RIDDL 2.0.0 final: the upgrade, and the gate compiler inverting (2026-08-31)
+
+riddl tagged **2.0.0** on 2026-08-27. For once the three things that normally
+drift — the tag, a resolvable JVM `_3` artifact, and a working compiler — all
+existed together, so the pin was mechanical: riddl `2.0.0`, Scala `3.9.0`
+(final, LTS). Also corrected in the developer guide from the same source:
+sbt **2.0.6** (was 2.0.2) and JDK 25.
+
+**The gate compiler inverted, and that is the durable lesson.** The standing
+rule was "validate with `../bin/riddlc`, never the `riddlc` on PATH" — PATH was
+Homebrew and lagged the RCs by twenty releases. The moment 2.0.0 shipped,
+Homebrew *became* the release and the staged binary became a build running
+*ahead* of it. Same instruction, opposite meaning, no word of it changed. The
+lesson is not "use PATH now"; it is that **which binary is authoritative is a
+fact to re-measure, not a habit to carry.**
+
+**The six gate failures were an un-started upgrade, not a regression**, exactly
+as BACKLOG 1g predicted — and the failure set was **identical** between rc.26
+and 2.0.0, which is itself informative: the release added no checks over the
+last RC.
+
+- **`put` is type-checked against the output's declaration** (3 sites). All
+  wrote `put order.confirmationNumber to output X` where `X` shows the whole
+  record. Fixed by putting the record — and each page now *states* the rule.
+  The fences were illustrating `put`, not record-vs-field, so teaching the new
+  constraint was the point rather than a workaround.
+- **A String literal no longer satisfies a `UUID` field** (2 sites). Both fixed
+  by passing a correctly-typed value already in scope — `cartId = cartId` from
+  the handled command — which reads better than the `"a value"` placeholder.
+- **A `when` condition must be Boolean** (1 site). `let isValid = "…"` typed
+  the local as String; it became `prompt("…") as Boolean`, which is what the
+  same page already teaches two sections earlier.
+
+### `empty`/`none`: the grammar comment overstates what is enforced (2026-08-31)
+
+Documenting `empty` turned up a discrepancy worth not papering over. The 2.0.0
+grammar comment says `empty` is "an error on `T+`, `T{1,n}` or a bare `T`".
+Probed against the release compiler:
+
+- `yield event Ev(id = empty String, …)` → **Error**,
+  `value-empty-needs-zero-cardinality`. The **ascribed** form is checked.
+- `set field St.tags to empty` where `tags is String+` → **0 errors**. The
+  unascribed form in a `set` target is not cardinality-checked.
+
+The docs state the rule where it is actually enforced, and the difference is
+filed upstream as an observation. **A grammar comment describes intent; only a
+probe describes behaviour** — same family as the enumerated-table trap, since
+no fence gate can catch a prose claim that is merely too strong.
+
+Also confirmed by probe and documented: `do { "one" "two" }` and
+`prompt({ … }) as T` take a braced `literal_string_block`; the bare form takes
+exactly one string (statements have no terminator, so juxtaposition would be
+unparseable); and the bare `prompt` *statement* emits
+`[deprecated] [prompt-statement]` in favour of `do`. `concepts/value.md` went
+from "The Ten Forms" to "The Eleven Forms" — an enumerated count is a claim.
+
+### The grammar needed no regeneration, and `extractGrammar` could not run
+
+**`sbt extractGrammar` hung.** Two attempts, ~40 minutes, **0.0% CPU
+throughout**, riddl 2.0.0 never reaching the Coursier cache, both logs ending
+at an IDE `sbt-structure` dump with an *identical* temp filename.
+`sbt -batch shutdown` first made no difference. The tells that separate a hang
+from a slow build: **flat log size, no `[info] compiling`, no CPU.**
+`pkill -f sbt` would have cleared it and is exactly what CLAUDE.md forbids.
+
+**It did not need to run.** The committed grammar is **byte-identical**
+(md5 `9ef5b7e2…`) to riddl's canonical `ebnf-grammar.ebnf` at tag `2.0.0` — it
+did not change between rc.25-1 and the release. Verified by reading riddl's
+file out of **git at the tag**, not off the working tree.
+
+That distinction is the whole point. `cp` from `../riddl` is forbidden because
+that path is a live working tree which has held uncommitted language changes;
+`git cat-file` at a **tag** is immutable, so it carries none of that risk — but
+it still bypasses the build, so it **verifies** and never **produces**. It
+answers "is this file right?", never "make this file right".
+
+So the upgrade shipped a provably correct grammar without the task running —
+a better outcome than a regenerated file nobody checked, and the direct answer
+to the older trap where a commit claimed a regeneration a `git checkout` had
+silently undone.
+
+### A self-inflicted near-miss worth recording (2026-08-31)
+
+Rewriting the HANDOFF section by slicing from `## HANDOFF` to `## Current
+Status` **deleted ~1,235 lines — 34 historical entries**, because the HANDOFF
+section had accumulated until the next `##` heading was a thousand lines away.
+The tree was uncommitted, so `git checkout HEAD -- NOTEBOOK.md` restored it,
+and the replacement was redone against the real boundary (`### The rc.16
+migration`).
+
+Caught by reading `git diff --stat` before committing: **1,341 deletions for
+what should have been an additive session.** The habit that saved it is
+cheap — *look at the diffstat and ask whether the shape matches the intent*.
+A heading-level diff (`diff <(git show HEAD:F | grep '^#') <(grep '^#' F)`)
+then names exactly what would have been lost.
 
 **In progress — RIDDL 2.0 docs on `release/2` (2026-07-28):**
 
