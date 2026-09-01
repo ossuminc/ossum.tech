@@ -245,7 +245,8 @@ context Catalog is {
         // Commands decide; they do not change state directly.
         on command UpdatePrice {
           when prompt("price is different from current") then {
-            yield event PriceUpdated(productId = "a value", oldPrice = 1.00, newPrice = 1.00, at = "a value")
+            yield event PriceUpdated(productId = productId, oldPrice = Active.price,
+              newPrice = newPrice, at = prompt("the moment the price changed") as TimeStamp)
           } else {
             error "the new price matches the current price"
           } end

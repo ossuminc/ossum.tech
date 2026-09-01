@@ -17,26 +17,33 @@ lazy val root = Root(
   startYr = 2025,
   devs = developers
 ).configure(
-  // 3.9.0-RC4, not the org-standard 3.8.4, because that is what riddl
-  // publishes 2.0.x with. An RC compiler emits EXPERIMENTAL TASTy
-  // (28.9-experimental-1), which only the exact compiler that produced it can
-  // read -- 3.8.4 accepts 28.0 to 28.8 and fails to load every riddl class.
-  // Keep these two lines in step: bumping the riddl version may require
-  // bumping this one to whatever riddl built with.
-  With.Scala3.configure(version = Some("3.9.0-RC4")),
-  With.Riddl.library(version = "2.0.0-rc.25-1-76cb9eab", nonJVMDependency = false)
+  // 3.9.0, not the org-standard 3.8.4, because that is what riddl publishes
+  // 2.0.0 with, and TASTy is not forward-compatible: 3.8.4 accepts 28.0 to
+  // 28.8 and fails to load every riddl class.
+  //
+  // This is the FINAL 3.9.0, and it is an LTS line, so it is expected to hold
+  // for a long time. The RC4 pin that stood here through the 2.0 release
+  // candidates is gone -- with it goes the experimental-TASTy hazard, where
+  // 28.9-experimental-1 could only be read by the exact compiler that emitted
+  // it. Keep these two lines in step anyway: bumping the riddl version may
+  // require bumping this one to whatever riddl built with.
+  With.Scala3.configure(version = Some("3.9.0")),
+  With.Riddl.library(version = "2.0.0", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
   // Extract RIDDL grammar by compiling and running ExtractGrammar.
   //
-  // The library above resolves a real 2.0 build, so this task produces the
+  // The library above resolves the 2.0.0 RELEASE, so this task produces the
   // grammar the docs actually describe -- the hand-copy from riddl's release/2
-  // branch that the old 1.29.0 pin forced is no longer needed.
+  // branch that the old 1.29.0 pin forced is no longer needed, and that branch
+  // no longer exists to copy from.
   //
-  // Keep the version above in step with ../bin/riddlc, the STAGED 2.0
-  // compiler that validates the fences. If they drift, the grammar in the
-  // docs and the compiler enforcing it are describing different languages.
+  // Keep the version above in step with the riddlc that validates the fences,
+  // which since 2.0.0 shipped is the one on PATH (Homebrew), NOT the staged
+  // ../bin/riddlc -- that is a post-release build and runs ahead of the tag.
+  // If the pin and the gate compiler drift, the grammar in the docs and the
+  // compiler enforcing it are describing different languages.
   // Re-run this task whenever the riddl version here is bumped.
   // Def.uncached because sbt 2 caches task results by hashing their inputs,
   // and this task has no hashable result: it shells out and writes a file as

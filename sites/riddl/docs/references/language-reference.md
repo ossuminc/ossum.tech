@@ -1304,12 +1304,36 @@ needs a value, it accepts any of these forms:
 | Form | Syntax | Meaning |
 |------|--------|---------|
 | Literal | `"some text"` | Opaque pseudo-code or a literal constant |
+| Empty | `empty`, `none`, `empty String*` | The minimum-cardinality inhabitant of a type; the optional ascription states which type |
 | Value reference | `order.total` | A named field, state field, function input, or `let` local |
 | Constructor | `OrderPlaced(total, id = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount") [as <type>]` | A value computed by AI at generation time; the optional ascription states its type |
 | Boolean | `a > b and not c` | A structured boolean expression |
+
+### Empty and None
+
+`empty` is the minimum-cardinality inhabitant of a type — no value at all.
+`none` is a synonym producing the identical AST; `prettify` converges both on
+`empty`.
+
+<!-- riddl: in-handler -->
+```riddl
+set field nickname to empty
+set field tags to none
+let noTags = empty String*
+```
+
+It is legal exactly where the minimum cardinality is **zero** — `T?`, `T*` or
+`T{0,n}`. A bare `T` or a `T+` demands at least one value, and asking `empty`
+of one is the `value-empty-needs-zero-cardinality` Error.
+
+The optional type ascription lets `empty` appear where the position supplies no
+expected type, such as a constructor argument. A type expression is a bare
+path and statements have no terminator, so the ascription may not begin with a
+statement keyword — otherwise `set x to empty` followed by `set y to …` would
+swallow the second statement as the first's type.
 
 ### Constructors
 
@@ -1947,8 +1971,12 @@ handlers:
 
 <!-- riddl: in-application -->
 ```riddl
-put order.confirmationNumber to output ConfirmationPanel
+put order to output ConfirmationPanel
 ```
+
+The value is checked against the output's declared type. `ConfirmationPanel`
+is declared `shows record ExampleOrder`, so putting one field of that record is
+a `value-type-mismatch` Error.
 
 ### Return Statement
 
@@ -2213,7 +2241,18 @@ do "Calculate the total price including all applicable taxes and discounts"
 ```
 
 This is useful for describing business logic that will be implemented in
-target code.
+target code. For several lines of guidance, brace a sequence of strings:
+
+<!-- riddl: in-handler -->
+```riddl
+do {
+  "Apply the loyalty discount before any promotional discount."
+  "Round the result to the customer's currency."
+}
+```
+
+The bare form takes exactly one string. The same block shape is what
+`prompt(...)` accepts between its parentheses.
 
 !!! warning "The `prompt` statement is deprecated"
     `do` is canonical. `prompt "..."` still builds the same node and emits a

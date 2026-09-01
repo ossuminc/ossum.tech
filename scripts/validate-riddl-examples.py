@@ -384,7 +384,11 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "      id is String, total is Natural, grandTotal is Natural,\n"
             "      balance is Natural, recommendation is String,\n"
             # A Boolean field so a bare/negated boolean condition has a subject.
-            "      isValid is Boolean }\n"
+            # `nickname` and `tags` have MINIMUM CARDINALITY ZERO so that the
+            # `empty`/`none` docs have a legal assignment target: `empty` is
+            # rejected on a bare `T` or a `T+`. Added, never renamed.
+            "      isValid is Boolean, nickname is String?,\n"
+            "      tags is String* }\n"
             "    record ExampleUser is { hasPermission is Boolean }\n"
             # `count` but NOT `total`: a bare `total` already resolves through
             # the state record, and adding a second one makes it ambiguous.

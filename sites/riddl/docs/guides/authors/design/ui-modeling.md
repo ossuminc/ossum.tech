@@ -225,7 +225,7 @@ application context StoreFront is {
 
   handler OrderHandler is {
     on command PlaceOrder {
-      send command CreateOrder(cartId = "a value") to outlet OrdersOut
+      send command CreateOrder(cartId = cartId) to outlet OrdersOut
     }
   }
 }

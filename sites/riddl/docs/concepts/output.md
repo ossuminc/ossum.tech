@@ -58,9 +58,15 @@ statement, which is valid in application and context handlers:
 <!-- riddl: in-app-clauses -->
 ```riddl
 on query GetReceipt {
-  put order.confirmationNumber to output Receipt
+  put order to output Receipt
 }
 ```
+
+The value `put` sends is **type-checked against what the output declares**.
+`Receipt` above is declared `shows record ExampleOrder`, so `put` wants that
+whole record — publishing one field of it is an Error. An output is the shape
+the user receives, so if a single field is what the user should see, declare an
+output that shows that field's type rather than narrowing at the `put`.
 
 An output that no handler ever writes to draws a **CompletenessWarning** when
 a use case claims to show it — see

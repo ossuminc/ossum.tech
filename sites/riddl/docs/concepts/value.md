@@ -32,11 +32,12 @@ RIDDL 2.0 replaced what had been a mostly-opaque quoted string with a real
 value-expression system. A literal string is still accepted everywhere, so
 pseudo-code remains available where structure would be false precision.
 
-## The Ten Forms
+## The Eleven Forms
 
 | Form | Syntax | Meaning |
 |------|--------|---------|
 | Literal | `"some text"` | Opaque pseudo-code, or a literal constant |
+| Empty | `empty`, `none`, `empty String*` | The minimum-cardinality inhabitant of a type — the absence of a value |
 | Value reference | `order.total` | A field, state field, function input, or `let` local |
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
@@ -134,6 +135,24 @@ It is distinguished from the `do` **statement** by its parentheses. The
 statement describes an action for a human to implement; the value denotes
 something AI computes.
 
+### Multi-line prompts
+
+Guidance long enough to need more than one line goes in **braces**, as a
+sequence of strings with no commas or other separator between them:
+
+<!-- riddl: in-handler -->
+```riddl
+let sentiment = prompt({
+  "rate the customer's sentiment from the note on the order,"
+  "returning a value between 0.0 and 1.0"
+}) as Real
+```
+
+The braces are the only multi-line form — a bare `prompt("…")` takes **exactly
+one** string. That restriction is deliberate: RIDDL statements have no
+terminator, so allowing two juxtaposed strings would leave nothing but the next
+keyword to mark where the statement ended.
+
 ## Typed holes: `prompt("…") as <type>`
 
 `prompt(...)` may carry an optional type ascription:
@@ -159,6 +178,51 @@ The ascription **restates the position's type; it never overrides it.** A
 determines the type — a constructor argument, a field — the ascription must
 agree with it. Writing one is opt-in: unascribed `prompt(...)` is unchanged and
 still valid, and is the right form wherever the position already says enough.
+
+## Empty and None
+
+`empty` denotes the **minimum-cardinality inhabitant** of a type: no value at
+all, written where a value is expected.
+
+<!-- riddl: in-handler -->
+```riddl
+set field nickname to empty
+set field tags to none
+```
+
+`none` is a **synonym**, not a second construct. Both spellings produce the
+identical AST, and `prettify` converges them on `empty`. Use whichever reads
+better where it appears — `none` often suits an optional scalar and `empty` a
+collection — but expect formatted output to say `empty`.
+
+### Only where the minimum cardinality is zero
+
+`empty` is meaningful only for a type that admits having no value: an optional
+`T?`, a sequence `T*`, or an explicit range starting at zero, `T{0,n}`. A bare
+`T` or a `T+` requires at least one value, so `empty` is not an inhabitant of
+it, and asking for one is the `value-empty-needs-zero-cardinality` Error.
+
+### The type ascription
+
+`empty` may carry a type, which is what lets it be written in a position that
+does not itself supply one — most often a constructor argument:
+
+<!-- riddl: in-handler -->
+```riddl
+let noTags = empty String*
+let unset  = none String?
+```
+
+The ascription is where the cardinality rule is checked, so `empty String` —
+a bare, one-or-more type — is the Error above, while `empty String*` is fine.
+
+!!! note "Why the ascription cannot be followed by just anything"
+    A type expression is a bare path, and RIDDL statements are separated by
+    whitespace with no terminator. Without a guard, `set x to empty` followed
+    by `set y to …` would read the second statement's `set` as the first's
+    ascription. Every statement begins with a reserved keyword, so the parser
+    refuses those in the ascription position — a complete fix rather than a
+    heuristic, since no type can be named `set`.
 
 ## Boolean Expressions
 

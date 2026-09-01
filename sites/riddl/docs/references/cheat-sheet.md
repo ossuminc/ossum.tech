@@ -693,6 +693,7 @@ Wherever a statement needs a value, any of these is accepted:
 | Form | Syntax | Meaning |
 |---|---|---|
 | Literal | `"some text"` | Opaque pseudo-code or a literal constant |
+| Empty | `empty`, `none`, `empty String*` | No value at all. `none` is a synonym; prettify emits `empty`. Only where min cardinality is 0 (`T?`, `T*`, `T{0,n}`) — an Error on `T` or `T+`. |
 | Value reference | `order.total` | A field, state field, function input, or `let` local |
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record; positional args first, then named |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
@@ -798,7 +799,7 @@ The message operand may be a bare reference or an inline constructor.
 
 | Statement | Syntax | Description |
 |---|---|---|
-| `do` | `do "Calculate the total"` | Natural-language action description for implementation. |
+| `do` | `do "Calculate the total"` | Natural-language action description for implementation. Brace a sequence of strings for several lines: `do { "one" "two" }`. |
 | `error` | `error "Invalid state"` | Refuse to proceed, with a reason. |
 | `code` | `` ```scala ... ``` `` | Embed implementation code (scala, java, python, mojo). |
 

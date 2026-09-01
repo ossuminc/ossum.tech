@@ -39,7 +39,7 @@ Conditions can reference identifiers defined with `let`:
 
 <!-- riddl: in-handler -->
 ```riddl
-let isValid = "order.items.count > 0"
+let isValid = prompt("the order has at least one item") as Boolean
 when isValid then {
   // actions when valid
 } end

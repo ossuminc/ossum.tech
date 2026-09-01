@@ -337,8 +337,11 @@ application or context handler:
 
 <!-- riddl: in-application -->
 ```riddl
-put order.confirmationNumber to output ConfirmationPanel
+put order to output ConfirmationPanel
 ```
+
+The value must match the type the output declares — `ConfirmationPanel` shows
+a record here, so `put` sends the record, not a field of it.
 
 and `return`, in a function body:
 
@@ -405,6 +408,22 @@ implemented in target code:
 do "Calculate the total price including all applicable taxes, discounts,
     and shipping based on the customer's location and membership tier"
 ```
+
+Guidance that wants to be several distinct lines goes in **braces**, as a
+sequence of strings with nothing between them:
+
+<!-- riddl: in-handler -->
+```riddl
+do {
+  "Apply the loyalty discount before any promotional discount."
+  "Round the result to the customer's currency."
+  "Never let the total fall below zero."
+}
+```
+
+The bare form takes **exactly one** string; the braces are what admit more.
+Statements have no terminator, so two juxtaposed bare strings would leave
+nothing but the next keyword to say where the statement ended.
 
 !!! warning "The `prompt` statement is deprecated"
     `do` is canonical; `prompt "..."` emits a `[deprecated]` message and

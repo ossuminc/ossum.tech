@@ -10,15 +10,24 @@ systems, see the [Author's Guide](../authors/index.md) or
 To work on RIDDL development, you'll need:
 
 - **JDK 25 or later** (Temurin recommended)
-- **Scala 3.9.0-RC4** (managed by sbt)
-- **sbt 2.0.2** (Scala Build Tool)
+- **Scala 3.9.0** (managed by sbt)
+- **sbt 2.0.6** (Scala Build Tool)
 - **Git** for version control
 
-!!! note "Why an RC compiler"
-    RIDDL 2.0 builds with Scala 3.9.0-RC4, which emits *experimental* TASTy.
-    That is readable only by the exact compiler that produced it, so anything
-    consuming the riddl libraries has to build with the same version —
-    including this documentation site.
+!!! note "Scala 3.9.0 is an LTS release, and RIDDL expects to stay on it"
+    RIDDL 2.0.0 builds with Scala **3.9.0 final**. It is a long-term-support
+    line, so this is not a version that will move every few months — expect it
+    to hold for a good while.
+
+    That matters to anyone consuming the riddl libraries, because TASTy is not
+    forward-compatible: a compiler reads only TASTy versions up to its own, so
+    a project on an older Scala 3 cannot load riddl's classes at all. Build
+    against 3.9.0 and the problem does not arise.
+
+    Through the 2.0 release candidates this pin was `3.9.0-RC4`, which was
+    worse than a mere version difference: an RC emits *experimental* TASTy
+    (`28.9-experimental-1`) readable only by the exact compiler that produced
+    it. The final release ends that constraint.
 
 If you are writing a tool **against** RIDDL rather than working on RIDDL
 itself, start with [AST, Finder and Passes](ast-api.md).
