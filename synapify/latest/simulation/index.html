@@ -1539,10 +1539,10 @@ and the expected outcomes. Scenarios are the "test cases" for your design.</p>
 <h3 id="example-scenario">Example Scenario<a class="headerlink" href="#example-scenario" title="Permanent link">&para;</a></h3>
 <p>For a shopping cart entity, a scenario might test adding items:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Scenario: Add item to empty cart
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  Given an empty Cart for customer &quot;C123&quot;
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  When command AddItem with {productId: &quot;P456&quot;, quantity: 2}
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  Given an empty Cart for customer "C123"
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  When command AddItem with {productId: "P456", quantity: 2}
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  Then event ItemAdded is published
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  And Cart state contains item &quot;P456&quot; with quantity 2
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  And Cart state contains item "P456" with quantity 2
 </span></code></pre></div>
 <h3 id="scenario-editor">Scenario Editor<a class="headerlink" href="#scenario-editor" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
