@@ -118,8 +118,8 @@ stamped `2.0`. Each product now deploys under its own prefix with its own
 | Deployed at | Source | Version |
 |---|---|---|
 | `/` | `sites/shell/` — landing, About, **IDE help** | **unversioned** |
-| `/riddl/2.0/` | `sites/riddl/` — the 2.0 language docs | 2.0 · `next` |
-| `/riddl/1.31/` | `sites/riddl-1x/` — the 1.x maintenance line | 1.31 · `latest` |
+| `/riddl/2.0/` | `sites/riddl/` — the 2.0 language docs | 2.0 · **`latest`** |
+| `/riddl/1.31/` | `sites/riddl-1x/` — the 1.x maintenance line | 1.31 (no alias) |
 | `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | 0.6 · `latest` |
 | `/synapify/<ver>/` | `sites/synapify/` | 0.17 · `latest` |
 
@@ -376,11 +376,31 @@ crawlers that every version of every page is the same URL.
   build for some time, snapshot builds land in the local cache via riddl's
   `publishLocal`, and the stale warning is what caused the `cp` above.)
 
-### When RIDDL 2.0 ships final
+### RIDDL 2.0 holds `latest` (promoted 2026-09-02)
 
-`latest` currently points at **1.31**, which is correct while 2.0 is a release
-candidate. Promoting it is a short procedure with one landmine, written up in
-**`scripts/promote-2.0-to-latest.md`**.
+**Done.** RIDDL 2.0.0 shipped on 2026-08-27 and `latest` was moved from 1.31 to
+2.0 in one commit, per **`scripts/promote-2.0-to-latest.md`**: the alias moved
+AND the two `riddl` entries swapped order, because the last entry for a prefix
+is the one `mike set-default` lands on. `next` was dropped from the manifest at
+the same time — it meant "unreleased preview" and is misleading now.
+
+**One manual step of that procedure remains and CI cannot do it:** the `next`
+alias copy already on `gh-pages` has to be deleted by hand, because mike only
+adds and updates aliases from the manifest and never removes one that has
+stopped being declared:
+
+```bash
+git fetch origin
+git branch -f gh-pages "$(git rev-parse origin/gh-pages)"   # mike refuses if stale
+mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next
+```
+
+Until that runs, `/riddl/next/` keeps serving a frozen copy and the version
+selector still lists it.
+
+`VERSION_SOURCE` in `scripts/check-cross-site-links.py` maps aliases to source
+trees and **nothing enforces the correspondence** — it was updated in the same
+commit so `latest` resolves against `sites/riddl/`. Keep it in step.
 
 **The old landmine is gone.** It used to be that two branches must never both
 declare `latest`, because `--update-aliases` *moves* the alias to the most

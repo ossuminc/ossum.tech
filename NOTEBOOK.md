@@ -49,8 +49,12 @@ Nothing half-edited.
 - **The 1.31 gate cannot run.** Homebrew's upgrade to `riddlc` 2.0.0 removed the
   1.31.0 keg, so the documented command dies with `FileNotFoundError`.
   `sites/riddl-1x/` is unchanged and was green when last gated, but nothing
-  would catch a future edit — and `latest` still points there. **Never
-  substitute a 2.0 binary**; it rejects valid 1.x. See BACKLOG 3b.
+  would catch a future edit. **Never substitute a 2.0 binary**; it rejects
+  valid 1.x. See BACKLOG 3b. (Less exposed since 2026-09-02 — `latest` now
+  points at 2.0, so 1.31 is no longer the default landing.)
+- **`/riddl/next/` is stale and must be deleted by hand.** The promotion
+  dropped `next` from the manifest, but mike never removes an alias that has
+  merely stopped being declared. One command, BACKLOG 2b.
 
 ### Traps, each of which has already bitten someone here
 
@@ -1264,6 +1268,43 @@ The CI gate stays off until this reaches zero.
 
 Documentation site is deployed at https://ossum.tech. All major
 sections are documented with proper RIDDL syntax highlighting.
+
+### Promoting 2.0 to `latest` (2026-09-02)
+
+Done the day after the upgrade, following `scripts/promote-2.0-to-latest.md`
+rather than improvising — the file exists precisely because this used to be
+dangerous.
+
+**The alias move is only half of it.** `mike set-default` runs once per
+manifest entry, so the **last** entry for a prefix decides where `/riddl/`
+redirects. Moving `latest` onto the 2.0 entry while leaving it first would have
+pointed `/riddl/` at 1.31 anyway — a silent wrong answer, since both entries
+deploy successfully either way. The entries were swapped as well as the alias.
+
+**`next` was dropped, and dropping it is not the same as deleting it.** mike
+adds and updates aliases from the manifest; it never removes one that has
+stopped being declared. So `/riddl/next/` keeps serving a frozen RC copy until
+`mike delete` is run by hand. Filed as BACKLOG 2b rather than left implicit —
+the manifest looks complete and gives no hint that a stale alias survives.
+
+**Two things updated in the same commit because nothing enforces them:**
+
+- `VERSION_SOURCE` in `check-cross-site-links.py` maps each alias to the source
+  tree that builds it. Had it kept saying `"latest": "riddl-1x"`, the link
+  checker would have validated `latest` links against the 1.x tree and passed
+  or failed for the wrong reasons.
+- The `outdated_banner` in `sites/riddl/mkdocs.yml`. Material renders it only
+  when a build is *not* `latest`, so it stopped showing the moment 2.0 took the
+  alias — but it is baked into the build and reappears the day 2.1 takes it.
+  The old text announced an unreleased 2.0 preview, which would have been
+  simply false by then. **A string that is invisible today still has to be
+  right for the day it becomes visible.**
+
+**On racing CI.** The promotion was prepared while a publish run was already
+in flight. Pushing immediately would have started a second concurrent
+`mike deploy --push` against the same `gh-pages`, which is a genuine race, not
+a tidiness concern. The run finished on its own in 1m10s and the question
+evaporated — but the rule stands: one publish at a time.
 
 ### RIDDL 2.0.0 final: the upgrade, and the gate compiler inverting (2026-08-31)
 

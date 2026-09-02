@@ -15,13 +15,13 @@ extra:
     provider: mike
     alias: true
   # Shown only when this build is not the `latest` alias. Worded per branch,
-  # because each branch is its own build: this one documents RIDDL 2.0, which
-  # is unreleased, so it announces a preview. docs/1.x says the opposite --
-  # that a newer release exists. When 2.0 becomes `latest` this stops showing
-  # on its own.
+  # Material shows this ONLY when the build is not `latest`. Since 2.0 now
+  # holds `latest` it does not render today -- but it is baked into the build,
+  # so it will reappear the day 2.1 takes the alias. It therefore has to read
+  # correctly for that day, not for this one. The old text announced an
+  # unreleased preview, which would have been simply false by then.
   outdated_banner: >-
-    This is a preview of the RIDDL 2.0 documentation. RIDDL 2.0 has not been
-    released yet.
+    You are reading documentation for an older release of RIDDL.
 
 nav:
   - Home: index.md

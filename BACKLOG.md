@@ -61,28 +61,34 @@ diagnostic there trains people to ignore diagnostics.
 
 ---
 
-## 2. Promote RIDDL 2.0 to `latest` when it ships final
+## 2b. Delete the stale `next` alias from gh-pages — ONE manual command
 
-**What:** `latest` points at 1.31, which is correct while 2.0 is an RC.
+**The promotion itself is DONE (2026-09-02):** `latest` moved from 1.31 to 2.0,
+the two `riddl` entries swapped order so `mike set-default` lands on 2.0, and
+`next` was dropped from `docs-version.yml`. `VERSION_SOURCE` in
+`scripts/check-cross-site-links.py` was updated in the same commit.
 
-**How:** `scripts/promote-2.0-to-latest.md`. Since TASK G it is **one commit** —
-both RIDDL lines publish from `main`, so the old two-branches-one-alias landmine
-is gone.
+**What is left cannot be done by CI.** mike adds and updates aliases from the
+manifest; it never removes one that has merely stopped being declared. So the
+`next` copy already on `gh-pages` stays there, serving frozen 2.0-RC content
+at `/riddl/next/` and still listed in the version selector.
 
-**The one rule left:** `mike set-default` runs once per entry, so the **last
-`riddl` entry** in `docs-version.yml` decides where `/riddl/` redirects. Move
-the entries, not just the alias.
+```bash
+git fetch origin
+git branch -f gh-pages "$(git rev-parse origin/gh-pages)"   # mike refuses if stale
+mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next
+```
 
-**No longer blocked — RIDDL 2.0.0 shipped on 2026-08-27** (tag `2.0.0` on
-riddl `main`, GitHub release marked Latest, JVM `_3` artifacts on GitHub
-Packages). The docs side is ready: the 2.0 tree gates green against the 2.0.0
-release compiler and the grammar is generated from it.
+`-F` is required: mike reads `mkdocs.yml` from the working directory to resolve
+the branch, and there is no config at the repo root.
 
-**This is a deployment change and has not been made — it is Reid's call.**
-Promoting moves what every unqualified `/riddl/` visitor lands on from 1.31 to
-2.0, so it wants deciding rather than inferring.
-
-Do not trust any version written here; run `riddlc version`.
+**Run it after the promotion deploy lands**, not before — deleting an alias the
+in-flight deploy is about to rewrite is how you get a confusing half-state.
+Verify with `curl -sS https://ossum.tech/riddl/versions.json` (expect 2.0
+`[latest]` and a bare 1.31, no `next`) and
+`curl -sSo /dev/null -w '%{http_code}\n' https://ossum.tech/riddl/next/quickstart/`
+(expect 404). Judge from `gh-pages`, not a fresh curl of the live site — the
+CDN serves stale for up to ten minutes and has produced three false alarms.
 
 ---
 

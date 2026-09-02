@@ -47,9 +47,10 @@ brew upgrade riddlc
 
 ## Release Candidates
 
-RIDDL 2.0 is being released through a series of **release candidates**, which
-ship from a separate formula so they can never reach anyone who did not ask for
-them.
+RIDDL ships release candidates ahead of each major or minor release, from a
+separate formula so they can never reach anyone who did not ask for them.
+RIDDL **2.0.0 is now final**, so the stable formula is what you want unless you
+are deliberately testing an upcoming release.
 
 ```bash
 brew unlink riddlc && brew install ossuminc/tap/riddlc-rc
@@ -73,11 +74,12 @@ riddlc version
 ```
 
 ```
-[info] 2.0.0-rc.1
+[info] 2.0.0
 ```
 
-Once RIDDL 2.0 ships as a final release, `brew upgrade riddlc` on the stable
-formula is all you need, and the RC formula can be removed:
+If you installed the RC formula during the 2.0 candidates, `brew upgrade
+riddlc` on the stable formula is all you need now, and the RC formula can be
+removed:
 
 ```bash
 brew uninstall riddlc-rc && brew link riddlc && brew upgrade riddlc
@@ -89,13 +91,14 @@ brew uninstall riddlc-rc && brew link riddlc && brew upgrade riddlc
     pattern — the name itself is the experimental marking.
 
 !!! warning "An RC is not for production models"
-    A release candidate may still change language behaviour before the final
-    release. Expect to re-validate models against the final 2.0, and see
+    A release candidate may still change language behaviour before the release
+    it precedes. Expect to re-validate models against the final version. If you
+    are coming from 1.x, see
     [Migrating from 1.x](../../migration/1.x-to-2.0.md) for what changed.
 
 ## Build from Source
 
-Building RIDDL 2.0 from source requires JDK 25 and **sbt 2.0.2 or later**.
+Building RIDDL 2.0 from source requires JDK 25 and **sbt 2.0.6 or later**.
 
 !!! warning "sbt 2 is required for RIDDL 2.0"
     RIDDL 2.0 migrated to sbt 2 and the `projectMatrix` build layout, so an

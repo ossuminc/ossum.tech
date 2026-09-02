@@ -42,7 +42,7 @@ VERSION_SOURCE = {
         "2.0": "riddl",
         "next": "riddl",
         "1.31": "riddl-1x",
-        "latest": "riddl-1x",
+        "latest": "riddl",
     },
 }
 
