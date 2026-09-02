@@ -2397,16 +2397,16 @@ takes significant time.</p>
 <p>The plugin follows all <code>include</code> directives from your top-level file:</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// myproject.riddl</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">domain</span> <span class="n">MyProject</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kn">include</span> <span class="s2">&quot;contexts/orders.riddl&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kn">include</span> <span class="s2">&quot;types/common.riddl&quot;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kn">include</span> <span class="s2">"contexts/orders.riddl"</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kn">include</span> <span class="s2">"types/common.riddl"</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>All included files are validated together, ensuring cross-file references
 resolve correctly.</p>
 <h3 id="understanding-validation-messages">Understanding Validation Messages<a class="headerlink" href="#understanding-validation-messages" title="Permanent link">&para;</a></h3>
 <p>Messages include severity and location:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Error: [orders.riddl:42:15] Undefined reference to type &#39;CustomerID&#39;
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Warning: [types.riddl:10:1] Missing brief description for type &#39;Address&#39;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Error: [orders.riddl:42:15] Undefined reference to type 'CustomerID'
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Warning: [types.riddl:10:1] Missing brief description for type 'Address'
 </span></code></pre></div>
 <p>Click the message to navigate to <code>orders.riddl</code>, line 42, column 15.</p>
 <h3 id="performance-tips">Performance Tips<a class="headerlink" href="#performance-tips" title="Permanent link">&para;</a></h3>
