@@ -1894,10 +1894,10 @@ via a JSON configuration file.</p>
 <h3 id="adding-the-riddl-mcp-server">Adding the RIDDL MCP Server<a class="headerlink" href="#adding-the-riddl-mcp-server" title="Permanent link">&para;</a></h3>
 <p>Create or edit the configuration file:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">&quot;riddl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;riddlg&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">]</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">"riddl"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">      </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"riddlg"</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">      </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">]</span>
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
@@ -1906,10 +1906,10 @@ via a JSON configuration file.</p>
 on the system <code>PATH</code>, use its absolute path as the <code>command</code>.</p>
 <h2 id="verify-connection">Verify Connection<a class="headerlink" href="#verify-connection" title="Permanent link">&para;</a></h2>
 <p>Test the connection with a simple RIDDL validation:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">&quot;validate this RIDDL: domain Test is { ??? }&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">"validate this RIDDL: domain Test is { ??? }"</span>
 </span></code></pre></div>
 <p>Or in explain mode:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>explain<span class="w"> </span><span class="s2">&quot;What does this RIDDL code do: domain Shop is { context Orders is { ??? } }&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>explain<span class="w"> </span><span class="s2">"What does this RIDDL code do: domain Shop is { context Orders is { ??? } }"</span>
 </span></code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <h3 id="command-modes">Command Modes<a class="headerlink" href="#command-modes" title="Permanent link">&para;</a></h3>
@@ -1933,22 +1933,22 @@ on the system <code>PATH</code>, use its absolute path as the <code>command</cod
 </table>
 <h3 id="riddl-specific-examples">RIDDL-Specific Examples<a class="headerlink" href="#riddl-specific-examples" title="Permanent link">&para;</a></h3>
 <p>Validate a file:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">&quot;validate this RIDDL file: </span><span class="k">$(</span>cat<span class="w"> </span>mymodel.riddl<span class="k">)</span><span class="s2">&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">"validate this RIDDL file: </span><span class="k">$(</span>cat<span class="w"> </span>mymodel.riddl<span class="k">)</span><span class="s2">"</span>
 </span></code></pre></div>
 <p>Explain an error:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>explain<span class="w"> </span><span class="s2">&quot;What does &#39;Undefined reference to type OrderId&#39; mean in RIDDL?&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>explain<span class="w"> </span><span class="s2">"What does 'Undefined reference to type OrderId' mean in RIDDL?"</span>
 </span></code></pre></div>
 <p>Generate from a description:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">&quot;Create RIDDL code for an e-commerce domain with products and orders&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">"Create RIDDL code for an e-commerce domain with products and orders"</span>
 </span></code></pre></div>
 <h3 id="pre-commit-validation">Pre-Commit Validation<a class="headerlink" href="#pre-commit-validation" title="Permanent link">&para;</a></h3>
 <p>Since <code>riddlg</code> is installed, the most reliable pre-commit check calls it
 directly rather than going through the assistant:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="ch">#!/bin/bash</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="c1"># .git/hooks/pre-commit</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">for</span><span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>git<span class="w"> </span>diff<span class="w"> </span>--cached<span class="w"> </span>--name-only<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;\.riddl$&#39;</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Validating </span><span class="nv">$file</span><span class="s2">...&quot;</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span>riddlg<span class="w"> </span>validate<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$file</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">for</span><span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>git<span class="w"> </span>diff<span class="w"> </span>--cached<span class="w"> </span>--name-only<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">'\.riddl$'</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Validating </span><span class="nv">$file</span><span class="s2">..."</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span>riddlg<span class="w"> </span>validate<span class="w"> </span><span class="s2">"</span><span class="nv">$file</span><span class="s2">"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
 </span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="k">done</span>
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
@@ -1962,7 +1962,7 @@ directly rather than going through the assistant:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>gh<span class="w"> </span>extension<span class="w"> </span>upgrade<span class="w"> </span>github/gh-copilot
 </span></code></pre></div>
 <h3 id="debug-mode">Debug Mode<a class="headerlink" href="#debug-mode" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">GH_DEBUG</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">&quot;your query&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">GH_DEBUG</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gh<span class="w"> </span>copilot<span class="w"> </span>suggest<span class="w"> </span><span class="s2">"your query"</span>
 </span></code></pre></div>
 <h2 id="available-riddl-tools">Available RIDDL Tools<a class="headerlink" href="#available-riddl-tools" title="Permanent link">&para;</a></h2>
 <p>When connected, Copilot can use these RIDDL tools:</p>

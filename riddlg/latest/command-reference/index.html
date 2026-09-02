@@ -2082,13 +2082,13 @@ generation until the model validates cleanly (up to <code>--max-retries</code>).
 </tbody>
 </table>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># A small model, straight to a file</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">&quot;an order-management system&quot;</span><span class="w"> </span>-o<span class="w"> </span>orders.riddl
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">"an order-management system"</span><span class="w"> </span>-o<span class="w"> </span>orders.riddl
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># A large system, decomposed layer by layer into one file per context</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--compositional<span class="w"> </span><span class="s2">&quot;a hospital system&quot;</span><span class="w"> </span>--multi-file<span class="w"> </span>-o<span class="w"> </span>hospital/
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--compositional<span class="w"> </span><span class="s2">"a hospital system"</span><span class="w"> </span>--multi-file<span class="w"> </span>-o<span class="w"> </span>hospital/
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
 </span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Watch the generation happen, and use a cloud provider for this run</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--stream<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span><span class="s2">&quot;a ticketing system&quot;</span><span class="w"> </span>-o<span class="w"> </span>t.riddl
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--stream<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span><span class="s2">"a ticketing system"</span><span class="w"> </span>-o<span class="w"> </span>t.riddl
 </span></code></pre></div>
 <p><code>--stream</code> writes to <strong>stderr</strong>, leaving stdout clean, so you can still pipe
 or redirect the RIDDL itself while watching progress on a multi-minute run.</p>
@@ -2232,7 +2232,7 @@ option tables are here.</p>
 </table>
 <p><code>ai show</code> additionally takes <code>--reveal</code> to print API keys in full instead of
 redacted.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># What&#39;s configured, and which profile is active?</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># What's configured, and which profile is active?</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>riddlg<span class="w"> </span>ai<span class="w"> </span>list
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
 </span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Switch to Anthropic, reading the key from stdin</span>

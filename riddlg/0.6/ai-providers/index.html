@@ -1770,9 +1770,9 @@ machine. With a <a href="../#free-and-pro">Pro subscription</a> you can instead 
 riddlg at a hosted service using <strong>your own API key</strong> (BYOK).</p>
 <p>Providers are configured as named <strong>profiles</strong>. One profile is active at a
 time, and any command can override it for a single run.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>riddlg<span class="w"> </span>ai<span class="w"> </span>list<span class="w">                    </span><span class="c1"># what&#39;s configured, and what&#39;s active</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>riddlg<span class="w"> </span>ai<span class="w"> </span>list<span class="w">                    </span><span class="c1"># what's configured, and what's active</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>riddlg<span class="w"> </span>ai<span class="w"> </span>use<span class="w"> </span>anthropic<span class="w"> </span>--api-key-stdin
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">&quot;a pet store&quot;</span><span class="w"> </span>-o<span class="w"> </span>pets.riddl<span class="w">    </span><span class="c1"># now runs on Claude</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">"a pet store"</span><span class="w"> </span>-o<span class="w"> </span>pets.riddl<span class="w">    </span><span class="c1"># now runs on Claude</span>
 </span></code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Cloud providers are a Pro feature</p>
@@ -1951,7 +1951,7 @@ for the local profile it verifies the GGUF file and GPU are present
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>riddlg<span class="w"> </span>ai<span class="w"> </span><span class="nb">set</span><span class="w"> </span>anthropic<span class="w"> </span>--api-key-stdin
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
 </span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Pipe from somewhere else</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ANTHROPIC_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>riddlg<span class="w"> </span>ai<span class="w"> </span><span class="nb">set</span><span class="w"> </span>anthropic<span class="w"> </span>--api-key-keychain
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$ANTHROPIC_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>riddlg<span class="w"> </span>ai<span class="w"> </span><span class="nb">set</span><span class="w"> </span>anthropic<span class="w"> </span>--api-key-keychain
 </span></code></pre></div>
 <h3 id="precedence">Precedence<a class="headerlink" href="#precedence" title="Permanent link">&para;</a></h3>
 <p>When riddlg needs a key it takes the first that resolves:</p>
@@ -2007,12 +2007,12 @@ file is readable by other users, riddlg prints an ssh-style
 <code>UNPROTECTED API KEY FILE!</code> warning telling you to <code>chmod 600</code> it.</p>
 <h2 id="choosing-a-provider-per-run">Choosing a Provider Per Run<a class="headerlink" href="#choosing-a-provider-per-run" title="Permanent link">&para;</a></h2>
 <p>The active profile is the default; <code>--provider</code> overrides it for one command:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span><span class="s2">&quot;a ticketing system&quot;</span><span class="w"> </span>-o<span class="w"> </span>t.riddl
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--provider<span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="s2">&quot;a ticketing system&quot;</span><span class="w"> </span>-o<span class="w"> </span>t.riddl
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span><span class="s2">"a ticketing system"</span><span class="w"> </span>-o<span class="w"> </span>t.riddl
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--provider<span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="s2">"a ticketing system"</span><span class="w"> </span>-o<span class="w"> </span>t.riddl
 </span></code></pre></div>
 <p><code>-m/--model</code> names a model <strong>for the effective provider</strong> — a GGUF path when
 that resolves to the local model, or a model id for a cloud provider:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span>-m<span class="w"> </span>claude-opus-4-8<span class="w"> </span><span class="s2">&quot;a pet store&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span>-m<span class="w"> </span>claude-opus-4-8<span class="w"> </span><span class="s2">"a pet store"</span>
 </span></code></pre></div>
 <p>GPU pre-flight only runs when the effective provider is the local model, so
 cloud users never see a GPU error on a machine without one.</p>
@@ -2023,7 +2023,7 @@ individual requests can override it — see
 <p><code>gen riddl --stream</code> echoes the model's output as it is produced — per token
 for the local model, per chunk for cloud providers. It goes to <strong>stderr</strong>, so
 stdout stays clean for the generated RIDDL:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--stream<span class="w"> </span><span class="s2">&quot;a hospital system&quot;</span><span class="w"> </span>-o<span class="w"> </span>hospital.riddl
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span>--stream<span class="w"> </span><span class="s2">"a hospital system"</span><span class="w"> </span>-o<span class="w"> </span>hospital.riddl
 </span></code></pre></div>
 <p>This is progress visibility only; the validation-and-retry loop is unchanged.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>

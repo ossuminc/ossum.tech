@@ -1594,7 +1594,7 @@ to hard-code a version.</p>
 <div class="tabbed-block">
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-fLO<span class="w"> </span>https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Darwin-arm64.tar.gz
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>tar<span class="w"> </span>-xzf<span class="w"> </span>riddlg-0.6.0-Darwin-arm64.tar.gz
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Darwin-arm64/bin&quot;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Darwin-arm64/bin"</span>
 </span></code></pre></div>
 <p>GPU acceleration uses Metal and works out of the box.</p>
 </div>
@@ -1604,7 +1604,7 @@ RTX 20 series or newer). It bundles the CUDA runtime — you only need
 the NVIDIA driver installed.</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-fLO<span class="w"> </span>https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Linux-x86_64-cuda.tar.gz
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>tar<span class="w"> </span>-xzf<span class="w"> </span>riddlg-0.6.0-Linux-x86_64-cuda.tar.gz
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Linux-x86_64-cuda/bin&quot;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Linux-x86_64-cuda/bin"</span>
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -1612,14 +1612,14 @@ the NVIDIA driver installed.</p>
 and NVIDIA alike).</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>-fLO<span class="w"> </span>https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Linux-x86_64-vulkan.tar.gz
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>tar<span class="w"> </span>-xzf<span class="w"> </span>riddlg-0.6.0-Linux-x86_64-vulkan.tar.gz
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Linux-x86_64-vulkan/bin&quot;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Linux-x86_64-vulkan/bin"</span>
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>For servers or machines without a GPU (non-AI commands, or CI use):</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-fLO<span class="w"> </span>https://storage.googleapis.com/synapify-releases/riddlg/0.6.0/riddlg-0.6.0-Linux-x86_64.tar.gz
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>tar<span class="w"> </span>-xzf<span class="w"> </span>riddlg-0.6.0-Linux-x86_64.tar.gz
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Linux-x86_64/bin&quot;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlg-0.6.0-Linux-x86_64/bin"</span>
 </span></code></pre></div>
 </div>
 </div>

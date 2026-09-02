@@ -1547,21 +1547,21 @@ next to the <code>riddlg</code> binary). It is idempotent — run it any time:</
 </span></code></pre></div>
 <p>To disable automatic downloading entirely, clear the URL — riddlg will then
 report a missing model instead of fetching one:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>riddlg { model { url = &quot;&quot; } }
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>riddlg { model { url = "" } }
 </span></code></pre></div>
 <h2 id="using-alternative-models">Using Alternative Models<a class="headerlink" href="#using-alternative-models" title="Permanent link">&para;</a></h2>
 <p>Any GGUF chat/instruct model works. Three ways to select one, from most to
 least specific:</p>
 <p><strong>1. Per command</strong> — pass a model path directly:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">&quot;a ticketing system&quot;</span><span class="w"> </span>--model<span class="w"> </span>~/models/qwen2.5-coder-14b-instruct-q4_k_m.gguf
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">"a ticketing system"</span><span class="w"> </span>--model<span class="w"> </span>~/models/qwen2.5-coder-14b-instruct-q4_k_m.gguf
 </span></code></pre></div>
 <p><strong>2. Configuration file</strong> — set <code>riddlg.model.*</code> keys in
 <code>~/.riddlg/config.conf</code> (HOCON). Run <code>riddlg config</code> to see the effective
 settings:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>riddlg {
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  model {
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    default-name = &quot;qwen2.5-coder-14b-instruct-q4_k_m.gguf&quot;
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    url = &quot;https://huggingface.co/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/qwen2.5-coder-14b-instruct-q4_k_m.gguf&quot;
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    default-name = "qwen2.5-coder-14b-instruct-q4_k_m.gguf"
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    url = "https://huggingface.co/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/qwen2.5-coder-14b-instruct-q4_k_m.gguf"
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  }
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>}
 </span></code></pre></div>
@@ -1604,7 +1604,7 @@ the script downloads without changing what riddlg loads. See
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">RIDDLG_MODEL_URL</span><span class="o">=</span>https://huggingface.co/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/qwen2.5-coder-14b-instruct-q4_k_m.gguf
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">RIDDLG_MODEL_FILE</span><span class="o">=</span>qwen2.5-coder-14b-instruct-q4_k_m.gguf<span class="w">   </span><span class="c1"># for the script</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>fetch-default-model.sh
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">&quot;a ticketing system&quot;</span><span class="w"> </span>-o<span class="w"> </span>tickets.riddl<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>riddlg<span class="w"> </span>gen<span class="w"> </span>riddl<span class="w"> </span><span class="s2">"a ticketing system"</span><span class="w"> </span>-o<span class="w"> </span>tickets.riddl<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span>--model<span class="w"> </span>~/.ossum-ai/models/qwen2.5-coder-14b-instruct-q4_k_m.gguf
 </span></code></pre></div>
 <h2 id="choosing-a-model-for-your-hardware">Choosing a Model for Your Hardware<a class="headerlink" href="#choosing-a-model-for-your-hardware" title="Permanent link">&para;</a></h2>
