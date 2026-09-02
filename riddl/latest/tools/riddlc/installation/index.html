@@ -5351,7 +5351,7 @@
    <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>unzip<span class="w"> </span>riddlc-*.zip
 </span></code></pre></div></li>
 <li>Add the <code>bin</code> directory to your PATH:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlc-*/bin&quot;</span>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlc-*/bin"</span>
 </span></code></pre></div></li>
 <li>Verify installation:
    <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>riddlc<span class="w"> </span>version
@@ -5406,20 +5406,20 @@ later:</p>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">cd</span><span class="w"> </span>riddl
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># Compile and stage the executable</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>sbt<span class="w"> </span><span class="s2">&quot;riddlc/stage&quot;</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>sbt<span class="w"> </span><span class="s2">"riddlc/stage"</span>
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
 </span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># The executable is now at:</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1"># riddlc/jvm/target/universal/stage/bin/riddlc</span>
 </span></code></pre></div>
 <h3 id="add-to-path">Add to PATH<a class="headerlink" href="#add-to-path" title="Permanent link">&para;</a></h3>
 <p>Add the staged executable to your PATH:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlc/jvm/target/universal/stage/bin&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/riddlc/jvm/target/universal/stage/bin"</span>
 </span></code></pre></div>
 <p>For permanent installation, add this to your shell profile (<code>.bashrc</code>, <code>.zshrc</code>,
 etc.).</p>
 <h2 id="create-universal-package">Create Universal Package<a class="headerlink" href="#create-universal-package" title="Permanent link">&para;</a></h2>
 <p>To create a portable package you can distribute:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sbt<span class="w"> </span><span class="s2">&quot;project riddlc&quot;</span><span class="w"> </span><span class="s2">&quot;universal:packageBin&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sbt<span class="w"> </span><span class="s2">"project riddlc"</span><span class="w"> </span><span class="s2">"universal:packageBin"</span>
 </span></code></pre></div>
 <p>This creates a <code>.zip</code> file in <code>riddlc/target/universal/</code> that can be unpacked
 on any system with a compatible JVM.</p>

@@ -5565,7 +5565,7 @@ parsing.</p>
 - Unrecognized keywords
 - Malformed strings or identifiers</p>
 <p><strong>Example error:</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[error] mymodel.riddl:15:10: Expected &#39;}&#39; but found &#39;entity&#39;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[error] mymodel.riddl:15:10: Expected '}' but found 'entity'
 </span></code></pre></div></p>
 <h2 id="structural-analysis">Structural Analysis<a class="headerlink" href="#structural-analysis" title="Permanent link">&para;</a></h2>
 <p>Once parsing succeeds, the compiler builds internal data structures from the
@@ -5625,14 +5625,14 @@ AST.</p>
 </table>
 <p><strong>Example errors:</strong></p>
 <p><em>Undefined reference:</em>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[error] mymodel.riddl:25:15: Reference to undefined type &#39;CustomerInfo&#39;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[error] mymodel.riddl:25:15: Reference to undefined type 'CustomerInfo'
 </span></code></pre></div></p>
 <p><em>Invalid containment:</em>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[error] mymodel.riddl:10:5: Entity cannot be defined directly in Domain;
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>        must be inside a Context
 </span></code></pre></div></p>
 <p><em>Missing required element:</em>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[warning] mymodel.riddl:30:5: Entity &#39;Order&#39; has no state defined
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[warning] mymodel.riddl:30:5: Entity 'Order' has no state defined
 </span></code></pre></div></p>
 <h2 id="understanding-messages">Understanding Messages<a class="headerlink" href="#understanding-messages" title="Permanent link">&para;</a></h2>
 <p>Messages are categorized by severity:</p>

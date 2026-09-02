@@ -5473,7 +5473,7 @@ bounded contexts simultaneously.</p>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="kd">type</span> <span class="n">Table</span> <span class="kp">is</span> <span class="nb">Integer</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kd">type</span> <span class="n">Seat</span> <span class="kp">is</span> <span class="nb">Integer</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="c1">// Messages in this context&#39;s language</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="c1">// Messages in this context's language</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="kd">table</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>      <span class="n">seat</span><span class="p">:</span> <span class="n">Seat</span><span class="p">,</span>
@@ -5487,7 +5487,7 @@ bounded contexts simultaneously.</p>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="c1">// Terms specific to kitchen</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="kd">type</span> <span class="n">Station</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span> <span class="n">Grill</span><span class="p">,</span> <span class="n">Fryer</span><span class="p">,</span> <span class="n">Salad</span><span class="p">,</span> <span class="n">Dessert</span> <span class="p">}</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="c1">// Messages in kitchen&#39;s language</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="c1">// Messages in kitchen's language</span>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="kd">command</span> <span class="n">PrepareItem</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>      <span class="n">station</span><span class="p">:</span> <span class="n">Station</span><span class="p">,</span>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>      <span class="kr">item</span><span class="p">:</span> <span class="n">FoodItem</span><span class="p">,</span>

@@ -5291,20 +5291,20 @@ interactions between users and system components.</p>
 </ul>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">epic</span> <span class="n">UserAuthentication</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;securely access their account&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can view orders and manage settings&quot;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">"securely access their account"</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">"they can view orders and manage settings"</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="kd">case</span> <span class="n">SuccessfulLogin</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;enters credentials on login page&quot;</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">then</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="s2">&quot;validates credentials&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">then</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="s2">&quot;creates session token&quot;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">then</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;is redirected to dashboard&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">"enters credentials on login page"</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">then</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="s2">"validates credentials"</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">then</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="s2">"creates session token"</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">then</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">"is redirected to dashboard"</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  <span class="p">}</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  <span class="kd">case</span> <span class="n">FailedLogin</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;enters invalid credentials&quot;</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="k">then</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="s2">&quot;rejects authentication&quot;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="k">then</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;sees error message&quot;</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">"enters invalid credentials"</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="k">then</span> <span class="kd">entity</span> <span class="n">AuthService</span> <span class="s2">"rejects authentication"</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="k">then</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">"sees error message"</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="p">}</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -5378,8 +5378,8 @@ interactions between users and system components.</p>
 <li><strong>Error paths</strong>: Handling of failures and edge cases</li>
 </ul>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">epic</span> <span class="n">PlaceOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;purchase items in cart&quot;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they receive products they need&quot;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">"purchase items in cart"</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kp">so</span> <span class="kp">that</span> <span class="s2">"they receive products they need"</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">case</span> <span class="n">HappyPath</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="c1">// Normal successful order</span>
