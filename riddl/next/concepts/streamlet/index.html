@@ -5541,7 +5541,7 @@ event RawOrder is { id is Natural }
 event EnrichedOrder is { id is Natural }
 -->
 <!-- riddl-prelude
-constant AlertThreshold is Natural = "100"
+constant AlertThreshold is Natural = 100
 event TemperatureReading is { value is Natural }
 event TemperatureAlert is { value is Natural }
 event TemperatureMetric is { value is Natural }
@@ -5559,9 +5559,9 @@ an optional shape ascription. The shape is otherwise <strong>derived</strong> fr
 <a href="../inlet/">inlets</a> and <a href="../outlet/">outlets</a> the processor declares.</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">processor</span> <span class="n">TemperatureProcessor</span> <span class="kp">as</span> <span class="kd">split</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">inlet</span> <span class="n">readings</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureReading</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureAlert</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">outlet</span> <span class="n">metrics</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureMetric</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">inlet</span> <span class="n">readings</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">TemperatureReading</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">TemperatureAlert</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">outlet</span> <span class="n">metrics</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">TemperatureMetric</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="kd">handler</span> <span class="n">ProcessReading</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">on</span> <span class="n">reading</span><span class="p">:</span> <span class="kd">event</span> <span class="n">TemperatureReading</span> <span class="p">{</span>
@@ -5650,11 +5650,11 @@ systems, listen for external events, generate data on timers, or read from
 files and databases.</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">processor</span> <span class="n">OrderEventSource</span> <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">outlet</span> <span class="n">orders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">OrderEvent</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">outlet</span> <span class="n">orders</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">OrderEvent</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">handler</span> <span class="n">GenerateEvents</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">on</span> <span class="kr">init</span> <span class="p">{</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      <span class="k">do</span> <span class="s2">&quot;Subscribe to order queue and emit events&quot;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      <span class="k">do</span> <span class="s2">"Subscribe to order queue and emit events"</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="p">}</span>
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="p">}</span>
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="p">}</span>
@@ -5664,11 +5664,11 @@ files and databases.</p>
 send notifications, update external systems, or log and archive data.</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">processor</span> <span class="n">NotificationSink</span> <span class="kp">as</span> <span class="kd">sink</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">notifications</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">UserNotification</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">notifications</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">UserNotification</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="kd">handler</span> <span class="n">SendNotifications</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">UserNotification</span> <span class="p">{</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>      <span class="k">do</span> <span class="s2">&quot;Send notification via email or push&quot;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>      <span class="k">do</span> <span class="s2">"Send notification via email or push"</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="p">}</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="p">}</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
@@ -5677,12 +5677,12 @@ send notifications, update external systems, or log and archive data.</p>
 <p>Flows transform data from one shape to another:</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">processor</span> <span class="n">OrderEnricher</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">inlet</span> <span class="n">rawOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawOrder</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="kd">outlet</span> <span class="n">enrichedOrders</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrder</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">inlet</span> <span class="n">rawOrders</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">RawOrder</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="kd">outlet</span> <span class="n">enrichedOrders</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">EnrichedOrder</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  <span class="kd">handler</span> <span class="n">EnrichOrder</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">on</span> <span class="n">raw</span><span class="p">:</span> <span class="kd">event</span> <span class="n">RawOrder</span> <span class="p">{</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>      <span class="k">do</span> <span class="s2">&quot;Look up customer details and product info&quot;</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>      <span class="k">do</span> <span class="s2">"Look up customer details and product info"</span>
 </span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>      <span class="k">send</span> <span class="kd">event</span> <span class="n">EnrichedOrder</span><span class="p">(</span><span class="n">raw</span><span class="p">.</span><span class="n">id</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">enrichedOrders</span>
 </span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="p">}</span>
 </span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  <span class="p">}</span>
@@ -5693,12 +5693,12 @@ send notifications, update external systems, or log and archive data.</p>
 outlet to an inlet:</p>
 <!-- riddl: in-domain -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">context</span> <span class="n">DataPipeline</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">processor</span> <span class="n">Ingest</span>    <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">events</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawOrder</span> <span class="p">}</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">processor</span> <span class="n">Ingest</span>    <span class="kp">as</span> <span class="kd">source</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">outlet</span> <span class="n">events</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">RawOrder</span> <span class="p">}</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="kd">processor</span> <span class="n">Transform</span> <span class="kp">as</span> <span class="kd">flow</span>   <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="kd">inlet</span> <span class="kd">input</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">RawOrder</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="kd">outlet</span> <span class="kd">output</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrder</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="kd">inlet</span> <span class="kd">input</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">RawOrder</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="kd">outlet</span> <span class="kd">output</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">EnrichedOrder</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="p">}</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  <span class="kd">processor</span> <span class="n">Store</span>     <span class="kp">as</span> <span class="kd">sink</span>   <span class="kp">is</span> <span class="p">{</span> <span class="kd">inlet</span> <span class="n">data</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">EnrichedOrder</span> <span class="p">}</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  <span class="kd">processor</span> <span class="n">Store</span>     <span class="kp">as</span> <span class="kd">sink</span>   <span class="kp">is</span> <span class="p">{</span> <span class="kd">inlet</span> <span class="n">data</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">EnrichedOrder</span> <span class="p">}</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  <span class="kd">connector</span> <span class="n">IngestToTransform</span> <span class="kp">is</span>
 </span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Ingest</span><span class="p">.</span><span class="n">events</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Transform</span><span class="p">.</span><span class="kd">input</span>

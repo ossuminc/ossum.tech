@@ -138,7 +138,8 @@ zone = /[A-Z0-9:.+-]{2,}/ ;
 
 (* Type Expressions *)
 pattern_type = "Pattern" "(" {literal_string} ")" ;
-unique_id_type = "Id" "(" ["entity"] path_identifier ")" ;
+unique_id_type = "Id" "(" [processor_kind] path_identifier ")" ;
+processor_kind = "adaptor" | "context" | "entity" | "projector" | "repository" | "streamlet" ;
 enumeration = "any" ["of"] "{" enumerators "}" ;
 enumerators = undefined | {enumerator [","]} ;
 enumerator = identifier [enum_value] [with_metadata] ;
@@ -238,13 +239,17 @@ handler = ["initial"] "handler" identifier is "{" handler_body "}" [with_metadat
 handler_body = {undefined | handler_contents} ;
 handler_contents = {on_clause | comment} ;
 on_clause = on_init_clause | on_other_clause | on_term_clause | on_activate_clause | on_passivate_clause | on_event_clause | on_message_clause ;
-on_init_clause = "on" "init" is pseudo_code_block [with_metadata] ;
+(* Task 3: parameters, so `on init`/`on term` become invocable (a later change). The parameter
+   list is OPTIONAL syntax for both clauses -- whether `on term` was given a correctly-typed
+   leading Id(...) parameter is a VALIDATION question, not a grammar one, since the grammar alone
+   cannot know which processor encloses the clause. *)
+on_init_clause = "on" "init" [ "(" [arguments] ")" ] is pseudo_code_block [with_metadata] ;
 (* A57: `as <name>` optionally binds the message's ENVELOPE (not the message -- this clause names
    none). The type is OPTIONAL and is a bare path with no `type` keyword: the colon already says a
    type follows. When omitted the type comes from `option message_envelope` in scope; when written
    it must agree with it. Both rules are enforced in validation, not the grammar. *)
 on_other_clause = "on" "other" [ "as" identifier [ ":" path_identifier ] ] is pseudo_code_block [with_metadata] ;
-on_term_clause = "on" "term" is pseudo_code_block [with_metadata] ;
+on_term_clause = "on" "term" [ "(" [arguments] ")" ] is pseudo_code_block [with_metadata] ;
 on_activate_clause = "on" "activate" is pseudo_code_block [with_metadata] ;
 on_passivate_clause = "on" "passivate" is pseudo_code_block [with_metadata] ;
 (* A55: an optional local name may be bound to the handled message with type ascription:
@@ -256,18 +261,21 @@ message_origins = inlet_ref | processor_ref | user_ref | epic_ref ;
 (* Statements *)
 (* Core statements available in all contexts *)
 statement = when_statement | match_statement | foreach_statement | send_statement | tell_statement |
+   forward_statement |
     yield_statement | reply_statement | the_set_statement | let_statement | put_statement |
-    return_statement | prompt_statement | code_statement | error_statement | require_statement |
-    morph_statement | become_statement | comment ;
+    return_statement | terminate_statement | prompt_statement | code_statement | error_statement |
+    require_statement | morph_statement | become_statement | comment ;
 
 (* Control flow *)
 when_statement = "when" when_condition "then" pseudo_code_block ["else" pseudo_code_block] "end" ;
-(* A28/A17: a condition is an opaque pseudo-code literal, a negated/bare let-binding identifier, a
-   structured boolean_expression, or (A17) a first-class bare boolean value_ref (a single name or a
-   dotted path, resolved and validated to be Boolean-typed). *)
+(* A28/A17: a condition is an opaque pseudo-code literal, a structured boolean_expression (which
+   covers a negated condition via `not`/`!` -- see not_expression), or (A17) a first-class bare
+   boolean value_ref (a single name or a dotted path, resolved and validated to be Boolean-typed).
+   `not`/`!` are synonymous everywhere (2026-08-14 ruling): there is deliberately no separate
+   `"!" identifier` alternative here -- boolean_expression's not_expression already subsumes it. *)
 (* literal_string is DEPRECATED as a condition: a bare string means a literal everywhere else,
    so a natural-language condition is written prompt("...") and evaluated by an AI. *)
-when_condition = prompt_value | literal_string | "!" identifier | boolean_expression | value_ref ;
+when_condition = prompt_value | literal_string | boolean_expression | value_ref ;
 (* A29: `match <subject> { case <pattern> [when <boolean_expression>] { <statements> } ...
    [default { <statements> }] }`. The subject is a runtime value ref / `get` / legacy literal. A
    pattern is a type-case (a bare type_ref), an explicit value comparison (`<op> <comparand>`, the
@@ -288,29 +296,97 @@ message_value = constructor | message_ref ;
 (* A56: `tell` and `send` additionally accept a bare name bound by the enclosing on-clause --
    `on p: command Ping is { tell p to entity F }` -- so a handler can forward the message it was
    given. Ordered AFTER message_value because message_ref is keyword-led; a bare path is only
-   tried once `command`/`event`/`query`/`result` has failed. NOT accepted by yield_statement,
-   whose operand is compared against the clause's declared `yields`. *)
+   tried once `command`/`event`/`query`/`result` has failed. Also accepted by yield_statement and
+   reply_statement: their operand IS compared against the clause's declared `yields`/`replies`,
+   but that comparison is by resolved TYPE, which a bare path supplies just as a message_ref
+   does, so it is a check that survives the widening rather than a reason against it. *)
 deliverable_message_value = message_value | path_identifier ;
 (* A30: `outlet` is the canonical `send` target (emit on your own outlet; a connector routes it
    to a downstream inlet). The `inlet_ref` form is DEPRECATED (soft, removed in 3.0) but still
    parses; use `tell` for direct delivery to a processor. *)
 send_statement = "send" deliverable_message_value "to" (outlet_ref | inlet_ref) ;
-tell_statement = "tell" deliverable_message_value "to" processor_ref ;
+(* The addressee is EITHER a keyword-led processor_ref naming a processor statically, OR a value
+   typed `Id(entity E)` naming WHICH INSTANCE to tell (`to self.id`, `to order.siteId`). They are
+   told apart by the keyword leading the reference -- every processor_ref alternative is
+   keyword-led -- so a bare path is unambiguously a value. Same discriminator forward_statement
+   uses. *)
+tell_statement = "tell" deliverable_message_value "to" ( processor_ref | value )
+                 [ "by" identifier ] ;
+
+(* `forward` passes the handled message on and DISCHARGES the response obligation, because
+   whatever handles it downstream produces the declared `yields`/`replies`. It takes BOTH
+   transmission shapes -- a portlet like `send`, a processor like `tell` -- told apart by the
+   keyword leading the reference, so no ambiguity needs resolving here.
+
+   Everything that constrains it is a VALIDATION rule, not a grammatical one: it is legal only in
+   a clause handling a command that declares `yields` or a query that declares `replies`, its
+   operand's type must match the handled message, a `yield`/`reply` may not follow it, and the
+   portlet-admits rule applies to the portlet shape. Those need a resolved message type, and a
+   parse-time error would preempt the whole pass chain. *)
+forward_statement = "forward" deliverable_message_value "to"
+                    ( outlet_ref | inlet_ref | processor_ref ) ;
 (* `yield` emits a command's declared EVENT; `reply` answers a query with its declared RESULT.
    Until 2.0 `reply` was a deprecated synonym for `yield` and both parsed to one node. They are
    now distinct statements, and the wrong pairing (`yield result` / `reply event`) is an Error. *)
-yield_statement = "yield" message_value ;
-reply_statement = "reply" message_value ;
+yield_statement = "yield" deliverable_message_value ;
+reply_statement = "reply" deliverable_message_value ;
 
 (* Variable operations. A54: `set`/`let` operands are now full value expressions. *)
 the_set_statement = "set" (field_ref | state_ref) "to" value ;
 let_statement = "let" identifier [":" type_ref] "=" value ;
 
 (* A54: value expressions. A value is pseudo-code text, an AI-computed `prompt(...)`, a message/record
-   constructor, a `get from` read of a UI input or entity state, or (A28) a boolean expression whose
-   bare atom is a value reference or literal. *)
-value = literal_string | prompt_value | call | ask | constructor | get_value | boolean_expression ;
-prompt_value = "prompt" "(" literal_string ")" ;
+   constructor, a `get from` read of a UI input or entity state, (A28) a boolean expression whose
+   bare atom is a value reference or literal, or a numeric literal (tried last, deliberately). This
+   ordering is LOAD-BEARING now that `comparand` (widened 2026-08-14) accepts numeric_literal:
+   trying boolean_expression first is what keeps `5 > 3` parsing as a comparison rather than
+   numeric_literal matching the bare `5` and leaving `> 3` dangling. *)
+(* `empty_value` sits BEFORE boolean_expression: that rule's atom accepts a bare path and would
+   otherwise swallow `empty` as a value_ref, leaving any ascription dangling. *)
+value = literal_string | prompt_value | call | ask | initiate | constructor | get_value
+      | empty_value | boolean_expression | numeric_literal ;
+
+(* The minimum-cardinality inhabitant of a type. `none` is a SYNONYM, not a second construct: both
+   spellings produce the identical AST and prettify converges them to `empty`. Legal exactly where
+   the minimum cardinality is zero -- `T?`, `T*`, `T{0,n}` -- and an error on `T+`, `T{1,n}` or a
+   bare `T`. The ascription is what lets it be written where the position supplies no expected
+   type, notably a constructor argument. *)
+empty_value = ( "empty" | "none" ) [ !statement_start type_expression ] ;
+
+(* The ascription is OPTIONAL and an aliased type expression is a bare path, while RIDDL statements
+   are whitespace-separated with no terminator -- so without this guard `set x to empty` followed by
+   `set y to ...` parses the second statement as the first's ascription. Every statement begins with
+   a reserved keyword, so refusing those is a complete fix rather than a heuristic: a type can never
+   be named one. Kept in step with `statementStart` in StatementParser.scala. *)
+statement_start = ( "set" | "tell" | "send" | "forward" | "yield" | "reply" | "morph" | "become"
+                  | "do" | "prompt" | "let" | "call" | "foreach" | "when" | "match" | "error"
+                  | "require" | "put" | "return" | "terminate" | "code" | "focus" | "stop"
+                  | "read" | "write" | "ask" | "initiate" | "if" | "else" ) ;
+prompt_value = "prompt" "(" literal_string_block ")" [ "as" type_expression ] ;
+(* Numeric literals - integers and reals, written directly. No digit separators and no radix     *)
+(* prefixes: declined deliberately, and pure additions later if wanted.                           *)
+(*                                                                                                 *)
+(* ONE single regex, like `integer`/`natural` above -- not a sequence of sub-parts joined by       *)
+(* `{digit}+` or by rule references, and not a quoted "e"|"E" alternation for the exponent marker. *)
+(* Three independent reasons converge on this shape:                                               *)
+(*  1. TatSu's generated parser skips whitespace BETWEEN repeated elements of a `{rule}+` closure   *)
+(*     regardless of any surrounding token boundary, so `{digit}+` let `1 2` parse as a SINGLE      *)
+(*     numeric_literal (verified by running the TatSu parser directly, 2026-08-15).                 *)
+(*  2. TatSu also inserts optional whitespace BETWEEN the elements of a composite (structural)       *)
+(*     rule, so even a version composed from sub-rule references (e.g. `natural "." natural`)        *)
+(*     let `1 . 5` parse as a SINGLE numeric_literal too (verified the same way).                    *)
+(*     fastparse's `numericLiteral` (`StatementParser.scala`) is whitespace-tight END TO END via     *)
+(*     `~~` for exactly this reason (fixed in `2d41c4e39`, `CharIn(...).rep(1)` -> `CharsWhileIn`)   *)
+(*     -- a single regex is the only EBNF shape with the same property.                              *)
+(*  3. A quoted "e"|"E" alternation for the exponent marker fails on its own: TatSu's default        *)
+(*     nameguard bounds a word-like quoted literal to a word boundary, so "e" immediately followed   *)
+(*     by a digit (`1e3`, no sign) fails to match even though fastparse accepts it (found            *)
+(*     2026-08-15 adding the numeric-literals corpus fixture). A regex bypasses nameguard entirely   *)
+(*     (see `letter`/`digit` above and `mime_type` below for the same inline-regex idiom).           *)
+(* A fourth reason used to live here -- keeping the rule classified TERMINAL by the GBNF           *)
+(* generator -- and is VOID as of 2026-08-20: the bundled GBNF grammar and its generator are        *)
+(* deleted. Reasons 1-3 stand on their own and are why the regex form remains correct.              *)
+numeric_literal = /[+-]?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?/ ;
 (* A24: call a pure function to get a result. "Functions only" — the callee is a function_ref. *)
 call = "call" function_ref "(" [constructor_arg {"," constructor_arg}] ")" ;
 (* `ask` declares a CORRELATION -- that a reply is expected and which query it answers -- and
@@ -319,6 +395,11 @@ call = "call" function_ref "(" [constructor_arg {"," constructor_arg}] ")" ;
    or record is not answerable, so the restriction is structural rather than a validation rule. The
    answer's type is the query's declared `replies result X`. *)
 ask = "ask" query_ref "of" processor_ref ;
+(* A70/instance-identity: bring an instance into being and yield its identity, the newly minted
+   `Id(<processor>)`. Parens are OPTIONAL and present exactly when there are arguments -- one
+   keyword, not two. Arity/argument-type checking is done in validation, which is the only place
+   that has resolved the target's `on init` clause; a wrong count still PARSES. *)
+initiate = "initiate" processor_ref ["(" [constructor_arg {"," constructor_arg}] ")"] ;
 constructor = (message_ref | record_ref) "(" [constructor_arg {"," constructor_arg}] ")" ;
 constructor_arg = (identifier "=" value) | value ;
 get_value = "get" "from" (input_ref | state_ref) ;
@@ -327,30 +408,67 @@ value_ref = path_identifier ;
 (* A28: the boolean-expression sub-language, lowest to highest precedence: or < and < not <
    comparison < atom. `and`/`or`/`not`/`true`/`false` are context-sensitive operators — legal
    identifiers everywhere except these rules. A boolean_atom with no comparison operator is a plain
-   value. A28 s3: comparisons are TYPE-SAFE — their operands are ref-only `comparand`s (a value_ref,
-   a get_value, or a constant_ref), never a literal/constructor/boolean_literal — so a comparison is
-   always between two typed references. *)
+   value. A28 s3: comparisons are `comparand`s (a value_ref, a get_value, a constant_ref, or a bare
+   numeric_literal) — never a quoted string, a constructor, or a boolean_literal. `comparand`
+   originally admitted refs ONLY, banning a literal comparison outright; Reid reversed that
+   2026-08-14, since the whole riddl-models corpus held exactly ONE named constant and the ban had
+   no uptake to protect. The intent survives as a StyleWarning in validation, not a parse error.
+   `!` is a synonym for `not` (2026-08-14 ruling), NOT matched when immediately followed by `=`
+   (that is the `!=` comparison_operator, handled below). *)
 boolean_expression = and_expression {"or" and_expression} ;
 and_expression = not_expression {"and" not_expression} ;
-not_expression = "not" not_expression | comparison ;
+not_expression = ("not" | "!") not_expression | comparison ;
 comparison = comparand comparison_operator comparand | boolean_atom ;
-comparand = get_value | constant_ref | value_ref ;
+(* system_value precedes ref_or_lookup for the same reason it does in boolean_atom: ordered
+   choice means a bare `system` would otherwise be consumed as an ordinary path. *)
+comparand = get_value | constant_ref | numeric_literal | system_value | ref_or_lookup ;
+(* `<collection> at <index>[, <index>...]` -- a mapping by key, a sequence by ordinal, or a table  *)
+(* by one ordinal per dimension. Expressed as a value_ref with an OPTIONAL `at` clause rather than *)
+(* as a separate alternative alongside value_ref, mirroring the fastparse rule: anything that makes *)
+(* the parser CHOOSE between "ref" and "ref at index" must backtrack across the `at` keyword, and  *)
+(* in fastparse that keyword cuts.                                                                 *)
+ref_or_lookup = value_ref [ "at" lookup_index { "," lookup_index } ] ;
+lookup_index = literal_string | numeric_literal | get_value | value_ref ;
 comparison_operator = "==" | "!=" | "<=" | ">=" | "<" | ">" ;
 (* `invariant X [with <value>]` names an invariant in a condition. It MUST precede value_ref:
    without it, `invariant` is taken as an ordinary identifier and the parser then demands a
    comparison operator, pointing past the real problem. The bare spelling (`when X`) also works,
-   via value_ref, and always has. *)
-boolean_atom = boolean_literal | "(" boolean_expression ")" | get_value | invariant_test | value_ref ;
+   via value_ref, and always has. `self_value` likewise MUST precede value_ref: `self` is not a
+   definition keyword, so a bare `self` would otherwise be consumed as an ordinary path. *)
+boolean_atom = boolean_literal | "(" boolean_expression ")" | get_value | invariant_test
+             | self_value | system_value | ref_or_lookup ;
 invariant_test = "invariant" path_identifier ["with" value] ;
 boolean_literal = "true" | "false" ;
+(* `self` -- the currently executing processor instance -- and `self.<field>` on it. Its type is
+   a synthesized record (`id`, `version`), not a user-nameable type. *)
+self_value = "self" ["." identifier] ;
+(* `system` -- values supplied by the running SYSTEM rather than by the model, the exact parallel
+   of `self_value`. `system.now` yields a TimeStamp and `system.random` a Real. Its type is
+   synthesized, not a user-nameable type, and the member set is closed. It carries the SAME
+   ordering constraint as `self_value`: `system` is not a definition keyword, so a bare `system`
+   would otherwise be consumed as an ordinary path. *)
+system_value = "system" ["." identifier] ;
 
 (* A45/A57: boundary value operations. `put` (application/context handlers only) publishes a value
    to a UI output; `return` (function bodies only) returns the function's result value. *)
 put_statement = "put" value "to" output_ref ;
 return_statement = "return" value ;
 
+(* A70/instance-identity: end the instance denoted by `value`, invoking its `on term`. A statement,
+   not a value: termination produces nothing.
+
+   The target is a VALUE, not a processor_ref (Reid, 2026-08-15): it must be typed `Id(entity E)`,
+   and the entity terminated is DERIVED from that type. `initiate` still names a type, because the
+   instance does not exist yet -- the asymmetry is the design, not an inconsistency.
+
+   Arguments sit behind `with`, not bare parentheses, because `terminate order.id("x")` reads as a
+   call on `id`. Neither the target's TYPE nor the argument arity is checked here: both live in
+   validation, the only place with the target's resolved type and the entity's `on term` clause,
+   so `terminate someString` and a wrong argument count both still PARSE. *)
+terminate_statement = "terminate" value [ "with" "(" [constructor_arg {"," constructor_arg}] ")" ] ;
+
 (* General statements. A54: `do` is canonical; the `prompt` statement is a deprecated synonym. *)
-prompt_statement = ("do" | "prompt") literal_string ;
+prompt_statement = ("do" | "prompt") literal_string_block ;
 code_statement = "```" ("scala" | "java" | "python" | "mojo") code_contents "```" ;
 code_contents = {any_char_except_triple_backtick} ;
 error_statement = "error" literal_string ;
@@ -359,8 +477,10 @@ error_statement = "error" literal_string ;
 require_statement = "require" (literal_string | invariant_ref | boolean_expression) ["with" value] ;
 invariant_ref = "invariant" path_identifier ;
 
-(* Entity state transitions. A54: the morph value is a bare record ref or an inline constructor. *)
-record_value = constructor | record_ref ;
+(* Entity state transitions. A54: the morph value is a bare record ref or an inline constructor.
+   It also accepts a bare path naming a value already in hand -- the record-side counterpart of
+   deliverable_message_value, and ordered last for the same keyword-led reason. *)
+record_value = constructor | record_ref | path_identifier ;
 morph_statement = "morph" entity_ref "to" state_ref "with" record_value ;
 become_statement = "become" entity_ref "to" handler_ref ;
 
@@ -369,7 +489,8 @@ pseudo_code_block = undefined | "{" pseudo_code_contents "}" | {statement} ;
 pseudo_code_contents = [undefined] {statement} ;
 
 (* Constants and Invariants *)
-constant = "constant" identifier is type_expression "=" literal_string [with_metadata] ;
+constant = "constant" identifier is type_expression "=" constant_value [with_metadata] ;
+constant_value = literal_string | numeric_literal | boolean_literal | prompt_value ;
 (* An invariant applies IMPLICITLY across every clause of its declaring scope, as a precondition.
    `requires state S` narrows an entity-level invariant to one state and stays implicit;
    `requires <type_ref>` makes it explicit-only (see require_statement). No `returns`: the
@@ -413,7 +534,13 @@ streamlet_definition = {inlet | outlet | streamlet_include | processor_definitio
 streamlet_include = "include" literal_string ;
 inlet = "inlet" identifier is type_ref [with_metadata] ;
 outlet = "outlet" identifier is type_ref [with_metadata] ;
-connector = "connector" identifier is connector_definitions [with_metadata] ;
+(* Intentions are keywords written BEFORE `connector`, mirroring entity_intention. Two independent
+   groups -- durability (persistent) and delivery (at-least-once | at-most-once) -- mutually
+   exclusive WITHIN a group, which validation reports rather than the grammar forbidding, so a model
+   naming two still parses and both get named. Absent delivery means at-least-once (Computational
+   Model 25.7); `at-most-once` is the knowing downgrade that section requires never be silent. *)
+connector_intention = "at-least-once" | "at-most-once" | "exactly-once" | "persistent" ;
+connector = {connector_intention} "connector" identifier is connector_definitions [with_metadata] ;
 connector_definitions = ["{" "from" outlet_ref "to" inlet_ref "}" | "from" outlet_ref "to" inlet_ref] ;
 
 (* Group-related *)
@@ -424,10 +551,10 @@ group_output = output_aliases identifier presentation_aliases (literal_string | 
 group_input = input_aliases identifier acquisition_aliases type_ref [input_definitions] [with_metadata] ;
 output_definitions = [is "{" {undefined | (group_output | type_ref)} "}"] ;
 input_definitions = [is "{" {undefined | group_input} "}"] ;
-group_aliases = "group" | "page" | "pane" | "dialog" | "menu" | "popup" | "frame" | "column" | "window" | "section" | "tab" | "flow" | "block" ;
-output_aliases = "output" | "document" | "list" | "table" | "graph" | "animation" | "picture" ;
-input_aliases = "input" | "form" | "text" | "button" | "picklist" | "selector" | "item" ;
-presentation_aliases = "presents" | "shows" | "displays" | "writes" | "emits" ;
+group_aliases = "group" | "page" | "pane" | "dialog" | "menu" | "popup" | "frame" | "column" | "window" | "section" | "tab" | "flow" | "block" | "scene" | "space" | "zone" ;
+output_aliases = "output" | "document" | "list" | "table" | "graph" | "animation" | "picture" | "sound" | "speech" | "haptic" ;
+input_aliases = "input" | "form" | "text" | "button" | "picklist" | "selector" | "item" | "voice" | "gesture" | "gaze" ;
+presentation_aliases = "presents" | "shows" | "displays" | "writes" | "emits" | "plays" | "speaks" | "announces" | "vibrates" | "pulses" | "nudges" | "diffuses" | "serve" | "offer" | "taste" ;
 acquisition_aliases = "acquires" | "reads" | "takes" | "accepts" | "admits" | "enters" | "provides" | "selects" | "chooses" | "picks" | "initiates" | "submits" | "triggers" | "activates" | "activate" | "starts" ;
 
 (* Repository-related *)
@@ -451,9 +578,20 @@ adaptor_include = "include" literal_string ;
 (* Projector-related *)
 projector = "projector" identifier [as_shape] is "{" projector_body "}" [with_metadata] ;
 projector_body = {undefined | projector_definitions} ;
-projector_definitions = {processor_definition_contents | updates | projector_include} ;
+projector_definitions = {processor_definition_contents | updates | correlation | projector_include} ;
 projector_include = "include" literal_string ;
 updates = "updates" repository_ref ;
+
+(* A70: a keyed accumulation of several events into one command the repository handles. A COMMAND,
+   not a record: a projector's only output is a change to a repository, and a repository is changed
+   by handling a command, so `yields record R` is deliberately not derivable. The timeout clause is
+   mandatory -- a correlation with no bound is a syntax error -- and its duration is an ordinary
+   literal_string so no duration syntax enters the grammar. *)
+correlation = "correlation" identifier "by" identifier {"," identifier} "yields" command_ref
+              correlation_body correlation_timeout [with_metadata] ;
+correlation_body = is "{" (undefined | {correlation_content}+) "}" ;
+correlation_content = handler | comment ;
+correlation_timeout = "times" "out" "after" literal_string pseudo_code_block ;
 
 (* Saga-related *)
 saga = "saga" identifier is "{" saga_body "}" [with_metadata] ;
@@ -481,7 +619,10 @@ step_interactions = "step" (focus_on_group_step | direct_user_to_url | select_in
 focus_on_group_step = "focus" user_ref "on" group_ref [with_metadata] ;
 direct_user_to_url = "direct" user_ref "to" http_url [with_metadata] ;
 select_input_step = user_ref "selects" input_ref [with_metadata] ;
-refusal_step = any_interaction_ref "refuses" user_ref literal_string [with_metadata] ;
+(* A38: the reason is prose OR the invariant the request violates. Both are first-class --
+   a handler refuses with either `error "<prose>"` or `require invariant X`, and only the
+   second has an invariant to name. *)
+refusal_step = any_interaction_ref "refuses" user_ref (literal_string | invariant_ref) [with_metadata] ;
 take_input_step = "take" input_ref "from" user_ref [with_metadata] ;
 show_output_step = "show" output_ref "to" user_ref [with_metadata] ;
 self_processing_step = "for" any_interaction_ref is literal_string [with_metadata] ;
@@ -521,5 +662,9 @@ doc_block = "{" {markdown_lines | literal_strings | undefined} "}" | literal_str
 markdown_lines = {markdown_line}+ ;
 markdown_line = "|" /[^\n]*\n?/ ;
 literal_strings = {literal_string}+ ;
+(* One string bare, or several inside braces -- the same shape doc_block uses for prose. The bare
+   form takes EXACTLY ONE string: admitting juxtaposition would leave nothing but the next keyword
+   to mark where the statement ends. *)
+literal_string_block = "{" literal_strings "}" | literal_string ;
 shown_by = "shown" "by" "{" {http_url} "}" ;
 mime_type = ("application" | "audio" | "example" | "font" | "image" | "model" | "text" | "video") "/" /[a-z.*-]*/ ;

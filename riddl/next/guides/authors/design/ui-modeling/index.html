@@ -5864,6 +5864,12 @@
     command Charge is { note is String }
     context Billing is {
       command BillingCharge is { note is String }
+      record BillingData is { note is String }
+      // The checkout handler tells `Charge` here, so Billing must receive it.
+      handler BillingHandler is {
+        on command Charge { ??? }
+        on other { error "Unrecognized message at the Billing boundary" }
+      }
     }
 -->
 
@@ -5922,7 +5928,7 @@ interaction.</p>
 </table>
 <h3 id="example-shopping-cart">Example: Shopping Cart<a class="headerlink" href="#example-shopping-cart" title="Permanent link">&para;</a></h3>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">domain</span> <span class="n">ECommerce</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">is</span> <span class="s2">&quot;A customer browsing and purchasing products&quot;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">is</span> <span class="s2">"A customer browsing and purchasing products"</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">application</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">context</span> <span class="n">Inventory</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
@@ -5930,33 +5936,33 @@ interaction.</p>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  <span class="kd">context</span> <span class="n">Payments</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">epic</span> <span class="n">ShoppingCartJourney</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;shop&quot;</span> <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they receive the products they need&quot;</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">"shop"</span> <span class="kp">so</span> <span class="kp">that</span> <span class="s2">"they receive the products they need"</span>
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
 </span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="kd">case</span> <span class="n">BrowseAndPurchase</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>      <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;browse products and complete a purchase&quot;</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;they can receive desired items&quot;</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>      <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">"browse products and complete a purchase"</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="kp">so</span> <span class="kp">that</span> <span class="s2">"they can receive desired items"</span>
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>      <span class="c1">// The shopper only ever touches StoreFront, the application...</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Shopper</span> <span class="s2">&quot;views the product catalog&quot;</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Shopper</span> <span class="s2">"views the product catalog"</span>
 </span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>           <span class="kp">to</span> <span class="kd">context</span> <span class="n">StoreFront</span>
 </span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
 </span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      <span class="c1">// ...which reaches into the domain on their behalf</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="s2">&quot;reserves the selected items&quot;</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="s2">"reserves the selected items"</span>
 </span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>           <span class="kp">to</span> <span class="kd">context</span> <span class="n">Inventory</span>
 </span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Shopper</span> <span class="s2">&quot;initiates checkout&quot;</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Shopper</span> <span class="s2">"initiates checkout"</span>
 </span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>           <span class="kp">to</span> <span class="kd">context</span> <span class="n">StoreFront</span>
 </span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="s2">&quot;creates the order&quot;</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="s2">"creates the order"</span>
 </span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>           <span class="kp">to</span> <span class="kd">context</span> <span class="n">Orders</span>
 </span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Orders</span> <span class="s2">&quot;requests payment capture&quot;</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Orders</span> <span class="s2">"requests payment capture"</span>
 </span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>           <span class="kp">to</span> <span class="kd">context</span> <span class="n">Payments</span>
 </span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Orders</span> <span class="s2">&quot;reports the order is confirmed&quot;</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Orders</span> <span class="s2">"reports the order is confirmed"</span>
 </span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>           <span class="kp">to</span> <span class="kd">context</span> <span class="n">StoreFront</span>
 </span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="s2">&quot;shows the confirmation&quot;</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>      <span class="kd">step</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="s2">"shows the confirmation"</span>
 </span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>           <span class="kp">to</span> <span class="kd">user</span> <span class="n">Shopper</span>
 </span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    <span class="p">}</span>
 </span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>  <span class="p">}</span>
@@ -5969,9 +5975,9 @@ the system. It represents the system facade that permits user interaction.</p>
 <p>In RIDDL, "user" is a term of art. It doesn't necessarily mean a human being.
 A user is anything that uses the system:</p>
 <!-- riddl: in-domain -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">is</span> <span class="s2">&quot;a human customer browsing products&quot;</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">user</span> <span class="n">APIClient</span> <span class="kp">is</span> <span class="s2">&quot;an automated system consuming our API&quot;</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kd">user</span> <span class="n">AIAssistant</span> <span class="kp">is</span> <span class="s2">&quot;an AI providing recommendations&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">is</span> <span class="s2">"a human customer browsing products"</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">user</span> <span class="n">APIClient</span> <span class="kp">is</span> <span class="s2">"an automated system consuming our API"</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kd">user</span> <span class="n">AIAssistant</span> <span class="kp">is</span> <span class="s2">"an AI providing recommendations"</span>
 </span></code></pre></div>
 <h3 id="application-components">Application Components<a class="headerlink" href="#application-components" title="Permanent link">&para;</a></h3>
 <p>Applications are composed of:</p>
@@ -6029,7 +6035,7 @@ A user is anything that uses the system:</p>
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  <span class="kd">handler</span> <span class="n">NavigationHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">NavigateToCheckout</span> <span class="p">{</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>      <span class="k">do</span> <span class="s2">&quot;move the user to the CheckoutFlow group&quot;</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>      <span class="k">do</span> <span class="s2">"move the user to the CheckoutFlow group"</span>
 </span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="p">}</span>
 </span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>  <span class="p">}</span>
 </span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="p">}</span>
@@ -6045,7 +6051,7 @@ to system components:</p>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  <span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>      <span class="k">send</span> <span class="kd">command</span> <span class="n">CreateOrder</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">OrdersOut</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>      <span class="k">send</span> <span class="kd">command</span> <span class="n">CreateOrder</span><span class="p">(</span><span class="n">cartId</span> <span class="o">=</span> <span class="n">cartId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">OrdersOut</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="p">}</span>
 </span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>  <span class="p">}</span>
 </span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="p">}</span>
@@ -6106,7 +6112,7 @@ two statements added in RIDDL 2.0:</p>
 </span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">SubmitPayment</span> <span class="p">{</span>
 </span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>      <span class="k">let</span> <span class="kr">details</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">PaymentDetails</span>
 </span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>      <span class="k">tell</span> <span class="kd">command</span> <span class="n">Charge</span><span class="p">(</span><span class="kr">details</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">context</span> <span class="n">Billing</span>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>      <span class="k">put</span> <span class="s2">&quot;Payment received&quot;</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">Receipt</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>      <span class="k">put</span> <span class="s2">"Payment received"</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">Receipt</span>
 </span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>    <span class="p">}</span>
 </span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>  <span class="p">}</span>
 </span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="p">}</span>
@@ -6145,7 +6151,7 @@ that check was removed, because all such combinations are legitimate.</p>
 one specific frame:</p>
 <!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  <span class="kr">figma</span> <span class="s2">"aBcD1234"</span> <span class="kr">node</span> <span class="s2">"42:1337"</span>
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Unlike an opaque URL, this is machine-readable, so <code>riddlc --check-figma-drift</code>
@@ -6169,7 +6175,7 @@ the <code>shown by</code> syntax to link to external UX artifacts:</p>
 </ul>
 <h2 id="example-complete-shopping-application">Example: Complete Shopping Application<a class="headerlink" href="#example-complete-shopping-application" title="Permanent link">&para;</a></h2>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kd">domain</span> <span class="n">ECommerce</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">is</span> <span class="s2">&quot;a customer using the store&quot;</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  <span class="kd">user</span> <span class="n">Shopper</span> <span class="kp">is</span> <span class="s2">"a customer using the store"</span>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
 </span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>  <span class="kd">application</span> <span class="kd">context</span> <span class="n">StoreFront</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
@@ -6217,7 +6223,7 @@ the <code>shown by</code> syntax to link to external UX artifacts:</p>
 </span><span id="__span-14-47"><a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a>    <span class="c1">// Handlers</span>
 </span><span id="__span-14-48"><a id="__codelineno-14-48" name="__codelineno-14-48" href="#__codelineno-14-48"></a>    <span class="kd">handler</span> <span class="n">ProductHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-14-49"><a id="__codelineno-14-49" name="__codelineno-14-49" href="#__codelineno-14-49"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">SearchProducts</span> <span class="p">{</span>
-</span><span id="__span-14-50"><a id="__codelineno-14-50" name="__codelineno-14-50" href="#__codelineno-14-50"></a>        <span class="k">send</span> <span class="kd">query</span> <span class="n">FindProducts</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CatalogOut</span>
+</span><span id="__span-14-50"><a id="__codelineno-14-50" name="__codelineno-14-50" href="#__codelineno-14-50"></a>        <span class="k">send</span> <span class="kd">query</span> <span class="n">FindProducts</span><span class="p">(</span><span class="n">text</span> <span class="o">=</span> <span class="s2">"a value"</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CatalogOut</span>
 </span><span id="__span-14-51"><a id="__codelineno-14-51" name="__codelineno-14-51" href="#__codelineno-14-51"></a>      <span class="p">}</span>
 </span><span id="__span-14-52"><a id="__codelineno-14-52" name="__codelineno-14-52" href="#__codelineno-14-52"></a>      <span class="k">on</span> <span class="kd">result</span> <span class="n">ProductList</span> <span class="p">{</span>
 </span><span id="__span-14-53"><a id="__codelineno-14-53" name="__codelineno-14-53" href="#__codelineno-14-53"></a>        <span class="k">put</span> <span class="kd">result</span> <span class="n">ProductList</span><span class="p">(</span><span class="n">matches</span> <span class="o">=</span> <span class="n">ProductList</span><span class="p">.</span><span class="n">matches</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">ProductGrid</span>
@@ -6226,16 +6232,16 @@ the <code>shown by</code> syntax to link to external UX artifacts:</p>
 </span><span id="__span-14-56"><a id="__codelineno-14-56" name="__codelineno-14-56" href="#__codelineno-14-56"></a>
 </span><span id="__span-14-57"><a id="__codelineno-14-57" name="__codelineno-14-57" href="#__codelineno-14-57"></a>    <span class="kd">handler</span> <span class="n">CartHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-14-58"><a id="__codelineno-14-58" name="__codelineno-14-58" href="#__codelineno-14-58"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">RemoveFromCart</span> <span class="p">{</span>
-</span><span id="__span-14-59"><a id="__codelineno-14-59" name="__codelineno-14-59" href="#__codelineno-14-59"></a>        <span class="k">send</span> <span class="kd">command</span> <span class="n">RemoveCartItem</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartOut</span>
+</span><span id="__span-14-59"><a id="__codelineno-14-59" name="__codelineno-14-59" href="#__codelineno-14-59"></a>        <span class="k">send</span> <span class="kd">command</span> <span class="n">RemoveCartItem</span><span class="p">(</span><span class="kr">item</span> <span class="o">=</span> <span class="s2">"a value"</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartOut</span>
 </span><span id="__span-14-60"><a id="__codelineno-14-60" name="__codelineno-14-60" href="#__codelineno-14-60"></a>      <span class="p">}</span>
 </span><span id="__span-14-61"><a id="__codelineno-14-61" name="__codelineno-14-61" href="#__codelineno-14-61"></a>    <span class="p">}</span>
 </span><span id="__span-14-62"><a id="__codelineno-14-62" name="__codelineno-14-62" href="#__codelineno-14-62"></a>
 </span><span id="__span-14-63"><a id="__codelineno-14-63" name="__codelineno-14-63" href="#__codelineno-14-63"></a>    <span class="kd">handler</span> <span class="n">CheckoutHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-14-64"><a id="__codelineno-14-64" name="__codelineno-14-64" href="#__codelineno-14-64"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">StartCheckout</span> <span class="p">{</span>
-</span><span id="__span-14-65"><a id="__codelineno-14-65" name="__codelineno-14-65" href="#__codelineno-14-65"></a>        <span class="k">do</span> <span class="s2">&quot;move the user to the CheckoutFlow group&quot;</span>
+</span><span id="__span-14-65"><a id="__codelineno-14-65" name="__codelineno-14-65" href="#__codelineno-14-65"></a>        <span class="k">do</span> <span class="s2">"move the user to the CheckoutFlow group"</span>
 </span><span id="__span-14-66"><a id="__codelineno-14-66" name="__codelineno-14-66" href="#__codelineno-14-66"></a>      <span class="p">}</span>
 </span><span id="__span-14-67"><a id="__codelineno-14-67" name="__codelineno-14-67" href="#__codelineno-14-67"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">ProcessPayment</span> <span class="p">{</span>
-</span><span id="__span-14-68"><a id="__codelineno-14-68" name="__codelineno-14-68" href="#__codelineno-14-68"></a>        <span class="k">send</span> <span class="kd">command</span> <span class="n">ChargePayment</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentsOut</span>
+</span><span id="__span-14-68"><a id="__codelineno-14-68" name="__codelineno-14-68" href="#__codelineno-14-68"></a>        <span class="k">send</span> <span class="kd">command</span> <span class="n">ChargePayment</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="m">1.00</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentsOut</span>
 </span><span id="__span-14-69"><a id="__codelineno-14-69" name="__codelineno-14-69" href="#__codelineno-14-69"></a>      <span class="p">}</span>
 </span><span id="__span-14-70"><a id="__codelineno-14-70" name="__codelineno-14-70" href="#__codelineno-14-70"></a>    <span class="p">}</span>
 </span><span id="__span-14-71"><a id="__codelineno-14-71" name="__codelineno-14-71" href="#__codelineno-14-71"></a>  <span class="p">}</span>

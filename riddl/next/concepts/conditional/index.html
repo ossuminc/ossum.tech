@@ -5499,7 +5499,7 @@ statements for pattern matching.</p>
 <p>The simplest form describes the condition in natural language, wrapped in
 <code>prompt(…)</code> so it is clear an AI decides it:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;the user is authenticated&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"the user is authenticated"</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="c1">// actions when the condition holds</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
@@ -5508,7 +5508,7 @@ Evaluating the condition is left to code generation.</p>
 <div class="admonition warning">
 <p class="admonition-title">The bare-string form is deprecated</p>
 <p><!-- riddl: skip reason="deliberate counter-example: it emits [deprecated], which the gate treats as failure" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">when</span> <span class="s2">&quot;user is authenticated&quot;</span> <span class="k">then</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">end</span>   <span class="c1">// deprecated</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">when</span> <span class="s2">"user is authenticated"</span> <span class="k">then</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kr">end</span>   <span class="c1">// deprecated</span>
 </span></code></pre></div></p>
 <p>It still parses, but draws a <code>[deprecated]</code> message. Everywhere else in
 RIDDL a bare quoted string denotes a <strong>literal value</strong>, while <code>prompt(…)</code>
@@ -5518,7 +5518,7 @@ which of the two it is rather than borrowing the literal's spelling.</p>
 <h2 id="identifier-conditions">Identifier Conditions<a class="headerlink" href="#identifier-conditions" title="Permanent link">&para;</a></h2>
 <p>Conditions can reference identifiers defined with <code>let</code>:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">let</span> <span class="n">isValid</span> <span class="o">=</span> <span class="s2">&quot;order.items.count &gt; 0&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">let</span> <span class="n">isValid</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"the order has at least one item"</span><span class="p">)</span> <span class="kp">as</span> <span class="nb">Boolean</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">when</span> <span class="n">isValid</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="c1">// actions when valid</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span> <span class="kr">end</span>
@@ -5526,7 +5526,7 @@ which of the two it is rather than borrowing the literal's spelling.</p>
 <p>Identifiers can be negated:</p>
 <!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">when</span> <span class="o">!</span><span class="n">isValid</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="k">error</span> <span class="s2">&quot;Order must have at least one item&quot;</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="k">error</span> <span class="s2">"Order must have at least one item"</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
 <h2 id="numeric-expressions">Numeric Expressions<a class="headerlink" href="#numeric-expressions" title="Permanent link">&para;</a></h2>
@@ -5536,7 +5536,7 @@ which of the two it is rather than borrowing the literal's spelling.</p>
 <li><strong>Arithmetic operators</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></li>
 </ul>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;order.total &gt; 100&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"order.total &gt; 100"</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="c1">// apply discount</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
@@ -5551,21 +5551,21 @@ during code generation.</p>
 <li><strong>NOT</strong>: Negates a condition</li>
 </ul>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;user.isVerified AND order.total &gt; 0&quot;</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">when</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"user.isVerified AND order.total &gt; 0"</span><span class="p">)</span> <span class="k">then</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="c1">// process order</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
 <h2 id="match-expressions">Match Expressions<a class="headerlink" href="#match-expressions" title="Permanent link">&para;</a></h2>
 <p>The <code>match</code> statement provides pattern matching:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">match</span> <span class="s2">&quot;orderStatus&quot;</span> <span class="p">{</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  <span class="kd">case</span> <span class="s2">&quot;pending&quot;</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">match</span> <span class="s2">"orderStatus"</span> <span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  <span class="kd">case</span> <span class="s2">"pending"</span> <span class="p">{</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="c1">// handle pending</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  <span class="p">}</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  <span class="kd">case</span> <span class="s2">&quot;processing&quot;</span> <span class="p">{</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  <span class="kd">case</span> <span class="s2">"processing"</span> <span class="p">{</span>
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="c1">// handle processing</span>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  <span class="p">}</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>  <span class="kd">case</span> <span class="s2">&quot;shipped&quot;</span> <span class="p">{</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>  <span class="kd">case</span> <span class="s2">"shipped"</span> <span class="p">{</span>
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="c1">// handle shipped</span>
 </span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>  <span class="p">}</span>
 </span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>  <span class="k">default</span> <span class="p">{</span>

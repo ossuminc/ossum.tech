@@ -2666,6 +2666,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#correlations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correlations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Correlations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-completes-a-correlation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What completes a correlation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-timeout-is-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The timeout is mandatory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences-worth-knowing-before-you-model-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences worth knowing before you model one
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5367,6 +5417,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#correlations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correlations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Correlations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-completes-a-correlation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What completes a correlation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-timeout-is-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The timeout is mandatory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences-worth-knowing-before-you-model-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences worth knowing before you model one
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5457,7 +5557,7 @@ it does not answer queries. Queries are served by the
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">record</span> <span class="n">SalesTotals</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">day</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">amount</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">repository</span> <span class="n">SalesData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kr">schema</span> <span class="n">Totals</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span> <span class="n">totals</span> <span class="kp">as</span> <span class="kd">type</span> <span class="n">SalesTotals</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kr">schema</span> <span class="n">Totals</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span> <span class="n">totals</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">SalesTotals</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="p">}</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kd">projector</span> <span class="n">SalesDashboard</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5467,10 +5567,10 @@ it does not answer queries. Queries are served by the
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="kd">handler</span> <span class="n">SalesEvents</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderCompleted</span> <span class="p">{</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="k">do</span> <span class="s2">&quot;Update daily sales totals with the order amount&quot;</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="k">do</span> <span class="s2">"Update daily sales totals with the order amount"</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>      <span class="p">}</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderContext</span><span class="p">.</span><span class="n">OrderRefunded</span> <span class="p">{</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="k">do</span> <span class="s2">&quot;Subtract the refund amount from daily totals&quot;</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="k">do</span> <span class="s2">"Subtract the refund amount from daily totals"</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>      <span class="p">}</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="p">}</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  <span class="p">}</span>
@@ -5491,6 +5591,124 @@ projector without one has nothing to project into.</p>
 <li>A declared repository reference never used in a <code>tell</code></li>
 </ul>
 </div>
+<h2 id="correlations">Correlations<a class="headerlink" href="#correlations" title="Permanent link">&para;</a></h2>
+<p>A projection often has to <strong>join facts that arrive separately</strong> — an order
+placed here, a payment taken there, a shipment somewhere else. A correlation is
+where the projector holds that partial join while it waits.</p>
+<!-- riddl: in-domain -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">context</span> <span class="n">Fulfillment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">event</span> <span class="n">OrderPlaced</span>  <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">customerId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">total</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">event</span> <span class="n">PaymentTaken</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">customerId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">amount</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">RecordFulfillment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">customerId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">total</span> <span class="kp">is</span> <span class="nb">Natural</span><span class="p">,</span> <span class="n">paidAmount</span> <span class="kp">is</span> <span class="nb">Natural</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">command</span> <span class="n">ReportStalled</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="kd">record</span> <span class="n">FulfillmentRow</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">,</span> <span class="n">total</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  <span class="kd">repository</span> <span class="n">Fulfillments</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="kr">schema</span> <span class="n">Rows</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span> <span class="n">rows</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">FulfillmentRow</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="kd">handler</span> <span class="n">Store</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">RecordFulfillment</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"write the joined row"</span> <span class="p">}</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span> <span class="k">error</span> <span class="s2">"Unrecognized message"</span> <span class="p">}</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="p">}</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>  <span class="p">}</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  <span class="kd">entity</span> <span class="n">Monitor</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="kd">state</span> <span class="n">Watching</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">FulfillmentRow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>      <span class="kd">handler</span> <span class="n">MonitorHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">on</span> <span class="kd">command</span> <span class="n">ReportStalled</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="p">}</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>  <span class="p">}</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  <span class="kd">projector</span> <span class="n">Joiner</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    <span class="kd">record</span> <span class="n">Joined</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">orderId</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">Fulfillments</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="n">correlation</span> <span class="n">FulfillmentJoin</span> <span class="kp">by</span> <span class="n">customerId</span><span class="p">,</span> <span class="n">orderId</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>      <span class="kr">yields</span> <span class="kd">command</span> <span class="n">RecordFulfillment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="kd">handler</span> <span class="n">Collect</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>        <span class="k">on</span> <span class="kd">event</span> <span class="n">OrderPlaced</span>  <span class="p">{</span> <span class="k">set</span> <span class="kd">field</span> <span class="n">RecordFulfillment</span><span class="p">.</span><span class="n">total</span> <span class="kp">to</span> <span class="s2">"the order total"</span> <span class="p">}</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="k">on</span> <span class="kd">event</span> <span class="n">PaymentTaken</span> <span class="p">{</span> <span class="k">set</span> <span class="kd">field</span> <span class="n">RecordFulfillment</span><span class="p">.</span><span class="n">paidAmount</span> <span class="kp">to</span> <span class="s2">"the amount paid"</span> <span class="p">}</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>      <span class="p">}</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    <span class="p">}</span> <span class="n">times</span> <span class="n">out</span> <span class="n">after</span> <span class="s2">"30 days"</span> <span class="p">{</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>      <span class="k">tell</span> <span class="kd">command</span> <span class="n">ReportStalled</span><span class="p">(</span><span class="n">orderId</span> <span class="o">=</span> <span class="s2">"the stalled order"</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Monitor</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>    <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  <span class="p">}</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Read the declaration as: <em>accumulate events keyed by <code>customerId, orderId</code>;
+when the accumulation is complete, emit <code>RecordFulfillment</code> to the repository;
+if 30 days pass first, do this instead.</em></p>
+<h3 id="what-completes-a-correlation">What completes a correlation<a class="headerlink" href="#what-completes-a-correlation" title="Permanent link">&para;</a></h3>
+<p><strong>Completion is derived from the target's type, never written down.</strong> The
+correlation completes when every <strong>required</strong> field of the yielded command has
+been set by some fold. There is no completion condition to state, so there is
+nothing to keep in sync when the command changes.</p>
+<p>Two Errors follow from that, and they are the reason the feature is worth
+having — each turns a production mystery into a compile-time fact:</p>
+<div class="admonition warning">
+<p class="admonition-title">A correlation that can never complete is an Error</p>
+<p><em>"Correlation 'X' can never complete: Command 'C' requires 'f', which no
+fold sets."</em></p>
+<p><strong>Key fields are exempt</strong> — they are filled from the correlation key
+itself. Optional and zero-or-more fields are not required, since both admit
+absence.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Two folds writing one field is an Error</p>
+<p><em>"Field 'f' of command C is set by more than one clause of Correlation
+'X'."</em></p>
+<p>The completed value would depend on which event arrived first, and across
+sources that order is not guaranteed. The model would produce different
+results from identical events, so it is rejected rather than left racy.</p>
+</div>
+<h3 id="the-timeout-is-mandatory">The timeout is mandatory<a class="headerlink" href="#the-timeout-is-mandatory" title="Permanent link">&para;</a></h3>
+<p><code>times out after "&lt;duration&gt;" { … }</code> is <strong>grammar, not an option</strong>, and it
+cannot be omitted. Options are advisory — "honored if possible" — and a bound
+that must fire a block of statements is not advisory. The practical
+consequence: a correlation with no bound cannot be written, so unbounded
+retention is not a state any implementation has to handle.</p>
+<p>The clock starts at the <strong>first handled event</strong> for a key tuple. A timeout
+<strong>does not poison the key</strong>: nothing was written, so a later event bearing that
+tuple starts a fresh correlation. That can produce a repeating notification for
+a correlation that never completes, which is deliberate — something is wrong
+and stays wrong.</p>
+<h3 id="consequences-worth-knowing-before-you-model-one">Consequences worth knowing before you model one<a class="headerlink" href="#consequences-worth-knowing-before-you-model-one" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identity</strong></td>
+<td>the <strong>full</strong> key tuple, ordered as written. A tuple sharing only some components with a completed one is a different correlation, and the order is never canonicalized.</td>
+</tr>
+<tr>
+<td><strong>Target kind</strong></td>
+<td>a <strong>command</strong>, not a record. A projector's only output is a change to a repository, and a repository is changed by handling a command — a handler clause takes a message, and a record is not one.</td>
+</tr>
+<tr>
+<td><strong>Scaling</strong></td>
+<td>a projector declaring correlations may <strong>not</strong> be scaled round-robin. Every event carrying a key tuple must reach the instance holding that tuple's partial, so distribution must be <strong>by key</strong>.</td>
+</tr>
+<tr>
+<td><strong>Own state</strong></td>
+<td>a correlating projector is no longer stateless: its state is the checkpoint <em>plus</em> the in-flight partials.</td>
+</tr>
+<tr>
+<td><strong>Replay</strong></td>
+<td>folds are pure, so re-running them has no effect beyond rebuilding the partial. The timeout block is an <strong>effect</strong>, fired <strong>at-least-once</strong> on every timeout including during reprocessing — so write timeout bodies to be idempotent and expect duplicates during a backfill.</td>
+</tr>
+</tbody>
+</table>
+<p>Durability of the in-flight partials is deliberately <strong>not</strong> specified. The
+declared window is the honest statement of what is needed: a 30-day window
+obliges an implementation that survives 30 days; a 5-second window does not.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <p><code>cacheable</code> (0–1 arguments), <code>batch</code> (1 argument), <code>microservice</code> and
 <code>protocol</code> are available on a projector.</p>
@@ -5502,9 +5720,13 @@ projector without one has nothing to project into.</p>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
     Projector(["Projector"]) --&gt; Updates["updates"]
-    Projector --&gt; PC["Processor contents"]</code></pre>
+    Projector --&gt; Correlation
+    Projector --&gt; PC["Processor contents"]
+    Correlation --&gt; Handler
+    Correlation --&gt; Timeout["times out after"]</code></pre>
 <ul>
 <li><code>updates</code> — the <a href="../repository/">repository</a> this projector maintains</li>
+<li><code>correlation</code> — a keyed accumulation of several events into one command (see above)</li>
 <li>Everything a <a href="../processor/">processor</a> may contain: <a href="../type/">Type</a>, <a href="../constant/">Constant</a>, <a href="../invariant/">Invariant</a>, <a href="../function/">Function</a>, <a href="../handler/">Handler</a>, <a href="../streamlet/">Streamlet</a>, nested <a href="../processor/">Processor</a>, <a href="../connector/">Connector</a>, Relationship, <a href="../inlet/">Inlet</a>, <a href="../outlet/">Outlet</a>, <a href="../version/">Version</a>, <a href="../copyright/">Copyright</a>, <a href="../comment/">Comment</a></li>
 <li><a href="../include/">Include</a></li>
 </ul>

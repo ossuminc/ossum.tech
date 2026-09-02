@@ -5478,6 +5478,19 @@
   
 
 
+<!-- riddl-prelude
+type ShiftId is Id(Shift)
+type EmployeeId is UUID
+record StoredShift is { shiftId: ShiftId }
+event ShiftCreated is { shiftId: ShiftId }
+event EmployeeAssigned is { shiftId: ShiftId }
+event AssignEmployeeRejected is { shiftId: ShiftId, rejectionReason: String(1,500) }
+type ShiftEvent is ShiftCreated | EmployeeAssigned | AssignEmployeeRejected
+entity Shift is { ??? }
+repository ShiftRepository is { ??? }
+command PersistEmployeeAssigned is { shiftId: ShiftId }
+-->
+
 <h1 id="scheduling-context">Scheduling Context<a class="headerlink" href="#scheduling-context" title="Permanent link">&para;</a></h1>
 <p>The Scheduling context manages staff shift planning, assignment,
 time tracking, shift swaps, and coverage. It provides the
@@ -5490,120 +5503,67 @@ The Scheduling context handles the lifecycle of each shift from
 creation through assignment, clock-in/out, and potential swaps
 or cancellations.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">ShiftId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Shift identifier&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a shift.&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">type</span> <span class="n">EmployeeId</span> <span class="kp">is</span> <span class="nb">UUID</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Employee identifier&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for an employee.&quot;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="kd">type</span> <span class="n">ShiftStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  <span class="n">ScheduledStatus</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="n">AssignedStatus</span><span class="p">,</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="n">InProgressStatus</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="n">ShiftCompletedStatus</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="n">ShiftCancelledStatus</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Shift status&quot;</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Current status of a shift.&quot;</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="kd">type</span> <span class="n">ShiftRole</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>  <span class="n">HostRole</span><span class="p">,</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>  <span class="n">ServerRole</span><span class="p">,</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="n">BartenderRole</span><span class="p">,</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>  <span class="n">ChefRole</span><span class="p">,</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>  <span class="n">CookRole</span><span class="p">,</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>  <span class="n">DishwasherRole</span><span class="p">,</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>  <span class="n">ManagerRole</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Shift role&quot;</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;The role for this shift.&quot;</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=ShiftId,EmployeeId -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">ShiftId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Shift</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">type</span> <span class="n">EmployeeId</span> <span class="kp">is</span> <span class="nb">UUID</span>
 </span></code></pre></div>
 <p>The <code>ShiftRole</code> enumeration maps directly to the personas
 interviewed — Host, Server, Bartender, Chef, Cook — plus
 Dishwasher and Manager.</p>
 <h2 id="entity-shift">Entity: Shift<a class="headerlink" href="#entity-shift" title="Permanent link">&para;</a></h2>
 <p>The <code>Shift</code> entity has a 6-command lifecycle:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Shift</span> <span class="kp">is</span> <span class="p">{</span>
+<!-- riddl: in-context no-prelude=Shift,ShiftCreated,EmployeeAssigned,AssignEmployeeRejected,ShiftCommand,ShiftEvent -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Shift</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">CreateShift</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">shiftId</span> <span class="kp">is</span> <span class="n">ShiftId</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">shiftDate</span> <span class="kp">is</span> <span class="nb">Date</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">shiftStart</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">shiftEnd</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">shiftRole</span> <span class="kp">is</span> <span class="n">ShiftRole</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="kd">command</span> <span class="n">AssignEmployee</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">shiftId</span> <span class="kp">is</span> <span class="n">ShiftId</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">employeeId</span> <span class="kp">is</span> <span class="n">EmployeeId</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">employeeName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="p">}</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>  <span class="kd">command</span> <span class="n">SwapShift</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">shiftId</span> <span class="kp">is</span> <span class="n">ShiftId</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">originalEmployeeId</span> <span class="kp">is</span> <span class="n">EmployeeId</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">replacementEmployeeId</span> <span class="kp">is</span> <span class="n">EmployeeId</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="n">replacementName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  <span class="p">}</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>  <span class="kd">command</span> <span class="n">ClockIn</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    <span class="n">shiftId</span> <span class="kp">is</span> <span class="n">ShiftId</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>    <span class="n">clockedInAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  <span class="p">}</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>  <span class="kd">command</span> <span class="n">ClockOut</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    <span class="n">shiftId</span> <span class="kp">is</span> <span class="n">ShiftId</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="n">clockedOutAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  <span class="p">}</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>  <span class="kd">command</span> <span class="n">CancelShift</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    <span class="n">shiftId</span> <span class="kp">is</span> <span class="n">ShiftId</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="n">shiftCancelReason</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">500</span><span class="p">)</span>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>  <span class="p">}</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>  <span class="c1">// Events: ShiftCreated, EmployeeAssigned, ShiftSwapped,</span>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  <span class="c1">//         ClockedIn, ClockedOut, ShiftCancelled</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>  <span class="kd">state</span> <span class="n">ActiveShift</span> <span class="kp">of</span> <span class="n">Shift</span><span class="p">.</span><span class="n">ShiftStateData</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="kd">handler</span> <span class="n">ShiftHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateShift</span> <span class="p">{</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span> <span class="kp">to</span> <span class="kd">state</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>        <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span><span class="p">.</span><span class="n">ActiveShift</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>        <span class="kp">with</span> <span class="kd">command</span> <span class="n">CreateShift</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ShiftCreated</span> <span class="kp">to</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>        <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>    <span class="p">}</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">AssignEmployee</span> <span class="p">{</span>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">EmployeeAssigned</span> <span class="kp">to</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>        <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>    <span class="p">}</span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">SwapShift</span> <span class="p">{</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ShiftSwapped</span> <span class="kp">to</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>        <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>    <span class="p">}</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ClockIn</span> <span class="p">{</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ClockedIn</span> <span class="kp">to</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>        <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span>
-</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>    <span class="p">}</span>
-</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ClockOut</span> <span class="p">{</span>
-</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ClockedOut</span> <span class="kp">to</span>
-</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>        <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span>
-</span><span id="__span-1-67"><a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>    <span class="p">}</span>
-</span><span id="__span-1-68"><a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CancelShift</span> <span class="p">{</span>
-</span><span id="__span-1-69"><a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ShiftCancelled</span> <span class="kp">to</span>
-</span><span id="__span-1-70"><a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>        <span class="kd">entity</span> <span class="n">Scheduling</span><span class="p">.</span><span class="n">Shift</span>
-</span><span id="__span-1-71"><a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a>    <span class="p">}</span>
-</span><span id="__span-1-72"><a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a>  <span class="p">}</span>
-</span><span id="__span-1-73"><a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a><span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="c1">// An event-sourced entity OWNS the commands and events that change it, so</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="c1">// they are declared INSIDE it, and every command names the event it yields.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">CreateShift</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">ShiftCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kd">command</span> <span class="n">AssignEmployee</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">EmployeeAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="kd">event</span> <span class="n">ShiftCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">event</span> <span class="n">EmployeeAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="kd">event</span> <span class="n">AssignEmployeeRejected</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span><span class="p">,</span> <span class="n">rejectionReason</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span> <span class="p">}</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">record</span> <span class="n">ShiftData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="c1">// Lifecycle phases are named STATES, not a status field: each state</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="c1">// declares the commands it accepts, so the compiler knows the machine.</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">ActiveShift</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ShiftData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="kd">handler</span> <span class="n">ActiveShiftHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AssignEmployee</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="k">yield</span> <span class="kd">event</span> <span class="n">EmployeeAssigned</span><span class="p">(</span><span class="n">shiftId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">shiftId</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      <span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="c1">// `set` and `morph` may appear ONLY in an `on event` clause here:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>      <span class="c1">// replay has to re-apply exactly the same change.</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">EmployeeAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Shift</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Filled</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">ShiftData</span><span class="p">(</span><span class="n">shiftId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">shiftId</span><span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>      <span class="p">}</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="p">}</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="p">}</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="kd">state</span> <span class="n">Filled</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ShiftData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="kd">handler</span> <span class="n">FilledHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>      <span class="c1">// A command this state does not accept is refused -- and the refusal</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="c1">// is PUBLISHED before it is raised, so the attempt is recorded.</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AssignEmployee</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">AssignEmployeeRejected</span><span class="p">(</span><span class="n">shiftId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">shiftId</span><span class="p">,</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>          <span class="n">rejectionReason</span> <span class="o">=</span> <span class="s2">"Shift does not accept AssignEmployee in this state"</span><span class="p">)</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>          <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">ShiftEvents</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">error</span> <span class="s2">"Shift does not accept AssignEmployee in this state"</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>      <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="p">}</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  <span class="p">}</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>  <span class="c1">// A processor receives on its OWN inlet and publishes on its OWN outlet,</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="c1">// and a portlet's type must ADMIT everything that travels on it.</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  <span class="kd">type</span> <span class="n">ShiftCommand</span> <span class="kp">is</span> <span class="n">CreateShift</span> <span class="sd">| AssignEmployee</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>  <span class="kd">type</span> <span class="n">ShiftEvent</span> <span class="kp">is</span> <span class="n">ShiftCreated</span> <span class="sd">| EmployeeAssigned | AssignEmployeeRejected</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  <span class="kd">inlet</span> <span class="n">ShiftCommands</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">ShiftCommand</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>  <span class="kd">outlet</span> <span class="n">ShiftEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">ShiftEvent</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The lifecycle: <strong>Create → Assign Employee → Clock In → Clock
 Out</strong> (with optional <strong>Swap</strong> or <strong>Cancel</strong> at any point).</p>
@@ -5611,14 +5571,35 @@ Out</strong> (with optional <strong>Swap</strong> or <strong>Cancel</strong> at 
 employee, maintaining an audit trail of who was originally
 assigned. This matters for labor compliance and reporting.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">ShiftRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">ShiftData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">shifts</span> <span class="kp">as</span> <span class="n">Shift</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">Shift</span><span class="p">.</span><span class="n">shiftId</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">Shift</span><span class="p">.</span><span class="n">shiftDate</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">Shift</span><span class="p">.</span><span class="n">employeeId</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=ShiftRepository,StoredShift,PersistEmployeeAssigned -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">ShiftRepository</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">ShiftRepositoryFromShift</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistEmployeeAssigned</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">outlet</span> <span class="n">ShiftRepositoryResponses</span> <span class="kp">is</span> <span class="kd">result</span> <span class="n">ShiftResult</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="c1">// A repository answers with a RESULT, never an event.</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">result</span> <span class="n">ShiftResult</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">found</span><span class="p">:</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">record</span> <span class="n">StoredShift</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="c1">// A repository that answers queries and declares NO index at all is a</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="c1">// sequential scan by construction, and draws a warning saying so.</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="kr">schema</span> <span class="n">ShiftSchema</span> <span class="kp">is</span> <span class="n">relational</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="kp">of</span> <span class="n">rows</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">StoredShift</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredShift</span><span class="p">.</span><span class="n">shiftId</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="kd">command</span> <span class="n">PersistEmployeeAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">shiftId</span><span class="p">:</span> <span class="n">ShiftId</span> <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="kd">handler</span> <span class="n">ShiftPersistence</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PersistEmployeeAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>      <span class="k">do</span> <span class="s2">"update the stored shift row for this shiftId"</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1">// An inlet admitting an alternation needs a clause that receives it.</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="c1">// Handling each member is not enough -- say what ARRIVING means.</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>      <span class="k">do</span> <span class="s2">"persist whatever else arrives on this inlet"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>  <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The index on <code>shiftDate</code> enables schedule-by-day views. The
 index on <code>employeeId</code> supports employee-centric schedule views

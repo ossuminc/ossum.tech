@@ -5871,8 +5871,8 @@ definition's closing curly bracket and is preceded using keywords as
 detailed in the subsections below</p>
 <h3 id="single-literal-string">Single Literal String<a class="headerlink" href="#single-literal-string" title="Permanent link">&para;</a></h3>
 <p>Pretty simple, like this:
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Stuff about engineering&quot;</span> <span class="p">}</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">domain</span> <span class="n">SomeDomain</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">explained</span> <span class="kp">as</span> <span class="s2">&quot;Too vague to have a good name&quot;</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">by</span> <span class="s2">"Stuff about engineering"</span> <span class="p">}</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">domain</span> <span class="n">SomeDomain</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">explained</span> <span class="kp">as</span> <span class="s2">"Too vague to have a good name"</span> <span class="p">}</span>
 </span></code></pre></div></p>
 <h3 id="documentation-block">Documentation Block<a class="headerlink" href="#documentation-block" title="Permanent link">&para;</a></h3>
 <p>Allowing markdown syntax, like this:
@@ -5887,7 +5887,7 @@ detailed in the subsections below</p>
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span> <span class="p">}</span>
 </span></code></pre></div></p>
 <h3 id="file-reference">File Reference<a class="headerlink" href="#file-reference" title="Permanent link">&para;</a></h3>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">&quot;engineering.md&quot;</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span> <span class="kr">described</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">"engineering.md"</span> <span class="p">}</span>
 </span></code></pre></div>
 <h3 id="url">URL<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
 <p>or
@@ -5897,18 +5897,18 @@ detailed in the subsections below</p>
 <p>Every definition in RIDDL can have a <code>briefly</code> or <code>brief</code> suffix that in one
 short string describes the definition, such as:
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;The discipline of using natural science, mathematics, and design</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="kr">briefly</span> <span class="s2">"The discipline of using natural science, mathematics, and design</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="s2"> processes to create or improve systems that solve technical problems, or</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="s2"> increase efficiency and productivity.&quot;</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="s2"> increase efficiency and productivity."</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <p>Brief descriptions should be short and concise, like a dictionary, and useful
 in a glossary of terms. Brief descriptions must precede the other kinds of descriptions,
 like this:</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">domain</span> <span class="n">Engineering</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;The discipline of using natural science, mathematics, and design</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  <span class="kr">briefly</span> <span class="s2">"The discipline of using natural science, mathematics, and design</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="s2"> processes to create or improve systems that solve technical problems, or</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="s2"> increase efficiency and productivity.&quot;</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="s2"> increase efficiency and productivity."</span>
 </span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  <span class="kr">described</span> <span class="kp">at</span> <span class="n">https</span><span class="p">:</span><span class="c1">//en.wikipedia.org/wiki/Engineering</span>
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -5955,15 +5955,15 @@ prevents fragments of definitions from being separated across files.</p>
 <p>For example, this is allowed:</p>
 <!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">domain</span> <span class="n">ThingAmaJig</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kn">include</span> <span class="s2">&quot;thingamajig/thing-context.riddl&quot;</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  <span class="kn">include</span> <span class="s2">&quot;thingamajig/ama-topic.riddl&quot;</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="kn">include</span> <span class="s2">&quot;thingamajig/jig-context.riddl&quot;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kn">include</span> <span class="s2">"thingamajig/thing-context.riddl"</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  <span class="kn">include</span> <span class="s2">"thingamajig/ama-topic.riddl"</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  <span class="kn">include</span> <span class="s2">"thingamajig/jig-context.riddl"</span>
 </span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>While this is <strong>not</strong> allowed:</p>
 <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">domain</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">include</span> <span class="s2">&quot;ThingAmaJig-domain.riddl&quot;</span>  <span class="c1">// ERROR: include inside definition name</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">include</span> <span class="s2">"ThingAmaJig-domain.riddl"</span>  <span class="c1">// ERROR: include inside definition name</span>
 </span></code></pre></div>
 <p>The domain needs a name before its body begins. As a rule, you can use
 <code>include</code> right after the opening curly brace of any container definition.</p>
@@ -5983,9 +5983,9 @@ prevents fragments of definitions from being separated across files.</p>
 <p>With <code>main.riddl</code> containing:</p>
 <!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">domain</span> <span class="n">OnlineRetail</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  <span class="kn">include</span> <span class="s2">&quot;catalog/catalog-context.riddl&quot;</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  <span class="kn">include</span> <span class="s2">&quot;shopping/shopping-context.riddl&quot;</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  <span class="kn">include</span> <span class="s2">&quot;fulfillment/fulfillment-context.riddl&quot;</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  <span class="kn">include</span> <span class="s2">"catalog/catalog-context.riddl"</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  <span class="kn">include</span> <span class="s2">"shopping/shopping-context.riddl"</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  <span class="kn">include</span> <span class="s2">"fulfillment/fulfillment-context.riddl"</span>
 </span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="future-directives-and-substitutions">Future: Directives and Substitutions<a class="headerlink" href="#future-directives-and-substitutions" title="Permanent link">&para;</a></h2>
@@ -5995,7 +5995,7 @@ prevents fragments of definitions from being separated across files.</p>
 </div>
 <p><strong>Directives</strong> will allow preprocessor-style commands:</p>
 <!-- riddl: skip reason="a proposed future directive; not RIDDL syntax today" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="err">#</span><span class="n">define</span> <span class="n">COMPANY_NAME</span> <span class="o">=</span> <span class="s2">&quot;Acme Corp&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="err">#</span><span class="n">define</span> <span class="n">COMPANY_NAME</span> <span class="o">=</span> <span class="s2">"Acme Corp"</span>
 </span></code></pre></div>
 <p><strong>Substitutions</strong> will allow variable replacement:</p>
 <!-- riddl: skip reason="a proposed future substitution; not RIDDL syntax today" -->

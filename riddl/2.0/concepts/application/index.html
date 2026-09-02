@@ -5430,8 +5430,8 @@
 record SignupData is { email is String }
 command PlaceOrder is { email is String }
 page CheckoutPage is {
-  form SignupForm accepts type SignupData
-  document ConfirmationPanel shows type SignupData
+  form SignupForm accepts record SignupData
+  document ConfirmationPanel shows record SignupData
 }
 -->
 
@@ -5507,7 +5507,7 @@ a <code>figma</code> reference linking the model element to the exact frame that
 it:</p>
 <!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">figma</span> <span class="s2">"aBcD1234"</span> <span class="kr">node</span> <span class="s2">"42:1337"</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>See <a href="../metadata/#figma-references">Metadata</a> for the optional drift validation.</p>

@@ -5497,9 +5497,9 @@
 
 
 <!-- riddl-prelude
-constant MinimumOrder is Natural = "10"
+constant MinimumOrder is Natural = 10
 record OrderInfo is { id is String, total is Natural }
-command PlaceOrder is { id is String, total is Natural }
+command PlaceOrder yields event OrderPlaced is { id is String, total is Natural }
 event OrderPlaced is { id is String, total is Natural }
 command DoIt is { note is String }
 -->
@@ -5564,10 +5564,10 @@ memory and later rehydrated passivates and activates repeatedly without ever
 being initialized or terminated again.</p>
 <!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="k">on</span> <span class="kr">init</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">&quot;load configuration&quot;</span> <span class="p">}</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="k">on</span> <span class="kr">activate</span>  <span class="p">{</span> <span class="k">do</span> <span class="s2">&quot;warm the pricing cache for this order&quot;</span> <span class="p">}</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="k">on</span> <span class="kr">passivate</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">&quot;flush the pricing cache&quot;</span> <span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="k">on</span> <span class="kd">term</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">&quot;archive the order record&quot;</span> <span class="p">}</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="k">on</span> <span class="kr">init</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">"load configuration"</span> <span class="p">}</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="k">on</span> <span class="kr">activate</span>  <span class="p">{</span> <span class="k">do</span> <span class="s2">"warm the pricing cache for this order"</span> <span class="p">}</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="k">on</span> <span class="kr">passivate</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"flush the pricing cache"</span> <span class="p">}</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="k">on</span> <span class="kd">term</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">"archive the order record"</span> <span class="p">}</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="binding-the-handled-message">Binding the Handled Message<a class="headerlink" href="#binding-the-handled-message" title="Permanent link">&para;</a></h2>
@@ -5578,8 +5578,10 @@ declaration <code>p1: String</code>, read as "<code>ord</code> has type <code>co
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">on</span> <span class="n">ord</span><span class="p">:</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">when</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span> <span class="o">&gt;</span> <span class="n">MinimumOrder</span> <span class="k">then</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kr">end</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="k">else</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">error</span> <span class="s2">"an order must reach the minimum"</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kr">end</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Within the body the bound name denotes the <strong>whole message</strong>; a dotted path
 reaches its fields. The binding is optional, so every model written without it

@@ -5512,7 +5512,15 @@ event TemperatureReading is { value is Natural }
 input through which data of a particular <a href="../type/">type</a> streams into the
 processor.</p>
 <!-- riddl: in-entity -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">inlet</span> <span class="n">readings</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureReading</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">inlet</span> <span class="n">readings</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">TemperatureReading</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// An inlet is only half of it: something must RECEIVE what arrives, or</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// nothing happens when it does. RIDDL says so as a CompletenessWarning.</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kd">handler</span> <span class="n">ReadingsHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="k">on</span> <span class="kd">event</span> <span class="n">TemperatureReading</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">do</span> <span class="s2">"record the reading"</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="p">}</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="where-inlets-may-be-declared">Where Inlets May Be Declared<a class="headerlink" href="#where-inlets-may-be-declared" title="Permanent link">&para;</a></h2>
 <p>In RIDDL 2.0, <strong>every</strong> processor kind may declare inlets — not only

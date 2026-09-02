@@ -896,6 +896,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#error-and-terminate-end-their-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        error and terminate end their block
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-response-obligation-is-discharged-by-fewer-statements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A response obligation is discharged by fewer statements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#adaptors-need-an-on-other-clause" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -988,6 +1010,28 @@
     <span class="md-ellipsis">
       
         The streaming rules tighten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-mappings-value-type-is-now-resolved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A mapping's VALUE type is now resolved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bast-files-must-be-regenerated-and-old-ones-are-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .bast files must be regenerated, and old ones are rejected
       
     </span>
   </a>
@@ -5690,6 +5734,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#error-and-terminate-end-their-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        error and terminate end their block
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-response-obligation-is-discharged-by-fewer-statements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A response obligation is discharged by fewer statements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#adaptors-need-an-on-other-clause" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5782,6 +5848,28 @@
     <span class="md-ellipsis">
       
         The streaming rules tighten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-mappings-value-type-is-now-resolved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A mapping's VALUE type is now resolved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bast-files-must-be-regenerated-and-old-ones-are-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .bast files must be regenerated, and old ones are rejected
       
     </span>
   </a>
@@ -5962,7 +6050,7 @@
     type EnrichedOrderEvent is String
     event Withdrawn is { amount is Natural }
     command Withdraw yields event Withdrawn is { amount is Natural }
-    constant Zero is Natural = "0"
+    constant Zero is Whole = 0
     record AccountData is { balance is Natural }
     processor MyProcessor as source is { outlet Diagnostics is type OrderEvent }
     processor BottomlessPit as sink is { inlet hole is type OrderEvent }
@@ -5979,7 +6067,7 @@ have a working 1.x model and need to know what to change.</p>
 </div>
 <p>Your goal is <strong>zero errors and zero deprecations</strong>. RIDDL 2.0 gives
 deprecations their own label, so you can check for them separately:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>riddlc<span class="w"> </span>validate<span class="w"> </span>model.riddl<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;\[error\]|\[deprecated\]&#39;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>riddlc<span class="w"> </span>validate<span class="w"> </span>model.riddl<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'\[error\]|\[deprecated\]'</span>
 </span></code></pre></div>
 <p>Work in the order below. The breaking changes must be fixed before the model
 will parse at all; everything after that can be done incrementally.</p>
@@ -6069,7 +6157,7 @@ fails at <em>parse</em> time:</p>
 </span></code></pre></div>
 <p>Name the threshold instead:</p>
 <!-- riddl: skip reason="two fragments at different depths in one fence: a context-level constant beside a handler-level statement" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span></code></pre></div>
 <p>This only affects models that had already adopted structured conditions.
@@ -6077,21 +6165,42 @@ A natural-language <code>when "..."</code> still parses — but see the deprecat
 it should become <code>when prompt("...")</code>.</p>
 <h3 id="refusals-must-precede-effects">Refusals must precede effects<a class="headerlink" href="#refusals-must-precede-effects" title="Permanent link">&para;</a></h3>
 <p>Within a single statement list, every <code>require</code> and <code>error</code> must come before
-every <code>set</code>, <code>morph</code>, <code>become</code>, <code>send</code>, <code>tell</code>, <code>yield</code> and <code>put</code>. Acting and
-then refusing would leave partial changes behind.</p>
-<!-- riddl: in-app-clauses -->
+every change to <strong>this definition's own state</strong>: <code>set</code>, <code>morph</code> and
+<code>terminate</code>. Acting and then refusing would leave a partial change behind.</p>
+<p><code>send</code>, <code>tell</code>, <code>yield</code>, <code>become</code> and <code>put</code> are <strong>not</strong> effects for this rule —
+the first three are transmissions whose consequences are elsewhere and later,
+<code>become</code> changes behaviour rather than state, and <code>put</code> writes to an output. So
+"refuse <strong>and</strong> publish a rejection event" is expressible, with the <code>send</code>
+before the <code>error</code>.</p>
+<!-- riddl: in-clauses no-prelude=AccountData -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// 2.0 — reorder if your handler did these the other way round</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  <span class="k">set</span> <span class="kd">field</span> <span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance - amount&quot;</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  <span class="k">set</span> <span class="kd">field</span> <span class="n">balance</span> <span class="kp">to</span> <span class="s2">"balance - amount"</span>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">Withdrawn</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span>
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">}</span>
 </span></code></pre></div>
+<h3 id="error-and-terminate-end-their-block"><code>error</code> and <code>terminate</code> end their block<a class="headerlink" href="#error-and-terminate-end-their-block" title="Permanent link">&para;</a></h3>
+<p>Both refuse or destroy unconditionally, so any statement written after one can
+never run. A following statement is now an <strong>Error</strong>.</p>
+<p><code>require</code> is deliberately <em>not</em> terminal: it refuses only when its condition
+fails, so statements after it are ordinary and reachable. An <code>on term</code> clause
+is a separate statement list that runs <em>because</em> of the termination, so it
+needs no exemption.</p>
+<p>If a 1.x handler recorded a refusal and then carried on, move the trailing work
+ahead of the <code>error</code>, or make the refusal conditional with <code>require</code>.</p>
+<h3 id="a-response-obligation-is-discharged-by-fewer-statements">A response obligation is discharged by fewer statements<a class="headerlink" href="#a-response-obligation-is-discharged-by-fewer-statements" title="Permanent link">&para;</a></h3>
+<p>A command declaring <code>yields event E</code> obliges every handler of it to produce an
+<code>E</code>, and only <code>yield</code>/<code>reply</code>, <code>error</code>/<code>require</code>, and the new
+<a href="../../references/language-reference/#forward-statement"><code>forward</code></a> settle that
+now. In particular a <strong><code>send</code> of the handled message no longer discharges it</strong>,
+even to an outlet that admits it, and emitting some <em>other</em> message never did.</p>
+<p>A handler that only passes the message along should <code>forward</code> it.</p>
 <h3 id="adaptors-need-an-on-other-clause">Adaptors need an <code>on other</code> clause<a class="headerlink" href="#adaptors-need-an-on-other-clause" title="Permanent link">&para;</a></h3>
 <p>Every adaptor handler must say explicitly what it does with messages it does
 not recognize:</p>
 <!-- riddl: in-clauses -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">on</span> <span class="kr">other</span> <span class="p">{</span> <span class="k">error</span> <span class="s2">&quot;Unrecognized message&quot;</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">on</span> <span class="kr">other</span> <span class="p">{</span> <span class="k">error</span> <span class="s2">"Unrecognized message"</span> <span class="p">}</span>
 </span></code></pre></div>
 <p>Adaptors are also now confined to their <strong>isolation seam</strong> — trafficking in a
 third context's messages (neither the parent's nor the referent's) is an
@@ -6118,7 +6227,7 @@ plausible referents and the model never said which.</p>
 <p>The escape is the <strong>quoted identifier</strong>, so existing names need not be
 changed:</p>
 <!-- riddl: in-context -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">handler</span> <span class="err">&#39;</span><span class="kd">projector</span><span class="err">&#39;</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>    <span class="c1">// fine</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">handler</span> <span class="err">'</span><span class="kd">projector</span><span class="err">'</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>    <span class="c1">// fine</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kd">handler</span> <span class="n">Projector</span>   <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>    <span class="c1">// also fine -- the check is case-sensitive</span>
 </span></code></pre></div>
 <h3 id="as-type-t-in-a-schema-is-strict"><code>as type T</code> in a schema is strict<a class="headerlink" href="#as-type-t-in-a-schema-is-strict" title="Permanent link">&para;</a></h3>
@@ -6146,7 +6255,28 @@ work.</p>
 <li>A domain-scoped connector whose ends share one context is over-scoped</li>
 <li>A context-scoped connector whose ends cross contexts is under-scoped</li>
 <li>An ascribed shape that contradicts the declared port arity is an Error</li>
+<li>A cross-context connector must land on each context's <strong>own</strong> portlet, never
+  on a portlet belonging to something the context contains. Reaching past the
+  boundary is an Error</li>
+<li>No dedicated <code>sink</code>/<code>source</code> streamlet is required for intra-context
+  messaging. An entity is a streamlet; a context with an inlet and handlers
+  <em>is</em> the sink. What remains is per-entity: an entity that handles messages
+  needs its own inlet, and one that emits them needs its own outlet</li>
+<li>A <code>send</code> naming a message the portlet's declared type does not admit is an
+  Error. Widen the portlet to an alternation of everything that travels on it</li>
 </ul>
+<h3 id="a-mappings-value-type-is-now-resolved">A mapping's VALUE type is now resolved<a class="headerlink" href="#a-mappings-value-type-is-now-resolved" title="Permanent link">&para;</a></h3>
+<p><code>mapping from K to V</code> used to resolve only <code>K</code>. <code>V</code> is now resolved too, so a
+mapping naming a type that does not exist — a typo, or a type deleted since —
+used to validate clean and is now an Error. Nothing about a <em>correct</em> mapping
+changed.</p>
+<h3 id="bast-files-must-be-regenerated-and-old-ones-are-rejected"><code>.bast</code> files must be regenerated, and old ones are rejected<a class="headerlink" href="#bast-files-must-be-regenerated-and-old-ones-are-rejected" title="Permanent link">&para;</a></h3>
+<p>BAST is the binary AST. Its <code>FORMAT_REVISION</code> has moved repeatedly through the
+2.0 release candidates, and a reader handed bytes from an older revision
+<strong>rejects them</strong> rather than misreading them — the gate exists precisely so a
+changed payload cannot be silently misaligned. Regenerate with <code>riddlc bastify</code>
+after any upgrade; there is no migration path for the files themselves, and
+none is needed since they are derived artifacts.</p>
 <h3 id="silent-changes-for-tools-that-read-the-ast">Silent changes for tools that read the AST<a class="headerlink" href="#silent-changes-for-tools-that-read-the-ast" title="Permanent link">&para;</a></h3>
 <p>Everything above announces itself as a parse or validation error. <strong>These two do
 not.</strong> They change the RIDDL libraries' Scala API in ways that keep consuming
@@ -6413,7 +6543,13 @@ ports.</p>
   <code>call function</code>, <code>prompt(...)</code>, and boolean expressions, replacing opaque
   quoted strings where structure is useful.</li>
 <li><strong>New statements</strong> — <code>foreach</code> (bounded iteration), <code>put</code> (publish to a UI
-  output), <code>return</code> (a function's result).</li>
+  output), <code>return</code> (a function's result), and
+  <strong><a href="../../references/language-reference/#forward-statement"><code>forward</code></a></strong>, which
+  hands the handled message onward and discharges its <code>yields</code>/<code>replies</code>
+  obligation — the thing a pure delegation handler previously had no way to say.</li>
+<li><strong><a href="../../guides/authors/authoring-riddl/#option-is-snapshots"><code>option is snapshots</code></a></strong>
+  — an event-sourced entity declares that it wants periodic snapshots. Omitting
+  it means "replay the whole log", which is often the right answer.</li>
 <li><strong><a href="../../concepts/version/"><code>version</code></a> and
   <a href="../../concepts/copyright/"><code>copyright</code></a></strong> — scope-wide leaf definitions. A
   version composes root-to-leaf into a coordinate; a copyright is inherited

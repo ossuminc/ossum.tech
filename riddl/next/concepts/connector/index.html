@@ -5556,10 +5556,10 @@
 event Order is { id is String }
 event OrderEvent is { id is String }
 event RawOrder is { id is String }
-processor OrderEventSource as source is { outlet OrderEvents is type OrderEvent }
-processor OrderEnricher as sink is { inlet RawOrders is type OrderEvent }
-processor Home as sink is { inlet incoming is type Order }
-processor Abroad as sink is { inlet incoming is type Order }
+processor OrderEventSource as source is { outlet OrderEvents is event OrderEvent }
+processor OrderEnricher as sink is { inlet RawOrders is event OrderEvent }
+processor Home as sink is { inlet incoming is event Order }
+processor Abroad as sink is { inlet incoming is event Order }
 -->
 
 <h1 id="connector">Connector<a class="headerlink" href="#connector" title="Permanent link">&para;</a></h1>
@@ -5571,7 +5571,7 @@ particular <a href="../type/">type</a>. A connector joins exactly one
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">OrderEventSource</span><span class="p">.</span><span class="n">OrderEvents</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">OrderEnricher</span><span class="p">.</span><span class="n">RawOrders</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">&quot;Connects the order source to enrichment&quot;</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">"Connects the order source to enrichment"</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="data-transmission-type">Data Transmission Type<a class="headerlink" href="#data-transmission-type" title="Permanent link">&para;</a></h2>
@@ -5590,9 +5590,9 @@ attaching several connectors to a single port.</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Correct: a split declares two outlets, each with its own connector</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">processor</span> <span class="n">Router</span> <span class="kp">as</span> <span class="kd">split</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">inlet</span> <span class="n">incoming</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">Order</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">outlet</span> <span class="n">domestic</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">Order</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">outlet</span> <span class="n">international</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">Order</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">inlet</span> <span class="n">incoming</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">Order</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">outlet</span> <span class="n">domestic</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">Order</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">outlet</span> <span class="n">international</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">Order</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kd">connector</span> <span class="n">ToDomestic</span>      <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Router</span><span class="p">.</span><span class="n">domestic</span>      <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Home</span><span class="p">.</span><span class="n">incoming</span>
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="kd">connector</span> <span class="n">ToInternational</span> <span class="kp">is</span> <span class="kp">from</span> <span class="kd">outlet</span> <span class="n">Router</span><span class="p">.</span><span class="n">international</span> <span class="kp">to</span> <span class="kd">inlet</span> <span class="n">Abroad</span><span class="p">.</span><span class="n">incoming</span>
@@ -5612,11 +5612,46 @@ are in different contexts, in the enclosing <a href="../domain/">Domain</a>.</p>
   over-scoped; move it into that context.</li>
 <li><strong>Error</strong> — a context-scoped connector whose ends cross contexts. It is
   under-scoped; promote it to domain scope.</li>
-<li><strong>CompletenessWarning</strong> — a domain-scoped cross-context connector without
-  the <code>persistent</code> option. Durability at a context boundary can be model
-  correctness, not merely a deployment concern.</li>
+<li><strong>CompletenessWarning</strong> — a domain-scoped connector that <strong>crosses</strong>
+  between two different contexts without the <code>persistent</code> option.
+  Durability at a context boundary can be model correctness, not merely a
+  deployment concern. A connector with both ends inside the <em>same</em>
+  external context crosses nothing and is not asked for it.</li>
+<li><strong>Error</strong> — a cross-context connector that reaches <strong>past</strong> a boundary.
+  Each end must land on the context's <strong>own</strong> portlet: the source context's
+  outlet, the target context's inlet.</li>
 </ul>
 <p>These checks are conservative: they only fire when both ends resolve.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Crossing out, and staying in</p>
+<p>A <a href="../context/">context</a> publishes a public API — its message set — while
+its representations stay private. A cross-context connector wired to a
+contained <a href="../entity/">entity</a>'s inlet binds a peer to that entity's
+existence and current command set, so the entity can no longer change
+without breaking a stranger. That is why reaching past the boundary is an
+Error rather than advice.</p>
+<p><strong>Inside</strong> a single context, none of this applies: any processor,
+streamlet or connector may communicate with any other, and a connector may
+drive a contained entity's inlet directly.</p>
+<p>Nothing requires a dedicated <code>sink</code> or <code>source</code> streamlet to make this
+work. An <strong>entity is a streamlet</strong> — it may carry its own inlets and
+outlets and needs nothing from its context to process messages. A
+<strong>context is a streamlet</strong> too: given an inlet and handlers, <em>the context
+is the sink</em>. Crossing out of a context, the context is the source;
+crossing in, it is the sink.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">A processor uses its OWN ports</p>
+<p>A message reaches a processor through <strong>that processor's</strong> inlet — not a
+sibling's, and not its container's. Likewise it publishes through its own
+outlet: a projector's inlet does not make an entity reachable, and an
+entity cannot publish on its context's outlet.</p>
+<p>Getting a message out of an entity therefore runs <em>entity outlet →
+connector → context inlet → handler → context outlet</em>, and the first step
+is the entity's own outlet. An entity that handles messages but declares no
+inlet, or emits messages but declares no outlet, draws a
+CompletenessWarning. A <code>???</code> stub is exempt.</p>
 </div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <p>Connector options are advice to the translators converting a connector into
@@ -5682,6 +5717,16 @@ that retains published data despite failures on either end.</p>
 <p>Removing the burden of persistence is likely to make a connector considerably
 more performant, since storage latency is no longer involved — which is why it
 is opt-in rather than the default.</p>
+<div class="admonition info">
+<p class="admonition-title">Why ordering is an option when persistence is not</p>
+<p>The default is <strong>ordered</strong>; <code>unordered</code> is <em>permission, not mandate</em> —
+best-effort unordered delivery, with ordered delivery remaining a
+conforming implementation. A generator may decline to honour it and still
+conform, which is exactly why ordering stayed an <strong>option</strong>.</p>
+<p>Persistence and delivery guarantees fail that test: a delivery guarantee is
+not something a generator may quietly decline. That is the line between an
+option and an intention.</p>
+</div>
 <h3 id="delivery-semantics">Delivery semantics<a class="headerlink" href="#delivery-semantics" title="Permanent link">&para;</a></h3>
 <p><code>at-least-once</code> requires the implementation to make handling idempotent, so
 that running an item twice has the same effect as running it once.

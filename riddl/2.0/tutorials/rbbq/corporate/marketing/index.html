@@ -5500,6 +5500,19 @@
   
 
 
+<!-- riddl-prelude
+type CampaignId is Id(Campaign)
+type CampaignName is String(1,120)
+record StoredCampaign is { campaignId: CampaignId }
+event CampaignCreated is { campaignId: CampaignId }
+event CampaignLaunched is { campaignId: CampaignId }
+event LaunchCampaignRejected is { campaignId: CampaignId, rejectionReason: String(1,500) }
+type CampaignEvent is CampaignCreated | CampaignLaunched | LaunchCampaignRejected
+entity Campaign is { ??? }
+repository CampaignRepository is { ??? }
+command PersistCampaignLaunched is { campaignId: CampaignId }
+-->
+
 <h1 id="marketing-context">Marketing Context<a class="headerlink" href="#marketing-context" title="Permanent link">&para;</a></h1>
 <p>The Marketing context manages marketing campaigns, promotions,
 and advertising across multiple channels. It integrates with
@@ -5522,54 +5535,10 @@ years ago."</p>
 include <code>LoyaltyBonus</code> promotions that offer bonus points,
 connecting marketing efforts directly to customer retention.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">CampaignId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Campaign identifier&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a marketing campaign.&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">type</span> <span class="n">CampaignStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="n">CampaignDraftStatus</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="n">CampaignScheduledStatus</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  <span class="n">CampaignLiveStatus</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  <span class="n">CampaignPausedStatus</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  <span class="n">CampaignEndedStatus</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Campaign status&quot;</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Current status of a marketing campaign.&quot;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="kd">type</span> <span class="n">CampaignChannel</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>  <span class="n">Email</span><span class="p">,</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="n">SocialMedia</span><span class="p">,</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>  <span class="n">InStore</span><span class="p">,</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  <span class="n">MobileApp</span><span class="p">,</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>  <span class="n">Website</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Campaign channel&quot;</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Marketing channel for the campaign.&quot;</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="p">}</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="kd">type</span> <span class="n">PromotionType</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>  <span class="n">PercentDiscount</span><span class="p">,</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>  <span class="n">FixedDiscount</span><span class="p">,</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>  <span class="n">BuyOneGetOne</span><span class="p">,</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>  <span class="n">FreeItem</span><span class="p">,</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>  <span class="n">LoyaltyBonus</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Promotion type&quot;</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Type of promotional offer.&quot;</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="p">}</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="kd">type</span> <span class="n">CampaignPromotion</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>  <span class="n">promotionType</span> <span class="kp">is</span> <span class="n">PromotionType</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>  <span class="n">promotionValue</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">8</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>  <span class="n">promotionDescription</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">500</span><span class="p">)</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>  <span class="n">applicableItems</span> <span class="kp">is</span> <span class="kr">many</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Campaign promotion&quot;</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;A promotional offer within a campaign.&quot;</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=CampaignId,CampaignName -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">CampaignId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Campaign</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">type</span> <span class="n">CampaignName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">120</span><span class="p">)</span>
 </span></code></pre></div>
 <p>The <code>CampaignChannel</code> enumeration captures the five channels
 a campaign can target. The <code>CampaignPromotion</code> record type
@@ -5577,69 +5546,57 @@ bundles the promotion details, including which menu items it
 applies to.</p>
 <h2 id="entity-campaign">Entity: Campaign<a class="headerlink" href="#entity-campaign" title="Permanent link">&para;</a></h2>
 <p>The <code>Campaign</code> entity has a 5-command lifecycle:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Campaign</span> <span class="kp">is</span> <span class="p">{</span>
+<!-- riddl: in-context no-prelude=Campaign,CampaignCreated,CampaignLaunched,LaunchCampaignRejected,CampaignCommand,CampaignEvent -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">Campaign</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">CreateCampaign</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">campaignId</span> <span class="kp">is</span> <span class="n">CampaignId</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">campaignName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">200</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">campaignDescription</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2000</span><span class="p">)</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">campaignChannels</span> <span class="kp">is</span> <span class="kr">many</span> <span class="n">CampaignChannel</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">campaignPromotion</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="n">CampaignPromotion</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="kd">command</span> <span class="n">ScheduleCampaign</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">campaignId</span> <span class="kp">is</span> <span class="n">CampaignId</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">campaignStartDate</span> <span class="kp">is</span> <span class="nb">Date</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">campaignEndDate</span> <span class="kp">is</span> <span class="nb">Date</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="p">}</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>  <span class="kd">command</span> <span class="n">LaunchCampaign</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">campaignId</span> <span class="kp">is</span> <span class="n">CampaignId</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">launchedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>  <span class="p">}</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  <span class="kd">command</span> <span class="n">PauseCampaign</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">campaignId</span> <span class="kp">is</span> <span class="n">CampaignId</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">pauseReason</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">500</span><span class="p">)</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>  <span class="p">}</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  <span class="kd">command</span> <span class="n">EndCampaign</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    <span class="n">campaignId</span> <span class="kp">is</span> <span class="n">CampaignId</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="n">endedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="p">}</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  <span class="c1">// Events: CampaignCreated, CampaignScheduled, CampaignLaunched,</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>  <span class="c1">//         CampaignPaused, CampaignEnded</span>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>  <span class="kd">state</span> <span class="n">ActiveCampaign</span> <span class="kp">of</span> <span class="n">Campaign</span><span class="p">.</span><span class="n">CampaignStateData</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>  <span class="kd">handler</span> <span class="n">CampaignHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateCampaign</span> <span class="p">{</span>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span> <span class="kp">to</span> <span class="kd">state</span>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>        <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span><span class="p">.</span><span class="n">ActiveCampaign</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>        <span class="kp">with</span> <span class="kd">command</span> <span class="n">CreateCampaign</span>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">CampaignCreated</span> <span class="kp">to</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>        <span class="kd">entity</span> <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>    <span class="p">}</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ScheduleCampaign</span> <span class="p">{</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">CampaignScheduled</span> <span class="kp">to</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>        <span class="kd">entity</span> <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    <span class="p">}</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">LaunchCampaign</span> <span class="p">{</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">CampaignLaunched</span> <span class="kp">to</span>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>        <span class="kd">entity</span> <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    <span class="p">}</span>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PauseCampaign</span> <span class="p">{</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">CampaignPaused</span> <span class="kp">to</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>        <span class="kd">entity</span> <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>    <span class="p">}</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">EndCampaign</span> <span class="p">{</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">CampaignEnded</span> <span class="kp">to</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>        <span class="kd">entity</span> <span class="n">Marketing</span><span class="p">.</span><span class="n">Campaign</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>    <span class="p">}</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>  <span class="p">}</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a><span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="c1">// An event-sourced entity OWNS the commands and events that change it, so</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="c1">// they are declared INSIDE it, and every command names the event it yields.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">CreateCampaign</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">CampaignCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kd">command</span> <span class="n">LaunchCampaign</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">CampaignLaunched</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="kd">event</span> <span class="n">CampaignCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">event</span> <span class="n">CampaignLaunched</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="kd">event</span> <span class="n">LaunchCampaignRejected</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span><span class="p">,</span> <span class="n">rejectionReason</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span> <span class="p">}</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">record</span> <span class="n">CampaignData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="c1">// Lifecycle phases are named STATES, not a status field: each state</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="c1">// declares the commands it accepts, so the compiler knows the machine.</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">ActiveCampaign</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">CampaignData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="kd">handler</span> <span class="n">ActiveCampaignHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">LaunchCampaign</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="k">yield</span> <span class="kd">event</span> <span class="n">CampaignLaunched</span><span class="p">(</span><span class="n">campaignId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">campaignId</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      <span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="c1">// `set` and `morph` may appear ONLY in an `on event` clause here:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>      <span class="c1">// replay has to re-apply exactly the same change.</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">CampaignLaunched</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Campaign</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Launched</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">CampaignData</span><span class="p">(</span><span class="n">campaignId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">campaignId</span><span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>      <span class="p">}</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="p">}</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="p">}</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="kd">state</span> <span class="n">Launched</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">CampaignData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="kd">handler</span> <span class="n">LaunchedHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>      <span class="c1">// A command this state does not accept is refused -- and the refusal</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="c1">// is PUBLISHED before it is raised, so the attempt is recorded.</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">LaunchCampaign</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">LaunchCampaignRejected</span><span class="p">(</span><span class="n">campaignId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">campaignId</span><span class="p">,</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>          <span class="n">rejectionReason</span> <span class="o">=</span> <span class="s2">"Campaign does not accept LaunchCampaign in this state"</span><span class="p">)</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>          <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CampaignEvents</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">error</span> <span class="s2">"Campaign does not accept LaunchCampaign in this state"</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>      <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="p">}</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  <span class="p">}</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>  <span class="c1">// A processor receives on its OWN inlet and publishes on its OWN outlet,</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="c1">// and a portlet's type must ADMIT everything that travels on it.</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  <span class="kd">type</span> <span class="n">CampaignCommand</span> <span class="kp">is</span> <span class="n">CreateCampaign</span> <span class="sd">| LaunchCampaign</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>  <span class="kd">type</span> <span class="n">CampaignEvent</span> <span class="kp">is</span> <span class="n">CampaignCreated</span> <span class="sd">| CampaignLaunched | LaunchCampaignRejected</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  <span class="kd">inlet</span> <span class="n">CampaignCommands</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">CampaignCommand</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>  <span class="kd">outlet</span> <span class="n">CampaignEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">CampaignEvent</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The lifecycle: <strong>Create → Schedule → Launch → (optional Pause)
 → End</strong>.</p>
@@ -5649,13 +5606,35 @@ The <code>campaignPromotion</code> is <code>optional</code> because not every
 campaign includes a promotional offer; some are purely
 awareness campaigns.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">CampaignRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">CampaignData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">campaigns</span> <span class="kp">as</span> <span class="n">Campaign</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">Campaign</span><span class="p">.</span><span class="n">campaignId</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">Campaign</span><span class="p">.</span><span class="n">campaignStatus</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=CampaignRepository,StoredCampaign,PersistCampaignLaunched -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">CampaignRepository</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">CampaignRepositoryFromCampaign</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistCampaignLaunched</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">outlet</span> <span class="n">CampaignRepositoryResponses</span> <span class="kp">is</span> <span class="kd">result</span> <span class="n">CampaignResult</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="c1">// A repository answers with a RESULT, never an event.</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">result</span> <span class="n">CampaignResult</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">found</span><span class="p">:</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">record</span> <span class="n">StoredCampaign</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="c1">// A repository that answers queries and declares NO index at all is a</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="c1">// sequential scan by construction, and draws a warning saying so.</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="kr">schema</span> <span class="n">CampaignSchema</span> <span class="kp">is</span> <span class="n">relational</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="kp">of</span> <span class="n">rows</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">StoredCampaign</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredCampaign</span><span class="p">.</span><span class="n">campaignId</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="kd">command</span> <span class="n">PersistCampaignLaunched</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">campaignId</span><span class="p">:</span> <span class="n">CampaignId</span> <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="kd">handler</span> <span class="n">CampaignPersistence</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PersistCampaignLaunched</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>      <span class="k">do</span> <span class="s2">"update the stored campaign row for this campaignId"</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1">// An inlet admitting an alternation needs a clause that receives it.</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="c1">// Handling each member is not enough -- say what ARRIVING means.</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>      <span class="k">do</span> <span class="s2">"persist whatever else arrives on this inlet"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>  <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="design-decisions">Design Decisions<a class="headerlink" href="#design-decisions" title="Permanent link">&para;</a></h2>
 <p><strong>Why separate from Menu Management?</strong> Marketing campaigns

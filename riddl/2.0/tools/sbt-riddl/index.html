@@ -5702,7 +5702,7 @@ process. This allows you to validate RIDDL models as part of your normal
 compilation workflow.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Add to your <code>project/plugins.sbt</code>:</p>
-<div class="language-scala highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">addSbtPlugin</span><span class="p">(</span><span class="s">&quot;com.ossuminc&quot;</span><span class="w"> </span><span class="o">%%</span><span class="w"> </span><span class="s">&quot;sbt-riddl&quot;</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">addSbtPlugin</span><span class="p">(</span><span class="s">"com.ossuminc"</span><span class="w"> </span><span class="o">%%</span><span class="w"> </span><span class="s">"sbt-riddl"</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Replace <code>1.0.0</code> with the <a href="https://github.com/ossuminc/riddl/releases">latest version</a>.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
@@ -5712,13 +5712,13 @@ compilation workflow.</p>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// Specify riddlc options to run during compile</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">riddlcOptions</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="s">&quot;--verbose&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="s">&quot;from&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;src/main/riddl/riddl.conf&quot;</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="s">&quot;validate&quot;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="s">"--verbose"</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="s">"from"</span><span class="p">,</span><span class="w"> </span><span class="s">"src/main/riddl/riddl.conf"</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="s">"validate"</span>
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="p">)</span>
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1">// Minimum riddlc version required</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">riddlcMinVersion</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">riddlcMinVersion</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"1.0.0"</span>
 </span></code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <p>Once configured, RIDDL validation runs automatically with <code>compile</code>:</p>
@@ -5731,33 +5731,33 @@ compilation workflow.</p>
 <h3 id="riddlcoptions">riddlcOptions<a class="headerlink" href="#riddlcoptions" title="Permanent link">&para;</a></h3>
 <p>Command-line arguments passed to <code>riddlc</code>:</p>
 <div class="language-scala highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">riddlcOptions</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="s">&quot;--verbose&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="s">&quot;--show-times&quot;</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="s">&quot;from&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/config.conf&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="s">&quot;validate&quot;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="s">"--verbose"</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="s">"--show-times"</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="s">"from"</span><span class="p">,</span><span class="w"> </span><span class="s">"path/to/config.conf"</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="s">"validate"</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="riddlcminversion">riddlcMinVersion<a class="headerlink" href="#riddlcminversion" title="Permanent link">&para;</a></h3>
 <p>Minimum <code>riddlc</code> version required for this project:</p>
-<div class="language-scala highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">riddlcMinVersion</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">riddlcMinVersion</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"1.0.0"</span>
 </span></code></pre></div>
 <p>The plugin will fail if the installed <code>riddlc</code> is older than this version.</p>
 <h3 id="riddlcpath">riddlcPath<a class="headerlink" href="#riddlcpath" title="Permanent link">&para;</a></h3>
 <p>Override the path to the <code>riddlc</code> executable:</p>
-<div class="language-scala highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">riddlcPath</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">&quot;/usr/local/bin/riddlc&quot;</span><span class="p">)</span>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">riddlcPath</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">"/usr/local/bin/riddlc"</span><span class="p">)</span>
 </span></code></pre></div>
 <p>By default, the plugin searches the PATH.</p>
 <h2 id="example-project-setup">Example Project Setup<a class="headerlink" href="#example-project-setup" title="Permanent link">&para;</a></h2>
 <div class="language-scala highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">lazy</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">project</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p">.</span><span class="n">in</span><span class="p">(</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">))</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p">.</span><span class="n">in</span><span class="p">(</span><span class="n">file</span><span class="p">(</span><span class="s">"."</span><span class="p">))</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="p">.</span><span class="n">enablePlugins</span><span class="p">(</span><span class="nc">RiddlSbtPlugin</span><span class="p">)</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p">.</span><span class="n">settings</span><span class="p">(</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;my-riddl-project&quot;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"my-riddl-project"</span><span class="p">,</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="n">riddlcOptions</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="s">&quot;from&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;src/main/riddl/model.conf&quot;</span><span class="p">,</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="s">&quot;validate&quot;</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="s">"from"</span><span class="p">,</span><span class="w"> </span><span class="s">"src/main/riddl/model.conf"</span><span class="p">,</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="s">"validate"</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="p">),</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="n">riddlcMinVersion</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="n">riddlcMinVersion</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"1.0.0"</span>
 </span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="p">)</span>
 </span></code></pre></div>
 <p>With a configuration file at <code>src/main/riddl/model.conf</code>:</p>
@@ -5767,26 +5767,26 @@ compilation workflow.</p>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>}
 </span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>validate {
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>  input-file = &quot;MyModel.riddl&quot;
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>  input-file = "MyModel.riddl"
 </span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>}
 </span></code></pre></div>
 <h2 id="multi-project-builds">Multi-Project Builds<a class="headerlink" href="#multi-project-builds" title="Permanent link">&para;</a></h2>
 <p>For projects with multiple RIDDL models:</p>
 <div class="language-scala highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">lazy</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="n">domainA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">project</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">.</span><span class="n">in</span><span class="p">(</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;domain-a&quot;</span><span class="p">))</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">.</span><span class="n">in</span><span class="p">(</span><span class="n">file</span><span class="p">(</span><span class="s">"domain-a"</span><span class="p">))</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">.</span><span class="n">enablePlugins</span><span class="p">(</span><span class="nc">RiddlSbtPlugin</span><span class="p">)</span>
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="p">.</span><span class="n">settings</span><span class="p">(</span>
 </span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="n">riddlcOptions</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="s">&quot;validate&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;src/main/riddl/DomainA.riddl&quot;</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="s">"validate"</span><span class="p">,</span><span class="w"> </span><span class="s">"src/main/riddl/DomainA.riddl"</span>
 </span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="p">)</span>
 </span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="p">)</span>
 </span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
 </span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="k">lazy</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="n">domainB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">project</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="p">.</span><span class="n">in</span><span class="p">(</span><span class="n">file</span><span class="p">(</span><span class="s">&quot;domain-b&quot;</span><span class="p">))</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="p">.</span><span class="n">in</span><span class="p">(</span><span class="n">file</span><span class="p">(</span><span class="s">"domain-b"</span><span class="p">))</span>
 </span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">  </span><span class="p">.</span><span class="n">enablePlugins</span><span class="p">(</span><span class="nc">RiddlSbtPlugin</span><span class="p">)</span>
 </span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">  </span><span class="p">.</span><span class="n">settings</span><span class="p">(</span>
 </span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="n">riddlcOptions</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">      </span><span class="s">&quot;validate&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;src/main/riddl/DomainB.riddl&quot;</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">      </span><span class="s">"validate"</span><span class="p">,</span><span class="w"> </span><span class="s">"src/main/riddl/DomainB.riddl"</span>
 </span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">)</span>
 </span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">  </span><span class="p">)</span>
 </span></code></pre></div>

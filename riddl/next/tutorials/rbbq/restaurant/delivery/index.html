@@ -5522,6 +5522,25 @@
   
 
 
+<!-- riddl-domain-prelude
+context OnlineOrdering is {
+  event OnlineOrderSubmitted is { onlineOrderId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type DeliveryId is Id(DeliveryOrder)
+type DriverId is UUID
+record StoredDeliveryOrder is { deliveryId: DeliveryId }
+event DeliveryCreated is { deliveryId: DeliveryId }
+event DriverAssigned is { deliveryId: DeliveryId }
+event AssignDriverRejected is { deliveryId: DeliveryId, rejectionReason: String(1,500) }
+type DeliveryOrderEvent is DeliveryCreated | DriverAssigned | AssignDriverRejected
+entity DeliveryOrder is { ??? }
+repository DeliveryRepository is { ??? }
+command PersistDriverAssigned is { deliveryId: DeliveryId }
+-->
+
 <h1 id="delivery-context">Delivery Context<a class="headerlink" href="#delivery-context" title="Permanent link">&para;</a></h1>
 <p>The Delivery context manages delivery driver dispatch, GPS
 tracking, and offline-resilient delivery operations. Drivers can
@@ -5545,48 +5564,10 @@ offline resilience. The driver's app can cache the order details
 locally, and location updates and issue reports can be queued
 and synced when connectivity resumes.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">DeliveryId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Delivery</span><span class="p">.</span><span class="n">DeliveryOrder</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Delivery identifier&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a delivery.&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">type</span> <span class="n">DriverId</span> <span class="kp">is</span> <span class="nb">UUID</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Driver identifier&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a delivery driver.&quot;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="kd">type</span> <span class="n">DeliveryStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  <span class="n">DeliveryPending</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="n">DriverAssignedStatus</span><span class="p">,</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="n">InTransit</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="n">Delivered</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="n">DeliveryFailed</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Delivery status&quot;</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Current status of a delivery.&quot;</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="kd">type</span> <span class="n">GeoLocation</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>  <span class="n">latitude</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">9</span><span class="p">,</span> <span class="m">6</span><span class="p">)</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>  <span class="n">longitude</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">9</span><span class="p">,</span> <span class="m">6</span><span class="p">)</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="n">recordedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Geographic location&quot;</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;GPS coordinates with timestamp.&quot;</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="p">}</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="kd">type</span> <span class="n">DeliveryIssueType</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>  <span class="n">AddressNotFound</span><span class="p">,</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>  <span class="n">CustomerUnavailable</span><span class="p">,</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>  <span class="n">FoodDamaged</span><span class="p">,</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>  <span class="n">VehicleBreakdown</span><span class="p">,</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>  <span class="n">TrafficDelay</span><span class="p">,</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>  <span class="n">OtherIssue</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Delivery issue type&quot;</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Type of issue reported during delivery.&quot;</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=DeliveryId,DriverId -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">DeliveryId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">DeliveryOrder</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">type</span> <span class="n">DriverId</span> <span class="kp">is</span> <span class="nb">UUID</span>
 </span></code></pre></div>
 <p>The <code>GeoLocation</code> type combines coordinates with a timestamp,
 enabling the system to track the driver's route over time. The
@@ -5596,70 +5577,57 @@ interview.</p>
 <h2 id="entity-deliveryorder">Entity: DeliveryOrder<a class="headerlink" href="#entity-deliveryorder" title="Permanent link">&para;</a></h2>
 <p>The <code>DeliveryOrder</code> entity has a 7-command lifecycle — the
 longest of any entity in the model:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">DeliveryOrder</span> <span class="kp">is</span> <span class="p">{</span>
+<!-- riddl: in-context no-prelude=DeliveryOrder,DeliveryCreated,DriverAssigned,AssignDriverRejected,DeliveryOrderCommand,DeliveryOrderEvent -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">DeliveryOrder</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">CreateDelivery</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">sourceOnlineOrderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">deliveryCustomerName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">deliveryCustomerPhone</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">7</span><span class="p">,</span> <span class="m">20</span><span class="p">)</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">deliveryDestination</span> <span class="kp">is</span> <span class="n">DeliveryAddress</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">requestedDeliveryTime</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="c1">// An event-sourced entity OWNS the commands and events that change it, so</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="c1">// they are declared INSIDE it, and every command names the event it yields.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">CreateDelivery</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">DeliveryCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kd">command</span> <span class="n">AssignDriver</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">DriverAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="kd">event</span> <span class="n">DeliveryCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">event</span> <span class="n">DriverAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="kd">event</span> <span class="n">AssignDriverRejected</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span><span class="p">,</span> <span class="n">rejectionReason</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span> <span class="p">}</span>
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">command</span> <span class="n">AssignDriver</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">driverId</span> <span class="kp">is</span> <span class="n">DriverId</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">driverName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="p">}</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>  <span class="kd">command</span> <span class="n">DispatchDriver</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">dispatchedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  <span class="p">}</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>  <span class="kd">command</span> <span class="n">RecordDeliveryLocation</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    <span class="n">driverLocation</span> <span class="kp">is</span> <span class="n">GeoLocation</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>  <span class="p">}</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="kd">command</span> <span class="n">ConfirmDelivery</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    <span class="n">confirmedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="n">deliverySignature</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">200</span><span class="p">)</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  <span class="p">}</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>  <span class="kd">command</span> <span class="n">RecordDeliveryPayment</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="n">deliveryTip</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">8</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    <span class="n">deliveryPaidAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>  <span class="p">}</span>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  <span class="kd">command</span> <span class="n">ReportDeliveryIssue</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>    <span class="n">deliveryId</span> <span class="kp">is</span> <span class="n">DeliveryId</span>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>    <span class="n">issueType</span> <span class="kp">is</span> <span class="n">DeliveryIssueType</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>    <span class="n">issueDescription</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">1000</span><span class="p">)</span>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>    <span class="n">reportedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  <span class="p">}</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>  <span class="c1">// Events: DeliveryCreated, DriverAssigned, DriverDispatched,</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  <span class="c1">//         DeliveryLocationRecorded, DeliveryConfirmed,</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>  <span class="c1">//         DeliveryPaymentRecorded, DeliveryIssueReported</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>  <span class="kd">state</span> <span class="n">ActiveDelivery</span> <span class="kp">of</span> <span class="n">DeliveryOrder</span><span class="p">.</span><span class="n">DeliveryStateData</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>  <span class="kd">handler</span> <span class="n">DeliveryHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateDelivery</span> <span class="p">{</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Delivery</span><span class="p">.</span><span class="n">DeliveryOrder</span> <span class="kp">to</span> <span class="kd">state</span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>        <span class="n">Restaurant</span><span class="p">.</span><span class="n">Delivery</span><span class="p">.</span><span class="n">DeliveryOrder</span><span class="p">.</span><span class="n">ActiveDelivery</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>        <span class="kp">with</span> <span class="kd">command</span> <span class="n">CreateDelivery</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">DeliveryCreated</span> <span class="kp">to</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>        <span class="kd">entity</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Delivery</span><span class="p">.</span><span class="n">DeliveryOrder</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>    <span class="p">}</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>    <span class="c1">// ... remaining commands use tell pattern</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>  <span class="p">}</span>
-</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a><span class="p">}</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">record</span> <span class="n">DeliveryOrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="c1">// Lifecycle phases are named STATES, not a status field: each state</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="c1">// declares the commands it accepts, so the compiler knows the machine.</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">DeliveryOrderData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="kd">handler</span> <span class="n">PendingHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AssignDriver</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="k">yield</span> <span class="kd">event</span> <span class="n">DriverAssigned</span><span class="p">(</span><span class="n">deliveryId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">deliveryId</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      <span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="c1">// `set` and `morph` may appear ONLY in an `on event` clause here:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>      <span class="c1">// replay has to re-apply exactly the same change.</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">DriverAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">DeliveryOrder</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">DriverAssignedState</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">DeliveryOrderData</span><span class="p">(</span><span class="n">deliveryId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">deliveryId</span><span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>      <span class="p">}</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="p">}</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="p">}</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="kd">state</span> <span class="n">DriverAssignedState</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">DeliveryOrderData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="kd">handler</span> <span class="n">DriverAssignedStateHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>      <span class="c1">// A command this state does not accept is refused -- and the refusal</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="c1">// is PUBLISHED before it is raised, so the attempt is recorded.</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AssignDriver</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">AssignDriverRejected</span><span class="p">(</span><span class="n">deliveryId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">deliveryId</span><span class="p">,</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>          <span class="n">rejectionReason</span> <span class="o">=</span> <span class="s2">"DeliveryOrder does not accept AssignDriver in this state"</span><span class="p">)</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>          <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">DeliveryOrderEvents</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">error</span> <span class="s2">"DeliveryOrder does not accept AssignDriver in this state"</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>      <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="p">}</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  <span class="p">}</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>  <span class="c1">// A processor receives on its OWN inlet and publishes on its OWN outlet,</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="c1">// and a portlet's type must ADMIT everything that travels on it.</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  <span class="kd">type</span> <span class="n">DeliveryOrderCommand</span> <span class="kp">is</span> <span class="n">CreateDelivery</span> <span class="sd">| AssignDriver</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>  <span class="kd">type</span> <span class="n">DeliveryOrderEvent</span> <span class="kp">is</span> <span class="n">DeliveryCreated</span> <span class="sd">| DriverAssigned | AssignDriverRejected</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  <span class="kd">inlet</span> <span class="n">DeliveryOrderCommands</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">DeliveryOrderCommand</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>  <span class="kd">outlet</span> <span class="n">DeliveryOrderEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">DeliveryOrderEvent</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The lifecycle: <strong>Create → Assign Driver → Dispatch → Track
 Location → Confirm Delivery → Record Payment → (optional)
@@ -5670,28 +5638,58 @@ during a delivery, building up a GPS trail. The
 doesn't end the delivery — it records the issue while the
 delivery continues.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">DeliveryRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">DeliveryData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">deliveries</span> <span class="kp">as</span> <span class="n">DeliveryOrder</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">DeliveryOrder</span><span class="p">.</span><span class="n">deliveryId</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">DeliveryOrder</span><span class="p">.</span><span class="n">deliveryStatus</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">DeliveryOrder</span><span class="p">.</span><span class="n">assignedDriverId</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=DeliveryRepository,StoredDeliveryOrder,PersistDriverAssigned -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">DeliveryRepository</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">DeliveryRepositoryFromDeliveryOrder</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistDriverAssigned</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">outlet</span> <span class="n">DeliveryRepositoryResponses</span> <span class="kp">is</span> <span class="kd">result</span> <span class="n">DeliveryResult</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="c1">// A repository answers with a RESULT, never an event.</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">result</span> <span class="n">DeliveryResult</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">found</span><span class="p">:</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">record</span> <span class="n">StoredDeliveryOrder</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="c1">// A repository that answers queries and declares NO index at all is a</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="c1">// sequential scan by construction, and draws a warning saying so.</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="kr">schema</span> <span class="n">DeliveryOrderSchema</span> <span class="kp">is</span> <span class="n">relational</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="kp">of</span> <span class="n">rows</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">StoredDeliveryOrder</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredDeliveryOrder</span><span class="p">.</span><span class="n">deliveryId</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="kd">command</span> <span class="n">PersistDriverAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">deliveryId</span><span class="p">:</span> <span class="n">DeliveryId</span> <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="kd">handler</span> <span class="n">DeliveryOrderPersistence</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PersistDriverAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>      <span class="k">do</span> <span class="s2">"update the stored deliveryOrder row for this deliveryId"</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1">// An inlet admitting an alternation needs a clause that receives it.</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="c1">// Handling each member is not enough -- say what ARRIVING means.</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>      <span class="k">do</span> <span class="s2">"persist whatever else arrives on this inlet"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>  <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The index on <code>assignedDriverId</code> supports looking up all active
 deliveries for a specific driver — essential for the driver's
 app dashboard.</p>
 <h2 id="adaptor">Adaptor<a class="headerlink" href="#adaptor" title="Permanent link">&para;</a></h2>
 <p>Delivery has a single inbound adaptor:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">adaptor</span> <span class="n">FromOnlineOrdering</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">OnlineOrdering</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">handler</span> <span class="n">OnlineDeliveryIntake</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">OnlineOrdering</span><span class="p">.</span><span class="n">OnlineOrder</span><span class="p">.</span><span class="n">FulfillmentSelected</span> <span class="p">{</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>      <span class="n">prompt</span> <span class="s2">&quot;Create delivery when delivery fulfillment is selected&quot;</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="p">}</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="p">}</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
+<!-- riddl: in-domain -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">context</span> <span class="n">Delivery</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="c1">// An adaptor is the translation seam at a context boundary: it is the only</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="c1">// place that knows the OTHER context's message shapes.</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="kd">adaptor</span> <span class="n">FromOnlineOrdering</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">OnlineOrdering</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="kd">handler</span> <span class="n">FromOnlineOrderingIntake</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">OnlineOrdering</span><span class="p">.</span><span class="n">OnlineOrderSubmitted</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="k">do</span> <span class="s2">"create a delivery for a submitted online order"</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>      <span class="p">}</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>      <span class="c1">// Every adaptor handler must say what it does with what it does not</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>      <span class="c1">// recognise. Silence is not an option in 2.0.</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="k">error</span> <span class="s2">"Unexpected message from OnlineOrdering"</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>      <span class="p">}</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="p">}</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  <span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The adaptor listens for <code>FulfillmentSelected</code> events and creates
 a delivery only when the customer chose delivery fulfillment.

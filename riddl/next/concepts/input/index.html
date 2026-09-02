@@ -5456,7 +5456,7 @@ record AccountData is { email is String }
 command Register is { email is String }
 command CreateAccount is { details is SignupDetails }
 page SignupPage is {
-  form Signup accepts type SignupDetails
+  form Signup accepts record SignupDetails
 }
 entity Account is {
   state Registered of record AccountData is {
@@ -5491,11 +5491,12 @@ by the application's input.</p>
 <p>An input is written as an alias, an identifier, an acquisition verb, and the
 type it takes in:</p>
 <!-- riddl: in-group no-prelude=SignupPage -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">form</span>  <span class="n">Signup</span>   <span class="kr">accepts</span> <span class="kd">type</span> <span class="n">SignupDetails</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">form</span>  <span class="n">Signup</span>   <span class="kr">accepts</span> <span class="kd">record</span> <span class="n">SignupDetails</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="n">Clicked</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kr">picklist</span> <span class="n">Country</span> <span class="kr">selects</span> <span class="kd">type</span> <span class="n">CountryCode</span>
 </span></code></pre></div>
-<p><strong>Aliases</strong>: <code>input</code>, <code>form</code>, <code>text</code>, <code>button</code>, <code>picklist</code>, <code>selector</code>, <code>item</code></p>
+<p><strong>Aliases</strong>: <code>input</code>, <code>form</code>, <code>text</code>, <code>button</code>, <code>picklist</code>, <code>selector</code>,
+<code>item</code>, <code>voice</code>, <code>gesture</code>, <code>gaze</code></p>
 <p><strong>Acquisition verbs</strong>: <code>acquires</code>, <code>reads</code>, <code>takes</code>, <code>accepts</code>, <code>admits</code>,
 <code>enters</code>, <code>provides</code>, <code>selects</code>, <code>chooses</code>, <code>picks</code>, <code>initiates</code>, <code>submits</code>,
 <code>triggers</code>, <code>activates</code>, <code>starts</code></p>

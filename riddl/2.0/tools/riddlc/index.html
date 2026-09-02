@@ -5134,6 +5134,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#search-the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search the Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fail-a-build-on-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fail a Build on Warnings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostics-as-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics as Data
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5585,6 +5618,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#search-the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search the Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fail-a-build-on-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fail a Build on Warnings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostics-as-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics as Data
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5770,6 +5836,21 @@ generation with AI assistance.</p>
 <h3 id="generate-bast-for-faster-loading">Generate BAST for Faster Loading<a class="headerlink" href="#generate-bast-for-faster-loading" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>riddlc<span class="w"> </span>bastify<span class="w"> </span>mymodel.riddl
 </span></code></pre></div>
+<h3 id="search-the-model">Search the Model<a class="headerlink" href="#search-the-model" title="Permanent link">&para;</a></h3>
+<p><code>riddlc find</code> searches the <strong>resolved</strong> model, so it sees definitions the way
+the compiler does rather than as text:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>mymodel.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-name<span class="w"> </span><span class="s1">'Order*'</span>
+</span></code></pre></div>
+<p>See <a href="command-reference/#find">find</a> for the full predicate and action
+vocabulary, including the editing actions.</p>
+<h3 id="fail-a-build-on-warnings">Fail a Build on Warnings<a class="headerlink" href="#fail-a-build-on-warnings" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>riddlc<span class="w"> </span>validate<span class="w"> </span>mymodel.riddl<span class="w"> </span>--fail-on<span class="w"> </span>warning
+</span></code></pre></div>
+<h3 id="diagnostics-as-data">Diagnostics as Data<a class="headerlink" href="#diagnostics-as-data" title="Permanent link">&para;</a></h3>
+<p>Every message carries a <a href="command-reference/#every-message-carries-a-rule-id">stable rule id</a>,
+and <code>--json</code> emits them for tooling:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>riddlc<span class="w"> </span>validate<span class="w"> </span>mymodel.riddl<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.[].rule'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn
+</span></code></pre></div>
 <h2 id="common-workflows">Common Workflows<a class="headerlink" href="#common-workflows" title="Permanent link">&para;</a></h2>
 <h3 id="development-cycle">Development Cycle<a class="headerlink" href="#development-cycle" title="Permanent link">&para;</a></h3>
 <ol>
@@ -5779,31 +5860,31 @@ generation with AI assistance.</p>
 <li>Repeat</li>
 </ol>
 <h3 id="cicd-pipeline">CI/CD Pipeline<a class="headerlink" href="#cicd-pipeline" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Validate RIDDL</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">riddlc validate --warnings-are-fatal src/main/riddl/model.riddl</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Validate RIDDL</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">riddlc validate --warnings-are-fatal src/main/riddl/model.riddl</span>
 </span></code></pre></div>
 <h3 id="using-with-sbt">Using with sbt<a class="headerlink" href="#using-with-sbt" title="Permanent link">&para;</a></h3>
 <p>See <a href="../sbt-riddl/">sbt-riddl</a> for sbt integration.</p>
 <h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># General help</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>riddlc<span class="w"> </span><span class="nb">help</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Help for specific command</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>riddlc<span class="w"> </span><span class="nb">help</span><span class="w"> </span>validate
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># General help</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>riddlc<span class="w"> </span><span class="nb">help</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Help for specific command</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>riddlc<span class="w"> </span><span class="nb">help</span><span class="w"> </span>validate
 </span></code></pre></div>
 <h2 id="build-information">Build Information<a class="headerlink" href="#build-information" title="Permanent link">&para;</a></h2>
 <p>Check your installed version:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>riddlc<span class="w"> </span>info
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>riddlc<span class="w"> </span>info
 </span></code></pre></div>
 <p>Output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>[info] About riddlc:
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>[info]            name: riddlc
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>[info]         version: 1.1.2
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>[info]   documentation: https://riddl.tech
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>[info]       copyright: © 2019-2026 Ossum Inc.
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>[info]        licenses: Apache License, Version 2.0
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>[info]    organization: Ossum Inc.
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>[info]   scala version: 3.3.7
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>[info] About riddlc:
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>[info]            name: riddlc
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>[info]         version: 1.1.2
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>[info]   documentation: https://riddl.tech
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>[info]       copyright: © 2019-2026 Ossum Inc.
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>[info]        licenses: Apache License, Version 2.0
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>[info]    organization: Ossum Inc.
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>[info]   scala version: 3.3.7
 </span></code></pre></div>
 <h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
 <ul>

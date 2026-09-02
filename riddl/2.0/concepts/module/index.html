@@ -5537,8 +5537,8 @@ RIDDL's unit of reuse and the root of compiled (<code>.bast</code>) output.</p>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kd">type</span> <span class="n">Money</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">12</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">author</span> <span class="n">Reid</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kr">name</span> <span class="kp">is</span> <span class="s2">&quot;Reid Spencer&quot;</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="kr">email</span> <span class="kp">is</span> <span class="s2">&quot;reid@ossuminc.com&quot;</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kr">name</span> <span class="kp">is</span> <span class="s2">"Reid Spencer"</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="kr">email</span> <span class="kp">is</span> <span class="s2">"reid@ossuminc.com"</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="p">}</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -5576,12 +5576,12 @@ the size.</p>
 <h3 id="importing">Importing<a class="headerlink" href="#importing" title="Permanent link">&para;</a></h3>
 <p>The <strong>full</strong> form takes everything the file's root module holds:</p>
 <!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="s2">&quot;commerce.bast&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="s2">"commerce.bast"</span>
 </span></code></pre></div>
 <p>The <strong>selective</strong> form takes exactly one named definition, optionally renamed:</p>
 <!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">import</span> <span class="kd">type</span> <span class="n">Money</span> <span class="kp">from</span> <span class="s2">&quot;commerce.bast&quot;</span> <span class="kp">as</span> <span class="nb">Currency</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="kd">domain</span> <span class="n">Shopping</span> <span class="kp">from</span> <span class="s2">"commerce.bast"</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">import</span> <span class="kd">type</span> <span class="n">Money</span> <span class="kp">from</span> <span class="s2">"commerce.bast"</span> <span class="kp">as</span> <span class="nb">Currency</span>
 </span></code></pre></div>
 <p>An importable kind may be any of <code>domain</code>, <code>context</code>, <code>entity</code>, <code>type</code>, <code>epic</code>,
 <code>saga</code>, <code>adaptor</code>, <code>function</code>, <code>projector</code>, <code>repository</code>, <code>streamlet</code>,

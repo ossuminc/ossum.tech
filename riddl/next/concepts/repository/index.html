@@ -5497,11 +5497,25 @@ storage layout the repository uses. </p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="kp">of</span> <span class="n">cart</span> <span class="kp">as</span> <span class="kd">type</span> <span class="n">Cart</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="kp">of</span> <span class="n">cart</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">Cart</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="kr">link</span> <span class="n">cartItems</span> <span class="kp">as</span> <span class="kd">field</span> <span class="n">Cart</span><span class="p">.</span><span class="kr">items</span><span class="p">.</span><span class="n">id</span> <span class="kp">to</span> <span class="kd">field</span> <span class="n">Product</span><span class="p">.</span><span class="n">id</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">Cart</span><span class="p">.</span><span class="n">id</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
 </span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">A queried repository with no index at all</p>
+<p>A repository that answers <code>on query</code> clauses but whose schemas declare <strong>no
+index</strong> draws a <strong>CompletenessWarning</strong>: a store queried without any index
+is a sequential scan by construction.</p>
+<p>It is a warning and not an Error because the model may be under-specified
+rather than self-contradictory — the author may know the table is small. It
+stays silent for a <code>???</code> stub, a repository with no schema, and a
+write-only repository that answers no queries.</p>
+<p>The check does <strong>not</strong> name which field to index, and that is a limit of
+what models say rather than caution: a repository's <code>on query</code> body is
+prose by design, so nothing in the model states which field the query
+filters on.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title"><code>as type T</code> is strict — changed in RIDDL 2.0</p>
 <p>The clause says <code>as type</code>, so <code>T</code> must genuinely <strong>be</strong> a

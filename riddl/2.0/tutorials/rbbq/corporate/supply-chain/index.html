@@ -5500,6 +5500,19 @@
   
 
 
+<!-- riddl-prelude
+type PurchaseOrderId is Id(PurchaseOrder)
+type VendorId is UUID
+record StoredPurchaseOrder is { purchaseOrderId: PurchaseOrderId }
+event BulkOrderCreated is { purchaseOrderId: PurchaseOrderId }
+event OrderApproved is { purchaseOrderId: PurchaseOrderId }
+event ApproveOrderRejected is { purchaseOrderId: PurchaseOrderId, rejectionReason: String(1,500) }
+type PurchaseOrderEvent is BulkOrderCreated | OrderApproved | ApproveOrderRejected
+entity PurchaseOrder is { ??? }
+repository PurchaseOrderRepository is { ??? }
+command PersistOrderApproved is { purchaseOrderId: PurchaseOrderId }
+-->
+
 <h1 id="supply-chain-context">Supply Chain Context<a class="headerlink" href="#supply-chain-context" title="Permanent link">&para;</a></h1>
 <p>The Supply Chain context manages vendor relationships and bulk
 ordering for the restaurant chain. It coordinates with the
@@ -5519,110 +5532,67 @@ receipt, and issue reporting.</p>
 ingredients and manage supplier relationships. The Supply Chain
 context formalizes this process with tracked purchase orders.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">PurchaseOrderId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Purchase order identifier&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a purchase order.&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">type</span> <span class="n">VendorId</span> <span class="kp">is</span> <span class="nb">UUID</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Vendor identifier&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a vendor.&quot;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="kd">type</span> <span class="n">PurchaseOrderStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  <span class="n">PoDraft</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="n">PoSubmitted</span><span class="p">,</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="n">PoApproved</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="n">PoShipped</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="n">PoReceived</span><span class="p">,</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>  <span class="n">PoDisputed</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Purchase order status&quot;</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Current status of a purchase order.&quot;</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="p">}</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="kd">type</span> <span class="n">OrderLineItem</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>  <span class="n">lineItemName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">200</span><span class="p">)</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="n">lineItemQuantity</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>  <span class="n">lineItemUnit</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">20</span><span class="p">)</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>  <span class="n">lineItemUnitPrice</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Order line item&quot;</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;A single item in a purchase order.&quot;</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=PurchaseOrderId,VendorId -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">PurchaseOrderId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">PurchaseOrder</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">type</span> <span class="n">VendorId</span> <span class="kp">is</span> <span class="nb">UUID</span>
 </span></code></pre></div>
 <p>Note the <code>PoDisputed</code> status — if a shipment has quality
 issues, the purchase order can be disputed rather than simply
 accepted.</p>
 <h2 id="entity-purchaseorder">Entity: PurchaseOrder<a class="headerlink" href="#entity-purchaseorder" title="Permanent link">&para;</a></h2>
 <p>The <code>PurchaseOrder</code> entity has a 5-command lifecycle:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">PurchaseOrder</span> <span class="kp">is</span> <span class="p">{</span>
+<!-- riddl: in-context no-prelude=PurchaseOrder,BulkOrderCreated,OrderApproved,ApproveOrderRejected,PurchaseOrderCommand,PurchaseOrderEvent -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">PurchaseOrder</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">CreateBulkOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">purchaseOrderId</span> <span class="kp">is</span> <span class="n">PurchaseOrderId</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">vendorId</span> <span class="kp">is</span> <span class="n">VendorId</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">vendorName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">200</span><span class="p">)</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">orderLineItems</span> <span class="kp">is</span> <span class="kr">many</span> <span class="n">OrderLineItem</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">requestedDeliveryDate</span> <span class="kp">is</span> <span class="nb">Date</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="kd">command</span> <span class="n">ApproveOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">purchaseOrderId</span> <span class="kp">is</span> <span class="n">PurchaseOrderId</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">approvedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="p">}</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="kd">command</span> <span class="n">ShipOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">purchaseOrderId</span> <span class="kp">is</span> <span class="n">PurchaseOrderId</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">shippedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">trackingNumber</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>  <span class="p">}</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  <span class="kd">command</span> <span class="n">ReceiveShipment</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">purchaseOrderId</span> <span class="kp">is</span> <span class="n">PurchaseOrderId</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">receivedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    <span class="n">receivedCondition</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">200</span><span class="p">)</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>  <span class="p">}</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="kd">command</span> <span class="n">ReportIssue</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="n">purchaseOrderId</span> <span class="kp">is</span> <span class="n">PurchaseOrderId</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    <span class="n">purchaseOrderIssueType</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="n">purchaseOrderIssueDescription</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">1000</span><span class="p">)</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>    <span class="n">issueReportedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>  <span class="p">}</span>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>  <span class="c1">// Events: BulkOrderCreated, OrderApproved, OrderShipped,</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>  <span class="c1">//         ShipmentReceived, IssueReported</span>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>  <span class="kd">state</span> <span class="n">ActivePurchaseOrder</span> <span class="kp">of</span> <span class="n">PurchaseOrder</span><span class="p">.</span><span class="n">PurchaseOrderStateData</span>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  <span class="kd">handler</span> <span class="n">PurchaseOrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CreateBulkOrder</span> <span class="p">{</span>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span> <span class="kp">to</span> <span class="kd">state</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>        <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span><span class="p">.</span><span class="n">ActivePurchaseOrder</span>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>        <span class="kp">with</span> <span class="kd">command</span> <span class="n">CreateBulkOrder</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">BulkOrderCreated</span> <span class="kp">to</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>        <span class="kd">entity</span> <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    <span class="p">}</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ApproveOrder</span> <span class="p">{</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderApproved</span> <span class="kp">to</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>        <span class="kd">entity</span> <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>    <span class="p">}</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ShipOrder</span> <span class="p">{</span>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">OrderShipped</span> <span class="kp">to</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>        <span class="kd">entity</span> <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>    <span class="p">}</span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ReceiveShipment</span> <span class="p">{</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ShipmentReceived</span> <span class="kp">to</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>        <span class="kd">entity</span> <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>    <span class="p">}</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ReportIssue</span> <span class="p">{</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">IssueReported</span> <span class="kp">to</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>        <span class="kd">entity</span> <span class="n">SupplyChain</span><span class="p">.</span><span class="n">PurchaseOrder</span>
-</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>    <span class="p">}</span>
-</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>  <span class="p">}</span>
-</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a><span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="c1">// An event-sourced entity OWNS the commands and events that change it, so</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="c1">// they are declared INSIDE it, and every command names the event it yields.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">CreateBulkOrder</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">BulkOrderCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kd">command</span> <span class="n">ApproveOrder</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">OrderApproved</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="kd">event</span> <span class="n">BulkOrderCreated</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">event</span> <span class="n">OrderApproved</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="kd">event</span> <span class="n">ApproveOrderRejected</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span><span class="p">,</span> <span class="n">rejectionReason</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span> <span class="p">}</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">record</span> <span class="n">PurchaseOrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="c1">// Lifecycle phases are named STATES, not a status field: each state</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="c1">// declares the commands it accepts, so the compiler knows the machine.</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">ActivePurchaseOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PurchaseOrderData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="kd">handler</span> <span class="n">ActivePurchaseOrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ApproveOrder</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderApproved</span><span class="p">(</span><span class="n">purchaseOrderId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">purchaseOrderId</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      <span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="c1">// `set` and `morph` may appear ONLY in an `on event` clause here:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>      <span class="c1">// replay has to re-apply exactly the same change.</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">OrderApproved</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">PurchaseOrder</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Approved</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">PurchaseOrderData</span><span class="p">(</span><span class="n">purchaseOrderId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">purchaseOrderId</span><span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>      <span class="p">}</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="p">}</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="p">}</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="kd">state</span> <span class="n">Approved</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PurchaseOrderData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="kd">handler</span> <span class="n">ApprovedHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>      <span class="c1">// A command this state does not accept is refused -- and the refusal</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="c1">// is PUBLISHED before it is raised, so the attempt is recorded.</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ApproveOrder</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">ApproveOrderRejected</span><span class="p">(</span><span class="n">purchaseOrderId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">purchaseOrderId</span><span class="p">,</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>          <span class="n">rejectionReason</span> <span class="o">=</span> <span class="s2">"PurchaseOrder does not accept ApproveOrder in this state"</span><span class="p">)</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>          <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PurchaseOrderEvents</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">error</span> <span class="s2">"PurchaseOrder does not accept ApproveOrder in this state"</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>      <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="p">}</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  <span class="p">}</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>  <span class="c1">// A processor receives on its OWN inlet and publishes on its OWN outlet,</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="c1">// and a portlet's type must ADMIT everything that travels on it.</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  <span class="kd">type</span> <span class="n">PurchaseOrderCommand</span> <span class="kp">is</span> <span class="n">CreateBulkOrder</span> <span class="sd">| ApproveOrder</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>  <span class="kd">type</span> <span class="n">PurchaseOrderEvent</span> <span class="kp">is</span> <span class="n">BulkOrderCreated</span> <span class="sd">| OrderApproved | ApproveOrderRejected</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  <span class="kd">inlet</span> <span class="n">PurchaseOrderCommands</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">PurchaseOrderCommand</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>  <span class="kd">outlet</span> <span class="n">PurchaseOrderEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">PurchaseOrderEvent</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The lifecycle: <strong>Create → Approve → Ship → Receive → (optional)
 Report Issue</strong>.</p>
@@ -5630,14 +5600,35 @@ Report Issue</strong>.</p>
 changes the order status to <code>PoDisputed</code>, initiating a
 resolution process with the vendor.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">PurchaseOrderRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">PurchaseOrderData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">purchaseOrders</span> <span class="kp">as</span> <span class="n">PurchaseOrder</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">PurchaseOrder</span><span class="p">.</span><span class="n">purchaseOrderId</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">PurchaseOrder</span><span class="p">.</span><span class="n">vendorId</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">PurchaseOrder</span><span class="p">.</span><span class="n">purchaseOrderStatus</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=PurchaseOrderRepository,StoredPurchaseOrder,PersistOrderApproved -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">PurchaseOrderRepository</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">PurchaseOrderRepositoryFromPurchaseOrder</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistOrderApproved</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">outlet</span> <span class="n">PurchaseOrderRepositoryResponses</span> <span class="kp">is</span> <span class="kd">result</span> <span class="n">PurchaseOrderResult</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="c1">// A repository answers with a RESULT, never an event.</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">result</span> <span class="n">PurchaseOrderResult</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">found</span><span class="p">:</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">record</span> <span class="n">StoredPurchaseOrder</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="c1">// A repository that answers queries and declares NO index at all is a</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="c1">// sequential scan by construction, and draws a warning saying so.</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="kr">schema</span> <span class="n">PurchaseOrderSchema</span> <span class="kp">is</span> <span class="n">relational</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="kp">of</span> <span class="n">rows</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">StoredPurchaseOrder</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredPurchaseOrder</span><span class="p">.</span><span class="n">purchaseOrderId</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="kd">command</span> <span class="n">PersistOrderApproved</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">purchaseOrderId</span><span class="p">:</span> <span class="n">PurchaseOrderId</span> <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="kd">handler</span> <span class="n">PurchaseOrderPersistence</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PersistOrderApproved</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>      <span class="k">do</span> <span class="s2">"update the stored purchaseOrder row for this purchaseOrderId"</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1">// An inlet admitting an alternation needs a clause that receives it.</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="c1">// Handling each member is not enough -- say what ARRIVING means.</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>      <span class="k">do</span> <span class="s2">"persist whatever else arrives on this inlet"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>  <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The index on <code>vendorId</code> supports vendor-centric views — how
 many orders are outstanding with a specific vendor, what's the

@@ -258,7 +258,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#the-seven-forms" class="md-skip">
+        <a href="#the-eleven-forms" class="md-skip">
           Skip to content
         </a>
       
@@ -3747,10 +3747,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-seven-forms" class="md-nav__link">
+  <a href="#the-eleven-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Seven Forms
+        The Eleven Forms
       
     </span>
   </a>
@@ -3810,6 +3810,73 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Prompt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-line-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-line prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typed-holes-prompt-as-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typed holes: prompt("…") as &lt;type&gt;
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#empty-and-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty and None
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Empty and None">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-where-the-minimum-cardinality-is-zero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Only where the minimum cardinality is zero
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-type-ascription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The type ascription
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3817,6 +3884,28 @@
     <span class="md-ellipsis">
       
         Boolean Expressions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initiate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initiate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self
       
     </span>
   </a>
@@ -5422,10 +5511,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-seven-forms" class="md-nav__link">
+  <a href="#the-eleven-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Seven Forms
+        The Eleven Forms
       
     </span>
   </a>
@@ -5485,6 +5574,73 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Prompt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-line-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-line prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typed-holes-prompt-as-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typed holes: prompt("…") as &lt;type&gt;
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#empty-and-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty and None
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Empty and None">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-where-the-minimum-cardinality-is-zero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Only where the minimum cardinality is zero
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-type-ascription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The type ascription
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5492,6 +5648,28 @@
     <span class="md-ellipsis">
       
         Boolean Expressions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initiate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initiate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self
       
     </span>
   </a>
@@ -5559,17 +5737,18 @@
   <h1>Value</h1>
 
 <!-- riddl-prelude
-constant MaxItems is Natural = "100"
+constant MaxItems is Natural = 100
 record DoneData is { note is String }
 record SignupData is { email is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
 record PricingInput is { subtotal is Natural, taxRate is Natural }
 function Pricing is {
-  requires PricingInput returns PricingInput
-  function CalculateTotal is { requires PricingInput returns PricingInput ??? }
+  requires record PricingInput returns record PricingInput
+  function CalculateTotal is { requires record PricingInput returns record PricingInput ??? }
 }
 entity Order is {
-  state Done of record DoneData is { handler H is { ??? } }
+  state Started of record DoneData is { handler StartedHandler is { ??? } }
+  state Done of record DoneData is { handler DoneHandler is { ??? } }
 }
 -->
 
@@ -5581,7 +5760,7 @@ implementation.</p>
 <p>RIDDL 2.0 replaced what had been a mostly-opaque quoted string with a real
 value-expression system. A literal string is still accepted everywhere, so
 pseudo-code remains available where structure would be false precision.</p>
-<h2 id="the-seven-forms">The Seven Forms<a class="headerlink" href="#the-seven-forms" title="Permanent link">&para;</a></h2>
+<h2 id="the-eleven-forms">The Eleven Forms<a class="headerlink" href="#the-eleven-forms" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -5595,6 +5774,11 @@ pseudo-code remains available where structure would be false precision.</p>
 <td>Literal</td>
 <td><code>"some text"</code></td>
 <td>Opaque pseudo-code, or a literal constant</td>
+</tr>
+<tr>
+<td>Empty</td>
+<td><code>empty</code>, <code>none</code>, <code>empty String*</code></td>
+<td>The minimum-cardinality inhabitant of a type — the absence of a value</td>
 </tr>
 <tr>
 <td>Value reference</td>
@@ -5618,13 +5802,28 @@ pseudo-code remains available where structure would be false precision.</p>
 </tr>
 <tr>
 <td>Prompt</td>
-<td><code>prompt("compute the discount")</code></td>
-<td>A value computed by AI at generation time</td>
+<td><code>prompt("compute the discount") [as &lt;type&gt;]</code></td>
+<td>A value computed by AI at generation time; the ascription states its type</td>
 </tr>
 <tr>
 <td>Boolean</td>
 <td><code>a &gt; b and not c</code></td>
 <td>A structured boolean expression</td>
+</tr>
+<tr>
+<td>Ask</td>
+<td><code>ask query GetInfo of entity Catalog</code></td>
+<td>A query paired with the reply that answers it</td>
+</tr>
+<tr>
+<td>Initiate</td>
+<td><code>initiate entity Order</code></td>
+<td>Brings an instance into being; <strong>yields its <code>Id</code></strong></td>
+</tr>
+<tr>
+<td>Self</td>
+<td><code>self</code>, <code>self.id</code></td>
+<td>The instance executing right now</td>
 </tr>
 </tbody>
 </table>
@@ -5645,9 +5844,9 @@ shadowed inside nested blocks.</p>
 <h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
 <p>A constructor builds a <a href="../message/">message</a> or record inline, rather than
 requiring it be assembled elsewhere first:</p>
-<!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Done</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">DoneData</span><span class="p">(</span><span class="n">note</span> <span class="o">=</span> <span class="s2">&quot;fulfilled&quot;</span><span class="p">)</span>
+<!-- riddl: in-yielding-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">"USD"</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Done</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">DoneData</span><span class="p">(</span><span class="n">note</span> <span class="o">=</span> <span class="s2">"fulfilled"</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Arguments are <strong>positional first, then named</strong>. Count, names, ordering and
 (best effort) types are all checked against the target's fields.</p>
@@ -5655,14 +5854,30 @@ requiring it be assembled elsewhere first:</p>
 <p><code>get from</code> reads a value from a UI <a href="../input/">input</a> or an entity
 <a href="../state/">state</a>:</p>
 <!-- riddl: in-application -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">let</span> <span class="kr">email</span>   <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Active</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">let</span> <span class="kr">email</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
 </span></code></pre></div>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">record</span> <span class="n">BasketData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">total</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">command</span> <span class="n">AddItem</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">sku</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kd">entity</span> <span class="n">Basket</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="kd">state</span> <span class="n">Filling</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">BasketData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kd">handler</span> <span class="n">BasketHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">AddItem</span> <span class="p">{</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Filling</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>      <span class="p">}</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="p">}</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="p">}</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The two forms cannot appear in the same clause. An <code>input</code> exists only inside
+an <code>application</code> context, and <strong>state may be read only inside the entity that
+owns it</strong> — reading another definition's state is an Error as of RIDDL 2.0.</p>
 <h2 id="call">Call<a class="headerlink" href="#call" title="Permanent link">&para;</a></h2>
 <p><code>call</code> invokes a <a href="../function/">function</a> — and only a function, since
 functions are the only definitions guaranteed pure — and produces its result:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
 </span></code></pre></div>
 <p>A call is value-producing rather than a bare statement, so it composes with
 <code>let</code>, <code>set</code>, <code>return</code> and constructor arguments. Calling something that
@@ -5670,16 +5885,81 @@ declares no <code>returns</code> is an <strong>Error</strong>.</p>
 <h2 id="prompt">Prompt<a class="headerlink" href="#prompt" title="Permanent link">&para;</a></h2>
 <p><code>prompt("...")</code> denotes a value computed by AI at generation time:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">recommendation</span> <span class="kp">to</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;suggest a complementary product&quot;</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">recommendation</span> <span class="kp">to</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"suggest a complementary product"</span><span class="p">)</span>
 </span></code></pre></div>
 <p>It is distinguished from the <code>do</code> <strong>statement</strong> by its parentheses. The
 statement describes an action for a human to implement; the value denotes
 something AI computes.</p>
+<h3 id="multi-line-prompts">Multi-line prompts<a class="headerlink" href="#multi-line-prompts" title="Permanent link">&para;</a></h3>
+<p>Guidance long enough to need more than one line goes in <strong>braces</strong>, as a
+sequence of strings with no commas or other separator between them:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">let</span> <span class="n">sentiment</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">({</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="s2">"rate the customer's sentiment from the note on the order,"</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  <span class="s2">"returning a value between 0.0 and 1.0"</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">})</span> <span class="kp">as</span> <span class="nb">Real</span>
+</span></code></pre></div>
+<p>The braces are the only multi-line form — a bare <code>prompt("…")</code> takes <strong>exactly
+one</strong> string. That restriction is deliberate: RIDDL statements have no
+terminator, so allowing two juxtaposed strings would leave nothing but the next
+keyword to mark where the statement ended.</p>
+<h2 id="typed-holes-prompt-as-type">Typed holes: <code>prompt("…") as &lt;type&gt;</code><a class="headerlink" href="#typed-holes-prompt-as-type" title="Permanent link">&para;</a></h2>
+<p><code>prompt(...)</code> may carry an optional type ascription:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">let</span> <span class="n">price</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"a plausible price for this item"</span><span class="p">)</span> <span class="kp">as</span> <span class="nb">Real</span>
+</span></code></pre></div>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">constant</span> <span class="n">Greeting</span><span class="p">:</span> <span class="nb">String</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"a friendly greeting"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>That is a <strong>typed hole</strong>, and it is the seam between RIDDL's two tiers: the
+<strong>type is known and checkable at compile time</strong>, while the computation that
+produces a value of that type is prose an AI fills in at generation time. The
+deterministic tier parses, validates and type-checks; the AI tier is the string
+inside the parentheses.</p>
+<p>The ascription <strong>restates the position's type; it never overrides it.</strong> A
+<code>let</code> takes its type from the ascription, but in a position that already
+determines the type — a constructor argument, a field — the ascription must
+agree with it. Writing one is opt-in: unascribed <code>prompt(...)</code> is unchanged and
+still valid, and is the right form wherever the position already says enough.</p>
+<h2 id="empty-and-none">Empty and None<a class="headerlink" href="#empty-and-none" title="Permanent link">&para;</a></h2>
+<p><code>empty</code> denotes the <strong>minimum-cardinality inhabitant</strong> of a type: no value at
+all, written where a value is expected.</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">nickname</span> <span class="kp">to</span> <span class="n">empty</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">tags</span> <span class="kp">to</span> <span class="n">none</span>
+</span></code></pre></div>
+<p><code>none</code> is a <strong>synonym</strong>, not a second construct. Both spellings produce the
+identical AST, and <code>prettify</code> converges them on <code>empty</code>. Use whichever reads
+better where it appears — <code>none</code> often suits an optional scalar and <code>empty</code> a
+collection — but expect formatted output to say <code>empty</code>.</p>
+<h3 id="only-where-the-minimum-cardinality-is-zero">Only where the minimum cardinality is zero<a class="headerlink" href="#only-where-the-minimum-cardinality-is-zero" title="Permanent link">&para;</a></h3>
+<p><code>empty</code> is meaningful only for a type that admits having no value: an optional
+<code>T?</code>, a sequence <code>T*</code>, or an explicit range starting at zero, <code>T{0,n}</code>. A bare
+<code>T</code> or a <code>T+</code> requires at least one value, so <code>empty</code> is not an inhabitant of
+it, and asking for one is the <code>value-empty-needs-zero-cardinality</code> Error.</p>
+<h3 id="the-type-ascription">The type ascription<a class="headerlink" href="#the-type-ascription" title="Permanent link">&para;</a></h3>
+<p><code>empty</code> may carry a type, which is what lets it be written in a position that
+does not itself supply one — most often a constructor argument:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">let</span> <span class="n">noTags</span> <span class="o">=</span> <span class="n">empty</span> <span class="nb">String</span><span class="o">*</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">let</span> <span class="n">unset</span>  <span class="o">=</span> <span class="n">none</span> <span class="nb">String</span><span class="o">?</span>
+</span></code></pre></div>
+<p>The ascription is where the cardinality rule is checked, so <code>empty String</code> —
+a bare, one-or-more type — is the Error above, while <code>empty String*</code> is fine.</p>
+<div class="admonition note">
+<p class="admonition-title">Why the ascription cannot be followed by just anything</p>
+<p>A type expression is a bare path, and RIDDL statements are separated by
+whitespace with no terminator. Without a guard, <code>set x to empty</code> followed
+by <code>set y to …</code> would read the second statement's <code>set</code> as the first's
+ascription. Every statement begins with a reserved keyword, so the parser
+refuses those in the ascription position — a complete fix rather than a
+heuristic, since no type can be named <code>set</code>.</p>
+</div>
 <h2 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h2>
 <p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; atom, with parentheses to
 group:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="kp">or</span> <span class="n">order</span><span class="p">.</span><span class="n">isRefunded</span><span class="p">)</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="kp">or</span> <span class="n">order</span><span class="p">.</span><span class="n">isRefunded</span><span class="p">)</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span></code></pre></div>
 <p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
 recognized only inside a boolean expression, so they remain legal identifiers
@@ -5693,11 +5973,11 @@ literal. This is enforced at <strong>parse</strong> time, so <code>count &gt; 5<
 <p>To compare against a fixed value, name it. The constant is a definition,
 declared alongside the other definitions of its context:</p>
 <p><!-- riddl: in-context no-prelude=MaxItems -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
 </span></code></pre></div></p>
 <p>and the comparison is a statement, written inside an on-clause:</p>
 <p><!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many items&quot;</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many items"</span> <span class="kr">end</span>
 </span></code></pre></div></p>
 <p>The point is to remove magic constants from models and to make every
 comparison check the types on both sides. <code>==</code> and <code>!=</code> require operands
@@ -5706,6 +5986,38 @@ type on both sides.</p>
 <p><code>true</code> and <code>false</code> remain valid boolean <em>atoms</em> — usable with <code>and</code>, <code>or</code>,
 <code>not</code>, and standalone — just not as comparison operands.</p>
 </div>
+<h2 id="initiate">Initiate<a class="headerlink" href="#initiate" title="Permanent link">&para;</a></h2>
+<p><code>initiate</code> brings a new instance of an entity into being, and its <strong>value is
+that instance's identity</strong>:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="n">initiate</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ExampleWelcome</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">fresh</span><span class="p">)</span> <span class="kp">to</span> <span class="n">fresh</span>
+</span></code></pre></div>
+<p>It is not a second way to exist — construction still completes only when
+<code>on init</code> finishes. But without it no <code>Id</code> value could ever come into being,
+so nothing could be addressed.</p>
+<p><code>initiate</code> and <a href="../statement/"><code>terminate</code></a> are <strong>entity-only</strong> and are both
+<strong>effects</strong>: banned in a function body, in <code>on activate</code>/<code>on passivate</code>, and
+in a correlation fold; legal in a saga step.</p>
+<div class="admonition warning">
+<p class="admonition-title">Discarding the id is a warning</p>
+<p>The id is the only thing <code>initiate</code> produces, so binding it and never
+using it means the instance was created and immediately made unreachable.</p>
+</div>
+<h2 id="self">Self<a class="headerlink" href="#self" title="Permanent link">&para;</a></h2>
+<p><code>self</code> is the instance executing right now. Its type is a <strong>synthesized
+record</strong> carrying <code>id</code> and <code>version</code>:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">me</span>  <span class="o">=</span> <span class="n">self</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">let</span> <span class="n">who</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">id</span>
+</span></code></pre></div>
+<p>Because that type is an ordinary record, <code>self.id</code> resolves by the same path
+walk as any other value — which is why no resolution rule has to know <code>self</code>
+exists.</p>
+<p>The type is not user-nameable, though: <code>self.id</code> is <code>Id(Order)</code> in an Order
+handler and <code>Id(Shipping)</code> in a Shipping one. So <code>let me: T = self</code> has no <code>T</code>
+to write, and <strong><code>self</code> cannot be assigned into a message field — pass
+<code>self.id</code>.</strong> The field set is closed; adding to it is a language change.</p>
 <h2 id="where-values-are-used">Where Values Are Used<a class="headerlink" href="#where-values-are-used" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

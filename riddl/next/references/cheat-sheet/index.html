@@ -7310,9 +7310,15 @@ in the <code>with { }</code> metadata block, not in the body.)</em></p>
 <li>Supports <code>morph</code> (change state) and <code>become</code> (change handler)</li>
 <li><code>on activate</code> / <code>on passivate</code> handle rehydration and eviction, and must
   be side-effect free</li>
+<li>Integer family by range: <code>Integer</code> signed, <code>Whole</code> &gt;= 0 (<strong>the counting
+  type</strong>), <code>Natural</code> &gt;= 1 (<strong>excludes zero</strong>). Literals are range-checked</li>
 <li>Options: <code>event-sourced</code>, <code>aggregate</code>, <code>transient</code>, <code>available</code>,
   <code>consistent</code>, <code>message-queue</code>, <code>value</code>, <code>auto-id</code> (auto-assign ULID at
   instantiation)</li>
+<li><code>option is snapshots</code> — an <strong>event-sourced</strong> entity wants periodic
+  snapshots so replay need not start from zero. Whether, never how often.
+  Omitting it means "replay the whole log", which is often right. An
+  <strong>Error</strong> on an entity that is not event-sourced</li>
 <li>The primary unit of consistency in a reactive system</li>
 </ul>
 <p><strong>Syntax</strong>: <code>entity Order is { initial state Active of record OrderData ... }</code></p>
@@ -7356,6 +7362,10 @@ that differs from the entity's write model.</p>
 <li>Handlers subscribe to events (often cross-context) and update the
   repository</li>
 <li>Multiple projectors can write to the same repository</li>
+<li><code>correlation X by k1, k2 yields command C is { ... } times out after "30 days" { ... }</code>
+  joins several events into one command. Completion is derived from <code>C</code>'s
+  required fields; the timeout is <strong>mandatory</strong>. A projector with correlations
+  cannot be scaled round-robin — distribution must be by key.</li>
 </ul>
 <blockquote>
 <p><em><a href="../../concepts/projector/">For more details →</a></em></p>
@@ -7463,7 +7473,12 @@ messages, states, and parameters in RIDDL.</p>
 <li><strong>Parameterized predefined types</strong> — <strong>require parenthesized
   arguments</strong>; using these without parameters is invalid:<ul>
 <li><code>String(min, max, enc)</code> — constrained string</li>
-<li><code>Id(entity)</code> — unique identifier for an entity type</li>
+<li><code>Id(&lt;kind&gt; Path)</code> — runtime identity of ONE INSTANCE of a
+  processor: adaptor, context, entity, projector, repository or
+  streamlet. <code>Id(entity Order)</code> is canonical, <code>Id(Order)</code>
+  shorthand; a keyword contradicting the referent's kind is an
+  <strong>Error</strong>. Only entities can be <code>initiate</code>d and <code>terminate</code>d,
+  but every processor can be named</li>
 <li><code>URL(scheme)</code> — URL with a specific scheme</li>
 <li><code>Range(min, max)</code> — bounded integer range</li>
 <li><code>LatLong(lat, long)</code> — geographic coordinates</li>
@@ -7752,6 +7767,11 @@ interactions between definitions, not full implementations.</p>
 <td>Opaque pseudo-code or a literal constant</td>
 </tr>
 <tr>
+<td>Empty</td>
+<td><code>empty</code>, <code>none</code>, <code>empty String*</code></td>
+<td>No value at all. <code>none</code> is a synonym; prettify emits <code>empty</code>. Only where min cardinality is 0 (<code>T?</code>, <code>T*</code>, <code>T{0,n}</code>) — an Error on <code>T</code> or <code>T+</code>.</td>
+</tr>
+<tr>
 <td>Value reference</td>
 <td><code>order.total</code></td>
 <td>A field, state field, function input, or <code>let</code> local</td>
@@ -7773,13 +7793,28 @@ interactions between definitions, not full implementations.</p>
 </tr>
 <tr>
 <td>Prompt</td>
-<td><code>prompt("compute the discount")</code></td>
-<td>A value computed by AI at generation time</td>
+<td><code>prompt("compute the discount") [as &lt;type&gt;]</code></td>
+<td>A typed hole: the type is checked at compile time, the computation is prose an AI fills in</td>
 </tr>
 <tr>
 <td>Boolean</td>
 <td><code>a &gt; b and not c</code></td>
-<td>A structured boolean expression</td>
+<td>A structured boolean expression. <code>!</code> is a synonym for <code>not</code>; prettify emits <code>not</code>. Unrelated to <code>!=</code>.</td>
+</tr>
+<tr>
+<td>Ask</td>
+<td><code>ask query GetInfo of entity Catalog</code></td>
+<td>A query paired with the reply that answers it. <strong>Never inside a saga.</strong></td>
+</tr>
+<tr>
+<td>Initiate</td>
+<td><code>initiate entity Order</code></td>
+<td>Creates an instance; the value is its <code>Id</code>. Entity-only; an effect.</td>
+</tr>
+<tr>
+<td>Self</td>
+<td><code>self</code>, <code>self.id</code></td>
+<td>The instance running now (<code>id</code>, <code>version</code>). Pass <code>self.id</code>, never <code>self</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -7789,8 +7824,8 @@ interactions between definitions, not full implementations.</p>
 <code>constant</code> — never a literal. <code>count &gt; 5</code>, <code>count &gt; "5"</code> and
 <code>count &gt; true</code> all fail at <strong>parse</strong> time. Name the threshold instead:</p>
 <p><!-- riddl: skip reason="a constant beside a condition that would use it; not one construct" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many&quot;</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many"</span> <span class="kr">end</span>
 </span></code></pre></div></p>
 <p><code>==</code>/<code>!=</code> need operands of the same category; <code>&lt;</code>/<code>&gt;</code>/<code>&lt;=</code>/<code>&gt;=</code> need an
 ordered (numeric) type on both sides.</p>
@@ -7850,6 +7885,11 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 <td>Deliver a message directly to a processor (point-to-point).</td>
 </tr>
 <tr>
+<td><code>tell</code> (instance)</td>
+<td><code>tell command X to order.id</code></td>
+<td>Address ONE instance by a value typed <code>Id(...)</code>. Keyword-led = processor, bare path = value. Not entity-only.</td>
+</tr>
+<tr>
 <td><code>yield</code></td>
 <td><code>yield event ProductAdded(id)</code></td>
 <td>Produce a <strong>command's</strong> declared event, without knowing the sender.</td>
@@ -7860,6 +7900,11 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 <td>Answer a <strong>query</strong> with its declared result.</td>
 </tr>
 <tr>
+<td><code>forward</code></td>
+<td><code>forward ord to entity Payments</code></td>
+<td>Pass the handled message on and <strong>discharge</strong> its <code>yields</code>/<code>replies</code> obligation. Portlet or processor target. Only in a clause handling a command with <code>yields</code> or a query with <code>replies</code>.</td>
+</tr>
+<tr>
 <td><code>ask</code></td>
 <td><code>let a = ask query GetInfo of entity Catalog</code></td>
 <td>A value: a query paired with the reply that answers it. <strong>Never inside a saga.</strong></td>
@@ -7867,6 +7912,13 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 </tbody>
 </table>
 <p>The message operand may be a bare reference or an inline constructor.</p>
+<div class="admonition warning">
+<p class="admonition-title">Something must RECEIVE it</p>
+<p>A <code>tell</code> whose target declares no clause receiving that type draws a
+CompletenessWarning, and so does an inlet admitting a type its processor
+handles nowhere — the same defect seen from each end. An <code>on other</code>
+clause satisfies both.</p>
+</div>
 <h4 id="data">Data<a class="headerlink" href="#data" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -7896,6 +7948,11 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 <td><code>return</code></td>
 <td><code>return &lt;value&gt;</code></td>
 <td>Return a function's result. Function bodies only.</td>
+</tr>
+<tr>
+<td><code>terminate</code></td>
+<td><code>terminate self.id [with (...)]</code></td>
+<td>End this instance's life. Ends its statement list.</td>
 </tr>
 </tbody>
 </table>
@@ -7934,10 +7991,25 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 <div class="admonition warning">
 <p class="admonition-title">Refusals before effects</p>
 <p>Within any single linear statement list, every refusal (<code>require</code>,
-<code>error</code>) must precede every effect (<code>set</code>, <code>morph</code>, <code>become</code>, <code>send</code>,
-<code>tell</code>, <code>yield</code>, <code>put</code>). Acting and then refusing would leave partial
-changes behind. Each branch of a <code>when</code>, <code>match</code> or <code>foreach</code> body is its
-own list. A refusal after an effect is an <strong>Error</strong>.</p>
+<code>error</code>) must precede every effect — where an effect is a change to <strong>this
+definition's own state</strong>: <code>set</code>, <code>morph</code>, <code>terminate</code>. Acting and then
+refusing would leave a partial change behind. Each branch of a <code>when</code>,
+<code>match</code> or <code>foreach</code> body is its own list. A refusal after an effect is an
+<strong>Error</strong>.</p>
+<p><code>send</code>, <code>tell</code> and <code>yield</code> are transmissions, <code>become</code> changes behaviour,
+and <code>put</code> writes to an output — none can leave this definition
+half-changed, so none of them is an effect for this rule.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title"><code>error</code> and <code>terminate</code> end their block</p>
+<p>A statement after either is unreachable and is an <strong>Error</strong>. <code>require</code> is
+<em>not</em> terminal — it refuses only when its condition fails. An <code>on term</code>
+clause is a separate list and is unaffected.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">What discharges a response obligation</p>
+<p>Only <code>yield</code>/<code>reply</code>, <code>error</code>/<code>require</code>, and <code>forward</code>. A <code>send</code> of the
+handled message does <strong>not</strong> settle it.</p>
 </div>
 <h4 id="description-implementation">Description / Implementation<a class="headerlink" href="#description-implementation" title="Permanent link">&para;</a></h4>
 <table>
@@ -7952,7 +8024,7 @@ own list. A refusal after an effect is an <strong>Error</strong>.</p>
 <tr>
 <td><code>do</code></td>
 <td><code>do "Calculate the total"</code></td>
-<td>Natural-language action description for implementation.</td>
+<td>Natural-language action description for implementation. Brace a sequence of strings for several lines: <code>do { "one" "two" }</code>.</td>
 </tr>
 <tr>
 <td><code>error</code></td>
@@ -8194,7 +8266,7 @@ interaction.</p>
 </tr>
 <tr>
 <td>Refusal</td>
-<td><code>step &lt;source&gt; refuses &lt;user&gt; "&lt;reason&gt;"</code></td>
+<td><code>step &lt;source&gt; refuses &lt;user&gt; "&lt;reason&gt;"</code> or <code>… invariant Cart.MustHaveStock</code></td>
 </tr>
 <tr>
 <td>Send message</td>
@@ -8279,7 +8351,8 @@ of UI containers.</p>
 <p><strong>Lives in</strong>: An <code>application</code> Context, or another Group (nesting).
 <strong>Contains</strong>: Group, Input, Output, Type.</p>
 <p><strong>Aliases</strong>: <code>group</code>, <code>page</code>, <code>pane</code>, <code>dialog</code>, <code>menu</code>, <code>popup</code>, <code>frame</code>,
-<code>column</code>, <code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code>, <code>block</code>.</p>
+<code>column</code>, <code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code>, <code>block</code>, <code>scene</code>, <code>space</code>,
+<code>zone</code>.</p>
 <p><strong>Key details</strong>:</p>
 <ul>
 <li>Groups can nest, forming a UI hierarchy</li>
@@ -8295,7 +8368,7 @@ providing information (form submission, button tap, voice response, etc.).</p>
 <p><strong>Lives in</strong>: Group.
 <strong>Contains</strong>: Type, Message (command).</p>
 <p><strong>Aliases</strong>: <code>input</code>, <code>form</code>, <code>text</code>, <code>button</code>, <code>picklist</code>, <code>selector</code>,
-<code>item</code>.</p>
+<code>item</code>, <code>voice</code>, <code>gesture</code>, <code>gaze</code>.</p>
 <p><strong>Acquisition verbs</strong>: <code>acquires</code>, <code>reads</code>, <code>takes</code>, <code>accepts</code>, <code>admits</code>,
 <code>enters</code>, <code>provides</code>, <code>selects</code>, <code>chooses</code>, <code>picks</code>, <code>initiates</code>, <code>submits</code>,
 <code>triggers</code>, <code>activates</code>, <code>starts</code>.</p>
@@ -8316,8 +8389,10 @@ information to a user (text, chart, audio, etc.).</p>
 <p><strong>Lives in</strong>: Group.
 <strong>Contains</strong>: Type, Message (result).</p>
 <p><strong>Aliases</strong>: <code>output</code>, <code>document</code>, <code>list</code>, <code>table</code>, <code>graph</code>, <code>animation</code>,
-<code>picture</code>.</p>
-<p><strong>Presentation verbs</strong>: <code>presents</code>, <code>shows</code>, <code>displays</code>, <code>writes</code>, <code>emits</code>.</p>
+<code>picture</code>, <code>sound</code>, <code>speech</code>, <code>haptic</code>.</p>
+<p><strong>Presentation verbs</strong>: <code>presents</code>, <code>shows</code>, <code>displays</code>, <code>writes</code>, <code>emits</code>,
+<code>plays</code>, <code>speaks</code>, <code>announces</code>, <code>vibrates</code>, <code>pulses</code>, <code>nudges</code>, <code>diffuses</code>,
+<code>serve</code>, <code>offer</code>, <code>taste</code>.</p>
 <p><strong>Writes</strong>: A handler publishes to an output with <code>put &lt;value&gt; to output
 &lt;Name&gt;</code>.</p>
 <blockquote>
@@ -8594,9 +8669,9 @@ cannot be expressed in Markdown descriptions.</p>
 <p><strong>Lives in</strong>: Any vital definition.</p>
 <p><strong>Syntax</strong> — the MIME type comes <strong>before</strong> the content, in all three forms:</p>
 <!-- riddl: skip reason="attachment forms; the referenced diagram file does not exist" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kr">attachment</span> <span class="n">StateChart</span> <span class="kp">is</span> <span class="n">image</span><span class="err">/</span><span class="n">png</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">&quot;diagrams/states.png&quot;</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kr">attachment</span> <span class="n">Note</span>      <span class="kp">is</span> <span class="n">text</span><span class="err">/</span><span class="n">plain</span> <span class="kp">as</span> <span class="s2">&quot;reviewed 2026-07-29&quot;</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kr">attachment</span> <span class="n">ULID</span>      <span class="kp">is</span> <span class="s2">&quot;01ARZ3NDEKTSV4RRFFQ69G5FAV&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kr">attachment</span> <span class="n">StateChart</span> <span class="kp">is</span> <span class="n">image</span><span class="err">/</span><span class="n">png</span> <span class="kp">in</span> <span class="kr">file</span> <span class="s2">"diagrams/states.png"</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kr">attachment</span> <span class="n">Note</span>      <span class="kp">is</span> <span class="n">text</span><span class="err">/</span><span class="n">plain</span> <span class="kp">as</span> <span class="s2">"reviewed 2026-07-29"</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kr">attachment</span> <span class="n">ULID</span>      <span class="kp">is</span> <span class="s2">"01ARZ3NDEKTSV4RRFFQ69G5FAV"</span>
 </span></code></pre></div>
 <p><code>attachment X is "path" as "image/png"</code> — content first — does not parse.</p>
 <hr />

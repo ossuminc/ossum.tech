@@ -5500,6 +5500,25 @@
   
 
 
+<!-- riddl-domain-prelude
+context Kitchen is {
+  event TicketApproved is { kitchenTicketId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type InventoryItemId is Id(InventoryItem)
+type StockQuantity is Natural
+record StoredInventoryItem is { inventoryItemId: InventoryItemId }
+event StockReceived is { inventoryItemId: InventoryItemId }
+event StockConsumed is { inventoryItemId: InventoryItemId }
+event ConsumeStockRejected is { inventoryItemId: InventoryItemId, rejectionReason: String(1,500) }
+type InventoryItemEvent is StockReceived | StockConsumed | ConsumeStockRejected
+entity InventoryItem is { ??? }
+repository InventoryItemRepository is { ??? }
+command PersistStockConsumed is { inventoryItemId: InventoryItemId }
+-->
+
 <h1 id="inventory-context">Inventory Context<a class="headerlink" href="#inventory-context" title="Permanent link">&para;</a></h1>
 <p>The Inventory context manages stock levels, receiving,
 consumption tracking, manual adjustments, and reorder
@@ -5512,122 +5531,67 @@ foundation: receiving shipments, tracking consumption,
 triggering reorder alerts, and creating purchase orders when
 stock runs low.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">InventoryItemId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Inventory item identifier&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for an inventory item.&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">type</span> <span class="n">UnitOfMeasure</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="n">Each</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="n">Pound</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  <span class="n">Ounce</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  <span class="n">Gallon</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  <span class="n">Liter</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  <span class="n">Case</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="n">Box</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Unit of measure&quot;</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Measurement unit for inventory quantities.&quot;</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">}</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="kd">type</span> <span class="n">InventoryItemStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>  <span class="n">InStock</span><span class="p">,</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  <span class="n">LowStock</span><span class="p">,</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>  <span class="n">OutOfStock</span><span class="p">,</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>  <span class="n">Discontinued</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Inventory item status&quot;</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Current stock status of an inventory item.&quot;</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="p">}</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="kd">type</span> <span class="n">StockAdjustmentReason</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>  <span class="n">Spoilage</span><span class="p">,</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>  <span class="n">Breakage</span><span class="p">,</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>  <span class="n">Theft</span><span class="p">,</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>  <span class="n">CountCorrection</span><span class="p">,</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>  <span class="n">Donation</span><span class="p">,</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>  <span class="n">OtherAdjustment</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Stock adjustment reason&quot;</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Reason for a manual stock adjustment.&quot;</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=InventoryItemId,StockQuantity -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">InventoryItemId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">InventoryItem</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">type</span> <span class="n">StockQuantity</span> <span class="kp">is</span> <span class="nb">Natural</span>
 </span></code></pre></div>
 <p>The <code>StockAdjustmentReason</code> enumeration captures why stock was
 manually adjusted — essential for loss tracking and audit
 compliance.</p>
 <h2 id="entity-inventoryitem">Entity: InventoryItem<a class="headerlink" href="#entity-inventoryitem" title="Permanent link">&para;</a></h2>
 <p>The <code>InventoryItem</code> entity has a 5-command lifecycle:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">InventoryItem</span> <span class="kp">is</span> <span class="p">{</span>
+<!-- riddl: in-context no-prelude=InventoryItem,StockReceived,StockConsumed,ConsumeStockRejected,InventoryItemCommand,InventoryItemEvent -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">InventoryItem</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">ReceiveStock</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">inventoryItemId</span> <span class="kp">is</span> <span class="n">InventoryItemId</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">receivedQuantity</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">receivedUnit</span> <span class="kp">is</span> <span class="n">UnitOfMeasure</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">supplierRef</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">stockReceivedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="kd">command</span> <span class="n">ConsumeStock</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">inventoryItemId</span> <span class="kp">is</span> <span class="n">InventoryItemId</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">consumedQuantity</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">consumedUnit</span> <span class="kp">is</span> <span class="n">UnitOfMeasure</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">consumptionRef</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="p">}</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>  <span class="kd">command</span> <span class="n">AdjustStock</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">inventoryItemId</span> <span class="kp">is</span> <span class="n">InventoryItemId</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">adjustmentQuantity</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="n">adjustmentUnit</span> <span class="kp">is</span> <span class="n">UnitOfMeasure</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="n">adjustmentReason</span> <span class="kp">is</span> <span class="n">StockAdjustmentReason</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">adjustmentNotes</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">500</span><span class="p">)</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>  <span class="p">}</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>  <span class="kd">command</span> <span class="n">SetReorderThreshold</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="n">inventoryItemId</span> <span class="kp">is</span> <span class="n">InventoryItemId</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    <span class="n">reorderThreshold</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="n">reorderUnit</span> <span class="kp">is</span> <span class="n">UnitOfMeasure</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="p">}</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  <span class="kd">command</span> <span class="n">CreatePurchaseOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>    <span class="n">inventoryItemId</span> <span class="kp">is</span> <span class="n">InventoryItemId</span>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="n">orderQuantity</span> <span class="kp">is</span> <span class="nb">Decimal</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    <span class="n">orderUnit</span> <span class="kp">is</span> <span class="n">UnitOfMeasure</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="n">preferredSupplier</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">100</span><span class="p">)</span>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>  <span class="p">}</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>  <span class="c1">// Events: StockReceived, StockConsumed, StockAdjusted,</span>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  <span class="c1">//         ReorderThresholdSet, PurchaseOrderCreated</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>  <span class="kd">state</span> <span class="n">TrackedItem</span> <span class="kp">of</span> <span class="n">InventoryItem</span><span class="p">.</span><span class="n">InventoryItemStateData</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="kd">handler</span> <span class="n">InventoryItemHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ReceiveStock</span> <span class="p">{</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span> <span class="kp">to</span> <span class="kd">state</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>        <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span><span class="p">.</span><span class="n">TrackedItem</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>        <span class="kp">with</span> <span class="kd">command</span> <span class="n">ReceiveStock</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">StockReceived</span> <span class="kp">to</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>        <span class="kd">entity</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>    <span class="p">}</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ConsumeStock</span> <span class="p">{</span>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">StockConsumed</span> <span class="kp">to</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>        <span class="kd">entity</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>    <span class="p">}</span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">AdjustStock</span> <span class="p">{</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">StockAdjusted</span> <span class="kp">to</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>        <span class="kd">entity</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>    <span class="p">}</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">SetReorderThreshold</span> <span class="p">{</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ReorderThresholdSet</span> <span class="kp">to</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>        <span class="kd">entity</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span>
-</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>    <span class="p">}</span>
-</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CreatePurchaseOrder</span> <span class="p">{</span>
-</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">PurchaseOrderCreated</span> <span class="kp">to</span>
-</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>        <span class="kd">entity</span> <span class="n">Inventory</span><span class="p">.</span><span class="n">InventoryItem</span>
-</span><span id="__span-1-67"><a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>    <span class="p">}</span>
-</span><span id="__span-1-68"><a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>  <span class="p">}</span>
-</span><span id="__span-1-69"><a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a><span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="c1">// An event-sourced entity OWNS the commands and events that change it, so</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="c1">// they are declared INSIDE it, and every command names the event it yields.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">ReceiveStock</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">StockReceived</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kd">command</span> <span class="n">ConsumeStock</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">StockConsumed</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="kd">event</span> <span class="n">StockReceived</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="kd">event</span> <span class="n">StockConsumed</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="kd">event</span> <span class="n">ConsumeStockRejected</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span><span class="p">,</span> <span class="n">rejectionReason</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span> <span class="p">}</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">record</span> <span class="n">InventoryItemData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="c1">// Lifecycle phases are named STATES, not a status field: each state</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="c1">// declares the commands it accepts, so the compiler knows the machine.</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">TrackedItem</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">InventoryItemData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="kd">handler</span> <span class="n">TrackedItemHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ConsumeStock</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="k">yield</span> <span class="kd">event</span> <span class="n">StockConsumed</span><span class="p">(</span><span class="n">inventoryItemId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">inventoryItemId</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      <span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      <span class="c1">// `set` and `morph` may appear ONLY in an `on event` clause here:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>      <span class="c1">// replay has to re-apply exactly the same change.</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>      <span class="k">on</span> <span class="n">evt</span><span class="p">:</span> <span class="kd">event</span> <span class="n">StockConsumed</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">InventoryItem</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Depleted</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">InventoryItemData</span><span class="p">(</span><span class="n">inventoryItemId</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">inventoryItemId</span><span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>      <span class="p">}</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="p">}</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="p">}</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="kd">state</span> <span class="n">Depleted</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">InventoryItemData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="kd">handler</span> <span class="n">DepletedHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>      <span class="c1">// A command this state does not accept is refused -- and the refusal</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>      <span class="c1">// is PUBLISHED before it is raised, so the attempt is recorded.</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>      <span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ConsumeStock</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">ConsumeStockRejected</span><span class="p">(</span><span class="n">inventoryItemId</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">inventoryItemId</span><span class="p">,</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>          <span class="n">rejectionReason</span> <span class="o">=</span> <span class="s2">"InventoryItem does not accept ConsumeStock in this state"</span><span class="p">)</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>          <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">InventoryItemEvents</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">error</span> <span class="s2">"InventoryItem does not accept ConsumeStock in this state"</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>      <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="p">}</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  <span class="p">}</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>  <span class="c1">// A processor receives on its OWN inlet and publishes on its OWN outlet,</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  <span class="c1">// and a portlet's type must ADMIT everything that travels on it.</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  <span class="kd">type</span> <span class="n">InventoryItemCommand</span> <span class="kp">is</span> <span class="n">ReceiveStock</span> <span class="sd">| ConsumeStock</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>  <span class="kd">type</span> <span class="n">InventoryItemEvent</span> <span class="kp">is</span> <span class="n">StockReceived</span> <span class="sd">| StockConsumed | ConsumeStockRejected</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  <span class="kd">inlet</span> <span class="n">InventoryItemCommands</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">InventoryItemCommand</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>  <span class="kd">outlet</span> <span class="n">InventoryItemEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">InventoryItemEvent</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Note that <code>ReceiveStock</code> uses <code>morph</code> — this is where an
 inventory item first enters the system. Subsequent commands use
@@ -5637,33 +5601,58 @@ field, enabling downstream systems (like the Reporting context's
 <code>InventoryReport</code> projector) to track stock levels without
 querying the entity directly.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">InventoryItemRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">InventoryItemData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="kr">items</span> <span class="kp">as</span> <span class="n">InventoryItem</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">InventoryItem</span><span class="p">.</span><span class="n">inventoryItemId</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">InventoryItem</span><span class="p">.</span><span class="n">inventoryItemStatus</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=InventoryItemRepository,StoredInventoryItem,PersistStockConsumed -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">InventoryItemRepository</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">InventoryItemRepositoryFromInventoryItem</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistStockConsumed</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">outlet</span> <span class="n">InventoryItemRepositoryResponses</span> <span class="kp">is</span> <span class="kd">result</span> <span class="n">InventoryItemResult</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="c1">// A repository answers with a RESULT, never an event.</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">result</span> <span class="n">InventoryItemResult</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">found</span><span class="p">:</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">record</span> <span class="n">StoredInventoryItem</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  <span class="c1">// A repository that answers queries and declares NO index at all is a</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="c1">// sequential scan by construction, and draws a warning saying so.</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="kr">schema</span> <span class="n">InventoryItemSchema</span> <span class="kp">is</span> <span class="n">relational</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="kp">of</span> <span class="n">rows</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">StoredInventoryItem</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredInventoryItem</span><span class="p">.</span><span class="n">inventoryItemId</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  <span class="kd">command</span> <span class="n">PersistStockConsumed</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">inventoryItemId</span><span class="p">:</span> <span class="n">InventoryItemId</span> <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  <span class="kd">handler</span> <span class="n">InventoryItemPersistence</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PersistStockConsumed</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>      <span class="k">do</span> <span class="s2">"update the stored inventoryItem row for this inventoryItemId"</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1">// An inlet admitting an alternation needs a clause that receives it.</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="c1">// Handling each member is not enough -- say what ARRIVING means.</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>      <span class="k">do</span> <span class="s2">"persist whatever else arrives on this inlet"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>  <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The index on <code>inventoryItemStatus</code> enables quick queries for
 low-stock and out-of-stock items.</p>
 <h2 id="adaptor-fromkitchen">Adaptor: FromKitchen<a class="headerlink" href="#adaptor-fromkitchen" title="Permanent link">&para;</a></h2>
 <p>The most interesting part of the Inventory context is its
 cross-context integration with the Kitchen:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">adaptor</span> <span class="n">FromKitchen</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Kitchen</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">handler</span> <span class="n">KitchenConsumptionIntake</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span><span class="p">.</span><span class="n">PreparationStarted</span> <span class="p">{</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>      <span class="n">prompt</span> <span class="s2">&quot;Consume stock for items being prepared&quot;</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="p">}</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="p">}</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Kitchen adaptor&quot;</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="p">{</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="sd">| Receives preparation events from the kitchen to</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="sd">| automatically track stock consumption.</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  <span class="p">}</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p">}</span>
+<!-- riddl: in-domain -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">context</span> <span class="n">Inventory</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="c1">// An adaptor is the translation seam at a context boundary: it is the only</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="c1">// place that knows the OTHER context's message shapes.</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="kd">adaptor</span> <span class="n">FromKitchen</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Kitchen</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="kd">handler</span> <span class="n">FromKitchenIntake</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">TicketApproved</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="k">do</span> <span class="s2">"decrement stock for the items the approved ticket consumed"</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>      <span class="p">}</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>      <span class="c1">// Every adaptor handler must say what it does with what it does not</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>      <span class="c1">// recognise. Silence is not an option in 2.0.</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="k">error</span> <span class="s2">"Unexpected message from Kitchen"</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>      <span class="p">}</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="p">}</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  <span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>When the Kitchen starts preparing a ticket
 (<code>PreparationStarted</code> event), the Inventory context

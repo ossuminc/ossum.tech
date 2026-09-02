@@ -5527,11 +5527,12 @@ in traditional user interfaces. Groups can contain other elements including
 nested groups, enabling hierarchical organization of the user interface.</p>
 <p>Groups have many aliases in RIDDL to accommodate different UI paradigms:
 <code>group</code>, <code>page</code>, <code>pane</code>, <code>dialog</code>, <code>menu</code>, <code>popup</code>, <code>frame</code>, <code>column</code>,
-<code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code> and <code>block</code>.</p>
+<code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code>, <code>block</code>, <code>scene</code>, <code>space</code> and <code>zone</code>.</p>
 <h3 id="input">Input<a class="headerlink" href="#input" title="Permanent link">&para;</a></h3>
 <p>An input takes data <em>from</em> the user. It is written as an input alias, a name,
 an <strong>acquisition verb</strong>, and the type acquired:</p>
-<p><code>input</code>, <code>form</code>, <code>text</code>, <code>button</code>, <code>picklist</code>, <code>selector</code>, <code>item</code></p>
+<p><code>input</code>, <code>form</code>, <code>text</code>, <code>button</code>, <code>picklist</code>, <code>selector</code>, <code>item</code>,
+<code>voice</code>, <code>gesture</code>, <code>gaze</code></p>
 <p>The acquisition verbs are interchangeable — pick whichever reads best:</p>
 <p><code>acquires</code>, <code>reads</code>, <code>takes</code>, <code>accepts</code>, <code>admits</code>, <code>enters</code>, <code>provides</code>,
 <code>selects</code>, <code>chooses</code>, <code>picks</code>, <code>initiates</code>, <code>submits</code>, <code>triggers</code>,
@@ -5539,8 +5540,11 @@ an <strong>acquisition verb</strong>, and the type acquired:</p>
 <h3 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h3>
 <p>An output presents data <em>to</em> the user, written as an output alias, a name, a
 <strong>presentation verb</strong>, and what is presented:</p>
-<p><code>output</code>, <code>document</code>, <code>list</code>, <code>table</code>, <code>graph</code>, <code>animation</code>, <code>picture</code></p>
-<p>Presentation verbs: <code>presents</code>, <code>shows</code>, <code>displays</code>, <code>writes</code>, <code>emits</code></p>
+<p><code>output</code>, <code>document</code>, <code>list</code>, <code>table</code>, <code>graph</code>, <code>animation</code>, <code>picture</code>,
+<code>sound</code>, <code>speech</code>, <code>haptic</code></p>
+<p>Presentation verbs: <code>presents</code>, <code>shows</code>, <code>displays</code>, <code>writes</code>, <code>emits</code>,
+<code>plays</code>, <code>speaks</code>, <code>announces</code>, <code>vibrates</code>, <code>pulses</code>, <code>nudges</code>, <code>diffuses</code>,
+<code>serve</code>, <code>offer</code>, <code>taste</code></p>
 <h2 id="navigation">Navigation<a class="headerlink" href="#navigation" title="Permanent link">&para;</a></h2>
 <p>There is <strong>no</strong> <code>activate</code> definition. Navigation is expressed as an input
 whose acquisition verb conveys the action — most naturally a <code>button</code> with

@@ -5564,24 +5564,29 @@ actions between users, entities, and other system components.</p>
 <p>Every interaction is introduced by the <code>step</code> keyword, followed by one of the
 ten step forms:</p>
 <!-- riddl-prelude
+record HamperData is { onHand: Natural }
+entity Hamper is {
+  invariant MustHaveStock is "the item must be in stock"
+  state Holding of record HamperData is { handler HamperHandler is { ??? } }
+}
 record OrderData is { confirmationNumber is String }
 command ProcessPayment is { note is String }
 entity PaymentService is { ??? }
 entity OrderService is { ??? }
 page Storefront is {
   page Cart is { ??? }
-  form PaymentDetails acquires type OrderData
-  document Confirmation shows type OrderData
+  form PaymentDetails acquires record OrderData
+  document Confirmation shows record OrderData
 }
 -->
 <!-- riddl: in-epic -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">case</span> <span class="n">PlaceOrder</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">&quot;check out&quot;</span> <span class="kp">so</span> <span class="kp">that</span> <span class="s2">&quot;the order is placed&quot;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">"check out"</span> <span class="kp">so</span> <span class="kp">that</span> <span class="s2">"the order is placed"</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">step</span> <span class="kr">focus</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="k">on</span> <span class="kr">page</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">Cart</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="kd">step</span> <span class="k">take</span> <span class="kr">form</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">PaymentDetails</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="kd">step</span> <span class="k">send</span> <span class="kd">command</span> <span class="n">ProcessPayment</span> <span class="kp">from</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kd">step</span> <span class="k">for</span> <span class="kd">entity</span> <span class="n">OrderService</span> <span class="kp">is</span> <span class="s2">&quot;create the order record&quot;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kd">step</span> <span class="k">for</span> <span class="kd">entity</span> <span class="n">OrderService</span> <span class="kp">is</span> <span class="s2">"create the order record"</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kd">step</span> <span class="kr">show</span> <span class="kr">document</span> <span class="n">Storefront</span><span class="p">.</span><span class="n">Confirmation</span> <span class="kp">to</span> <span class="kd">user</span> <span class="n">Customer</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -5622,7 +5627,7 @@ page Storefront is {
 </tr>
 <tr>
 <td><strong>Refusal</strong></td>
-<td><code>step &lt;source&gt; refuses &lt;user&gt; "&lt;reason&gt;"</code></td>
+<td><code>step &lt;source&gt; refuses &lt;user&gt; "&lt;reason&gt;"</code> — or <code>… invariant &lt;ref&gt;</code></td>
 <td>Any → User</td>
 </tr>
 <tr>
@@ -5662,11 +5667,27 @@ to be AI-translatable into a test, and warns when it is not. See
 <p>New in RIDDL 2.0. A refusal models a system element declining a user's
 request:</p>
 <!-- riddl: in-usecase no-prelude -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">&quot;the item is out of stock&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">step</span> <span class="kd">entity</span> <span class="n">Cart</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="s2">"the item is out of stock"</span>
 </span></code></pre></div>
 <p>Before it existed, the error branch of a use case — often the most interesting
 one — could only be written as free prose, which meant it was also the least
 checkable part of the model.</p>
+<p>A refusal may cite the <strong>invariant</strong> it violates instead of prose, which is
+what closes that gap completely:</p>
+<!-- riddl: in-epic -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">case</span> <span class="n">OutOfStock</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">user</span> <span class="n">Customer</span> <span class="kp">wants</span> <span class="kp">to</span> <span class="s2">"add an item to the basket"</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">so</span> <span class="kp">that</span> <span class="s2">"they can buy it"</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="kd">step</span> <span class="kd">entity</span> <span class="n">Hamper</span> <span class="kr">refuses</span> <span class="kd">user</span> <span class="n">Customer</span> <span class="kd">invariant</span> <span class="n">Hamper</span><span class="p">.</span><span class="n">MustHaveStock</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>That one reference ties three things together that were previously only
+related by intention: the requirement's named <a href="../invariant/">invariant</a>, the
+<a href="../statement/"><code>require</code></a> statement that enforces it, and the
+<code>InvariantViolated</code> result a generated test asserts. Prose stays valid and
+draws no warning — the invariant form is an additional option, not a
+replacement, and refusal paths may still be organised as separate use cases or
+inside <code>optional { … }</code>.</p>
 <h2 id="grouping">Grouping<a class="headerlink" href="#grouping" title="Permanent link">&para;</a></h2>
 <p>Interactions may be grouped to express ordering semantics:</p>
 <ul>

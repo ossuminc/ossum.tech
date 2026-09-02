@@ -3548,6 +3548,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Send, Tell, Yield and Reply">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#forward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forward
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5704,6 +5721,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Send, Tell, Yield and Reply">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#forward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forward
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5849,9 +5883,9 @@
   <h1>Statement</h1>
 
 <!-- riddl-prelude
-constant MaxItems is Natural = "100"
-constant Zero is Natural = "0"
-constant HighValueThreshold is Natural = "1000"
+constant MaxItems is Natural = 100
+constant Zero is Whole = 0
+constant HighValueThreshold is Natural = 1000
 type OrderStatus is any of { Pending, InTransit, Delivered }
 record ShippedData is { trackingNumber is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
@@ -5861,20 +5895,27 @@ event LoginSucceeded is { who is String }
 event OrderShipped is { orderId is String }
 event Withdrawn is { amount is Natural }
 command Withdraw yields event Withdrawn is { amount is Natural }
+command AddItem yields event ItemAdded is { sku is String }
+query GetCart replies result CartInfo is { id is String }
 command ProcessOrder is { orderId is String }
 command ProcessPayment is { orderId is String }
 command EscalateReview is { orderId is String }
 result CartInfo is { id is String, total is Natural }
 outlet CartEvents is event ItemAdded
-outlet Events is event LoginSucceeded
+type StatementEvent is LoginSucceeded | OrderShipped
+outlet Events is type StatementEvent
 outlet Shipments is event LineShipped
 entity OrderProcessor is { ??? }
 entity Review is { ??? }
 entity PaymentService is { ??? }
 entity Order is {
+  state Packing of record ShippedData is {
+    handler PackingHandler is { ??? }
+  }
   state Shipped of record ShippedData is {
     handler ShippedHandler is { ??? }
   }
+  handler DispatchHandler is { ??? }
 }
 -->
 
@@ -5914,8 +5955,13 @@ of your system in a structured but abstract way.</p>
 </tr>
 <tr>
 <td><code>tell</code></td>
-<td>Deliver a message directly to a processor</td>
-<td><code>tell command X to entity Y</code></td>
+<td>Deliver a message directly to a processor, or to one <strong>instance</strong></td>
+<td><code>tell command X to entity Y</code> · <code>tell command X to order.id</code></td>
+</tr>
+<tr>
+<td><code>forward</code></td>
+<td>Pass the handled message on, <strong>discharging</strong> its response obligation</td>
+<td><code>forward ord to entity Payments</code></td>
 </tr>
 <tr>
 <td><code>yield</code></td>
@@ -5990,6 +6036,11 @@ of your system in a structured but abstract way.</p>
 <td>Switch entity to a different handler</td>
 <td><code>become entity X to handler Y</code></td>
 </tr>
+<tr>
+<td><code>terminate</code></td>
+<td>End this instance's life</td>
+<td><code>terminate self.id</code></td>
+</tr>
 </tbody>
 </table>
 <h2 id="value-expressions">Value Expressions<a class="headerlink" href="#value-expressions" title="Permanent link">&para;</a></h2>
@@ -6050,8 +6101,8 @@ Wherever a statement needs a value, any of these forms is accepted:</p>
 <p>A constructor builds a <a href="../message/">message</a> or record inline. Arguments are
 positional first, then named, and are checked against the target's fields for
 count, name, order and (best effort) type:</p>
-<!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">&quot;USD&quot;</span><span class="p">)</span>
+<!-- riddl: in-yielding-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">"USD"</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h3>
 <p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; atom, with parentheses to
@@ -6065,16 +6116,16 @@ reference, a <code>get from</code>, or a named <a href="../constant/">constant</
 not permitted, and this is enforced at <strong>parse</strong> time:</p>
 <p><!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="m">5</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>        <span class="c1">// fails to parse</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="s2">&quot;5&quot;</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>      <span class="c1">// fails to parse</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="s2">"5"</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>      <span class="c1">// fails to parse</span>
 </span></code></pre></div></p>
 <p>Name the threshold instead. The constant is a definition, declared
 alongside the other definitions of its context:</p>
 <p><!-- riddl: in-context no-prelude=MaxItems -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
 </span></code></pre></div></p>
 <p>and the comparison is a statement, written inside an on-clause:</p>
 <p><!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">&quot;too many items&quot;</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many items"</span> <span class="kr">end</span>
 </span></code></pre></div></p>
 <p>This removes magic constants from models and makes every comparison check
 the types on both sides. <code>==</code> and <code>!=</code> require operands of the same
@@ -6084,9 +6135,9 @@ category; <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> and <code>&gt
 <h3 id="when-statement">When Statement<a class="headerlink" href="#when-statement" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="k">then</span> <span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">LoginSucceeded</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">LoginSucceeded</span><span class="p">(</span><span class="n">who</span> <span class="o">=</span> <span class="s2">"the signed-in user"</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  <span class="k">error</span> <span class="s2">&quot;Authentication failed&quot;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  <span class="k">error</span> <span class="s2">"Authentication failed"</span>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span> <span class="kr">end</span>
 </span></code></pre></div>
 <p>The <code>end</code> keyword is required. A condition may be:</p>
@@ -6111,13 +6162,13 @@ non-Boolean condition is an <strong>Error</strong>.</p>
 <!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">match</span> <span class="n">order</span><span class="p">.</span><span class="n">status</span> <span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="kd">case</span> <span class="n">Pending</span> <span class="p">{</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessOrder</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">OrderProcessor</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessOrder</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">OrderProcessor</span>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  <span class="p">}</span>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  <span class="kd">case</span> <span class="n">InTransit</span> <span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="p">{</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderShipped</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">send</span> <span class="kd">event</span> <span class="n">OrderShipped</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Events</span>
 </span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  <span class="p">}</span>
 </span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  <span class="k">default</span> <span class="p">{</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="k">error</span> <span class="s2">&quot;Unknown order status&quot;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="k">error</span> <span class="s2">"Unknown order status"</span>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>  <span class="p">}</span>
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -6127,10 +6178,10 @@ above:</p>
 <!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">match</span> <span class="n">order</span><span class="p">.</span><span class="n">total</span> <span class="p">{</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  <span class="kd">case</span> <span class="o">&gt;=</span> <span class="n">HighValueThreshold</span> <span class="p">{</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">EscalateReview</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Review</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">EscalateReview</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Review</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  <span class="p">}</span>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  <span class="k">default</span> <span class="p">{</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">do</span> <span class="s2">&quot;handle an ordinary order&quot;</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">do</span> <span class="s2">"handle an ordinary order"</span>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  <span class="p">}</span>
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -6186,12 +6237,43 @@ value:</p>
   the sender's identity</li>
 <li><strong>reply</strong> — answer a <strong>query</strong> with its declared result</li>
 </ul>
-<!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">send</span> <span class="kd">event</span> <span class="n">ItemAdded</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartEvents</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">ItemAdded</span><span class="p">(</span><span class="n">cart</span><span class="p">.</span><span class="n">id</span><span class="p">)</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="kr">reply</span> <span class="kd">result</span> <span class="n">CartInfo</span><span class="p">(</span><span class="n">cart</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
+<!-- riddl: in-clauses -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">on</span> <span class="n">add</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AddItem</span> <span class="p">{</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  <span class="k">send</span> <span class="kd">event</span> <span class="n">ItemAdded</span><span class="p">(</span><span class="n">sku</span> <span class="o">=</span> <span class="n">add</span><span class="p">.</span><span class="n">sku</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">CartEvents</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  <span class="k">tell</span> <span class="kd">command</span> <span class="n">ProcessPayment</span><span class="p">(</span><span class="n">orderId</span> <span class="o">=</span> <span class="n">add</span><span class="p">.</span><span class="n">sku</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">ItemAdded</span><span class="p">(</span><span class="n">sku</span> <span class="o">=</span> <span class="n">add</span><span class="p">.</span><span class="n">sku</span><span class="p">)</span>   <span class="c1">// AddItem's declared event</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="p">}</span>
 </span></code></pre></div>
+<p><code>reply</code> is the query half of the same idea:</p>
+<!-- riddl: in-clauses -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">on</span> <span class="n">cart</span><span class="p">:</span> <span class="kd">query</span> <span class="n">GetCart</span> <span class="p">{</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  <span class="kr">reply</span> <span class="kd">result</span> <span class="n">CartInfo</span><span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="m">1</span><span class="p">)</span>   <span class="c1">// GetCart's declared result</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="forward">Forward<a class="headerlink" href="#forward" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>forward</strong> — hand the handled message onward and <strong>discharge</strong> its response
+  obligation, because whatever handles it downstream produces the answer</li>
+</ul>
+<p>A command declaring <code>yields event E</code> obliges <em>every</em> handler of it to produce an
+<code>E</code>. A boundary handler that only passes the command along produces nothing, and
+before <code>forward</code> existed it had no way to say so:</p>
+<!-- riddl: in-clauses -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">on</span> <span class="n">add</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AddItem</span> <span class="p">{</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  <span class="n">forward</span> <span class="n">add</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">PaymentService</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>It takes both transmission shapes — <code>to outlet ...</code> like <code>send</code>, or
+<code>to entity ...</code> like <code>tell</code>. It is legal only in a clause handling a command
+that declares <code>yields</code> or a query that declares <code>replies</code>; an <strong>event</strong> or a
+<strong>result</strong> answers nothing, so neither can be forwarded. Because the response
+has been delegated, a <code>yield</code> or <code>reply</code> after a <code>forward</code> is an <strong>Error</strong>.</p>
+<div class="admonition info">
+<p class="admonition-title">What settles a path</p>
+<p>Only <code>yield</code>/<code>reply</code>, <code>error</code>/<code>require</code>, and <code>forward</code> discharge a response
+obligation. A <code>send</code> of the handled message does <strong>not</strong>, even to an outlet
+that admits it.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title"><code>send … to inlet</code> is deprecated</p>
 <p>Sending directly into another processor's inlet bypasses the streaming
@@ -6212,19 +6294,26 @@ application and context handlers. <code>return</code> produces a
 <p>They can never appear together — the two scopes are disjoint. <code>put</code>, in an
 application or context handler:</p>
 <!-- riddl: in-application -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">put</span> <span class="n">order</span><span class="p">.</span><span class="n">confirmationNumber</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">ConfirmationPanel</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">put</span> <span class="n">order</span> <span class="kp">to</span> <span class="kd">output</span> <span class="n">ConfirmationPanel</span>
 </span></code></pre></div>
+<p>The value must match the type the output declares — <code>ConfirmationPanel</code> shows
+a record here, so <code>put</code> sends the record, not a field of it.</p>
 <p>and <code>return</code>, in a function body:</p>
 <!-- riddl: in-function -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Compute</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">return</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Tax</span><span class="p">.</span><span class="n">Compute</span><span class="p">(</span><span class="n">subtotal</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="require-and-error">Require and Error<a class="headerlink" href="#require-and-error" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">require</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="n">limits</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="k">error</span> <span class="s2">&quot;Price must be greater than zero&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">require</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">require</span> <span class="kd">invariant</span> <span class="n">UnderLimit</span> <span class="kp">with</span> <span class="n">limits</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="k">error</span> <span class="s2">"Price must be greater than zero"</span>
 </span></code></pre></div>
+<p><code>error</code> <strong>ends its statement list.</strong> It refuses unconditionally, so anything
+after it is unreachable and is an <strong>Error</strong>. <code>require</code> is deliberately <em>not</em>
+terminal — it refuses only when its condition fails, so later statements are
+ordinary. <code>terminate</code> ends a list for the other reason: the instance is gone.
+An <code>on term</code> clause is unaffected; it runs <em>because</em> of the termination.</p>
 <p>A <code>require invariant</code> is an explicit <strong>restatement</strong> — an
 <a href="../invariant/">invariant</a> already applies implicitly across its declaring
 scope. The <code>with &lt;value&gt;</code> form is the exception that does real work: it hands a
@@ -6233,28 +6322,45 @@ ambient scope cannot supply.</p>
 <div class="admonition warning">
 <p class="admonition-title">Refusals before effects</p>
 <p>Within any single linear statement list, every <strong>refusal</strong> (<code>require</code>,
-<code>error</code>) must appear before every <strong>effect</strong> (<code>set</code>, <code>morph</code>, <code>become</code>,
-<code>send</code>, <code>tell</code>, <code>yield</code>, <code>put</code>). Acting and then refusing would leave
-partial changes behind.</p>
+<code>error</code>) must appear before every <strong>effect</strong> — and an "effect" here is a
+change to <strong>this definition's own state</strong>: <code>set</code>, <code>morph</code> and <code>terminate</code>.
+Acting and then refusing would leave a partial change behind.</p>
+<p><code>send</code>, <code>tell</code> and <code>yield</code> are <strong>transmissions</strong>, not local changes: any
+state they cause is elsewhere and later. <code>become</code> changes behaviour rather
+than state, and <code>put</code> writes to an <a href="../output/">output</a>. None of them can
+leave this definition half-changed, so none has to wait for the refusals —
+which is what makes "refuse <strong>and</strong> publish a rejection event" expressible.</p>
 <p>Each statement list is checked independently, so each branch of a <code>when</code>,
 <code>match</code> or <code>foreach</code> body is its own list. A refusal after an effect in the
 same list is an <strong>Error</strong>.</p>
 <p><!-- riddl: in-clauses -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>          <span class="c1">// refusals first</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  <span class="n">require</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  <span class="k">set</span> <span class="kd">field</span> <span class="n">balance</span> <span class="kp">to</span> <span class="s2">&quot;balance - amount&quot;</span>    <span class="c1">// then effects</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">Withdrawn</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">on</span> <span class="n">cmd</span><span class="p">:</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  <span class="n">require</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="n">Zero</span>          <span class="c1">// refusals first</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  <span class="n">require</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>  <span class="k">set</span> <span class="kd">field</span> <span class="n">balance</span> <span class="kp">to</span> <span class="s2">"balance - amount"</span>    <span class="c1">// then effects</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>  <span class="k">yield</span> <span class="kd">event</span> <span class="n">Withdrawn</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="p">}</span>
 </span></code></pre></div></p>
 </div>
 <h3 id="do-statement">Do Statement<a class="headerlink" href="#do-statement" title="Permanent link">&para;</a></h3>
 <p>Use <code>do</code> to describe business logic in natural language that will be
 implemented in target code:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">do</span> <span class="s2">&quot;Calculate the total price including all applicable taxes, discounts,</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="s2">    and shipping based on the customer&#39;s location and membership tier&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">do</span> <span class="s2">"Calculate the total price including all applicable taxes, discounts,</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="s2">    and shipping based on the customer's location and membership tier"</span>
 </span></code></pre></div>
+<p>Guidance that wants to be several distinct lines goes in <strong>braces</strong>, as a
+sequence of strings with nothing between them:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">do</span> <span class="p">{</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  <span class="s2">"Apply the loyalty discount before any promotional discount."</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  <span class="s2">"Round the result to the customer's currency."</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  <span class="s2">"Never let the total fall below zero."</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The bare form takes <strong>exactly one</strong> string; the braces are what admit more.
+Statements have no terminator, so two juxtaposed bare strings would leave
+nothing but the next keyword to say where the statement ended.</p>
 <div class="admonition warning">
 <p class="admonition-title">The <code>prompt</code> statement is deprecated</p>
 <p><code>do</code> is canonical; <code>prompt "..."</code> emits a <code>[deprecated]</code> message and
@@ -6267,9 +6373,9 @@ the value denotes something AI computes.</p>
 <p>RIDDL's deliberate <strong>escape hatch</strong>: an opaque pass-through of raw
 target-language source, handed to the code generator untouched.</p>
 <!-- riddl: in-function -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="sd">```scala</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="sd">val total = items.map(_.price).sum * (1 - discountRate)</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="sd">```</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="sd">```scala</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="sd">val total = items.map(_.price).sum * (1 - discountRate)</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="sd">```</span>
 </span></code></pre></div>
 <p>Supported languages: <code>scala</code>, <code>java</code>, <code>python</code>, <code>mojo</code>. RIDDL does not parse
 or check the contents — everything between the fences is carried through
@@ -6291,8 +6397,8 @@ express what you need.</p>
 </div>
 <h3 id="morph-and-become-entity-only">Morph and Become (Entity Only)<a class="headerlink" href="#morph-and-become-entity-only" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Shipped</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">ShippedData</span><span class="p">(</span><span class="n">trackingNumber</span><span class="p">)</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">become</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">handler</span> <span class="n">ShippedHandler</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Shipped</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">ShippedData</span><span class="p">(</span><span class="n">trackingNumber</span><span class="p">)</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">become</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">handler</span> <span class="n">ShippedHandler</span>
 </span></code></pre></div>
 <p>The <code>morph</code> payload is a <strong>record</strong> — a bare record reference or an inline
 constructor. It is not a message; a message cannot type a <a href="../state/">state</a>.</p>
@@ -6320,14 +6426,14 @@ statements:</p>
 <tbody>
 <tr>
 <td>All handlers</td>
-<td>when, match, foreach, send, tell, yield, require, set, let, do, error, code</td>
+<td>when, match, foreach, send, tell, yield, reply, require, set, let, do, error, code</td>
 </tr>
 <tr>
 <td>Entity handlers</td>
 <td>All above + morph, become</td>
 </tr>
 <tr>
-<td>Application / context handlers</td>
+<td>Application-context handlers</td>
 <td>All above + put</td>
 </tr>
 <tr>
@@ -6336,7 +6442,7 @@ statements:</p>
 </tr>
 <tr>
 <td><code>on activate</code> / <code>on passivate</code></td>
-<td>Side-effect free only — no send, tell, yield, morph, become</td>
+<td>Side-effect free only — no send, tell, yield, reply, morph, become</td>
 </tr>
 <tr>
 <td><code>on event</code></td>
@@ -6344,12 +6450,22 @@ statements:</p>
 </tr>
 <tr>
 <td>Saga steps</td>
-<td>send, tell, yield, put, do, error</td>
+<td>when, match, foreach, send, tell, require, let, do, error, code</td>
 </tr>
 </tbody>
 </table>
 <p>The function and lifecycle bans are enforced at <strong>parse</strong> time, so a banned
 statement can never enter the AST at all.</p>
+<div class="admonition warning">
+<p class="admonition-title">A saga step is not a handler</p>
+<p><code>yield</code> and <code>reply</code> are <strong>not</strong> available in a saga step — a step is not
+answering a message, so it has no sender to answer. Neither are <code>morph</code> and
+<code>become</code>, which belong to an entity, nor <code>put</code>, which is rejected in a step
+even inside an <code>application</code> context because it is handler-only.</p>
+<p>A step <em>may</em> use <code>call</code> inside a <code>let</code> — which is what the
+<a href="../saga/">one-failure-point rule</a> counts when it says
+<code>let x = call F(get from input I)</code> is two failure points.</p>
+</div>
 <h2 id="deprecated-statements">Deprecated Statements<a class="headerlink" href="#deprecated-statements" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

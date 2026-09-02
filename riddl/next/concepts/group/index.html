@@ -5440,18 +5440,37 @@ To make this more tangible, groups could be used to model the following
 implementation concepts:
 * HTML forms, pages, containers, and sections
 * mobile application screens, pages, forms and containers
-* accordions (vertically stacked list of items with show/hide functionality)</p>
+* accordions (vertically stacked list of items with show/hide functionality)
+* a spatial <strong>zone</strong> in a 3D or AR scene
+* a <strong>voice</strong> dialogue turn, which has structure but no pixels</p>
 <p>A UI designer is free to arrange the contained
 elements in any fashion, but presumably in a way that is consistent with
 their overall UI design theme.</p>
+<div class="admonition info">
+<p class="admonition-title">The triad is modality-free, and that is the point</p>
+<p>It is tempting to read <a href="./">group</a>, <a href="../input/">input</a> and
+<a href="../output/">output</a> as <em>container</em>, <em>widget</em> and <em>widget</em> — screen things.
+They are not. The triad is the <strong>modality-free logical core</strong>: something
+is acquired from a user, something is presented to them, and things are
+grouped for cohesion. None of that mentions a screen.</p>
+<p>The alias sets say so out loud. A group may be a <code>scene</code>, a <code>space</code> or a
+<code>zone</code>; an input may be <code>voice</code>, <code>gesture</code> or <code>gaze</code>; an output may be
+<code>sound</code>, <code>speech</code> or <code>haptic</code>. A model that <code>speaks</code> a confirmation and
+<code>vibrates</code> on error is using exactly the same three concepts as one that
+renders a form — which is what lets a single model target a screen, a
+voice assistant and a headset without restructuring.</p>
+<p>The aliases are <strong>closed lists</strong> and carry <strong>no structural difference</strong>:
+they are directional heuristics for the reader and for a generator's
+choice of representation.</p>
+</div>
 <h2 id="aliases">Aliases<a class="headerlink" href="#aliases" title="Permanent link">&para;</a></h2>
 <p>A group may be written with any of these keywords, all of which mean the same
 thing structurally. Pick whichever reads best for what you are modeling:</p>
 <p><code>group</code>, <code>page</code>, <code>pane</code>, <code>dialog</code>, <code>menu</code>, <code>popup</code>, <code>frame</code>, <code>column</code>,
-<code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code>, <code>block</code></p>
+<code>window</code>, <code>section</code>, <code>tab</code>, <code>flow</code>, <code>block</code>, <code>scene</code>, <code>space</code>, <code>zone</code></p>
 <!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">page</span> <span class="n">ShoppingCart</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="n">list</span> <span class="n">Items</span> <span class="kr">shows</span> <span class="kd">type</span> <span class="n">CartLine</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="n">list</span> <span class="n">Items</span> <span class="kr">shows</span> <span class="kd">record</span> <span class="n">CartLine</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">button</span> <span class="n">Checkout</span> <span class="kr">activates</span> <span class="kd">type</span> <span class="n">Clicked</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -5468,7 +5487,7 @@ treated as an application.</p>
 to the exact frame that depicts it:</p>
 <!-- riddl: in-app-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">page</span> <span class="n">Checkout</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kr">figma</span> <span class="s2">&quot;aBcD1234&quot;</span> <span class="kr">node</span> <span class="s2">&quot;42:1337&quot;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kr">figma</span> <span class="s2">"aBcD1234"</span> <span class="kr">node</span> <span class="s2">"42:1337"</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="occurs-in">Occurs In<a class="headerlink" href="#occurs-in" title="Permanent link">&para;</a></h2>

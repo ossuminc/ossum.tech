@@ -5607,7 +5607,7 @@ models and enabling team collaboration.</p>
 </ul>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">include</span> <span class="s2">&quot;path/to/file.riddl&quot;</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">include</span> <span class="s2">"path/to/file.riddl"</span>
 </span></code></pre></div>
 <p>The path is relative to the file containing the include statement.</p>
 <h2 id="an-include-is-a-node-not-a-paste">An Include Is a Node, Not a Paste<a class="headerlink" href="#an-include-is-a-node-not-a-paste" title="Permanent link">&para;</a></h2>
@@ -5633,11 +5633,11 @@ to lose the file structure in exchange.</p>
 <p><strong>main.riddl</strong></p>
 <!-- riddl: skip reason="resolved at parse time against files that do not exist here; an include/import cannot be validated out of its tree" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">domain</span> <span class="n">ECommerce</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kn">include</span> <span class="s2">&quot;types/common-types.riddl&quot;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kn">include</span> <span class="s2">&quot;contexts/catalog.riddl&quot;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kn">include</span> <span class="s2">&quot;contexts/orders.riddl&quot;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kn">include</span> <span class="s2">&quot;contexts/payments.riddl&quot;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kn">include</span> <span class="s2">&quot;epics/checkout-flow.riddl&quot;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kn">include</span> <span class="s2">"types/common-types.riddl"</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kn">include</span> <span class="s2">"contexts/catalog.riddl"</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kn">include</span> <span class="s2">"contexts/orders.riddl"</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kn">include</span> <span class="s2">"contexts/payments.riddl"</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kn">include</span> <span class="s2">"epics/checkout-flow.riddl"</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>types/common-types.riddl</strong></p>

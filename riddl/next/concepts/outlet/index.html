@@ -5497,7 +5497,7 @@ event TemperatureAlert is { value is Natural }
 event TemperatureReading is { value is Natural }
 record ReadingData is { value is Natural }
 processor MyProcessor as source is {
-  outlet Diagnostics is type TemperatureAlert
+  outlet Diagnostics is event TemperatureAlert
 }
 -->
 
@@ -5505,7 +5505,7 @@ processor MyProcessor as source is {
 output through which data of a particular <a href="../type/">type</a> streams out of the
 processor.</p>
 <!-- riddl: in-entity -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureAlert</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">TemperatureAlert</span>
 </span></code></pre></div>
 <h2 id="where-outlets-may-be-declared">Where Outlets May Be Declared<a class="headerlink" href="#where-outlets-may-be-declared" title="Permanent link">&para;</a></h2>
 <p>In RIDDL 2.0, <strong>every</strong> processor kind may declare outlets — not only
@@ -5516,7 +5516,7 @@ its events into a stream.</p>
 the message to a downstream inlet:</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Thermometer</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">TemperatureAlert</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">outlet</span> <span class="n">alerts</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">TemperatureAlert</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">state</span> <span class="n">Watching</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ReadingData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="kd">handler</span> <span class="n">WatchTemperature</span> <span class="kp">is</span> <span class="p">{</span>

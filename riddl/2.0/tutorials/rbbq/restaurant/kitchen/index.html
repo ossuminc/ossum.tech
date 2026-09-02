@@ -5544,6 +5544,40 @@
   
 
 
+<!-- riddl-domain-prelude
+context FrontOfHouse is {
+  event OrderSubmitted is { tableOrderId: String(1,50) }
+}
+-->
+
+<!-- riddl-prelude
+type KitchenTicketId is Id(KitchenTicket)
+type StationName is String(1,50)
+type StationRouting is mapping from String to StationName
+type DietaryFlags is set of String
+type TicketSource is any of { DineIn, Online }
+type TicketItem is {
+  ticketMenuItemId: String(1,50)
+  ticketItemName: String(1,200)
+  ticketItemQuantity: Natural
+  ticketItemNotes: String(1,500)?
+  ticketItemReady: Boolean
+}
+record StoredKitchenTicket is {
+  kitchenTicketId: KitchenTicketId
+  currentStation: StationName?
+}
+event TicketReceived is { kitchenTicketId: KitchenTicketId }
+event StationAssigned is { kitchenTicketId: KitchenTicketId }
+event PreparationStarted is { kitchenTicketId: KitchenTicketId }
+event ItemMarkedReady is { kitchenTicketId: KitchenTicketId }
+event TicketApproved is { kitchenTicketId: KitchenTicketId }
+event ServerNotified is { kitchenTicketId: KitchenTicketId }
+type KitchenTicketEvent is TicketReceived | StationAssigned | PreparationStarted | ItemMarkedReady | TicketApproved | ServerNotified
+entity KitchenTicket is { ??? }
+repository KitchenTicketRepository is { ??? }
+-->
+
 <h1 id="kitchen-context">Kitchen Context<a class="headerlink" href="#kitchen-context" title="Permanent link">&para;</a></h1>
 <p>The Kitchen context manages the kitchen ticket queue, station
 assignments, preparation tracking, and quality control. Its
@@ -5569,126 +5603,125 @@ interviews:</p>
 <p>The KitchenDisplay projector solves both problems by providing
 a persistent, legible, digital ticket queue.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">KitchenTicketId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Kitchen ticket identifier&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Unique identifier for a kitchen ticket.&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">type</span> <span class="n">StationName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Station name&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Name of the kitchen station such as grill, fryer, prep.&quot;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=KitchenTicketId,StationName,StationRouting,DietaryFlags,TicketSource,TicketItem -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">type</span> <span class="n">KitchenTicketId</span> <span class="kp">is</span> <span class="nb">Id</span><span class="p">(</span><span class="n">KitchenTicket</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">type</span> <span class="n">StationName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">50</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1">// Which station cooks each menu category. A mapping and not a field on the</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1">// item, because the same dish moves between stations as a kitchen is relaid</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1">// or a station goes down -- the routing is a property of THIS kitchen on</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1">// THIS night, not of the dish.</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="kd">type</span> <span class="n">StationRouting</span> <span class="kp">is</span> <span class="kr">mapping</span> <span class="kp">from</span> <span class="nb">String</span> <span class="kp">to</span> <span class="n">StationName</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="kd">type</span> <span class="n">TicketStatus</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  <span class="n">Received</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  <span class="n">Assigned</span><span class="p">,</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="n">InPreparation</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="n">ItemsReady</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="n">Approved</span><span class="p">,</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>  <span class="n">ServerNotifiedTicket</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Ticket status&quot;</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Current status of a kitchen ticket.&quot;</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="p">}</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="kd">type</span> <span class="n">TicketSource</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>  <span class="n">DineIn</span><span class="p">,</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>  <span class="n">Online</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Ticket source&quot;</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;Whether the ticket originated from dine-in or online.&quot;</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="p">}</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="kd">type</span> <span class="n">TicketItem</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>  <span class="n">ticketMenuItemId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>  <span class="n">ticketItemName</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">200</span><span class="p">)</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>  <span class="n">ticketItemQuantity</span> <span class="kp">is</span> <span class="nb">Natural</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>  <span class="n">ticketItemNotes</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">500</span><span class="p">)</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>  <span class="n">ticketItemReady</span> <span class="kp">is</span> <span class="nb">Boolean</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>  <span class="kr">briefly</span> <span class="s2">&quot;Ticket item&quot;</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>  <span class="kr">described</span> <span class="kp">by</span> <span class="s2">&quot;A single item on a kitchen ticket.&quot;</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1">// A SET, not a list: order is meaningless and a repeat carries no extra</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1">// warning. A cook scanning a ticket must see each flag exactly once.</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kd">type</span> <span class="n">DietaryFlags</span> <span class="kp">is</span> <span class="k">set</span> <span class="kp">of</span> <span class="nb">String</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="kd">type</span> <span class="n">TicketSource</span> <span class="kp">is</span> <span class="kr">any</span> <span class="kp">of</span> <span class="p">{</span> <span class="n">DineIn</span><span class="p">,</span> <span class="n">Online</span> <span class="p">}</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="kd">type</span> <span class="n">TicketItem</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>  <span class="n">ticketMenuItemId</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">50</span><span class="p">)</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>  <span class="n">ticketItemName</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">200</span><span class="p">)</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>  <span class="n">ticketItemQuantity</span><span class="p">:</span> <span class="nb">Natural</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>  <span class="n">ticketItemNotes</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span><span class="o">?</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>  <span class="n">ticketItemReady</span><span class="p">:</span> <span class="nb">Boolean</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The <code>TicketSource</code> enumeration distinguishes dine-in from online
 orders — important because they arrive through different
 adaptors and may have different preparation priorities.</p>
 <h2 id="entity-kitchenticket">Entity: KitchenTicket<a class="headerlink" href="#entity-kitchenticket" title="Permanent link">&para;</a></h2>
-<p>The <code>KitchenTicket</code> entity has a 6-command lifecycle with event
-sourcing:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">is</span> <span class="p">{</span>
+<p>The <code>KitchenTicket</code> entity has a six-command lifecycle and is event-sourced.
+Each lifecycle phase is a <strong>named state</strong> rather than a <code>status</code> field, so the
+compiler knows which commands each phase accepts. Two of the six are shown
+here; the others follow the same shape:</p>
+<!-- riddl: in-context no-prelude=KitchenTicket,TicketReceived,StationAssigned,PreparationStarted,ItemMarkedReady,TicketApproved,ServerNotified,KitchenTicketEvent -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="no">event-sourced</span> <span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="kd">command</span> <span class="n">ReceiveTicket</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">sourceOrderId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">ticketSource</span> <span class="kp">is</span> <span class="n">TicketSource</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">ticketItems</span> <span class="kp">is</span> <span class="kr">many</span> <span class="n">TicketItem</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">receivedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="kd">command</span> <span class="n">AssignStation</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">assignedStation</span> <span class="kp">is</span> <span class="n">StationName</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  <span class="p">}</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="kd">command</span> <span class="n">StartPreparation</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">startedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>  <span class="p">}</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  <span class="kd">command</span> <span class="n">MarkItemReady</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">readyMenuItemId</span> <span class="kp">is</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">markedReadyAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>  <span class="p">}</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  <span class="kd">command</span> <span class="n">ApproveTicket</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="n">approvedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>  <span class="p">}</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  <span class="kd">command</span> <span class="n">NotifyServer</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="n">notifiedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>  <span class="p">}</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>  <span class="c1">// Events: TicketReceived, StationAssigned, PreparationStarted,</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>  <span class="c1">//         ItemMarkedReady, TicketApproved, ServerNotified</span>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  <span class="kd">state</span> <span class="n">ActiveTicket</span> <span class="kp">of</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">KitchenTicketStateData</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>  <span class="kd">handler</span> <span class="n">KitchenTicketHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ReceiveTicket</span> <span class="p">{</span>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>      <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span> <span class="kp">to</span> <span class="kd">state</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>        <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span><span class="p">.</span><span class="n">ActiveTicket</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>        <span class="kp">with</span> <span class="kd">command</span> <span class="n">ReceiveTicket</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">TicketReceived</span> <span class="kp">to</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>        <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    <span class="p">}</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">AssignStation</span> <span class="p">{</span>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">StationAssigned</span> <span class="kp">to</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>        <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>    <span class="p">}</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">StartPreparation</span> <span class="p">{</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">PreparationStarted</span> <span class="kp">to</span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>        <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>    <span class="p">}</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">MarkItemReady</span> <span class="p">{</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ItemMarkedReady</span> <span class="kp">to</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>        <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>    <span class="p">}</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">ApproveTicket</span> <span class="p">{</span>
-</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">TicketApproved</span> <span class="kp">to</span>
-</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>        <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span>
-</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>    <span class="p">}</span>
-</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">NotifyServer</span> <span class="p">{</span>
-</span><span id="__span-1-67"><a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>      <span class="k">tell</span> <span class="kd">event</span> <span class="n">ServerNotified</span> <span class="kp">to</span>
-</span><span id="__span-1-68"><a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>        <span class="kd">entity</span> <span class="n">Kitchen</span><span class="p">.</span><span class="n">KitchenTicket</span>
-</span><span id="__span-1-69"><a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>    <span class="p">}</span>
-</span><span id="__span-1-70"><a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>  <span class="p">}</span>
-</span><span id="__span-1-71"><a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a><span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="c1">// An event-sourced entity OWNS the commands and events that change it, so</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="c1">// they are declared INSIDE it. Every command names the event it yields.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">command</span> <span class="n">ReceiveTicket</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">TicketReceived</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">sourceOrderId</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">50</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">ticketSource</span><span class="p">:</span> <span class="n">TicketSource</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">ticketItems</span><span class="p">:</span> <span class="n">TicketItem</span><span class="o">+</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">receivedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  <span class="p">}</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  <span class="kd">command</span> <span class="n">AssignStation</span> <span class="kr">yields</span> <span class="kd">event</span> <span class="n">StationAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">assignedStation</span><span class="p">:</span> <span class="n">StationName</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="p">}</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>  <span class="kd">event</span> <span class="n">TicketReceived</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">ticketItems</span><span class="p">:</span> <span class="n">TicketItem</span><span class="o">+</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">receivedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  <span class="p">}</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  <span class="kd">event</span> <span class="n">StationAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">assignedStation</span><span class="p">:</span> <span class="n">StationName</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    <span class="n">assignedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>  <span class="p">}</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>  <span class="c1">// A rejection event for every command, so a refusal is recorded and not</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>  <span class="c1">// merely returned. See the handler below.</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>  <span class="kd">event</span> <span class="n">AssignStationRejected</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="n">rejectionReason</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">500</span><span class="p">)</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>  <span class="p">}</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>  <span class="kd">record</span> <span class="n">KitchenTicketData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="n">ticketItems</span><span class="p">:</span> <span class="n">TicketItem</span><span class="o">+</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    <span class="n">currentStation</span><span class="p">:</span> <span class="n">StationName</span><span class="o">?</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    <span class="n">receivedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>  <span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Received</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">KitchenTicketData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>    <span class="kd">handler</span> <span class="n">ReceivedHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>      <span class="k">on</span> <span class="n">assignStation</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AssignStation</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>        <span class="k">yield</span> <span class="kd">event</span> <span class="n">StationAssigned</span><span class="p">(</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>          <span class="n">kitchenTicketId</span> <span class="o">=</span> <span class="n">assignStation</span><span class="p">.</span><span class="n">kitchenTicketId</span><span class="p">,</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>          <span class="n">assignedStation</span> <span class="o">=</span> <span class="n">assignStation</span><span class="p">.</span><span class="n">assignedStation</span><span class="p">,</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>          <span class="n">assignedAt</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"when the station was assigned"</span><span class="p">))</span>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>      <span class="p">}</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>      <span class="c1">// `set` and `morph` may appear ONLY in an `on event` clause of an</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>      <span class="c1">// event-sourced entity: replay must re-apply the same change.</span>
+</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>      <span class="k">on</span> <span class="n">stationAssigned</span><span class="p">:</span> <span class="kd">event</span> <span class="n">StationAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Assigned</span>
+</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">KitchenTicketData</span><span class="p">(</span>
+</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>            <span class="n">kitchenTicketId</span> <span class="o">=</span> <span class="n">stationAssigned</span><span class="p">.</span><span class="n">kitchenTicketId</span><span class="p">,</span>
+</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>            <span class="n">ticketItems</span> <span class="o">=</span> <span class="n">KitchenTicketData</span><span class="p">.</span><span class="n">ticketItems</span><span class="p">,</span>
+</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>            <span class="n">currentStation</span> <span class="o">=</span> <span class="n">KitchenTicketData</span><span class="p">.</span><span class="n">currentStation</span><span class="p">,</span>
+</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>            <span class="n">receivedAt</span> <span class="o">=</span> <span class="n">KitchenTicketData</span><span class="p">.</span><span class="n">receivedAt</span><span class="p">)</span>
+</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>      <span class="p">}</span>
+</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>    <span class="p">}</span>
+</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>  <span class="p">}</span>
+</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>
+</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>  <span class="kd">state</span> <span class="n">Assigned</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">KitchenTicketData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>    <span class="kd">handler</span> <span class="n">AssignedHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>      <span class="c1">// A command this state does not accept is refused -- and the refusal is</span>
+</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>      <span class="c1">// PUBLISHED before it is raised.</span>
+</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>      <span class="k">on</span> <span class="n">assignStation</span><span class="p">:</span> <span class="kd">command</span> <span class="n">AssignStation</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-67"><a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>        <span class="k">send</span> <span class="kd">event</span> <span class="n">AssignStationRejected</span><span class="p">(</span>
+</span><span id="__span-1-68"><a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>          <span class="n">kitchenTicketId</span> <span class="o">=</span> <span class="n">assignStation</span><span class="p">.</span><span class="n">kitchenTicketId</span><span class="p">,</span>
+</span><span id="__span-1-69"><a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>          <span class="n">rejectionReason</span> <span class="o">=</span> <span class="s2">"KitchenTicket does not accept AssignStation in this state"</span><span class="p">)</span>
+</span><span id="__span-1-70"><a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>          <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">KitchenTicketEvents</span>
+</span><span id="__span-1-71"><a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a>        <span class="k">error</span> <span class="s2">"KitchenTicket does not accept AssignStation in this state"</span>
+</span><span id="__span-1-72"><a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a>      <span class="p">}</span>
+</span><span id="__span-1-73"><a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a>    <span class="p">}</span>
+</span><span id="__span-1-74"><a id="__codelineno-1-74" name="__codelineno-1-74" href="#__codelineno-1-74"></a>  <span class="p">}</span>
+</span><span id="__span-1-75"><a id="__codelineno-1-75" name="__codelineno-1-75" href="#__codelineno-1-75"></a>
+</span><span id="__span-1-76"><a id="__codelineno-1-76" name="__codelineno-1-76" href="#__codelineno-1-76"></a>  <span class="c1">// An entity is a streamlet: it receives on its OWN inlet and publishes on</span>
+</span><span id="__span-1-77"><a id="__codelineno-1-77" name="__codelineno-1-77" href="#__codelineno-1-77"></a>  <span class="c1">// its OWN outlet, never on its context's. A portlet's type must ADMIT</span>
+</span><span id="__span-1-78"><a id="__codelineno-1-78" name="__codelineno-1-78" href="#__codelineno-1-78"></a>  <span class="c1">// everything that travels on it, rejections included -- which is what an</span>
+</span><span id="__span-1-79"><a id="__codelineno-1-79" name="__codelineno-1-79" href="#__codelineno-1-79"></a>  <span class="c1">// alternation is for.</span>
+</span><span id="__span-1-80"><a id="__codelineno-1-80" name="__codelineno-1-80" href="#__codelineno-1-80"></a>  <span class="kd">type</span> <span class="n">KitchenTicketCommand</span> <span class="kp">is</span> <span class="n">ReceiveTicket</span> <span class="sd">| AssignStation</span>
+</span><span id="__span-1-81"><a id="__codelineno-1-81" name="__codelineno-1-81" href="#__codelineno-1-81"></a>  <span class="kd">type</span> <span class="n">KitchenTicketEvent</span> <span class="kp">is</span> <span class="n">TicketReceived</span> <span class="sd">| StationAssigned | AssignStationRejected</span>
+</span><span id="__span-1-82"><a id="__codelineno-1-82" name="__codelineno-1-82" href="#__codelineno-1-82"></a>
+</span><span id="__span-1-83"><a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a>  <span class="kd">inlet</span> <span class="n">KitchenTicketCommands</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">KitchenTicketCommand</span>
+</span><span id="__span-1-84"><a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a>  <span class="kd">outlet</span> <span class="n">KitchenTicketEvents</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">KitchenTicketEvent</span>
+</span><span id="__span-1-85"><a id="__codelineno-1-85" name="__codelineno-1-85" href="#__codelineno-1-85"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The lifecycle flow is: <strong>Receive → Assign → Start → Mark Items
 Ready → Approve → Notify Server</strong>. Each step emits an event,
@@ -5696,81 +5729,107 @@ and event sourcing means the complete ticket history survives
 crashes. This directly addresses the Chef's concern about lost
 orders.</p>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">KitchenTicketRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">schema</span> <span class="n">KitchenTicketData</span> <span class="kp">is</span> <span class="n">relational</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kp">of</span> <span class="n">tickets</span> <span class="kp">as</span> <span class="n">KitchenTicket</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">kitchenTicketId</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">ticketStatus</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">assignedStation</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<!-- riddl: in-context no-prelude=KitchenTicketRepository,StoredKitchenTicket -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">KitchenTicketRepository</span> <span class="kp">as</span> <span class="kd">merge</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">inlet</span> <span class="n">KitchenTicketRepositoryFromKitchenTicket</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistStationAssigned</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">inlet</span> <span class="n">KitchenTicketRepositoryFromKitchenDisplay</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">PersistStationAssigned</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="kd">outlet</span> <span class="n">KitchenTicketRepositoryResponses</span> <span class="kp">is</span> <span class="kd">result</span> <span class="n">KitchenTicketResult</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="c1">// A repository answers with a RESULT, never an event.</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  <span class="kd">result</span> <span class="n">KitchenTicketResult</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">found</span><span class="p">:</span> <span class="nb">Boolean</span> <span class="p">}</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>  <span class="kd">record</span> <span class="n">StoredKitchenTicket</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">currentStation</span><span class="p">:</span> <span class="n">StationName</span><span class="o">?</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  <span class="p">}</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  <span class="kr">schema</span> <span class="n">KitchenTicketSchema</span> <span class="kp">is</span> <span class="n">relational</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="kp">of</span> <span class="n">tickets</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">StoredKitchenTicket</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredKitchenTicket</span><span class="p">.</span><span class="n">kitchenTicketId</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>      <span class="kr">index</span> <span class="k">on</span> <span class="kd">field</span> <span class="n">StoredKitchenTicket</span><span class="p">.</span><span class="n">currentStation</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>  <span class="kd">command</span> <span class="n">PersistStationAssigned</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span> <span class="p">}</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>  <span class="kd">handler</span> <span class="n">KitchenTicketPersistence</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">PersistStationAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>      <span class="k">do</span> <span class="s2">"update KitchenTicketSchema.tickets set currentStation =</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="s2">        assignedStation where kitchenTicketId matches"</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="p">}</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="c1">// An inlet admitting an alternation needs a clause that receives it.</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    <span class="c1">// Handling each member is not enough -- say what ARRIVING means.</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>      <span class="k">do</span> <span class="s2">"persist whatever else arrives on this inlet"</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>    <span class="p">}</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>  <span class="p">}</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>The index on <code>assignedStation</code> enables the kitchen display to
-quickly filter tickets by station — the grill station only sees
-grill tickets.</p>
+<p>The index on <code>currentStation</code> enables the kitchen display to quickly filter
+tickets by station — the grill station only sees grill tickets. A repository
+that answers queries and declares no index at all draws a warning, because it
+is a sequential scan by construction.</p>
 <h2 id="projector-kitchendisplay">Projector: KitchenDisplay<a class="headerlink" href="#projector-kitchendisplay" title="Permanent link">&para;</a></h2>
 <p>The KitchenDisplay projector provides the real-time screen that
 replaces printed and handwritten tickets:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">projector</span> <span class="n">KitchenDisplay</span> <span class="kp">is</span> <span class="p">{</span>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">projector</span> <span class="n">KitchenDisplay</span> <span class="kp">as</span> <span class="kd">flow</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kr">updates</span> <span class="kd">repository</span> <span class="n">KitchenTicketRepository</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="kd">record</span> <span class="n">KitchenDisplayEntry</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">kitchenTicketId</span> <span class="kp">is</span> <span class="n">KitchenTicketId</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">ticketSource</span> <span class="kp">is</span> <span class="n">TicketSource</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">ticketItems</span> <span class="kp">is</span> <span class="kr">many</span> <span class="n">TicketItem</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">ticketStatus</span> <span class="kp">is</span> <span class="n">TicketStatus</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">displayStation</span> <span class="kp">is</span> <span class="kr">optional</span> <span class="n">StationName</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">receivedAt</span> <span class="kp">is</span> <span class="nb">TimeStamp</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  <span class="p">}</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  <span class="kd">handler</span> <span class="n">KitchenDisplayHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">TicketReceived</span> <span class="p">{</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>      <span class="n">prompt</span> <span class="s2">&quot;Add ticket to kitchen display&quot;</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="p">}</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">StationAssigned</span> <span class="p">{</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>      <span class="n">prompt</span> <span class="s2">&quot;Update display with station assignment&quot;</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="p">}</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">PreparationStarted</span> <span class="p">{</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>      <span class="n">prompt</span> <span class="s2">&quot;Update display to show preparation in progress&quot;</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="p">}</span>
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">ItemMarkedReady</span> <span class="p">{</span>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>      <span class="n">prompt</span> <span class="s2">&quot;Update item readiness on display&quot;</span>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="p">}</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">TicketApproved</span> <span class="p">{</span>
-</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>      <span class="n">prompt</span> <span class="s2">&quot;Mark ticket as approved on display&quot;</span>
-</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="p">}</span>
-</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">KitchenTicket</span><span class="p">.</span><span class="n">ServerNotified</span> <span class="p">{</span>
-</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>      <span class="n">prompt</span> <span class="s2">&quot;Remove completed ticket from active display&quot;</span>
-</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>    <span class="p">}</span>
-</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>  <span class="p">}</span>
-</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="p">}</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  <span class="kd">inlet</span> <span class="n">KitchenDisplayFromKitchenTicket</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">KitchenTicketEvent</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="kd">outlet</span> <span class="n">KitchenDisplayOut</span> <span class="kp">is</span> <span class="kd">type</span> <span class="n">KitchenTicketEvent</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="kd">record</span> <span class="n">KitchenDisplayEntry</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">kitchenTicketId</span><span class="p">:</span> <span class="n">KitchenTicketId</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">ticketSource</span><span class="p">:</span> <span class="n">TicketSource</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">ticketItems</span><span class="p">:</span> <span class="n">TicketItem</span><span class="o">+</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">ticketDisplayStatus</span><span class="p">:</span> <span class="nb">String</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">30</span><span class="p">)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">displayStation</span><span class="p">:</span> <span class="n">StationName</span><span class="o">?</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">receivedAt</span><span class="p">:</span> <span class="nb">TimeStamp</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  <span class="p">}</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  <span class="kd">handler</span> <span class="n">KitchenDisplayHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="k">on</span> <span class="n">ticketReceived</span><span class="p">:</span> <span class="kd">event</span> <span class="n">TicketReceived</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>      <span class="k">do</span> <span class="s2">"insert a KitchenDisplayEntry for this ticket"</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    <span class="p">}</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="k">on</span> <span class="n">stationAssigned</span><span class="p">:</span> <span class="kd">event</span> <span class="n">StationAssigned</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>      <span class="k">do</span> <span class="s2">"update the display with the station assignment"</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="p">}</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="k">on</span> <span class="n">serverNotified</span><span class="p">:</span> <span class="kd">event</span> <span class="n">ServerNotified</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>      <span class="k">do</span> <span class="s2">"remove the completed ticket from the active display"</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="p">}</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="c1">// The inlet admits an alternation, so the projector must say what</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="c1">// ARRIVING means -- handling each member individually is not enough.</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>      <span class="k">do</span> <span class="s2">"ignore any other event on this stream"</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>    <span class="p">}</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>  <span class="p">}</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="adaptors">Adaptors<a class="headerlink" href="#adaptors" title="Permanent link">&para;</a></h2>
 <p>Kitchen has two inbound adaptors — one for dine-in orders from
 Front of House, one for online orders:</p>
-<!-- riddl: skip reason="quoted verbatim from riddl-models, which is still RIDDL 1.x; see the note on the tutorial index" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">adaptor</span> <span class="n">FromFrontOfHouse</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">handler</span> <span class="n">FrontOfHouseIntake</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">TableOrder</span><span class="p">.</span><span class="n">OrderSubmitted</span> <span class="p">{</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>      <span class="n">prompt</span> <span class="s2">&quot;Convert submitted dine-in order into kitchen ticket&quot;</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="p">}</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="p">}</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="kd">adaptor</span> <span class="n">FromOnlineOrdering</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">OnlineOrdering</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>  <span class="kd">handler</span> <span class="n">OnlineIntake</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">Restaurant</span><span class="p">.</span><span class="n">OnlineOrdering</span><span class="p">.</span><span class="n">OnlineOrder</span><span class="p">.</span><span class="n">OnlineOrderSubmitted</span> <span class="p">{</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>      <span class="n">prompt</span> <span class="s2">&quot;Convert submitted online order into kitchen ticket&quot;</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="p">}</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>  <span class="p">}</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p">}</span>
+<!-- riddl: in-domain -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">context</span> <span class="n">Kitchen</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">adaptor</span> <span class="n">FromFrontOfHouse</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">FrontOfHouse</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="kd">handler</span> <span class="n">FrontOfHouseIntake</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>      <span class="k">on</span> <span class="kd">event</span> <span class="n">FrontOfHouse</span><span class="p">.</span><span class="n">OrderSubmitted</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="k">do</span> <span class="s2">"convert a submitted dine-in order into a kitchen ticket"</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>      <span class="p">}</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>      <span class="k">on</span> <span class="kr">other</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="k">error</span> <span class="s2">"Unexpected message from Front of House"</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>      <span class="p">}</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="p">}</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>  <span class="p">}</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Both adaptors convert their respective order formats into a
 unified <code>KitchenTicket</code>. The kitchen doesn't need to know
 whether an order came from a table or a website — it just
 processes tickets.</p>
 <h2 id="design-decisions">Design Decisions<a class="headerlink" href="#design-decisions" title="Permanent link">&para;</a></h2>
+<p><strong>Why named states rather than a <code>ticketStatus</code> field?</strong> A status field is
+data the model cannot reason about: nothing stops a ticket being approved
+before preparation started. As states, each phase declares the commands it
+accepts, and one it does not is refused — after the refusal has been
+<em>published</em> as a rejection event, so the attempt is recorded rather than lost.</p>
 <p><strong>Why event sourcing for kitchen tickets?</strong> The Chef's interview
 made it clear that order loss during system crashes was the
 biggest operational pain point. Event sourcing ensures that even
