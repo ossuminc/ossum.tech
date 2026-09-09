@@ -272,7 +272,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-  This is a preview of the RIDDL 2.0 documentation. RIDDL 2.0 has not been released yet.
+  You are reading documentation for an older release of RIDDL.
   <a href="../../../..">
     <strong>Go to the current release.</strong>
   </a>
@@ -5607,9 +5607,10 @@ later:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>brew<span class="w"> </span>upgrade<span class="w"> </span>riddlc
 </span></code></pre></div>
 <h2 id="release-candidates">Release Candidates<a class="headerlink" href="#release-candidates" title="Permanent link">&para;</a></h2>
-<p>RIDDL 2.0 is being released through a series of <strong>release candidates</strong>, which
-ship from a separate formula so they can never reach anyone who did not ask for
-them.</p>
+<p>RIDDL ships release candidates ahead of each major or minor release, from a
+separate formula so they can never reach anyone who did not ask for them.
+RIDDL <strong>2.0.0 is now final</strong>, so the stable formula is what you want unless you
+are deliberately testing an upcoming release.</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>brew<span class="w"> </span>unlink<span class="w"> </span>riddlc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>ossuminc/tap/riddlc-rc
 </span></code></pre></div>
 <p>To go back to the stable line:</p>
@@ -5622,10 +5623,11 @@ unlinked — reverting does not re-download anything.</p>
 <p>Confirm which one you are running:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>riddlc<span class="w"> </span>version
 </span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>[info] 2.0.0-rc.1
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>[info] 2.0.0
 </span></code></pre></div>
-<p>Once RIDDL 2.0 ships as a final release, <code>brew upgrade riddlc</code> on the stable
-formula is all you need, and the RC formula can be removed:</p>
+<p>If you installed the RC formula during the 2.0 candidates, <code>brew upgrade
+riddlc</code> on the stable formula is all you need now, and the RC formula can be
+removed:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>brew<span class="w"> </span>uninstall<span class="w"> </span>riddlc-rc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>brew<span class="w"> </span>link<span class="w"> </span>riddlc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>brew<span class="w"> </span>upgrade<span class="w"> </span>riddlc
 </span></code></pre></div>
 <div class="admonition info">
@@ -5636,12 +5638,13 @@ pattern — the name itself is the experimental marking.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">An RC is not for production models</p>
-<p>A release candidate may still change language behaviour before the final
-release. Expect to re-validate models against the final 2.0, and see
+<p>A release candidate may still change language behaviour before the release
+it precedes. Expect to re-validate models against the final version. If you
+are coming from 1.x, see
 <a href="../../../migration/1.x-to-2.0/">Migrating from 1.x</a> for what changed.</p>
 </div>
 <h2 id="build-from-source">Build from Source<a class="headerlink" href="#build-from-source" title="Permanent link">&para;</a></h2>
-<p>Building RIDDL 2.0 from source requires JDK 25 and <strong>sbt 2.0.2 or later</strong>.</p>
+<p>Building RIDDL 2.0 from source requires JDK 25 and <strong>sbt 2.0.6 or later</strong>.</p>
 <div class="admonition warning">
 <p class="admonition-title">sbt 2 is required for RIDDL 2.0</p>
 <p>RIDDL 2.0 migrated to sbt 2 and the <code>projectMatrix</code> build layout, so an

@@ -1,483 +1,511 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://ossum.tech/riddl/1.31/</loc>
+         <loc>https://ossum.tech/riddl/2.0/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/quickstart/</loc>
+         <loc>https://ossum.tech/riddl/2.0/quickstart/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/adaptor/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/adaptor/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/application/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/application/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/author/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/author/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/comment/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/comment/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/conditional/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/conditional/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/connector/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/connector/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/constant/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/constant/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/context/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/context/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/definition/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/copyright/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/description/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/definition/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/domain/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/description/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/element/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/domain/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/entity/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/element/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/epic/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/entity/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/field/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/epic/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/function/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/field/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/group/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/function/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/handler/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/group/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/include/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/handler/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/inlet/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/include/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/input/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/inlet/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/interaction/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/input/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/invariant/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/interaction/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/message/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/invariant/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/metadata/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/message/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/onclause/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/metadata/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/option/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/module/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/outlet/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/onclause/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/output/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/option/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/processor/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/outlet/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/projector/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/output/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/repository/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/processor/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/root/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/projector/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/saga/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/repository/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/sagastep/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/root/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/state/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/saga/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/statement/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/sagastep/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/streamlet/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/standard-module/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/term/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/state/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/type/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/statement/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/use-case/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/streamlet/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/user/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/term/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/value/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/type/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/concepts/vital/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/use-case/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/examples/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/user/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/value/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/authors/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/version/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/authors/authoring-riddl/</loc>
+         <loc>https://ossum.tech/riddl/2.0/concepts/vital/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/authors/design/</loc>
+         <loc>https://ossum.tech/riddl/2.0/examples/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/authors/design/command-event-patterns/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/authors/design/contexts/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/authors/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/authors/design/ui-modeling/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/authors/authoring-riddl/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/developers/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/authors/design/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/developers/principles/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/authors/design/command-event-patterns/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/developers/releasing/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/authors/design/contexts/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/domain-experts/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/authors/design/ui-modeling/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/domain-experts/duties/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/developers/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/domain-experts/relating-to-riddl/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/developers/ast-api/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/implementors/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/developers/principles/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/guides/implementors/ways-to-use-riddl/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/developers/releasing/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/domain-experts/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/how-can-i-get-help/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/domain-experts/duties/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/what-can-riddl-do/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/domain-experts/relating-to-riddl/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/what-conventions-does-riddl-use/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/implementors/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/what-is-riddl-based-on/</loc>
+         <loc>https://ossum.tech/riddl/2.0/guides/implementors/ways-to-use-riddl/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/what-is-riddl/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/who-can-benefit-from-riddl/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/how-can-i-get-help/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/who-made-riddl-possible/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/what-can-riddl-do/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/introduction/why-is-riddl-needed/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/what-conventions-does-riddl-use/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/playground/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/what-is-riddl-based-on/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/references/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/what-is-riddl/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/references/cheat-sheet/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/who-can-benefit-from-riddl/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/references/ebnf-grammar/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/who-made-riddl-possible/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/references/language-reference/</loc>
+         <loc>https://ossum.tech/riddl/2.0/introduction/why-is-riddl-needed/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/references/standard-highlighting/</loc>
+         <loc>https://ossum.tech/riddl/2.0/licenses/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/</loc>
+         <loc>https://ossum.tech/riddl/2.0/migration/1.x-to-2.0/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddl-idea-plugin/</loc>
+         <loc>https://ossum.tech/riddl/2.0/playground/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddl-mcp-server/</loc>
+         <loc>https://ossum.tech/riddl/2.0/references/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddlc/</loc>
+         <loc>https://ossum.tech/riddl/2.0/references/cheat-sheet/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddlc/command-reference/</loc>
+         <loc>https://ossum.tech/riddl/2.0/references/ebnf-grammar/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddlc/compilation/</loc>
+         <loc>https://ossum.tech/riddl/2.0/references/language-reference/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddlc/configuration/</loc>
+         <loc>https://ossum.tech/riddl/2.0/references/standard-highlighting/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddlc/github-actions/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/riddlc/installation/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddl-idea-plugin/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tools/sbt-riddl/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddl-mcp-server/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddlc/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/basics/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddlc/command-reference/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddlc/compilation/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/external-contexts/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddlc/configuration/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/patterns/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddlc/github-actions/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/reactive-bbq/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/riddlc/installation/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/scenario/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tools/sbt-riddl/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/backoffice/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/backoffice/inventory/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/basics/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/backoffice/reporting/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/backoffice/scheduling/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/external-contexts/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/corporate/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/patterns/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/corporate/marketing/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/reactive-bbq/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/corporate/menu-management/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/scenario/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/corporate/supply-chain/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/backoffice/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/backoffice/inventory/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/bartender/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/backoffice/reporting/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/ceo/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/backoffice/scheduling/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/chef/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/corporate/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/cook/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/corporate/marketing/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/delivery-driver/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/corporate/menu-management/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/head-chef/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/corporate/supply-chain/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/host/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/online-customer/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/bartender/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/personas/server/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/ceo/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/chef/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/bar/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/cook/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/delivery/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/delivery-driver/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/front-of-house/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/head-chef/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/kitchen/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/host/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/loyalty/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/online-customer/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
     <url>
-         <loc>https://ossum.tech/riddl/1.31/tutorials/rbbq/restaurant/online-ordering/</loc>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/personas/server/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/bar/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/delivery/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/front-of-house/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/kitchen/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/loyalty/</loc>
+         <lastmod>2026-09-09</lastmod>
+    </url>
+    <url>
+         <loc>https://ossum.tech/riddl/2.0/tutorials/rbbq/restaurant/online-ordering/</loc>
          <lastmod>2026-09-09</lastmod>
     </url>
 </urlset>

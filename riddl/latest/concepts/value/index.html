@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Documentation for RIDDL - a specification language for large, distributed, reactive systems. Learn to model internet-scale applications with DDD patterns.">
+        <meta name="description" content="Value expressions: the seven forms a statement operand may take, including constructors, calls, gets and boolean expressions.">
       
       
       
-        <link rel="canonical" href="https://ossum.tech/riddl/1.31/concepts/value/">
+        <link rel="canonical" href="https://ossum.tech/riddl/2.0/concepts/value/">
       
       
         <link rel="prev" href="../definition/">
@@ -258,7 +258,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#value-types" class="md-skip">
+        <a href="#the-eleven-forms" class="md-skip">
           Skip to content
         </a>
       
@@ -272,7 +272,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-  You are reading documentation for RIDDL 1.x. A newer release is available.
+  You are reading documentation for an older release of RIDDL.
   <a href="../../..">
     <strong>Go to the current release.</strong>
   </a>
@@ -438,7 +438,7 @@
   
     
   
-  RIDDL Language
+  Home
 
       </a>
     </li>
@@ -458,6 +458,25 @@
     
   
   Quickstart
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../migration/1.x-to-2.0/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Migrating from 1.x
 
       </a>
     </li>
@@ -703,7 +722,7 @@
   <span class="md-ellipsis">
     
   
-    RIDDL Language
+    Home
   
 
     
@@ -749,6 +768,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../migration/1.x-to-2.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating from 1.x
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -761,10 +807,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -782,8 +828,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -867,10 +913,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
             
   
   
@@ -888,8 +934,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1001,10 +1047,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_4" >
         
           
-          <label class="md-nav__link" for="__nav_3_3_4" id="__nav_3_3_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3_4" id="__nav_4_3_4_label" tabindex="0">
             
   
   
@@ -1022,8 +1068,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3_4">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1255,10 +1301,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_5" >
         
           
-          <label class="md-nav__link" for="__nav_3_3_5" id="__nav_3_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3_5" id="__nav_4_3_5_label" tabindex="0">
             
   
   
@@ -1276,8 +1322,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3_5">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1425,10 +1471,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_3_6" id="__nav_3_3_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3_6" id="__nav_4_3_6_label" tabindex="0">
             
   
   
@@ -1446,8 +1492,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3_6">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1651,10 +1697,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_3_9" id="__nav_3_3_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3_9" id="__nav_4_3_9_label" tabindex="0">
             
   
   
@@ -1672,8 +1718,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3_9">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2004,10 +2050,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -2025,8 +2071,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2318,10 +2364,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -2339,8 +2385,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2393,6 +2439,34 @@
     
   
     Root
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Module
   
 
     
@@ -3141,6 +3215,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../standard-module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard Module
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../group/" class="md-nav__link">
         
   
@@ -3317,6 +3419,62 @@
     
   
     Author
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copyright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copyright
   
 
     
@@ -3589,10 +3747,176 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#value-types" class="md-nav__link">
+  <a href="#the-eleven-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Value Types
+        The Eleven Forms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#value-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prompt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-line-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-line prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typed-holes-prompt-as-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typed holes: prompt("…") as &lt;type&gt;
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#empty-and-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty and None
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Empty and None">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-where-the-minimum-cardinality-is-zero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Only where the minimum cardinality is zero
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-type-ascription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The type ascription
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boolean-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boolean Expressions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initiate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initiate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-values-are-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Values Are Used
       
     </span>
   </a>
@@ -3711,10 +4035,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -3732,8 +4056,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3789,10 +4113,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
         
           
-          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
             
   
   
@@ -3810,8 +4134,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3895,10 +4219,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_6_2_3" id="__nav_6_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_2_3" id="__nav_7_2_3_label" tabindex="0">
             
   
   
@@ -3916,8 +4240,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_2_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4073,10 +4397,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
             
   
   
@@ -4094,8 +4418,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4215,10 +4539,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
         
           
-          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
             
   
   
@@ -4236,8 +4560,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4329,10 +4653,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
         
           
-          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
             
   
   
@@ -4350,8 +4674,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4404,6 +4728,34 @@
     
   
     Design Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/developers/ast-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AST, Finder and Passes
   
 
     
@@ -4532,10 +4884,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   
@@ -4553,8 +4905,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4704,6 +5056,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../licenses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Third-Party Licenses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4729,10 +5109,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
             
   
   
@@ -4750,8 +5130,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4807,10 +5187,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11_2" >
         
           
-          <label class="md-nav__link" for="__nav_10_2" id="__nav_10_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_11_2" id="__nav_11_2_label" tabindex="0">
             
   
   
@@ -4828,8 +5208,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_11_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -5131,10 +5511,176 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#value-types" class="md-nav__link">
+  <a href="#the-eleven-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Value Types
+        The Eleven Forms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#value-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prompt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-line-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-line prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typed-holes-prompt-as-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typed holes: prompt("…") as &lt;type&gt;
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#empty-and-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty and None
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Empty and None">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-where-the-minimum-cardinality-is-zero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Only where the minimum cardinality is zero
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-type-ascription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The type ascription
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boolean-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boolean Expressions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initiate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initiate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-values-are-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Values Are Used
       
     </span>
   </a>
@@ -5180,7 +5726,7 @@
 
 
   
-    <a href="https://github.com/ossuminc/ossum.tech/edit/main/sites/riddl-1x/docs/concepts/value.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/ossuminc/ossum.tech/edit/main/sites/riddl/docs/concepts/value.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5190,25 +5736,339 @@
 
   <h1>Value</h1>
 
-<p>A value is an expression, in the context of a statement, that provides a
-value to a statement. There are a variety of value expressions but they are
-intentionally vague or abstract. The idea is that statements, values, and
-conditions work together to express business logic at an appropriate level
-of abstraction—detailed enough to be meaningful, but not so specific as to
-constrain implementation.</p>
-<h2 id="value-types">Value Types<a class="headerlink" href="#value-types" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Literals</strong>: Direct values like strings, numbers, or booleans</li>
-<li><strong>Field references</strong>: References to fields in state or message types</li>
-<li><strong>Path identifiers</strong>: References to definitions elsewhere in the model</li>
-<li><strong>Expressions</strong>: Combinations of values using operators</li>
-</ul>
+<!-- riddl-prelude
+constant MaxItems is Natural = 100
+record DoneData is { note is String }
+record SignupData is { email is String }
+event OrderPlaced is { orderId is String, total is Natural, currency is String }
+record PricingInput is { subtotal is Natural, taxRate is Natural }
+function Pricing is {
+  requires record PricingInput returns record PricingInput
+  function CalculateTotal is { requires record PricingInput returns record PricingInput ??? }
+}
+entity Order is {
+  state Started of record DoneData is { handler StartedHandler is { ??? } }
+  state Done of record DoneData is { handler DoneHandler is { ??? } }
+}
+-->
+
+<p>A value is an expression, in the context of a <a href="../statement/">statement</a>, that
+provides a value to that statement. Values, statements and conditions work
+together to express business logic at an appropriate level of abstraction —
+detailed enough to be meaningful, but not so specific as to constrain
+implementation.</p>
+<p>RIDDL 2.0 replaced what had been a mostly-opaque quoted string with a real
+value-expression system. A literal string is still accepted everywhere, so
+pseudo-code remains available where structure would be false precision.</p>
+<h2 id="the-eleven-forms">The Eleven Forms<a class="headerlink" href="#the-eleven-forms" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Syntax</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Literal</td>
+<td><code>"some text"</code></td>
+<td>Opaque pseudo-code, or a literal constant</td>
+</tr>
+<tr>
+<td>Empty</td>
+<td><code>empty</code>, <code>none</code>, <code>empty String*</code></td>
+<td>The minimum-cardinality inhabitant of a type — the absence of a value</td>
+</tr>
+<tr>
+<td>Value reference</td>
+<td><code>order.total</code></td>
+<td>A field, state field, function input, or <code>let</code> local</td>
+</tr>
+<tr>
+<td>Constructor</td>
+<td><code>OrderPlaced(id, total = x)</code></td>
+<td>Builds a message or record</td>
+</tr>
+<tr>
+<td>Get</td>
+<td><code>get from input SignupForm</code></td>
+<td>Reads a UI input or an entity state</td>
+</tr>
+<tr>
+<td>Call</td>
+<td><code>call function Pricing.Total(a, b)</code></td>
+<td>Invokes a pure function for its result</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td><code>prompt("compute the discount") [as &lt;type&gt;]</code></td>
+<td>A value computed by AI at generation time; the ascription states its type</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td><code>a &gt; b and not c</code></td>
+<td>A structured boolean expression</td>
+</tr>
+<tr>
+<td>Ask</td>
+<td><code>ask query GetInfo of entity Catalog</code></td>
+<td>A query paired with the reply that answers it</td>
+</tr>
+<tr>
+<td>Initiate</td>
+<td><code>initiate entity Order</code></td>
+<td>Brings an instance into being; <strong>yields its <code>Id</code></strong></td>
+</tr>
+<tr>
+<td>Self</td>
+<td><code>self</code>, <code>self.id</code></td>
+<td>The instance executing right now</td>
+</tr>
+</tbody>
+</table>
+<h2 id="value-references">Value References<a class="headerlink" href="#value-references" title="Permanent link">&para;</a></h2>
+<p>A value reference names something in scope. Four sources are consulted, in
+order:</p>
+<ol>
+<li>the <a href="../onclause/">on clause</a>'s message binding — bare <code>ord</code> is the whole
+   message, <code>ord.field</code> reaches into it</li>
+<li>a field of the handled message, the entity <a href="../state/">state</a>, or a
+   <a href="../function/">function</a>'s <code>requires</code> input</li>
+<li>a definition reached by a qualified path, such as <code>GState.active</code></li>
+<li>a named <a href="../constant/">constant</a></li>
+</ol>
+<p>A <code>let</code> local is also a value reference, but resolves <strong>lexically</strong> rather than
+through the symbol table: it is visible only after its declaration and is
+shadowed inside nested blocks.</p>
+<h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
+<p>A constructor builds a <a href="../message/">message</a> or record inline, rather than
+requiring it be assembled elsewhere first:</p>
+<!-- riddl: in-yielding-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">"USD"</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Done</span> <span class="kp">with</span> <span class="kd">record</span> <span class="n">DoneData</span><span class="p">(</span><span class="n">note</span> <span class="o">=</span> <span class="s2">"fulfilled"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Arguments are <strong>positional first, then named</strong>. Count, names, ordering and
+(best effort) types are all checked against the target's fields.</p>
+<h2 id="get">Get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h2>
+<p><code>get from</code> reads a value from a UI <a href="../input/">input</a> or an entity
+<a href="../state/">state</a>:</p>
+<!-- riddl: in-application -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">let</span> <span class="kr">email</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">input</span> <span class="n">SignupForm</span>
+</span></code></pre></div>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">record</span> <span class="n">BasketData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">total</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="p">}</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">command</span> <span class="n">AddItem</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">sku</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kd">entity</span> <span class="n">Basket</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="kd">state</span> <span class="n">Filling</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">BasketData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kd">handler</span> <span class="n">BasketHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">AddItem</span> <span class="p">{</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Filling</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>      <span class="p">}</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="p">}</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="p">}</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The two forms cannot appear in the same clause. An <code>input</code> exists only inside
+an <code>application</code> context, and <strong>state may be read only inside the entity that
+owns it</strong> — reading another definition's state is an Error as of RIDDL 2.0.</p>
+<h2 id="call">Call<a class="headerlink" href="#call" title="Permanent link">&para;</a></h2>
+<p><code>call</code> invokes a <a href="../function/">function</a> — and only a function, since
+functions are the only definitions guaranteed pure — and produces its result:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">let</span> <span class="n">total</span> <span class="o">=</span> <span class="k">call</span> <span class="kd">function</span> <span class="n">Pricing</span><span class="p">.</span><span class="n">CalculateTotal</span><span class="p">(</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxRate</span> <span class="o">=</span> <span class="n">rate</span><span class="p">)</span>
+</span></code></pre></div>
+<p>A call is value-producing rather than a bare statement, so it composes with
+<code>let</code>, <code>set</code>, <code>return</code> and constructor arguments. Calling something that
+declares no <code>returns</code> is an <strong>Error</strong>.</p>
+<h2 id="prompt">Prompt<a class="headerlink" href="#prompt" title="Permanent link">&para;</a></h2>
+<p><code>prompt("...")</code> denotes a value computed by AI at generation time:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">recommendation</span> <span class="kp">to</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"suggest a complementary product"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>It is distinguished from the <code>do</code> <strong>statement</strong> by its parentheses. The
+statement describes an action for a human to implement; the value denotes
+something AI computes.</p>
+<h3 id="multi-line-prompts">Multi-line prompts<a class="headerlink" href="#multi-line-prompts" title="Permanent link">&para;</a></h3>
+<p>Guidance long enough to need more than one line goes in <strong>braces</strong>, as a
+sequence of strings with no commas or other separator between them:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">let</span> <span class="n">sentiment</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">({</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="s2">"rate the customer's sentiment from the note on the order,"</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  <span class="s2">"returning a value between 0.0 and 1.0"</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">})</span> <span class="kp">as</span> <span class="nb">Real</span>
+</span></code></pre></div>
+<p>The braces are the only multi-line form — a bare <code>prompt("…")</code> takes <strong>exactly
+one</strong> string. That restriction is deliberate: RIDDL statements have no
+terminator, so allowing two juxtaposed strings would leave nothing but the next
+keyword to mark where the statement ended.</p>
+<h2 id="typed-holes-prompt-as-type">Typed holes: <code>prompt("…") as &lt;type&gt;</code><a class="headerlink" href="#typed-holes-prompt-as-type" title="Permanent link">&para;</a></h2>
+<p><code>prompt(...)</code> may carry an optional type ascription:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">let</span> <span class="n">price</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"a plausible price for this item"</span><span class="p">)</span> <span class="kp">as</span> <span class="nb">Real</span>
+</span></code></pre></div>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">constant</span> <span class="n">Greeting</span><span class="p">:</span> <span class="nb">String</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">(</span><span class="s2">"a friendly greeting"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>That is a <strong>typed hole</strong>, and it is the seam between RIDDL's two tiers: the
+<strong>type is known and checkable at compile time</strong>, while the computation that
+produces a value of that type is prose an AI fills in at generation time. The
+deterministic tier parses, validates and type-checks; the AI tier is the string
+inside the parentheses.</p>
+<p>The ascription <strong>restates the position's type; it never overrides it.</strong> A
+<code>let</code> takes its type from the ascription, but in a position that already
+determines the type — a constructor argument, a field — the ascription must
+agree with it. Writing one is opt-in: unascribed <code>prompt(...)</code> is unchanged and
+still valid, and is the right form wherever the position already says enough.</p>
+<h2 id="empty-and-none">Empty and None<a class="headerlink" href="#empty-and-none" title="Permanent link">&para;</a></h2>
+<p><code>empty</code> denotes the <strong>minimum-cardinality inhabitant</strong> of a type: no value at
+all, written where a value is expected.</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">nickname</span> <span class="kp">to</span> <span class="n">empty</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">tags</span> <span class="kp">to</span> <span class="n">none</span>
+</span></code></pre></div>
+<p><code>none</code> is a <strong>synonym</strong>, not a second construct. Both spellings produce the
+identical AST, and <code>prettify</code> converges them on <code>empty</code>. Use whichever reads
+better where it appears — <code>none</code> often suits an optional scalar and <code>empty</code> a
+collection — but expect formatted output to say <code>empty</code>.</p>
+<h3 id="only-where-the-minimum-cardinality-is-zero">Only where the minimum cardinality is zero<a class="headerlink" href="#only-where-the-minimum-cardinality-is-zero" title="Permanent link">&para;</a></h3>
+<p><code>empty</code> is meaningful only for a type that admits having no value: an optional
+<code>T?</code>, a sequence <code>T*</code>, or an explicit range starting at zero, <code>T{0,n}</code>. A bare
+<code>T</code> or a <code>T+</code> requires at least one value, so <code>empty</code> is not an inhabitant of
+it, and asking for one is the <code>value-empty-needs-zero-cardinality</code> Error.</p>
+<h3 id="the-type-ascription">The type ascription<a class="headerlink" href="#the-type-ascription" title="Permanent link">&para;</a></h3>
+<p><code>empty</code> may carry a type, which is what lets it be written in a position that
+does not itself supply one — most often a constructor argument:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">let</span> <span class="n">noTags</span> <span class="o">=</span> <span class="n">empty</span> <span class="nb">String</span><span class="o">*</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">let</span> <span class="n">unset</span>  <span class="o">=</span> <span class="n">none</span> <span class="nb">String</span><span class="o">?</span>
+</span></code></pre></div>
+<p>The ascription is where the cardinality rule is checked, so <code>empty String</code> —
+a bare, one-or-more type — is the Error above, while <code>empty String*</code> is fine.</p>
+<div class="admonition note">
+<p class="admonition-title">Why the ascription cannot be followed by just anything</p>
+<p>A type expression is a bare path, and RIDDL statements are separated by
+whitespace with no terminator. Without a guard, <code>set x to empty</code> followed
+by <code>set y to …</code> would read the second statement's <code>set</code> as the first's
+ascription. Every statement begins with a reserved keyword, so the parser
+refuses those in the ascription position — a complete fix rather than a
+heuristic, since no type can be named <code>set</code>.</p>
+</div>
+<h2 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h2>
+<p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; atom, with parentheses to
+group:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="kp">or</span> <span class="n">order</span><span class="p">.</span><span class="n">isRefunded</span><span class="p">)</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
+</span></code></pre></div>
+<p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
+recognized only inside a boolean expression, so they remain legal identifiers
+everywhere else in the language.</p>
+<div class="admonition warning">
+<p class="admonition-title">Comparisons are type-safe and reference-only</p>
+<p>Both operands of a comparison must be a <strong>typed reference</strong> — a value
+reference, a <code>get from</code>, or a named <a href="../constant/">constant</a> — never a
+literal. This is enforced at <strong>parse</strong> time, so <code>count &gt; 5</code>,
+<code>count &gt; "5"</code>, <code>count &gt; true</code> and <code>count &gt; R(1)</code> all fail to parse.</p>
+<p>To compare against a fixed value, name it. The constant is a definition,
+declared alongside the other definitions of its context:</p>
+<p><!-- riddl: in-context no-prelude=MaxItems -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
+</span></code></pre></div></p>
+<p>and the comparison is a statement, written inside an on-clause:</p>
+<p><!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many items"</span> <span class="kr">end</span>
+</span></code></pre></div></p>
+<p>The point is to remove magic constants from models and to make every
+comparison check the types on both sides. <code>==</code> and <code>!=</code> require operands
+of the same category; <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> and <code>&gt;=</code> require an ordered numeric
+type on both sides.</p>
+<p><code>true</code> and <code>false</code> remain valid boolean <em>atoms</em> — usable with <code>and</code>, <code>or</code>,
+<code>not</code>, and standalone — just not as comparison operands.</p>
+</div>
+<h2 id="initiate">Initiate<a class="headerlink" href="#initiate" title="Permanent link">&para;</a></h2>
+<p><code>initiate</code> brings a new instance of an entity into being, and its <strong>value is
+that instance's identity</strong>:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="n">initiate</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ExampleWelcome</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">fresh</span><span class="p">)</span> <span class="kp">to</span> <span class="n">fresh</span>
+</span></code></pre></div>
+<p>It is not a second way to exist — construction still completes only when
+<code>on init</code> finishes. But without it no <code>Id</code> value could ever come into being,
+so nothing could be addressed.</p>
+<p><code>initiate</code> and <a href="../statement/"><code>terminate</code></a> are <strong>entity-only</strong> and are both
+<strong>effects</strong>: banned in a function body, in <code>on activate</code>/<code>on passivate</code>, and
+in a correlation fold; legal in a saga step.</p>
+<div class="admonition warning">
+<p class="admonition-title">Discarding the id is a warning</p>
+<p>The id is the only thing <code>initiate</code> produces, so binding it and never
+using it means the instance was created and immediately made unreachable.</p>
+</div>
+<h2 id="self">Self<a class="headerlink" href="#self" title="Permanent link">&para;</a></h2>
+<p><code>self</code> is the instance executing right now. Its type is a <strong>synthesized
+record</strong> carrying <code>id</code> and <code>version</code>:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">me</span>  <span class="o">=</span> <span class="n">self</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">let</span> <span class="n">who</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">id</span>
+</span></code></pre></div>
+<p>Because that type is an ordinary record, <code>self.id</code> resolves by the same path
+walk as any other value — which is why no resolution rule has to know <code>self</code>
+exists.</p>
+<p>The type is not user-nameable, though: <code>self.id</code> is <code>Id(Order)</code> in an Order
+handler and <code>Id(Shipping)</code> in a Shipping one. So <code>let me: T = self</code> has no <code>T</code>
+to write, and <strong><code>self</code> cannot be assigned into a message field — pass
+<code>self.id</code>.</strong> The field set is closed; adding to it is a language change.</p>
+<h2 id="where-values-are-used">Where Values Are Used<a class="headerlink" href="#where-values-are-used" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Statement</th>
+<th>Operand</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>set</code></td>
+<td>the assigned value</td>
+</tr>
+<tr>
+<td><code>let</code></td>
+<td>the bound expression</td>
+</tr>
+<tr>
+<td><code>put</code></td>
+<td>the published value</td>
+</tr>
+<tr>
+<td><code>return</code></td>
+<td>the returned value</td>
+</tr>
+<tr>
+<td><code>send</code>, <code>tell</code>, <code>yield</code></td>
+<td>a message reference or constructor</td>
+</tr>
+<tr>
+<td><code>morph</code></td>
+<td>a record reference or constructor</td>
+</tr>
+<tr>
+<td><code>when</code>, <code>require</code>, <code>invariant</code></td>
+<td>a condition</td>
+</tr>
+<tr>
+<td><code>match</code></td>
+<td>the subject, and each comparison pattern's comparand</td>
+</tr>
+</tbody>
+</table>
 <h2 id="occurs-in">Occurs In<a class="headerlink" href="#occurs-in" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../statement/">Statements</a></li>
+<li><a href="../invariant/">Invariants</a></li>
 </ul>
 <h2 id="contains">Contains<a class="headerlink" href="#contains" title="Permanent link">&para;</a></h2>
-<p>Values are self-contained and only contain other values.</p>
+<p>Values may contain other values — a constructor's arguments, a call's
+arguments, and a boolean expression's operands are all themselves values.</p>
 
 
 
@@ -5411,8 +6271,6 @@ constrain implementation.</p>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="../../javascripts/extra.js"></script>
       
     
   </body>
