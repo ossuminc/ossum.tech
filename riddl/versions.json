@@ -1,10 +1,16 @@
 [
   {
+    "version": "2.x",
+    "title": "2.x",
+    "aliases": [
+      "latest"
+    ]
+  },
+  {
     "version": "2.0",
     "title": "2.0",
     "aliases": [
-      "next",
-      "latest"
+      "next"
     ]
   },
   {
