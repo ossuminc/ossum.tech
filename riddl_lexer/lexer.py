@@ -41,7 +41,8 @@ class RiddlLexer(RegexLexer):
     # `version` and `copyright` are leaf definitions as of 2.0.
     DEFINITION_KEYWORDS = (
         'adaptor', 'application', 'author', 'case', 'command', 'connector',
-        'constant', 'context', 'copyright', 'domain', 'entity', 'epic',
+        'constant', 'context', 'copyright', 'correlation', 'domain',
+        'entity', 'epic',
         'event', 'external', 'field', 'flow', 'function', 'gateway', 'graph',
         'group', 'handler', 'inlet', 'input', 'invariant', 'merge', 'module',
         'nebula', 'outlet', 'output', 'pipe', 'plant', 'processor',
@@ -57,10 +58,16 @@ class RiddlLexer(RegexLexer):
     # function value statements), `yield` (deprecating `reply`), `get` and
     # `call` (value expressions), and `default` for a match's fallback case.
     # `initial` marks the starting state or handler of an entity.
+    # `ask`, `forward`, `initiate`, `terminate` and `require` are 2.0
+    # statements/value expressions that were absent here until 2026-09-09, so
+    # every sample on the site rendered them as plain identifiers. `prompt` is
+    # both the AI value expression `prompt(...)` and the deprecated synonym of
+    # the `do` statement; one entry covers both spellings.
     CONTROL_KEYWORDS = (
-        'become', 'call', 'default', 'do', 'else', 'error', 'execute', 'for',
-        'foreach', 'get', 'if', 'initial', 'let', 'match', 'morph', 'on',
-        'put', 'return', 'reverted', 'send', 'set', 'stop', 'take', 'tell',
+        'ask', 'become', 'call', 'default', 'do', 'else', 'error', 'execute',
+        'for', 'foreach', 'forward', 'get', 'if', 'initial', 'initiate',
+        'let', 'match', 'morph', 'on', 'prompt', 'put', 'require', 'return',
+        'reverted', 'send', 'set', 'stop', 'take', 'tell', 'terminate',
         'then', 'when', 'yield',
     )
 
@@ -83,8 +90,21 @@ class RiddlLexer(RegexLexer):
     # `figma`/`node` (a design reference), `refuses` (an interaction step),
     # `activate`/`passivate` (entity lifecycle on-clauses), and the selection
     # and entry verbs `chooses`/`picks`/`enters`/`provides`.
+    #
+    # Added 2026-09-09 from a full diff against riddl's `Keyword.allKeywords`:
+    # `self` and `system` (the instance-identity and builtin value roots, as in
+    # `self.id` and `system.now`), `replies` (a query's declared response, the
+    # counterpart of `yields`), `final` (the two-word keyword `final value`;
+    # `value` was already here, and Pygments colours the two words separately),
+    # and `quiescence`.
+    #
+    # `quiescence` is CONTEXT-SENSITIVE -- deliberately still legal as an
+    # ordinary identifier -- so highlighting it is best-effort, exactly as the
+    # note on BOOLEAN_KEYWORDS describes. There is no separate contextual group
+    # in this lexer to put it in.
     OTHER_KEYWORDS = (
         'accepts', 'acquires', 'activate', 'activates', 'admits', 'all',
+        'final', 'quiescence', 'replies', 'self', 'system',
         'animation', 'any', 'append', 'attachment', 'benefit', 'block',
         'body', 'brief', 'briefly', 'button', 'capability', 'chooses',
         'column', 'commands', 'condition', 'container', 'contains', 'create',
@@ -106,10 +126,13 @@ class RiddlLexer(RegexLexer):
     # Readability words - prepositions, connectors, and the user-story modal
     # verbs. 2.0 widened the user-story verb from `wants` alone to the modal
     # set {wants, must, shall, should, may, will, can}.
+    # `times`, `out` and `after` spell the correlation timeout `times out
+    # after <duration>`; they read as connectives rather than as definitions,
+    # so they sit with the other readability words.
     READABILITY_WORDS = (
-        'and', 'are', 'as', 'at', 'by', 'can', 'for', 'from', 'in', 'is',
-        'may', 'must', 'of', 'or', 'shall', 'should', 'so', 'that', 'to',
-        'wants', 'will', 'with',
+        'after', 'and', 'are', 'as', 'at', 'by', 'can', 'for', 'from', 'in',
+        'is', 'may', 'must', 'of', 'or', 'out', 'shall', 'should', 'so',
+        'that', 'times', 'to', 'wants', 'will', 'with',
     )
 
     # Streamlet shapes usable in an `as <shape>` ascription, including the
