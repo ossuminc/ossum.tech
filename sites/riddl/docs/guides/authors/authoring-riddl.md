@@ -621,10 +621,14 @@ entity Order is {
 
 ### Aggregate with Event Sourcing
 
-<!-- riddl: in-context no-prelude=Account -->
+<!-- riddl: in-context no-prelude=Account,Events -->
 ```riddl
 aggregate entity Account is {
   type AccountId is Id(Account)
+
+  // The entity publishes through its OWN outlet. An outlet on the enclosing
+  // context will not do: a processor may only name an outlet it owns.
+  outlet Events is type AccountEvent
 
   record State is {
     id: AccountId,

@@ -17,9 +17,10 @@ lazy val root = Root(
   startYr = 2025,
   devs = developers
 ).configure(
-  // 3.9.0, not the org-standard 3.8.4, because that is what riddl publishes
-  // 2.0.0 with, and TASTy is not forward-compatible: 3.8.4 accepts 28.0 to
-  // 28.8 and fails to load every riddl class.
+  // 3.9.0, not the org-standard 3.8.4, because that is what riddl builds
+  // 2.0.x AND 2.1.x with (checked at the pinned commit, not assumed), and
+  // TASTy is not forward-compatible: 3.8.4 accepts 28.0 to 28.8 and fails to
+  // load every riddl class.
   //
   // This is the FINAL 3.9.0, and it is an LTS line, so it is expected to hold
   // for a long time. The RC4 pin that stood here through the 2.0 release
@@ -28,20 +29,26 @@ lazy val root = Root(
   // it. Keep these two lines in step anyway: bumping the riddl version may
   // require bumping this one to whatever riddl built with.
   With.Scala3.configure(version = Some("3.9.0")),
-  With.Riddl.library(version = "2.0.0", nonJVMDependency = false)
+  With.Riddl.library(version = "2.1.1-26-4d17b1ef", nonJVMDependency = false)
 ).settings(
   resolvers += "GitHub Package Registry" at "https://maven.pkg.github.com/ossuminc/riddl",
 
   // Extract RIDDL grammar by compiling and running ExtractGrammar.
   //
-  // The library above resolves the 2.0.0 RELEASE, so this task produces the
-  // grammar the docs actually describe -- the hand-copy from riddl's release/2
-  // branch that the old 1.29.0 pin forced is no longer needed, and that branch
-  // no longer exists to copy from.
+  // The library above resolves the STAGED build, not a release, because the
+  // language work the docs describe (`on quiescence`, `send ... at`,
+  // `streamlet`, the A103 adaptor-boundary rules) is in riddl `main` past the
+  // 2.1.1 tag and in no published release. Its JVM `_3` artifacts are in
+  // ~/.ivy2/local, which is what makes the exact `git describe` version
+  // resolvable.
   //
-  // Keep the version above in step with the riddlc that validates the fences,
-  // which since 2.0.0 shipped is the one on PATH (Homebrew), NOT the staged
-  // ../bin/riddlc -- that is a post-release build and runs ahead of the tag.
+  // Keep the version above in step with the riddlc that validates the fences.
+  // WHICH BINARY THAT IS KEEPS CHANGING, so measure it rather than assuming:
+  //   - during the 2.0 RCs it was ../bin/riddlc (PATH lagged by 20 releases)
+  //   - when 2.0.0 shipped it flipped to PATH (Homebrew became the release)
+  //   - now it is ../bin/riddlc again (riddl is developing past 2.1.1 while
+  //     Homebrew still serves 2.0.0)
+  // Run `riddlc version && ../bin/riddlc version` and decide from the output.
   // If the pin and the gate compiler drift, the grammar in the docs and the
   // compiler enforcing it are describing different languages.
   // Re-run this task whenever the riddl version here is bumped.

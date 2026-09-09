@@ -265,7 +265,8 @@ The arity is checked both ways, and each mistake has its own message:
 
 - **send** — emit on one of *this* processor's own [outlets](outlet.md); a
   [connector](connector.md) routes it onward
-- **tell** — deliver directly to a specific processor (point-to-point)
+- **tell** — deliver to a specific processor (point-to-point), over a channel
+  the model declares
 - **yield** — produce a **command's** declared event, without needing to know
   the sender's identity
 - **reply** — answer a **query** with its declared result
@@ -278,6 +279,25 @@ on add: command AddItem {
   yield event ItemAdded(sku = add.sku)   // AddItem's declared event
 }
 ```
+
+!!! warning "`tell` needs a modelled channel"
+    A `tell` is **sugar for a `send` on the outlet connected to the target's
+    inlet** — not a way to skip the streaming model. So there must be a
+    [connector](connector.md) running **from an outlet the sender owns** to the
+    target's inlet, and "something, somewhere connects to the target" does not
+    satisfy it: an enclosing context's outlet is not the sender's own. Without
+    one, `msg-tell-target-unreachable`.
+
+    Authors usually meet this rule in two steps, and the second surprises
+    them: you declare the target's inlet, and now riddlc says the inlet is not
+    connected. That is correct and is the point — it is asking you to model the
+    channel rather than imply it.
+
+    Between **unrelated** domains — domains sharing no ancestor — a `tell` is
+    an Error however you wire it (`msg-tell-crosses-unrelated-domains`).
+    Unrelated domains do not communicate by *any* route: not by connector, and
+    not by a `tell` through an adaptor. The remedy is structural — put both
+    domains under a common parent, then connect them.
 
 `reply` is the query half of the same idea:
 

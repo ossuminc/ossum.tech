@@ -10,7 +10,7 @@ description: >-
 event TemperatureAlert is { value is Natural }
 event TemperatureReading is { value is Natural }
 record ReadingData is { value is Natural }
-processor MyProcessor as source is {
+streamlet MyProcessor as source is {
   outlet Diagnostics is event TemperatureAlert
 }
 -->

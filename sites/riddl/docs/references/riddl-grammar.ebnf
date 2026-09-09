@@ -103,7 +103,7 @@ state_content = handler | invariant | comment ;
 entity_include = "include" literal_string ;
 
 (* Processor Definition Contents *)
-processor_definition_contents = vital_definition_contents | constant | invariant | function | handler | streamlet | processor | connector | relationship | inlet | outlet | version | copyright ;
+processor_definition_contents = vital_definition_contents | constant | invariant | function | handler | streamlet | generic_streamlet | connector | relationship | inlet | outlet | version | copyright ;
 vital_definition_contents = type_def | comment ;
 
 (* Type Definition *)
@@ -164,6 +164,14 @@ alternation = "one" ["of"] "{" alternation_contents "}" ;
    At least one bar is required, so a lone type reference is not an alternation. *)
 infix_alternation = aliased_type_expression {"|" aliased_type_expression}+ ;
 alternation_contents = undefined | [aliased_type_expression {("|" | "or" | ",") aliased_type_expression}] ;
+(* DEPRECATED in 2.0, and it keeps parsing forever -- from 3.0 onward a deprecated
+   spelling is never deleted. This is the same concept as `unique_id_type` above: a
+   pointer to an INSTANCE of an entity. Both now build the identical AST node
+   (UniqueId), with the keyword recorded as "entity", so a field spelled this way is
+   usable as a `tell` address exactly as `Id(entity X)` is. The prettifier emits
+   `Id(entity <path>)`, so this form converges on the canonical one. Write
+   `Id(entity X)` instead; the rule stays here because the syntax must go on being
+   accepted, not because it is a second way to say something. *)
 entity_reference_type = "reference" ["to"] ["entity"] path_identifier ;
 aggregation = "{" aggregate_definitions "}" ;
 aggregate_definitions = undefined | {aggregate_content [","]} ;
@@ -238,7 +246,7 @@ any_interaction_ref = processor_ref | saga_ref | input_ref | output_ref | group_
 handler = ["initial"] "handler" identifier is "{" handler_body "}" [with_metadata] ;
 handler_body = {undefined | handler_contents} ;
 handler_contents = {on_clause | comment} ;
-on_clause = on_init_clause | on_other_clause | on_term_clause | on_activate_clause | on_passivate_clause | on_event_clause | on_message_clause ;
+on_clause = on_init_clause | on_other_clause | on_term_clause | on_activate_clause | on_passivate_clause | on_quiescence_clause | on_event_clause | on_message_clause ;
 (* Task 3: parameters, so `on init`/`on term` become invocable (a later change). The parameter
    list is OPTIONAL syntax for both clauses -- whether `on term` was given a correctly-typed
    leading Id(...) parameter is a VALIDATION question, not a grammar one, since the grammar alone
@@ -252,6 +260,13 @@ on_other_clause = "on" "other" [ "as" identifier [ ":" path_identifier ] ] is ps
 on_term_clause = "on" "term" [ "(" [arguments] ")" ] is pseudo_code_block [with_metadata] ;
 on_activate_clause = "on" "activate" is pseudo_code_block [with_metadata] ;
 on_passivate_clause = "on" "passivate" is pseudo_code_block [with_metadata] ;
+(* Temporal semantics (2026-09-07): fires when NOTHING arrived at this processor instance within
+   the window; the clock restarts on every handled message. Legal on any handler-bearing processor
+   (not inside a correlation, which has `times out after`). The window is a literal duration string,
+   validated like the correlation timeout, or a Duration-typed value: a constant or a field, named
+   by a bare path. A `let` cannot be named here -- lets are clause-local statements. *)
+on_quiescence_clause = "on" "quiescence" quiescence_window is pseudo_code_block [with_metadata] ;
+quiescence_window = literal_string | path_identifier ;
 (* A55: an optional local name may be bound to the handled message with type ascription:
    `on foo: command Foo { ... }`. Within the body the name denotes the whole message. *)
 on_event_clause = "on" [identifier ":"] event_ref ["from" [identifier ":"] message_origins] is pseudo_code_block [with_metadata] ;
@@ -304,7 +319,10 @@ deliverable_message_value = message_value | path_identifier ;
 (* A30: `outlet` is the canonical `send` target (emit on your own outlet; a connector routes it
    to a downstream inlet). The `inlet_ref` form is DEPRECATED (soft, removed in 3.0) but still
    parses; use `tell` for direct delivery to a processor. *)
-send_statement = "send" deliverable_message_value "to" (outlet_ref | inlet_ref) ;
+(* `at <value>` schedules the delivery for an instant (TimeStamp, DateTime or ZonedDateTime); a
+   past instant is delivered immediately. `send` only: `tell`'s target may itself be a value, so
+   `tell m to x at t` already parses as a lookup. *)
+send_statement = "send" deliverable_message_value "to" (outlet_ref | inlet_ref) [ "at" value ] ;
 (* The addressee is EITHER a keyword-led processor_ref naming a processor statically, OR a value
    typed `Id(entity E)` naming WHICH INSTANCE to tell (`to self.id`, `to order.siteId`). They are
    told apart by the keyword leading the reference -- every processor_ref alternative is
@@ -516,12 +534,18 @@ relationship_cardinality = "1:1" | "1:N" | "N:1" | "N:N" ;
 
 (* Streamlet-related *)
 as_shape = "as" ( "void" | "source" | "sink" | "flow" | "cascade" | "merge" | "fanin" | "split" | "broadcast" | "fanout" | "router" ) ;
-processor = "processor" identifier [as_shape] is "{" ( {processor_definition_contents}+ | undefined ) "}" [with_metadata] ;
-(* `streamlet` mirrors StreamingParser.streamlet exactly: the deprecated shape keywords PLUS the *)
-(* generic `processor <id> [as <shape>]` form. Without `processor` here, a processor written     *)
-(* directly in a module (where `module_content` reaches streamlets only through this rule) would *)
-(* parse with fastparse but not with this grammar.                                              *)
-streamlet = source | sink | flow | merge | split | router | void | processor ;
+(* `streamlet` is the CANONICAL spelling from 2.0 on; `processor` is the deprecated original *)
+(* and keeps parsing forever, per the 3.0 never-delete rule. Both build the identical AST     *)
+(* node -- which has always been called Streamlet -- and the prettifier emits `streamlet`, so *)
+(* the old spelling converges on the new one. The rule keeps its NAME because `streamlet` is  *)
+(* already taken below by the alternation over all the streamlet forms; a rule name is not a  *)
+(* spelling anyone writes.                                                                    *)
+generic_streamlet = ( "streamlet" | "processor" ) identifier [as_shape] is "{" ( {processor_definition_contents}+ | undefined ) "}" [with_metadata] ;
+(* `streamlet` mirrors StreamingParser.streamlet exactly: the deprecated shape keywords PLUS  *)
+(* the generic `streamlet <id> [as <shape>]` form. Without generic_streamlet here, one written *)
+(* directly in a module (where `module_content` reaches streamlets only through this rule)     *)
+(* would parse with fastparse but not with this grammar.                                       *)
+streamlet = source | sink | flow | merge | split | router | void | generic_streamlet ;
 source = "source" identifier is "{" streamlet_body "}" [with_metadata] ;
 sink = "sink" identifier is "{" streamlet_body "}" [with_metadata] ;
 flow = "flow" identifier is "{" streamlet_body "}" [with_metadata] ;

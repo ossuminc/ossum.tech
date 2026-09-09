@@ -11,6 +11,10 @@ context Payments is {
 context Inventory is {
   record StockData is { orderId is String }
   command ReserveStock is { orderId is String }
+  // An adaptor may address only a CONTEXT, and that context must declare an
+  // inlet ADMITTING the message -- the boundary has to be modelled, not
+  // implied (adaptor-target-no-admitting-inlet).
+  inlet FromOrders is command ReserveStock
   // The tell addresses the CONTEXT, so the context is the sink and needs its
   // own clause -- a contained entity's handler does not receive on its behalf.
   handler InventoryBoundary is {
@@ -84,24 +88,36 @@ context Orders is {
   command MarkAsPaid is { orderId is String }
   command HandlePaymentFailure is { orderId is String }
   command ReserveItems is { orderId is String }
+  type PaymentInbound is MarkAsPaid | HandlePaymentFailure
+
+  // An INBOUND adaptor addresses its OWN context, so this context needs an
+  // inlet and a boundary handler. The context then dispatches inward by its
+  // own rules -- the adaptor never names what is inside.
+  inlet FromPayments is type PaymentInbound
+  handler OrdersBoundary is {
+    on command MarkAsPaid { ??? }
+    on command HandlePaymentFailure { ??? }
+    on other { error "Unexpected message at the Orders boundary" }
+  }
 
   entity Order is {
     state Active of record OrderData is {
       handler OrderHandler is {
         on command MarkAsPaid { ??? }
-        // A `tell` needs a clause at the far end, or nothing receives it.
         on command HandlePaymentFailure { ??? }
       }
     }
   }
 
   adaptor PaymentAdapter from context Payments is {
+    outlet ToOrders is type PaymentInbound
+
     handler InboundPayments is {
       on paid: event Payments.PaymentCompleted {
-        tell command MarkAsPaid(paid.orderId) to entity Order
+        tell command MarkAsPaid(paid.orderId) to context Orders
       }
       on failed: event Payments.PaymentFailed {
-        tell command HandlePaymentFailure(failed.orderId) to entity Order
+        tell command HandlePaymentFailure(failed.orderId) to context Orders
       }
       on other {
         error "Unrecognized message from the Payments context"
@@ -111,8 +127,18 @@ context Orders is {
     briefly as "Translates payment messages between Orders and Payments"
   }
 
+  // The channel the inbound `tell` travels. Intra-context, so context scope
+  // is right -- unlike the cross-context connector at the end of this example.
+  connector PaymentsToOrders is
+    from outlet PaymentAdapter.ToOrders
+    to inlet Orders.FromPayments
+
   // Declared so the outbound `tell` below has somewhere to land.
   adaptor InventoryAdapter to context Inventory is {
+    // A `tell` needs a modelled channel from the sender's OWN outlet to the
+    // target's inlet; the connector below joins this one to Inventory.
+    outlet ToInventory is command Inventory.ReserveStock
+
     handler OutboundInventory is {
       on req: command ReserveItems {
         tell command Inventory.ReserveStock(req.orderId) to context Inventory
@@ -124,10 +150,100 @@ context Orders is {
   } with {
     briefly as "Translates inventory requests from Orders to Inventory"
   }
+
 }
+
+// A connector may name the ADAPTOR as an endpoint. This is what makes the
+// crossing into Inventory a modelled delivery rather than an implied one.
+// It sits at DOMAIN scope: a connector joining two contexts is under-scoped
+// inside either of them (stream-crosses-contexts).
+connector OrdersToInventory is
+  from outlet Orders.InventoryAdapter.ToInventory
+  to inlet Inventory.FromOrders
 ```
 
 Note the operand order: `tell <message> to <processor>`, not the reverse.
+
+## The Adaptor Is the Boundary
+
+An adaptor is not merely *allowed* at a context boundary — for the ordered pair
+of contexts and the direction it declares, it **is** that boundary. Five rules
+follow, and together they are the largest change to streaming semantics since
+2.0.
+
+### It may address only a Context
+
+A `tell`, `send` or `forward` inside an adaptor must name a **context** — or a
+context's own portlet. Naming an entity, repository, projector or streamlet is
+an Error: `adaptor-targets-context-only`.
+
+This does **not** follow from the isolation seam below, which is why it needs
+saying separately. The seam governs what *crosses* a context and leaves
+intra-context sends alone, so an adaptor telling an entity of its own context
+satisfies it — and that is exactly what most models used to do.
+
+The reasoning is that the adaptor is the one processor for which the boundary
+is not a constraint on its work but *is* its work. Reaching inward to a named
+entity makes it a participant in that context's business rather than its
+translator, and it binds the foreign message's shape to one processor inside
+this one.
+
+### Both directions address a context
+
+There is no third form, and no port name appears in either:
+
+| Direction | Addresses | Resolved against |
+|---|---|---|
+| **Outbound** (`to context B`) | the **far** context | a portlet *B* declares |
+| **Inbound** (`from context B`) | its **own** context | its own declared inlet |
+
+Inbound, the context then dispatches inward by its own rules — which is the
+isolation seam expressed as syntax rather than as a prohibition, since the
+foreign vocabulary appears on exactly one side of each clause.
+
+### The target context must declare an admitting inlet
+
+An adaptor may address a context only where that context declares an inlet
+admitting the message type. Otherwise:
+`adaptor-target-no-admitting-inlet`. The boundary has to be **modelled**, not
+implied.
+
+### Ports are implied, and declaring one overrides that side
+
+A port-less adaptor is a `flow`. Because the shape is implied, ascribing
+`as source` to a one-outlet adaptor is now an Error rather than a
+clarification.
+
+A connector may name the **adaptor itself** as an endpoint —
+`from outlet Orders.PaymentAdapter.ToOrders` — which is what makes the
+crossing a modelled delivery.
+
+An implied outlet carries **one** type. An adaptor with no declared outlet
+that tells several distinct types to a context is therefore ambiguous —
+`adaptor-implied-outlet-ambiguous` — and riddlc says so rather than guessing,
+because a generator lowering the implied port has nothing single-valued to
+type it with. Declare an outlet typed with an alternation of those types (as
+the example above does with `PaymentInbound`), or split the translation across
+one adaptor per type.
+
+### Exclusivity: no going around it
+
+Where a context declares an outbound adaptor toward another, a connector that
+runs from that context's own outlet straight into the target is an Error, and
+it names the adaptor you are bypassing:
+`stream-connector-bypasses-adaptor`. An adaptor that can be routed around is
+not a boundary.
+
+!!! note "Why the near hop may be free at run time"
+    The adaptor's port toward its **own** context, and the connector joining
+    them, are a *modelling* device. A generator is free to fuse them into a
+    direct in-process call — an adaptor and its context share a memory space,
+    and translation is not worth a channel of its own.
+
+    **The fusion stops at the boundary.** The hop to the *far* context stays a
+    real message on a real channel, durable by default. Fusing the near hop
+    also costs independent scalability of the adaptor, so it is a deployment
+    choice taken knowingly, never something a model may assume.
 
 ## The Isolation Seam
 

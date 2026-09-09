@@ -2,7 +2,7 @@
 title: "Streamlet"
 draft: false
 description: >-
-  The generic streaming processor, declared with the `processor` keyword and
+  The generic streaming processor, declared with the `streamlet` keyword and
   an optional `as <shape>` ascription.
 ---
 
@@ -25,13 +25,20 @@ A Streamlet is a [processor](processor.md) that handles streaming data flows.
 Streamlets are the building blocks for data pipelines, connecting sources of
 data to consumers through transformations.
 
-In RIDDL 2.0 a streamlet is declared with the generic `processor` keyword and
-an optional shape ascription. The shape is otherwise **derived** from how many
+A streamlet is declared with the `streamlet` keyword and an optional shape
+ascription. The shape is otherwise **derived** from how many
 [inlets](inlet.md) and [outlets](outlet.md) the processor declares.
+
+!!! note "This keyword was `processor` until recently"
+    `processor X is { … }` still parses and means exactly the same thing, but
+    is deprecated (`stream-processor-keyword`) and `prettify` emits
+    `streamlet`. `riddlc validate --fix --fix-rule stream-processor-keyword`
+    rewrites it. See [Processor](processor.md#the-streamlet-keyword) for why
+    the abstraction kept the older name while the keyword changed.
 
 <!-- riddl: in-context -->
 ```riddl
-processor TemperatureProcessor as split is {
+streamlet TemperatureProcessor as split is {
   inlet readings is event TemperatureReading
   outlet alerts is event TemperatureAlert
   outlet metrics is event TemperatureMetric
@@ -74,7 +81,7 @@ files and databases.
 
 <!-- riddl: in-context -->
 ```riddl
-processor OrderEventSource as source is {
+streamlet OrderEventSource as source is {
   outlet orders is event OrderEvent
 
   handler GenerateEvents is {
@@ -92,7 +99,7 @@ send notifications, update external systems, or log and archive data.
 
 <!-- riddl: in-context -->
 ```riddl
-processor NotificationSink as sink is {
+streamlet NotificationSink as sink is {
   inlet notifications is event UserNotification
 
   handler SendNotifications is {
@@ -109,7 +116,7 @@ Flows transform data from one shape to another:
 
 <!-- riddl: in-context -->
 ```riddl
-processor OrderEnricher as flow is {
+streamlet OrderEnricher as flow is {
   inlet rawOrders is event RawOrder
   outlet enrichedOrders is event EnrichedOrder
 
@@ -130,12 +137,12 @@ outlet to an inlet:
 <!-- riddl: in-domain -->
 ```riddl
 context DataPipeline is {
-  processor Ingest    as source is { outlet events is event RawOrder }
-  processor Transform as flow   is {
+  streamlet Ingest    as source is { outlet events is event RawOrder }
+  streamlet Transform as flow   is {
     inlet input is event RawOrder
     outlet output is event EnrichedOrder
   }
-  processor Store     as sink   is { inlet data is event EnrichedOrder }
+  streamlet Store     as sink   is { inlet data is event EnrichedOrder }
 
   connector IngestToTransform is
     from outlet Ingest.events to inlet Transform.input
@@ -147,6 +154,42 @@ context DataPipeline is {
 Exactly one connector may attach to any given port. To fan out, declare more
 outlets rather than more connectors. To discard output you genuinely do not
 need, route it to the [standard module's](standard-module.md) `BottomlessPit`.
+
+## Where a Chain Ends
+
+A stream chain ends where its message is **consumed** — not at a processor
+whose shape happens to be `sink`. A processor is a **tail** for a message type
+when it has an inlet, handles every type its inlets admit, and no clause
+handling type `T` sends, tells or forwards a message of *that* type onward.
+
+**Sending a different type is a write, not a continuation.** An event log that
+receives an event and sends a `Persist` command has *consumed* the event, even
+though it owns an outlet and its arity therefore reads as a `flow`. Its shape
+says nothing about whether the chain stopped there; what its clauses do with
+the type does.
+
+A processor with **no handlers at all** is a tail whatever its shape. An opaque
+processor lets no rule assert what it does with a message, so nothing can claim
+the chain continues through it.
+
+## Cycles
+
+`stream-graph-cycle` forbids an infinite **message** loop, not a ring of
+connectors. A cycle is an `on X` clause that transmits `X`, whose message can
+travel the network back round to an `on X` clause that transmits `X` again.
+
+A ring of connectors is therefore **not** by itself a cycle: a request/response
+pair is two chains that happen to point at each other. It is also why the
+schedule-to-yourself idiom is legal — in
+
+<!-- riddl: skip reason="illustrates the shape of a legal self-schedule; the whole model is on the send-at page" -->
+```riddl
+on command Book  { send event ReminderDue(...) to outlet Out at b.startsAt }
+on event ReminderDue { … }
+```
+
+the emitting clause handles `Book` and sends `ReminderDue`, so the event it
+sends can never re-enter it.
 
 ## Use Cases
 

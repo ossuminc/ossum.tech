@@ -35,6 +35,7 @@ the message and the sender of any statements that send messages.
 | `on term` | Termination — once, ever |
 | `on activate` | Entity rehydration — every time |
 | `on passivate` | Entity eviction — every time |
+| `on quiescence <window>` | Nothing arrived for the whole window |
 | `on other` | A message not otherwise handled |
 
 `on init` and `on term` bracket the whole life of a definition. `on activate`
@@ -51,6 +52,73 @@ handler OrderHandler is {
   on term      { do "archive the order record" }
 }
 ```
+
+## `on quiescence` — when nothing arrived
+
+Every other clause fires because a message came in. `on quiescence` fires
+because **none did**:
+
+<!-- riddl: in-entity -->
+```riddl
+handler CartHandler is {
+  on command ExampleEntityCommand { do "add the item to the cart" }
+  on quiescence "PT30M" { do "treat the cart as abandoned" }
+}
+```
+
+It is **instance-scoped**: the window is measured per processor instance, and
+the clock restarts on every message that instance handles. Inside a
+[state](state.md)'s handler it is armed only while that state is active, so a
+state change disarms it.
+
+### The window
+
+The window is a duration **literal**, or a bare path to a `Duration`-typed
+value — a [constant](constant.md), a state field, or a field of the handled
+message:
+
+<!-- riddl: in-context -->
+```riddl
+constant IdleWindow is Duration = "PT10M"
+
+repository Sessions is {
+  handler SessionHandler is {
+    on quiescence IdleWindow { do "compact the session store" }
+  }
+}
+```
+
+A `let` cannot be named here: a `let` is clause-local and the window is part of
+the clause *header*, evaluated before any body runs. The literal is validated
+exactly as a [correlation](projector.md#correlations) timeout is, so `"banana"`
+and `"0s"` are both Errors, as is a path whose type is not `Duration`
+(`handler-quiescence-window-not-duration`).
+
+### Where it is allowed
+
+Any handler-bearing processor may have one — entity, context, adaptor,
+projector, repository or streamlet. Two rules bound it:
+
+- **At most one per handler** (`handler-quiescence-duplicate`). A handler that
+  wants two different idle behaviours is describing two different windows, and
+  the language makes you pick.
+- **Never inside a `correlation`** (`handler-quiescence-in-correlation`). A
+  correlation already bounds itself with `times out after`, which is the
+  projector-specific spelling of the same idea.
+
+!!! note "Unlike `on activate` and `on passivate`, this is an effect block"
+    `yield`, `tell`, `send`, `terminate`, `morph` and `initiate` are all legal
+    inside `on quiescence`. Timing out is a real business event — a cart is
+    abandoned, a session expires — and saying so usually means emitting
+    something.
+
+    Event-sourcing rules are unchanged: in an event-sourced entity, change
+    state only via a yielded event. That is also what stops replay from
+    re-firing the timer.
+
+!!! info "`quiescence` is still a legal identifier"
+    It is contextual — recognised only after `on`. Existing models that use it
+    as a name keep working.
 
 ## Binding the Handled Message
 
@@ -106,6 +174,7 @@ cannot enter the model at all:
 | [Projector](projector.md) | **Event-only**: `on command`, `on query` and `on record` are rejected. `on event` and `on result` are valid. |
 | `on event` (anywhere) | `require` and `error` are forbidden — an event has already happened and must always be accepted. |
 | `on activate` / `on passivate` | [Entity](entity.md)-only, and side-effect free: `send`, `tell`, `yield`, `morph` and `become` are rejected. |
+| `on quiescence` | At most one per handler, and never inside a `correlation` — which bounds itself with `times out after`. |
 | [Adaptor](adaptor.md) | A handler with no `on other` clause is an **Error**. |
 
 !!! warning "Shadowed clauses"

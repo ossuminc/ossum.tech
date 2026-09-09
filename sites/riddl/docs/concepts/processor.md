@@ -30,7 +30,7 @@ The following definitions are all processors:
 * [Entity](entity.md) — stateful business object (can have multiple handlers per state)
 * [Projector](projector.md) — projects events into queryable data
 * [Repository](repository.md) — persistent storage abstraction
-* [Streamlet](streamlet.md) — the generic `processor`, a stream-processing component
+* [Streamlet](streamlet.md) — the generic `streamlet`, a stream-processing component
 
 !!! info "Saga and Function are not processors"
     A [Saga](saga.md) and a [Function](function.md) extend the
@@ -41,14 +41,14 @@ The following definitions are all processors:
     being a coordinator, it has messages to receive and emit. A Function does
     not.
 
-## The `processor` Keyword
+## The `streamlet` Keyword
 
-The generic streaming processor is declared with the `processor` keyword and an
+The generic streaming processor is declared with the `streamlet` keyword and an
 optional shape ascription:
 
 <!-- riddl: in-context -->
 ```riddl
-processor OrderEnricher as flow is {
+streamlet OrderEnricher as flow is {
   inlet RawOrders is event OrderEvent
   outlet EnrichedOrders is event EnrichedOrderEvent
 
@@ -63,6 +63,26 @@ processor OrderEnricher as flow is {
 
 The `as <shape>` ascription is also available on every other processor header —
 `context`, `entity`, `adaptor`, `projector` and `repository`.
+
+!!! warning "`processor` as a keyword is deprecated"
+    Write `streamlet X is { … }`. The old spelling still parses and builds the
+    identical node, but draws `stream-processor-keyword`, and `prettify` emits
+    `streamlet`. riddlc will rewrite it for you:
+
+    ```bash
+    riddlc validate --fix --fix-rule stream-processor-keyword model.riddl
+    ```
+
+    The reasoning is worth knowing, because it explains why this page keeps the
+    word: every processor **kind** names a thing — `entity`, `repository`,
+    `projector`, `adaptor`, `context` — while `processor` named the
+    *abstraction*. "Processor" is still exactly the right word for what this
+    page describes, the category all of those belong to. It is only the
+    declaration keyword that moved, to `streamlet`, which names a thing like
+    its siblings do.
+
+    The shape keywords' own deprecation message changed with it, and now reads
+    `streamlet X as flow`.
 
 ## Message Delivery
 

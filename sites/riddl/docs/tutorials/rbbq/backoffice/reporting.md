@@ -68,6 +68,13 @@ repository SalesReportRepository as sink is {
   }
 }
 
+// `tell` needs a MODELLED channel: a connector from the sender's own
+// outlet to the target's inlet. Declaring both ports is not enough -- the
+// delivery has to be something the model states, not something it implies.
+connector SalesReportToRepository is
+  from outlet SalesReport.SalesReportOut
+  to inlet SalesReportRepository.SalesReportRepositoryFromSalesReport
+
 projector SalesReport as source is {
   updates repository SalesReportRepository
   outlet SalesReportOut is type SalesReportCommand
@@ -125,6 +132,13 @@ repository LaborReportRepository as sink is {
   }
 }
 
+// `tell` needs a MODELLED channel: a connector from the sender's own
+// outlet to the target's inlet. Declaring both ports is not enough -- the
+// delivery has to be something the model states, not something it implies.
+connector LaborReportToRepository is
+  from outlet LaborReport.LaborReportOut
+  to inlet LaborReportRepository.LaborReportRepositoryFromLaborReport
+
 projector LaborReport as source is {
   updates repository LaborReportRepository
   outlet LaborReportOut is type LaborReportCommand
@@ -181,6 +195,13 @@ repository InventoryReportRepository as sink is {
     }
   }
 }
+
+// `tell` needs a MODELLED channel: a connector from the sender's own
+// outlet to the target's inlet. Declaring both ports is not enough -- the
+// delivery has to be something the model states, not something it implies.
+connector InventoryReportToRepository is
+  from outlet InventoryReport.InventoryReportOut
+  to inlet InventoryReportRepository.InventoryReportRepositoryFromInventoryReport
 
 projector InventoryReport as source is {
   updates repository InventoryReportRepository

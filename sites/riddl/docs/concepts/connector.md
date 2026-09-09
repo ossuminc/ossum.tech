@@ -10,10 +10,10 @@ description: >-
 event Order is { id is String }
 event OrderEvent is { id is String }
 event RawOrder is { id is String }
-processor OrderEventSource as source is { outlet OrderEvents is event OrderEvent }
-processor OrderEnricher as sink is { inlet RawOrders is event OrderEvent }
-processor Home as sink is { inlet incoming is event Order }
-processor Abroad as sink is { inlet incoming is event Order }
+streamlet OrderEventSource as source is { outlet OrderEvents is event OrderEvent }
+streamlet OrderEnricher as sink is { inlet RawOrders is event OrderEvent }
+streamlet Home as sink is { inlet incoming is event Order }
+streamlet Abroad as sink is { inlet incoming is event Order }
 -->
 
 # Connector
@@ -54,7 +54,7 @@ attaching several connectors to a single port.
 <!-- riddl: in-context -->
 ```riddl
 // Correct: a split declares two outlets, each with its own connector
-processor Router as split is {
+streamlet Router as split is {
   inlet incoming is event Order
   outlet domestic is event Order
   outlet international is event Order
@@ -73,9 +73,13 @@ are in different contexts, in the enclosing [Domain](domain.md).
 !!! warning "Placement validation"
     Both ends are resolved, and their owning contexts and domains compared:
 
-    - **Error** — the ends resolve to different **domains**. A stream edge
-      across a domain boundary is a failure of domain analysis, not something
-      to wire around.
+    - **Error** — the ends resolve to **unrelated** domains, meaning domains
+      that share no ancestor. A stream edge between two unrelated domains is a
+      failure of domain analysis, not something to wire around. The remedy is
+      structural: if the two really do need to communicate, they belong under a
+      common parent domain, and then they are related.
+    - **Permitted** — ends in **related** domains, sharing an ancestor domain.
+      Declare the connector in the ancestor they share.
     - **Error** — a domain-scoped connector whose ends share one context. It is
       over-scoped; move it into that context.
     - **Error** — a context-scoped connector whose ends cross contexts. It is
@@ -88,6 +92,11 @@ are in different contexts, in the enclosing [Domain](domain.md).
     - **Error** — a cross-context connector that reaches **past** a boundary.
       Each end must land on the context's **own** portlet: the source context's
       outlet, the target context's inlet.
+    - **Error** — a connector that goes **around** an adaptor. Where a context
+      declares an outbound [adaptor](adaptor.md) toward another, a connector
+      from that context's own outlet into the target bypasses the boundary:
+      `stream-connector-bypasses-adaptor`, which names the adaptor being
+      skipped. A connector may instead name the **adaptor** as its endpoint.
 
     These checks are conservative: they only fire when both ends resolve.
 

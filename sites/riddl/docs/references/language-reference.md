@@ -137,8 +137,8 @@ description: >-
     constant orderStatus is ShipmentState = "Pending"
 
     // Endpoints for the `connector` fence that discards an unused outlet.
-    processor MyProcessor as source is { outlet Unused is event OrderEvent }
-    processor BottomlessPit as sink is { inlet hole is event OrderEvent }
+    streamlet MyProcessor as source is { outlet Unused is event OrderEvent }
+    streamlet BottomlessPit as sink is { inlet hole is event OrderEvent }
 -->
 
 <!-- riddl-domain-prelude
@@ -289,7 +289,7 @@ from the number of ports the processor declares, and may optionally be
 
 <!-- riddl: in-context -->
 ```riddl
-processor OrderEnricher as flow is {
+streamlet OrderEnricher as flow is {
   inlet RawOrders is event OrderEvent
   outlet EnrichedOrders is event EnrichedOrderEvent
 }
@@ -392,9 +392,16 @@ The keyword that introduces an aggregate says what kind of thing it is:
 
 **Special Types:**
 
-- **Entity Reference**: `reference to entity Path`
 - **Unique ID**: `Id(<kind> Path)` — runtime identity of one *instance* of a
-  processor. Not entity-only; see [Instance Identity](#instance-identity)
+  processor. Not entity-only; see [Instance Identity](#instance-identity).
+  This is the canonical way to type a reference to an entity instance:
+  `Id(entity Order)`
+- **Entity Reference** *(deprecated)*: `reference to entity Path`, and the
+  shorter `reference Path` / `reference to Path`. All of these produce the
+  **same** `UniqueId` that `Id(entity Path)` does — they are one construct with
+  five spellings, not two constructs — and they draw
+  `type-reference-to-is-id`. Write `Id(entity Path)`; the older forms go on
+  parsing so existing models keep working
 
 ### Messages and Records
 
@@ -1045,12 +1052,45 @@ that match specific message kinds and execute statements.
 | `on term` | Execute when the processor terminates | `on term { ... }` |
 | `on activate` | Execute when an entity is rehydrated | `on activate { ... }` |
 | `on passivate` | Execute when an entity is evicted | `on passivate { ... }` |
+| `on quiescence <window>` | Execute when nothing arrived for the window | `on quiescence "PT30M" { ... }` |
 | `on other` | Handle any unmatched message | `on other { ... }` |
 
 `on init` and `on term` are once-ever lifecycle events. `on activate` and
 `on passivate` fire on every rehydration and eviction, are **entity-only**, and
 must be side-effect free: `send`, `tell`, `yield`, `morph` and `become` are
 rejected inside them at parse time.
+
+#### `on quiescence <window>`
+
+Fires when the processor **instance** has handled no message for the whole
+window. The clock restarts on every handled message; inside a `state`'s
+handler the clause is armed only while that state is active.
+
+<!-- riddl: in-entity -->
+```riddl
+handler CartHandler is {
+  on command ExampleEntityCommand { do "add the item" }
+  on quiescence "PT30M" { do "treat the cart as abandoned" }
+}
+```
+
+The window is a duration literal or a bare path to a `Duration`-typed constant,
+state field or message field — not a `let`, which is clause-local while the
+window sits in the clause header. Validated as a correlation timeout is:
+`"banana"` and `"0s"` are Errors, and so is a non-`Duration` path
+(`handler-quiescence-window-not-duration`).
+
+Legal on any handler-bearing processor. **At most one per handler**
+(`handler-quiescence-duplicate`) and **never inside a `correlation`**
+(`handler-quiescence-in-correlation`), which bounds itself with
+`times out after`.
+
+Unlike `on activate` / `on passivate` it is an **effect block**: `yield`,
+`tell`, `send`, `terminate`, `morph` and `initiate` are all legal. In an
+event-sourced entity the usual rule holds — change state only through a
+yielded event, which is also what keeps replay from re-firing the timer.
+
+`quiescence` remains a legal identifier; it is recognised only after `on`.
 
 #### Lifecycle clauses take parameters
 
@@ -1597,6 +1637,39 @@ send command ProcessPayment(orderId) to outlet PaymentRequests
     an **Error**. The portlet's type is what the connector and every downstream
     consumer are built on, so a consumer typed by it simply cannot receive the
     value.
+
+#### Scheduling a delivery: `send … at <instant>`
+
+An optional `at` clause states **when** the message should be delivered:
+
+<!-- riddl: in-handler -->
+```riddl
+send event ItemAdded(sku = order.id) to outlet CartEvents at order.dueAt
+send event ItemAdded(sku = order.id) to outlet CartEvents at system.now
+```
+
+The instant must type as `TimeStamp`, `DateTime` or `ZonedDateTime` (through
+aliases): a message or state field, a constant, or `system.now`. A `Date` or a
+`String` is an Error — `stmt-send-at-not-instant`, which names the type it got.
+
+It states an **instant, never a mechanism.** Whether that becomes a timer, a
+scheduler entry, a delay queue or a poll is the generator's choice, and RIDDL
+deliberately does not say.
+
+Two consequences worth planning around:
+
+- **A past instant is delivered immediately.** There is no error and no
+  discarding; "at" means "no earlier than".
+- **There is no cancellation construct.** The idiom is to schedule *to
+  yourself* and decide at fire time, so any receiver of a scheduled message
+  must tolerate it arriving stale — the booking it refers to may already be
+  cancelled.
+
+`send` only. `tell m to x at t` already parses as something else, so `tell`
+does not take `at`. Everything else about `send` is unchanged: it is a
+transmission rather than a local state change, it does **not** discharge a
+`yields` obligation, and outlet ownership and portlet typing apply exactly as
+above.
 
     Both portlet kinds are checked, and both sides expand through alias chains.
     To carry more than one message on an outlet, declare its type as an
@@ -2510,9 +2583,12 @@ Adaptors specify a direction relative to a context:
 ```riddl
 context OrderContext is {
   event OrderPaymentReceived is { orderId is UUID }
-  outlet OrderEvents is event OrderPaymentReceived
 
   adaptor PaymentIntegration from context PaymentContext is {
+    // The adaptor owns the outlet it publishes on. Naming the enclosing
+    // context's outlet is `stmt-outlet-not-owned`.
+    outlet OrderEvents is event OrderPaymentReceived
+
     handler InboundPayments is {
       on evt: event PaymentContext.PaymentCompleted {
         let orderId = evt.reference
@@ -2600,13 +2676,13 @@ own an outlet; a projector may own an inlet.
 <!-- riddl: in-domain -->
 ```riddl
 context DataPipeline is {
-  processor OrderEventSource as source is {
+  streamlet OrderEventSource as source is {
     outlet OrderEvents is event OrderEvent
   } with {
     briefly as "Streams order events from the event store"
   }
 
-  processor OrderEnricher as flow is {
+  streamlet OrderEnricher as flow is {
     inlet RawOrders is event OrderEvent
     outlet EnrichedOrders is event EnrichedOrderEvent
 
@@ -2618,7 +2694,7 @@ context DataPipeline is {
     }
   }
 
-  processor AnalyticsSink as sink is {
+  streamlet AnalyticsSink as sink is {
     inlet AnalyticsEvents is event EnrichedOrderEvent
 
     handler AnalyticsHandler is {
@@ -2731,12 +2807,12 @@ different contexts, in the enclosing Domain.
 <!-- riddl: in-domain -->
 ```riddl
 context EventProcessing is {
-  processor Events as source is { outlet Raw is event RawEvent }
-  processor Validate as flow is {
+  streamlet Events as source is { outlet Raw is event RawEvent }
+  streamlet Validate as flow is {
     inlet In is event RawEvent
     outlet Out is event ValidatedEvent
   }
-  processor Store as sink is { inlet In is event ValidatedEvent }
+  streamlet Store as sink is { inlet In is event ValidatedEvent }
 
   connector Step1 is from outlet Events.Raw to inlet Validate.In
   connector Step2 is from outlet Validate.Out to inlet Store.In

@@ -172,6 +172,28 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         return "\n".join(pad + ln if ln.strip() else ln for ln in txt.split("\n"))
 
     pre = ind(prelude.strip(), 4) if prelude.strip() else ""
+
+    # A103 / rc-2.1: a processor publishes ONLY through an outlet it OWNS
+    # (`stmt-outlet-not-owned`). The page prelude lands at context level, so an
+    # `outlet` declared there used to be the natural home for the outlets a
+    # `send` names -- and every entity-scoped fence that sent on one became an
+    # Error the moment that rule landed, 14 of them at once.
+    #
+    # The outlets therefore move INTO the entity for the entity-scoped
+    # wrappers. That is not a workaround: under the new rule an outlet a page's
+    # entity publishes through simply BELONGS to that entity, so this makes the
+    # wrapper agree with the language rather than papering over it. Everything
+    # else in the prelude stays at context level, where shared vocabulary
+    # belongs.
+    #
+    # Kept as a whole-line split, not a parse: a prelude entry must fit on one
+    # line (see the module docstring), so a line starting `outlet` IS the whole
+    # declaration.
+    pre_lines = prelude.strip().split("\n") if prelude.strip() else []
+    outlet_lines = [ln for ln in pre_lines if ln.strip().startswith("outlet ")]
+    other_lines = [ln for ln in pre_lines if not ln.strip().startswith("outlet ")]
+    pre_no_outlets = ind("\n".join(other_lines).strip(), 4) if other_lines else ""
+    entity_outlets = ind("\n".join(outlet_lines).strip(), 6) + "\n" if outlet_lines else ""
     # An author may only be DEFINED in a Module or Domain, so a context-level
     # page prelude cannot supply one -- yet `by author X` appears on many
     # pages. Every wrapper therefore defines one at domain level.
@@ -347,12 +369,13 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
     if kind == "in-clauses":
         # An `on ...` clause fragment: give it a handler to sit in.
         return (
-            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre_no_outlets + "\n"
             "    constant ExampleZero is Whole = 0\n"
             "    type ExampleLimit is Natural\n"
             "    record ExampleData is { note is String, balance is Natural }\n"
             "    command ExampleCommand is { note is String, amount is Natural }\n"
             "    entity ExampleEntity is {\n"
+            + entity_outlets +
             "      invariant BalanceNonNegative is balance >= ExampleZero\n"
             "      invariant UnderLimit requires ExampleLimit is \"under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
@@ -368,13 +391,14 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # extra field cannot break a fence that ignores it, but a renamed one
         # would break every fence that used the old name.
         return (
-            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre_no_outlets + "\n"
             "    type ExampleLimit is Natural\n"
             "    record ExampleLine is { sku is String, quantity is Natural }\n"
             "    record ExampleOrder is { id is String, number is String,\n"
             "      total is Natural, status is String, isPaid is Boolean,\n"
             "      isCancelled is Boolean, isRefunded is Boolean,\n"
-            "      confirmationNumber is String, items is many ExampleLine,\n"
+            "      confirmationNumber is String, dueAt is TimeStamp,\n"
+            "      items is many ExampleLine,\n"
             "      lines is many ExampleLine,\n"
             "      prices is mapping from String to ExampleLine }\n"
             # `foreach` resolves any path that lands on a collection (rc.10-57),
@@ -405,6 +429,7 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "      count is Natural, user is ExampleUser }\n"
             "    command ExampleWelcome is { target is Id(entity ExampleEntity) }\n"
             "    entity ExampleEntity is {\n"
+            + entity_outlets +
             "      invariant BalanceNonNegative is \"the balance must not go negative\"\n"
             "      invariant UnderLimit requires ExampleLimit is \"must stay under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
@@ -425,11 +450,11 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
         # such a fence for its own shape. The two handlers may both handle the
         # same command; verified against rc.10-57.
         return (
-            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre + "\n"
+            "domain Example is {\n" + AUTHOR + "  context Example is {\n" + pre_no_outlets + "\n"
             "    record ExampleEntityData is { note is String, balance is Natural,\n"
             "      quantity is Natural, holdAmount is Natural }\n"
             "    command ExampleEntityCommand is { note is String }\n"
-            "    entity ExampleEntity is {\n" + ind(body, 6) + "\n"
+            "    entity ExampleEntity is {\n" + entity_outlets + ind(body, 6) + "\n"
             "      state ExampleEntityState of record ExampleEntityData is {\n"
             "        handler ExampleEntityHandler is {\n"
             "          on command ExampleEntityCommand { ??? }\n"
