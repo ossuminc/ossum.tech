@@ -38,23 +38,30 @@ shell:
   config: sites/shell/mkdocs.yml
 
 sites:
-  # The 1.x maintenance line. It carries NO alias since 2.0.0 shipped
-  # (2026-09-02) -- `latest` must name the newest released version.
+  # RIDDL versions are EVOLVING LINES, not frozen minors (Reid, 2026-09-09).
+  # `2.x` tracks the whole 2 series and is continuously updated; there is no
+  # per-minor freeze, so 2.1 and 2.2 land here rather than spawning entries.
+  # A `3.x` line appears when 3.0.0 is released and becomes the evolving line
+  # then. Changes may be backported to 2.x; 1.x is maintenance only.
+  #
+  # This REPLACES the older "one documentation version per product MINOR
+  # version" rule for riddl -- that rule produced a 2.0 label on a tree that
+  # had grown to describe 2.1.
   - prefix: riddl
     config: sites/riddl-1x/mkdocs.yml
-    version: "1.31"
+    version: "1.x"
     aliases: []
 
   # MUST stay LAST of the riddl entries: `mike set-default` runs once per
   # entry, so the last one decides where /riddl/ redirects. It holds `latest`,
-  # so /riddl/ -> latest -> 2.0.
+  # so /riddl/ -> latest -> 2.x.
   #
-  # `next` is deliberately dropped -- it meant "unreleased preview" and is
-  # misleading now. The alias copy still on gh-pages must be removed once, by
-  # hand, per step 3 of scripts/promote-2.0-to-latest.md.
+  # `next` is GONE for good. It meant "unreleased preview", which an evolving
+  # line has no use for -- 2.x already is where unreleased work lands. The
+  # copy still on gh-pages must be deleted once, by hand: BACKLOG 2b.
   - prefix: riddl
     config: sites/riddl/mkdocs.yml
-    version: "2.0"
+    version: "2.x"
     aliases:
       - latest
 

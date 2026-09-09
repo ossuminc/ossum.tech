@@ -86,7 +86,7 @@ deploy() {  # prefix config version aliases...
   fi
 }
 
-# RIDDL 1.31 no longer needs a branch checkout: it is sites/riddl-1x/ on this
+# RIDDL 1.x no longer needs a branch checkout: it is sites/riddl-1x/ on this
 # branch and comes through the ordinary loop below like every other entry
 # (TASK G, 2026-07-31). The previous version of this script checked out
 # docs/1.x here, deployed it, and switched back.

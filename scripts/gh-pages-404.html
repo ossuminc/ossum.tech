@@ -43,7 +43,16 @@
   <script>
     (function () {
       var PREFIXES = ["riddl", "riddlg", "synapify"];
-      var VERSION = /^(latest|next|\d+(\.\d+)*)$/;
+      // `2.x` and `1.x` are the RIDDL evolving lines (2026-09-09). They MUST
+      // match, or the loop guard below stops firing and a real 404 inside
+      // /riddl/2.x/ gets rewritten to /riddl/2.x/2.x/... `next` stays matched
+      // even though the alias is gone, so old links land somewhere sensible
+      // rather than being rewritten into nonsense.
+      var VERSION = /^(latest|next|\d+\.x|\d+(\.\d+)*)$/;
+
+      // RIDDL's numbered versions became evolving lines. These are the only
+      // riddl versions that ever shipped, so the map is closed, not a pattern.
+      var RIDDL_LINE = { "2.0": "2.x", "1.31": "1.x", "next": "latest" };
 
       var path = window.location.pathname.replace(/^\/+/, "");
       var segs = path.split("/").filter(Boolean);
@@ -69,8 +78,12 @@
       // Before the loop guard, which would otherwise swallow it.
       var conceptCase = path.match(/^riddl\/([^/]+)\/concepts\/case(\/|\.html)?$/);
       if (conceptCase) {
+        // Map a retired version to its line here too, so an old link lands in
+        // ONE hop rather than bouncing through a directory that no longer
+        // exists.
+        var ccLine = RIDDL_LINE[conceptCase[1]] || conceptCase[1];
         window.location.replace(
-          "/riddl/" + conceptCase[1] + "/concepts/use-case/" +
+          "/riddl/" + ccLine + "/concepts/use-case/" +
           window.location.search + window.location.hash
         );
         return;
@@ -91,7 +104,17 @@
       // former top-level section, so a real 404 inside /riddl/latest/ would
       // otherwise be rewritten to /riddl/latest/latest/... Leave anything that
       // already has the current shape alone.
-      if (PREFIXES.indexOf(segs[0]) !== -1 && VERSION.test(segs[1] || "")) return;
+      if (PREFIXES.indexOf(segs[0]) !== -1 && VERSION.test(segs[1] || "")) {
+        // ...unless it names a retired riddl version, which redirects to the
+        // line that replaced it, preserving the rest of the path.
+        if (segs[0] === "riddl" && RIDDL_LINE[segs[1]]) {
+          window.location.replace(
+            "/riddl/" + RIDDL_LINE[segs[1]] + "/" + segs.slice(2).join("/") +
+            (segs.length > 2 ? "/" : "")
+          );
+        }
+        return;
+      }
 
       // Shape 2 put the version first. Shape 1 had no version at all.
       var version = "latest";

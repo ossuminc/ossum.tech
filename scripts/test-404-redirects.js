@@ -56,9 +56,10 @@ const cases = [
   ['/riddl/2.0/OSS/vscode-extension/',       '/ide-help/vscode-extension/'],
 
   // concepts/case was removed as a duplicate of concepts/use-case.
-  ['/riddl/2.0/concepts/case/',              '/riddl/2.0/concepts/use-case/'],
-  ['/riddl/1.31/concepts/case.html',         '/riddl/1.31/concepts/use-case/'],
-  ['/riddl/2.0/concepts/use-case/',          null],   // must not loop
+  ['/riddl/2.0/concepts/case/',              '/riddl/2.x/concepts/use-case/'],  // retired line -> 2.x, one hop
+  ['/riddl/1.31/concepts/case.html',         '/riddl/1.x/concepts/use-case/'],
+  ['/riddl/2.0/concepts/use-case/',          '/riddl/2.x/concepts/use-case/'],  // 2.0 is retired
+  ['/riddl/2.x/concepts/use-case/',          null],   // current line must not loop
 
   // Coming Soon was DELETED, not moved. It must fall through to the not-found
   // message: mapping it to itself would make replace() reload forever.
@@ -72,8 +73,8 @@ const cases = [
 
   // shape 2: one version axis for the whole site, version segment first
   ['/latest/riddl/concepts/entity.html',     '/riddl/latest/concepts/entity/'],
-  ['/next/riddl/concepts/entity.html',       '/riddl/next/concepts/entity/'],
-  ['/2.0/riddl/quickstart.html',             '/riddl/2.0/quickstart/'],
+  ['/next/riddl/concepts/entity.html',       '/riddl/next/concepts/entity/'],  // shape-2 rewrite; /riddl/next/ then maps to latest
+  ['/2.0/riddl/quickstart.html',             '/riddl/2.0/quickstart/'],  // shape-2 rewrite, then 2.0 -> 2.x on the next 404
   ['/1.31/riddl/quickstart.html',            '/riddl/1.31/quickstart/'],
   ['/latest/riddl/tools/riddlg/models.html', '/riddlg/latest/models/'],
   ['/latest/MCP/claude-code.html',           '/riddlg/latest/MCP/claude-code/'],
@@ -91,7 +92,7 @@ const cases = [
   // current prefix and a former top-level section, so without the loop guard
   // these would become /riddl/latest/latest/...
   ['/riddl/latest/concepts/entity/',         null],
-  ['/riddl/2.0/concepts/nonexistent/',       null],
+  ['/riddl/2.x/concepts/nonexistent/',       null],
   ['/riddlg/latest/mcp-tools/',              null],
   ['/synapify/0.17/generation/',             null],
 

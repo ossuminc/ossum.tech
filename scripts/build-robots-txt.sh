@@ -13,8 +13,8 @@
 # What it deliberately does NOT do
 # --------------------------------
 # It does not block anything from being indexed. The site WANTS to be indexed.
-# Duplicate content between a version and its alias copy (/riddl/2.0/ and
-# /riddl/next/ are byte-identical) is already handled properly, by rel=canonical
+# Duplicate content between a version and its alias copy (/riddl/2.x/ and
+# /riddl/latest/ are byte-identical) is already handled properly, by rel=canonical
 # rather than by hiding pages: every build is built once with its version's
 # site_url, so the pages inside the alias copy carry a canonical pointing at the
 # real version directory. Crawlers dedupe on that and keep the right URL.

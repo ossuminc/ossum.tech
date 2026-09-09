@@ -61,34 +61,51 @@ diagnostic there trains people to ignore diagnostics.
 
 ---
 
-## 2b. Delete the stale `next` alias from gh-pages — ONE manual command
+## 2b. Retire `next`, `2.0` and `1.31` from gh-pages — manual, after the deploy
 
-**The promotion itself is DONE (2026-09-02):** `latest` moved from 1.31 to 2.0,
-the two `riddl` entries swapped order so `mike set-default` lands on 2.0, and
-`next` was dropped from `docs-version.yml`. `VERSION_SOURCE` in
-`scripts/check-cross-site-links.py` was updated in the same commit.
+**Reid's decision, 2026-09-09:** RIDDL doc versions are **evolving lines**.
+`2.x` is the live line and holds `latest`; `1.x` is maintenance. **`next` is
+gone for good** — an evolving line has no use for an "unreleased preview",
+because 2.x already is where unreleased work lands. A `3.x` line appears when
+3.0.0 ships and becomes the evolving line then.
 
-**What is left cannot be done by CI.** mike adds and updates aliases from the
-manifest; it never removes one that has merely stopped being declared. So the
-`next` copy already on `gh-pages` stays there, serving frozen 2.0-RC content
-at `/riddl/next/` and still listed in the version selector.
+`docs-version.yml`, `VERSION_SOURCE` and the 404 handler are all updated and
+committed. **What is left cannot be done by CI**, because mike only adds and
+updates what the manifest declares and never removes what it stops declaring.
+
+Three directories therefore keep serving until deleted by hand: `next` (an
+alias, currently byte-identical to 2.0), and the retired `2.0` and `1.31`
+version directories.
 
 ```bash
 git fetch origin
 git branch -f gh-pages "$(git rev-parse origin/gh-pages)"   # mike refuses if stale
-mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next
+mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next 2.0 1.31
 ```
 
 `-F` is required: mike reads `mkdocs.yml` from the working directory to resolve
 the branch, and there is no config at the repo root.
 
-**Run it after the promotion deploy lands**, not before — deleting an alias the
-in-flight deploy is about to rewrite is how you get a confusing half-state.
-Verify with `curl -sS https://ossum.tech/riddl/versions.json` (expect 2.0
-`[latest]` and a bare 1.31, no `next`) and
-`curl -sSo /dev/null -w '%{http_code}\n' https://ossum.tech/riddl/next/quickstart/`
-(expect 404). Judge from `gh-pages`, not a fresh curl of the live site — the
-CDN serves stale for up to ten minutes and has produced three false alarms.
+**Run it AFTER the `2.x`/`1.x` deploy has landed**, never before — deleting
+`2.0` while nothing has published `2.x` yet leaves the RIDDL docs with no live
+version at all.
+
+**The URLs still in the wild are already handled.** `scripts/gh-pages-404.html`
+maps `2.0`→`2.x`, `1.31`→`1.x` and `next`→`latest`, preserving the rest of the
+path, so deleting the directories is what *activates* those redirects rather
+than breaking anything. That is why deletion is right and leaving them is not:
+a surviving `/riddl/2.0/` serves frozen content forever and never 404s, so the
+handler never fires.
+
+Verify from `gh-pages`, not a fresh curl of the live site — the CDN serves
+stale for up to ten minutes and has produced three false alarms here:
+
+```bash
+git fetch origin gh-pages
+git show origin/gh-pages:riddl/versions.json     # expect 2.x [latest] and 1.x only
+git ls-tree origin/gh-pages riddl/ --name-only   # expect no next/2.0/1.31
+node scripts/test-404-redirects.js               # 39 cases
+```
 
 ---
 

@@ -1,3 +1,19 @@
+> **HISTORICAL — executed 2026-09-02, and the model it describes is gone.**
+>
+> This file records how `latest` was moved from 1.31 to 2.0 when RIDDL 2.0.0
+> shipped. A week later the numbered labels were replaced by **evolving lines**
+> (`2.x`, `1.x`) because the tree deployed as `2.0` had grown to document 2.1,
+> and `next` was retired entirely.
+>
+> **There is no future promotion of this shape to run.** An evolving line never
+> gets promoted; a new line simply appears when a new major ships, and takes
+> `latest` then. Step 3's `mike delete` is still the right mechanism for
+> retiring a directory — see **BACKLOG 2b**, which supersedes it and covers
+> `next`, `2.0` and `1.31` together.
+>
+> Kept because its landmines are real and its reasoning about `mike
+> set-default` ordering still governs `docs-version.yml`.
+
 # Promoting RIDDL 2.0 to `latest`
 
 Run this when RIDDL **2.0 final** ships. Until then, `latest` points at 1.31 —

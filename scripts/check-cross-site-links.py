@@ -39,9 +39,8 @@ ALIASES = {"latest", "next"}
 # `latest` moves to "riddl" here in the same commit that moves it there.
 VERSION_SOURCE = {
     "riddl": {
-        "2.0": "riddl",
-        "next": "riddl",
-        "1.31": "riddl-1x",
+        "2.x": "riddl",
+        "1.x": "riddl-1x",
         "latest": "riddl",
     },
 }

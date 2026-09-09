@@ -28,11 +28,13 @@ PY="$(sed -n '1s|^#!||p' "$(command -v mkdocs)")"
 # Index each product's DEFAULT ALIAS only, plus the unversioned shell pages.
 #
 # Not the whole tree: mike deploys aliases as full COPIES, so /riddl/latest/ is
-# a byte-for-byte duplicate of /riddl/1.31/. Indexing everything would return
-# the same page three or four times, once per version and once per alias.
+# a byte-for-byte duplicate of /riddl/2.x/. Indexing everything would return
+# the same page twice or more, once per version and once per alias.
 #
-# Following the alias rather than a pinned version means this needs no edit
-# when RIDDL 2.0 is promoted -- `latest` moves and the index follows.
+# Following the ALIAS rather than a pinned version is what has kept this file
+# from needing an edit through two version changes -- the 1.31-to-2.0 promotion
+# and the 2026-09-09 move to evolving `2.x`/`1.x` lines. It will likewise need
+# none when a `3.x` line takes `latest`.
 GLOB='{index.html,about/**/*.html,ide-help/**/*.html,riddl/latest/**/*.html,riddlg/latest/**/*.html,synapify/latest/**/*.html}'
 
 # Material renders a pilcrow anchor after every heading (`toc.permalink: true`).

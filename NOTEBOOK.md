@@ -36,6 +36,12 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 Nothing half-edited. `task/` is empty — both incoming tasks closed 2026-09-09.
 
+**The version relabel is committed but NOT yet deployed.** `docs-version.yml`
+now declares evolving lines `2.x` (holding `latest`) and `1.x`; `gh-pages`
+still shows `2.0 [latest, next]` and `1.31`. Pushing publishes `2.x`/`1.x`, and
+**then** the three retired directories (`next`, `2.0`, `1.31`) need one manual
+`mike delete` — BACKLOG 2b, which must run *after* the deploy, never before.
+
 ### The three things a fresh session would get wrong
 
 - **Green is not the same as right when the Computational Model has a ruling.**
@@ -1267,9 +1273,15 @@ deploy successfully either way. The entries were swapped as well as the alias.
 
 **`next` was dropped, and dropping it is not the same as deleting it.** mike
 adds and updates aliases from the manifest; it never removes one that has
-stopped being declared. So `/riddl/next/` keeps serving a frozen RC copy until
-`mike delete` is run by hand. Filed as BACKLOG 2b rather than left implicit —
-the manifest looks complete and gives no hint that a stale alias survives.
+stopped being declared, so `/riddl/next/` keeps serving until `mike delete` is
+run by hand. Filed as BACKLOG 2b rather than left implicit — the manifest looks
+complete and gives no hint that the alias survives.
+
+> **Corrected 2026-09-09:** this entry said `next` served "a frozen RC copy".
+> It did not — its content was byte-identical to `/riddl/2.0/`
+> (`b4ef369e…`), so the problem was redundancy, not staleness: one build
+> reachable under three names, with the selector offering "next" as if it led
+> somewhere else. The remedy is the same and BACKLOG 2b still applies.
 
 **Two things updated in the same commit because nothing enforces them:**
 
@@ -1289,6 +1301,49 @@ in flight. Pushing immediately would have started a second concurrent
 `mike deploy --push` against the same `gh-pages`, which is a genuine race, not
 a tidiness concern. The run finished on its own in 1m10s and the question
 evaporated — but the rule stands: one publish at a time.
+
+### RIDDL doc versions become evolving lines (2026-09-09)
+
+**Reid's decision**, prompted by a good question: *why is `/riddl/next/` stale
+— shouldn't it be 3.0?*
+
+It shouldn't, and the question exposed a worse problem. `next` was not serving
+stale content at all (byte-identical to 2.0, checked); it was **redundant** —
+2.0 held `latest` AND `next`, so one build was reachable under three names and
+the selector offered "next" as if it led somewhere. But the tree deployed as
+**`2.0` had grown to document 2.1**, because the previous day's work put
+`streamlet`, `on quiescence`, `send … at` and A103 into it. The label was lying.
+
+The resolution replaces the numbered-minor model for riddl:
+
+| | |
+|---|---|
+| `2.x` | the evolving line, holds `latest`; 2.1, 2.2 … land here |
+| `1.x` | maintenance; will not receive backports |
+| `3.x` | appears when 3.0.0 ships, becomes the evolving line then |
+| `next` | **gone for good** — an evolving line has no unreleased-preview to name |
+
+**Three things this touched that were not obvious:**
+
+- **The 404 handler's `VERSION` regex did not match `2.x`.** Its loop guard is
+  `PREFIXES.includes(segs[0]) && VERSION.test(segs[1])`, so without
+  `\d+\.x` a genuine 404 inside `/riddl/2.x/` would rewrite to
+  `/riddl/2.x/2.x/…` — the exact loop the guard exists to stop. Caught by
+  reading the guard before editing, not by a test.
+- **Renaming a mike version does not move the old one.** `2.0` and `1.31` stay
+  on `gh-pages` exactly as deployed. A surviving directory serves frozen
+  content forever and never 404s, so the redirect never fires — which is why
+  the retired directories must be *deleted* and a `RIDDL_LINE` map added, not
+  left in place. BACKLOG 2b.
+- **The `conceptCase` rule runs before the loop guard**, so an old
+  `/riddl/2.0/concepts/case/` would have taken two hops. It maps the line
+  itself now. 39/39 redirect cases pass.
+
+**What needed no edit at all:** every in-content cross-site link, because they
+all say `/riddl/latest/` rather than a version number; and
+`build-search-index.sh`, because it globs the `latest` alias. Following the
+alias rather than pinning a version has now survived two version changes
+without a line changing.
 
 ### riddl 2.1.x: 92 failures, and what the ratio told us (2026-09-09)
 

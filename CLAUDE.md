@@ -118,8 +118,8 @@ stamped `2.0`. Each product now deploys under its own prefix with its own
 | Deployed at | Source | Version |
 |---|---|---|
 | `/` | `sites/shell/` — landing, About, **IDE help** | **unversioned** |
-| `/riddl/2.0/` | `sites/riddl/` — the 2.0 language docs | 2.0 · **`latest`** |
-| `/riddl/1.31/` | `sites/riddl-1x/` — the 1.x maintenance line | 1.31 (no alias) |
+| `/riddl/2.x/` | `sites/riddl/` — the RIDDL 2 line | 2.x · **`latest`** |
+| `/riddl/1.x/` | `sites/riddl-1x/` — the 1 maintenance line | 1.x (no alias) |
 | `/riddlg/<ver>/` | `sites/riddlg/` — riddlg plus the `MCP/` guides | 0.6 · `latest` |
 | `/synapify/<ver>/` | `sites/synapify/` | 0.17 · `latest` |
 
@@ -157,7 +157,22 @@ Order in `docs-version.yml` matters for one thing: `mike set-default` runs per
 entry, so the **last `riddl` entry decides where `/riddl/` redirects**. Keep
 the entry holding `latest` last.
 
-One documentation version per product **minor** version, never per patch.
+**RIDDL versions are EVOLVING LINES, not frozen minors** (Reid, 2026-09-09).
+`2.x` tracks the whole 2 series and is continuously updated, so 2.1 and 2.2
+land in it rather than spawning entries. A `3.x` line appears when 3.0.0 is
+released and becomes the evolving line then; changes may be backported to 2.x,
+but 1.x is maintenance only and will not receive them.
+
+**`next` is gone for good.** It meant "unreleased preview", which an evolving
+line has no use for — 2.x already *is* where unreleased work lands. It was also
+a trap: 2.0 held `latest` AND `next` simultaneously, so the same build was
+reachable under three names and the version selector offered "next" as if it
+were somewhere else.
+
+The other products still follow **one documentation version per minor
+version**, never per patch. The riddl rule diverged because a numbered label
+went stale under it: the tree was deployed as `2.0` while its content had grown
+to describe 2.1.
 
 The MCP guides live with riddlg, not with the language docs, because 21 of
 their 22 outbound links point at riddlg — they document the server riddlg
@@ -376,27 +391,33 @@ crawlers that every version of every page is the same URL.
   build for some time, snapshot builds land in the local cache via riddl's
   `publishLocal`, and the stale warning is what caused the `cp` above.)
 
-### RIDDL 2.0 holds `latest` (promoted 2026-09-02)
+### RIDDL 2.x holds `latest`; the lines are evolving (2026-09-09)
 
-**Done.** RIDDL 2.0.0 shipped on 2026-08-27 and `latest` was moved from 1.31 to
-2.0 in one commit, per **`scripts/promote-2.0-to-latest.md`**: the alias moved
-AND the two `riddl` entries swapped order, because the last entry for a prefix
-is the one `mike set-default` lands on. `next` was dropped from the manifest at
-the same time — it meant "unreleased preview" and is misleading now.
+**Done, in two steps.** RIDDL 2.0.0 shipped on 2026-08-27 and `latest` moved
+from 1.31 to 2.0 (2026-09-02), per **`scripts/promote-2.0-to-latest.md`**: the
+alias moved AND the two `riddl` entries swapped order, because the last entry
+for a prefix is the one `mike set-default` lands on.
 
-**One manual step of that procedure remains and CI cannot do it:** the `next`
-alias copy already on `gh-pages` has to be deleted by hand, because mike only
-adds and updates aliases from the manifest and never removes one that has
-stopped being declared:
+A week later the numbered labels were replaced by **evolving lines**, `2.x` and
+`1.x`, because the tree deployed as `2.0` had grown to document 2.1. That
+procedure file is now **historical** — there is no future promotion of this
+shape to run, since an evolving line never gets promoted; a new line simply
+appears when a new major ships.
 
-```bash
-git fetch origin
-git branch -f gh-pages "$(git rev-parse origin/gh-pages)"   # mike refuses if stale
-mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next
-```
+**Manual steps remain that CI cannot do**, because mike only adds and updates
+what the manifest declares and never removes what it stops declaring. Until
+they run, `/riddl/next/`, `/riddl/2.0/` and `/riddl/1.31/` all keep serving and
+stay in the version selector — see BACKLOG 2b.
 
-Until that runs, `/riddl/next/` keeps serving a frozen copy and the version
-selector still lists it.
+**Renaming a version does not move the old one.** `mike deploy` at `2.x`
+creates a new directory; `2.0` is left exactly as last deployed. That is why
+`scripts/gh-pages-404.html` carries a `RIDDL_LINE` map (`2.0`→`2.x`,
+`1.31`→`1.x`, `next`→`latest`) — the retired directories get deleted, and the
+404 handler catches the URLs still in the wild.
+
+**Its `VERSION` regex had to learn `\d+\.x`.** Without that the loop guard
+stops matching and a real 404 inside `/riddl/2.x/` is rewritten to
+`/riddl/2.x/2.x/…`. `node scripts/test-404-redirects.js` covers it — 39 cases.
 
 `VERSION_SOURCE` in `scripts/check-cross-site-links.py` maps aliases to source
 trees and **nothing enforces the correspondence** — it was updated in the same
