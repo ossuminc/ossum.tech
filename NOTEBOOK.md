@@ -11,95 +11,79 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-08-31
+## HANDOFF — as of 2026-09-09
 
-**Branch `main`.** Run `git status` for tree/push state — a number written
-here is wrong the moment anyone commits.
+**Branch `main`.** Run `git status` for tree/push state.
 
-**RIDDL 2.0.0 shipped 2026-08-27 and this repo is upgraded to it.**
-`build.sbt` pins riddl `2.0.0` and Scala `3.9.0` (final, LTS — the RC4
-experimental-TASTy hazard is gone). Whole 2.0 tree gates **green: 372
-validated / 51 skipped / 0 failed, exit 0**.
+**Pinned to the STAGED riddl `2.1.1-26-4d17b1ef`**, not a release — the
+language work the docs now describe (`streamlet`, `on quiescence`, `send … at`,
+the A103 boundary rules) is past the 2.1.1 tag and in no published release.
+Scala unchanged at 3.9.0. Gate: **376 validated / 52 skipped / 0 failed,
+exit 0.**
 
-**The gate compiler INVERTED, and it is the thing to get right.** It is now
-the **`riddlc` on PATH** (Homebrew, `2.0.0`) — *not* `../bin/riddlc`, which is
-a post-release staged build ahead of the tag (`2.0.0-9-e895537f`). Throughout
-the RCs the rule was the exact opposite and just as emphatic. Same words,
-opposite meaning. **Run both, every time:**
+**The gate compiler is `../bin/riddlc` again — it has flipped THREE times in
+six weeks** (RCs → staged, 2.0.0 → PATH, 2.1.x dev → staged). Each flip was
+written down as confidently as this one. **Measure, never remember:**
 
 ```bash
 riddlc version && ../bin/riddlc version
-python3 scripts/validate-riddl-examples.py riddlc \
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   $(find sites/riddl/docs -name '*.md' | sort) > /tmp/gate.txt 2>&1
 echo "EXIT=$?"; tail -2 /tmp/gate.txt
 ```
 
 ### In flight
 
-Nothing half-edited.
+Nothing half-edited. `task/` is empty — both incoming tasks closed 2026-09-09.
 
-### The two things a fresh session would get wrong
+### The three things a fresh session would get wrong
 
-- **`concepts/group.md:42` is still factually false.** It says the modality
-  aliases *"carry no structural difference"*; riddl built three checks for them
-  on 2026-08-26. The 2.0.0 upgrade did not touch it — **no gate can see a wrong
-  prose claim.** BACKLOG 1e-remnant carries the reasoning that must survive the
-  edit: the verb map is deliberately PARTIAL, `presents`/`emits` are silent by
-  design, and `diffuses`/`serve`/`offer`/`taste` have no modality to contradict.
-- **The 1.31 gate cannot run.** Homebrew's upgrade to `riddlc` 2.0.0 removed the
-  1.31.0 keg, so the documented command dies with `FileNotFoundError`.
-  `sites/riddl-1x/` is unchanged and was green when last gated, but nothing
-  would catch a future edit. **Never substitute a 2.0 binary**; it rejects
-  valid 1.x. See BACKLOG 3b. (Less exposed since 2026-09-02 — `latest` now
-  points at 2.0, so 1.31 is no longer the default landing.)
-- **`/riddl/next/` is stale and must be deleted by hand.** The promotion
-  dropped `next` from the manifest, but mike never removes an alias that has
-  merely stopped being declared. One command, BACKLOG 2b.
+- **Green is not the same as right when the Computational Model has a ruling.**
+  The adaptor example was rewritten so an inbound adaptor published into an
+  *entity's* inlet. It validated with 0 errors and was **wrong**: CM §7.7 says
+  an inbound adaptor addresses its OWN context, which dispatches inward. Only
+  reading the CM caught it. Same failure the org CLAUDE.md warns about for
+  riddlg, reproduced in docs.
+- **`concepts/group.md:42` is still factually false** about the modality
+  aliases. Untouched again — no gate can see a wrong prose claim. BACKLOG
+  1e-remnant.
+- **The 1.31 gate still cannot run** (Homebrew removed the keg). BACKLOG 3b.
 
 ### Traps, each of which has already bitten someone here
 
-- **Regenerate the grammar LAST.** `git checkout -- sites/riddl/docs` reverts
-  it along with everything else. The rc.24 commit shipped rc.21's grammar this
-  way under a message claiming otherwise, and nothing could catch it — the gate
-  validates against the BINARY, never the `.ebnf`.
-  **Stronger check now available:** compare hashes against riddl's canonical
-  file *at the tag* (`git cat-file -p <tag>:language/.../ebnf-grammar.ebnf |
-  md5 -q`). Immutable, so unlike `cp` it is safe — but it VERIFIES only, and
-  never replaces `extractGrammar` as the way to produce the file.
-- **`sbt extractGrammar` can hang indefinitely.** 2026-08-31: ~40 min at
-  **0.0% CPU** across two attempts; `sbt -batch shutdown` first did not help.
-  Tells are flat log size, no `[info] compiling`, no CPU. **Do not
-  `pkill -f sbt`** — it kills Reid's IDE and every other project's server.
-- **A grammar comment describes intent; only a probe describes behaviour.**
-  2.0.0's comment claims `empty` errors on a bare `T`; it does so only in the
-  **ascribed** form. Probe before documenting.
-- **A scratch copy of the validator goes stale.** Twice this cost real time,
-  reporting fixes as unapplied. Re-copy from the live script every run.
-- **Never check `$?` through a pipe.** `… | tail` reports tail's status, so a
-  red gate reads green. Redirect, check, then read.
+- **Fix preludes and wrappers BEFORE fences.** 92 failures → 16 from ten
+  prelude lines; then 16 → 5 from one wrapper change. Chasing fences first
+  would have been days of wasted work. The tell is a message count far larger
+  than the fence count.
+- **Regenerate the grammar LAST**, and verify by hash against riddl at the
+  pinned commit (`git cat-file -p <sha>:language/.../ebnf-grammar.ebnf | md5 -q`).
+  That is a VERIFICATION, never a substitute for `sbt extractGrammar`.
+- **`sbt extractGrammar` can hang** at 0.0% CPU with a flat log. Do **not**
+  `pkill -f sbt` — it kills Reid's IDE. It ran fine this session.
+- **Never conclude absence from a narrowly-scoped grep.**
+  `adaptor-implied-outlet-ambiguous` looked defined-but-dead in `language/`;
+  it is emitted from `passes/`.
+- **Never check `$?` through a pipe.** `… | tail` reports tail's status.
 
 ### Certainty
 
-- **Verified this session (run, not recalled):** riddl tag `2.0.0` exists and
-  its JVM `_3` artifact resolves; PATH `riddlc` is `2.0.0` and `../bin` is
-  `2.0.0-9-e895537f`; riddl 2.0.0 builds with Scala 3.9.0 / sbt 2.0.6 / JDK 25;
-  all six gate failures and their fixes; the grammar hash equality; every
-  `empty`/`none`/`do`/`prompt` claim documented; that the 1.31 keg is gone.
-- **Assumed, not verified:** that leaving the unascribed `set … to empty` case
-  unchecked is intended upstream rather than an oversight. Stated as an
-  observation in the task Results, not as a bug.
+- **Verified this session (run, not recalled):** every compiler version; all 92
+  gate failures and their rule ids; all 15 missing lexer keywords AND that they
+  now tokenize as keywords; the grammar hash against the pinned commit; that a
+  connector between *related* domains validates; the CM-sanctioned inbound
+  adaptor shape.
+- **Assumed:** that `concepts/processor.md` keeping the word "processor" for
+  the abstraction matches riddl's intent. It follows from the commit's stated
+  reasoning, but was not confirmed with riddl.
 
 ### Pointers
 
-- **BACKLOG.md** — all open work. **2** (promote `latest`, Reid's call),
-  **1e-remnant** (`group.md`), **3b** (1.31 gate).
-- **CLAUDE.md** — durable facts: the gate's scope and compiler, prelude rules,
-  the grammar traps, the version-differences table.
-- **`task/` is EMPTY** — `upgrade-riddl-2.0.0.md` closed 2026-08-31 with full
-  Results in `task/done/`.
+- **BACKLOG.md** — **2b** (delete the stale `next` alias, one command), **2c**
+  (2.1.x is moving fast), **1e-remnant**, **3b**.
+- **CLAUDE.md** — the gate-compiler flip table, the lexer drift trap, and the
+  version-differences table now carrying the 2.1 rules.
 
-**Run `/ossuminc-skills:check-tasks` in the new session** — triage is the
-driver's call, and this handoff deliberately does not do it.
+**Run `/ossuminc-skills:check-tasks` in the new session.**
 
 ---
 
@@ -1305,6 +1289,87 @@ in flight. Pushing immediately would have started a second concurrent
 `mike deploy --push` against the same `gh-pages`, which is a genuine race, not
 a tidiness concern. The run finished on its own in 1m10s and the question
 evaporated — but the rule stands: one publish at a time.
+
+### riddl 2.1.x: 92 failures, and what the ratio told us (2026-09-09)
+
+Two incoming tasks, one superseding the other. Gating the tree against the
+staged `2.1.1-26-4d17b1ef` opened at **280 / 51 / 92** — against **372 / 51 / 0**
+on 2.0.0 the same morning, so all 92 were the six-week delta, not drift. Closed
+at **376 / 52 / 0**.
+
+**The most useful number was a ratio, not a count.** 160 deprecation messages
+across 92 failing fences, but only **17 fences** actually wrote `processor` as a
+keyword. The excess came from **ten page-prelude lines**, each injected into
+every fence on its page. One edit took 92 → 16. Then one wrapper change took
+16 → 5. *Message count far exceeding fence count means the cause is shared
+vocabulary, not the fences.* That is the standing "preludes and wrappers before
+fences" lesson with a way to SEE it early.
+
+**The wrapper change was a semantics change, not a workaround.** Under the new
+`stmt-outlet-not-owned`, an outlet the page's entity publishes through *belongs
+to that entity* — so page-prelude `outlet` lines now land inside the entity for
+entity-scoped wrappers, and at context level for everything else. Making the
+wrapper agree with the language fixed 11 fences at once.
+
+### Green is not the same as right (2026-09-09)
+
+**The near-miss of the session, and it is worth remembering precisely.** The
+adaptor example was rewritten so an inbound adaptor published on its own outlet
+into an **entity's** inlet, with a connector. It validated: **0 errors.**
+
+It was wrong. Computational Model §7.7 rules that an inbound adaptor addresses
+its **own context**, which then dispatches inward by its own rules — the
+entity-inlet shape merely happens not to be caught by any check. It was found
+only by reading the CM *after* the gate went green, to write the prose.
+
+The org CLAUDE.md had been updated days earlier with exactly this warning —
+riddlg "invented a plausible lowering and gone green on it", four times in a
+week. This is the same failure in documentation rather than generated code.
+**When the CM has a ruling, the compiler passing is not evidence you modelled
+it right**; the CM is the authority and the gate is only a floor.
+
+### The lexer had drifted fifteen keywords, not six
+
+The task file named six missing keywords and added "worth a full diff rather
+than just patching these six". That instinct was right — the real number was
+**fifteen**, including `after`/`out`/`times` (the `times out after` timeout),
+`ask`, `require`, `correlation`, `replies`, `system`, and `final` (half of the
+two-word keyword `final value`).
+
+Three things about getting that diff right:
+
+- `Keyword.allKeywords` lists **`final val` identifiers, not string literals**,
+  so a regex for quoted strings inside the Seq returns **zero**. Each has to be
+  resolved against its declaration.
+- The lexer's tuples are **indented inside the class**, so a pattern anchored at
+  column zero matches nothing — and the first attempt reported *all 168*
+  keywords as missing, including `domain` and `entity`. Obviously wrong, which
+  is why controls matter.
+- `comm` on two "sorted" files disagreed with Python's sort order and also
+  reported all 168 missing. The set difference was done in Python instead, with
+  assertions on control words.
+
+**Verification was by tokenizing, not by re-reading the list.** Word lists are
+matched in order and an earlier rule can shadow a later one, so presence in a
+tuple is not proof of highlighting. `scripts/check-lexer-keywords.py` now
+guards the whole thing.
+
+### A rule-id catalog was declined, deliberately
+
+The task asked for twelve new rule ids "if the reference carries a rule-id
+table". It does not — it explains that rule ids exist and how `--fix-rule`
+works, but lists none. Creating a twelve-entry catalog was rejected: riddl
+carries on the order of **400** rule ids, so such a page would be a claim about
+a closed set that is false the day it ships, unmaintainable, and precisely the
+enumerated-tables-are-claims trap. Each id is cited inline at the rule it names
+instead, where a reader who just saw the message will be.
+
+### Two documented claims were false and are now fixed
+
+- `concepts/connector.md` said ends in different **domains** are always an
+  Error. Probed: **related** domains (sharing an ancestor), with the connector
+  in that ancestor, validate cleanly. Only *unrelated* domains are an Error.
+- The adaptor example modelled the entire pre-A103 world.
 
 ### RIDDL 2.0.0 final: the upgrade, and the gate compiler inverting (2026-08-31)
 

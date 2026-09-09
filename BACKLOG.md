@@ -92,6 +92,27 @@ CDN serves stale for up to ten minutes and has produced three false alarms.
 
 ---
 
+## 2c. Keep the docs current with riddl 2.1.x — it is moving fast
+
+**Not a defect; a standing condition.** riddl shipped 2.0.0 (2026-08-27),
+2.1.0 (09-01) and 2.1.1 (09-04), and the work the docs now describe is **26
+commits past 2.1.1** and in no release. Gating the tree against the staged
+build on 2026-09-09 opened at **92 failures** against 0 the same morning on
+2.0.0 — that is the delta over six weeks, and it will keep coming.
+
+**What that means practically:**
+
+- `build.sbt` pins a `git describe` version, not a tag, and will keep having to.
+- The gate compiler is `../bin/riddlc` again. It has flipped three times; see
+  the table in CLAUDE.md and **measure, never remember**.
+- `python3 scripts/check-lexer-keywords.py` after every upgrade.
+- Verify the grammar by hash against riddl at the pinned commit.
+
+**When 2.1.x is released and Homebrew catches up, the authority flips back to
+PATH.** That is the moment to re-read the CLAUDE.md table rather than assume.
+
+---
+
 ## 3. Re-sync the EBNF grammar whenever riddl's parser changes
 
 **What:** `sites/riddl/docs/references/riddl-grammar.ebnf` is **generated** from

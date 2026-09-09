@@ -450,24 +450,30 @@ checker above it is a **gate**: it exits non-zero on failure.
 about the checkout tells you which one is meant — and the `riddlc` on PATH is
 neither of them any more, so the wrong pairing reports confident nonsense.
 
-**Since RIDDL 2.0.0 shipped (2026-08-27), the 2.0 gate compiler is the
-`riddlc` on PATH — and this REVERSED.** Verified 2026-08-31: PATH (Homebrew)
-is **`2.0.0`**, the release; `../bin/riddlc` is **`2.0.0-9-e895537f`**, nine
-commits PAST the tag. The pin in `build.sbt` names the release, so the release
-is what the fences must be checked against.
+**Which riddlc is authoritative has now flipped THREE times in six weeks.** Do
+not carry an answer forward from a previous session; measure it.
 
-Throughout the release candidates the rule was the exact opposite, and it was
-just as emphatic: PATH was **2.0.0-rc.5** against a staged **rc.25**, twenty
-releases behind, and validating with it silently passed examples the real
-compiler rejected. **The instruction inverted without a word of it changing.**
+| When | Authority | Why |
+|---|---|---|
+| 2.0 release candidates | `../bin/riddlc` | PATH was rc.5 against a staged rc.25 — twenty releases behind |
+| 2.0.0 shipped (2026-08-27) | **PATH** | Homebrew *became* the release; the staged build ran ahead of it |
+| 2.1.x development (2026-09-09) | **`../bin/riddlc`** | riddl tagged 2.1.0/2.1.1 and moved 26 commits past; PATH still serves **2.0.0** |
+
+Each of those was written down as emphatically as this one. The instruction
+inverted twice **without a word of it changing**, and validating with the wrong
+one silently passes examples the real compiler rejects.
 
 So the durable rule is not "use PATH" and never was "use `../bin`":
 **re-measure which binary is authoritative every time, and run both.**
 
 ```bash
-riddlc version          # PATH  -- the released compiler
+riddlc version          # PATH   -- Homebrew; the LAST release it packaged
 ../bin/riddlc version   # staged -- a development build, ahead OR behind
 ```
+
+**Pick the one the docs are describing.** If the language work being documented
+is unreleased, that is the staged build, and `build.sbt` must pin its exact
+`git describe` version.
 
 `../bin/riddlc` remains a **native binary installed directly at that path**
 (since 2026-08-12; `../riddlc-dist/` is gone). It is the right choice for
@@ -498,9 +504,10 @@ the tag. All three were reconciled on 2026-08-11 and the pin is now
 resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
-# 2.0 -- sites/riddl/, validated by the RELEASED compiler on PATH (see above;
-# this was `../bin/riddlc` throughout the RCs and flipped when 2.0.0 shipped)
-python3 scripts/validate-riddl-examples.py riddlc \
+# 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
+# As of 2026-09-09 it is the STAGED build, because the docs describe 2.1.x
+# language work that no release contains.
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
 # 1.31 -- sites/riddl-1x/. THIS PATH NO LONGER EXISTS on Reid's Mac: Homebrew
@@ -552,7 +559,7 @@ a reported number cannot be compared with the last one:
 
 ```bash
 # 2.0 -- the WHOLE tree, not just annotated pages (see Status below for why)
-python3 scripts/validate-riddl-examples.py riddlc \
+python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   $(find sites/riddl/docs -name '*.md' | sort) > /tmp/gate.txt 2>&1
 echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
@@ -562,9 +569,9 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-08-31, riddl **2.0.0** release): the whole 2.0 tree is
-**372 validated / 51 skipped / 0 failed**, exit 0, and **every blanket skip is
-gone** — both the 118 `"illustrative fragment"` ones and the 73
+**Status** (2026-09-09, staged riddl **2.1.1-26-4d17b1ef**): the whole 2.0 tree
+is **376 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
+is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
 
 **Run the gate over the whole tree, not over "files with a directive".** The
@@ -684,6 +691,16 @@ compilers):
 | `put` value | unchecked | **type-checked against the output's declaration** (2.0.0) — `put order.field to output X` is a `value-type-mismatch` Error when `X` shows the whole record |
 | multi-line `do` / `prompt` | — | brace a sequence of strings: `do { "one" "two" }`, `prompt({ "one" "two" }) as T`. The bare form takes **exactly one** string — statements have no terminator, so juxtaposition would be unparseable |
 | `prompt` statement | ✅ | `[deprecated] [prompt-statement]` — `do` is canonical. Unrelated to the `prompt(...)` **value**, which is current |
+| generic processor keyword | `processor` | **`streamlet`** (2.1.x) — `processor` is `[deprecated]` (`stream-processor-keyword`) and `riddlc validate --fix --fix-rule stream-processor-keyword` rewrites it. The ABSTRACTION is still called a processor; only the keyword moved |
+| `on quiescence <window>` | ❌ | ✅ 2.1.x — fires when the **instance** handled nothing for the window; clock restarts on every message; state-scoped arming. Window is a duration literal or a `Duration`-typed path (not a `let`). One per handler; never in a `correlation`. Unlike `on activate` it IS an effect block |
+| `send … at <instant>` | ❌ | ✅ 2.1.x — `TimeStamp`/`DateTime`/`ZonedDateTime` only (`stmt-send-at-not-instant`). A past instant delivers immediately; there is **no cancellation**, so schedule to yourself and decide at fire time. `send` only, never `tell` |
+| entity-instance reference | `reference to entity X` | **`Id(entity X)`** — all five spellings make the same `UniqueId`; the old ones are `[deprecated]` (`type-reference-to-is-id`) |
+| outlet a processor may `send` on | any in scope | only one it **OWNS** (`stmt-outlet-not-owned`) — an enclosing context's outlet does not count |
+| `tell` | direct delivery | needs a **modelled channel**: a connector from an outlet the SENDER owns to the target's inlet (`msg-tell-target-unreachable`). It is sugar for exactly that `send`. Between **unrelated** domains it is an Error however wired |
+| adaptor targets | any processor | a **Context** only (`adaptor-targets-context-only`), which must declare an **admitting inlet**. Outbound addresses the far context, inbound its OWN context |
+| connector across domains | Error | permitted between **related** domains (sharing an ancestor); an Error only between unrelated ones |
+| chain end | a `sink` shape | where the message is **consumed**. Sending a *different* type is a write, not a continuation; a handler-less processor is a tail whatever its shape |
+| `stream-graph-cycle` | — | an infinite **message** loop, not a connector ring. A request/response pair is two chains |
 
 **The grammar's comment on `empty` overstates what 2.0.0 enforces.** It says
 `empty` is "an error on `T+`, `T{1,n}` or a bare `T`". Probed against the
@@ -707,6 +724,35 @@ Since the entity options emit `[deprecated]`, and the fence validator gates on
 that, they now **fail the gate** — so this is not a cosmetic migration.
 
 ### RIDDL Syntax Highlighting
+
+**The lexer's vocabulary drifts from riddl's, silently.** `riddl_lexer/` copies
+a list that lives in riddl's `Keyword.allKeywords`, and nothing kept them in
+step: measured 2026-09-09, **fifteen** keywords were missing — `prompt` and
+`forward` among them, both common in real models. The failure looks cosmetic
+(the words render as plain identifiers), so it reads as a styling quirk rather
+than a stale vocabulary, and it had gone unnoticed for a long time.
+
+```bash
+python3 scripts/check-lexer-keywords.py        # exits 1 on a gap
+```
+
+Run it after any riddl upgrade. It resolves `allKeywords` properly — the Seq
+lists `final val` identifiers, not string literals, so a naive regex for quoted
+strings returns **zero** — and it asserts on control words so a broken
+extraction fails loudly instead of reporting everything as missing. Note
+`final value` is a single two-word keyword.
+
+**Verify a fix by TOKENIZING, not by reading the list back.** Word lists are
+matched in order and an earlier rule can shadow a later one, so presence in a
+tuple is not proof of highlighting:
+
+```python
+from riddl_lexer.lexer import RiddlLexer
+toks = list(RiddlLexer().get_tokens('on quiescence "PT30M" { forward m to outlet O }'))
+```
+
+(Pygments lives in the mkdocs interpreter, `/opt/homebrew/opt/python@3.9/bin/python3.9`,
+not in the default `python3`.)
 
 The `riddl_lexer/` package provides custom Pygments syntax highlighting for
 RIDDL code blocks. It's automatically installed in CI via `pip install -e .`
