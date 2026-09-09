@@ -1,0 +1,277 @@
+.md-header{
+  background-color: #272740;
+}
+.md-search{
+    background-color: #141420;
+}
+.md-tabs{
+    background-color: #272740;
+}
+
+/* Larger logo in header */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+    height: 2rem;
+    width: auto;
+}
+
+/* RIDDL Syntax Highlighting - Dark Theme */
+[data-md-color-scheme="slate"] .language-riddl {
+  /* Keywords - burnt orange */
+  .k, .kd, .kr, .kn { color: #fa8b61; }
+  /* Readability words - yellow */
+  .kp { color: #b3ae60; }
+  /* Predefined types - teal */
+  .nb { color: #19c4bf; }
+  /* Option values - green */
+  .no { color: #57d07c; }
+  /* Punctuation - teal */
+  .p { color: #0da19e; }
+  /* Comments - gray */
+  .c1, .cm { color: #808080; font-style: italic; }
+  /* Strings - bright green */
+  .s2, .s1 { color: #98c379; }
+  /* Markdown docs - dimmer green */
+  .sd { color: #629755; font-style: italic; }
+  /* String escapes - yellow */
+  .se { color: #e0be35; }
+  /* Identifiers - default light */
+  .n { color: #a9b7c6; }
+  /* Numbers - blue */
+  .mi, .mf { color: #6897bb; }
+  /* Errors - red */
+  .err { color: #c41919; }
+}
+
+/* RIDDL Syntax Highlighting - Light Theme */
+[data-md-color-scheme="default"] .language-riddl {
+  /* Keywords - burnt orange (darker for light bg) */
+  .k, .kd, .kr, .kn { color: #c75a20; }
+  /* Readability words - olive */
+  .kp { color: #7a7a30; }
+  /* Predefined types - teal */
+  .nb { color: #0d8a85; }
+  /* Option values - green */
+  .no { color: #2d8a4a; }
+  /* Punctuation - teal */
+  .p { color: #0a7a75; }
+  /* Comments - gray */
+  .c1, .cm { color: #707070; font-style: italic; }
+  /* Strings - green */
+  .s2, .s1 { color: #50873a; }
+  /* Markdown docs - dimmer green */
+  .sd { color: #3d6a30; font-style: italic; }
+  /* String escapes - olive */
+  .se { color: #9a8520; }
+  /* Identifiers - dark */
+  .n { color: #2b2b2b; }
+  /* Numbers - blue */
+  .mi, .mf { color: #4a6a9a; }
+  /* Errors - red */
+  .err { color: #a31515; }
+}
+
+/* ---------------------------------------------------------------------------
+   "Full Search" -- cross-site search.
+
+   Rendered by overrides/main.html into Material's `hero` block, then MOVED by
+   script into the header, between the title row and the tabs. The template
+   cannot put it there directly: with navigation.tabs.sticky the tabs are
+   rendered inside partials/header.html, so no block exists between them.
+
+   Two states are styled below because the move can fail (if Material renames
+   .md-header or .md-tabs). Unmoved it sits below the header on the page
+   background; moved it sits on the header's primary colour. It works either
+   way; only the first is ugly.
+   --------------------------------------------------------------------------- */
+.ossum-fullsearch {
+  background: var(--md-default-bg-color);
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.ossum-fullsearch__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.1rem 0.8rem 0.25rem;
+}
+
+.ossum-fullsearch__label {
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.ossum-fullsearch__ui {
+  position: relative;   /* containing block for the results overlay */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* --- in the header, on the primary colour ------------------------------- */
+
+/* Transparent, NOT a colour of its own: this sits inside .md-header, which
+   this stylesheet paints #272740 a few rules above, so letting the header show
+   through keeps the strip indistinguishable from the rows above and below it.
+   Setting var(--md-primary-fg-color) here made it a bright blue band across an
+   otherwise dark header. Hard-coding #272740 would work too, but would be a
+   second place to update whenever the header colour changes. */
+.ossum-fullsearch--in-header {
+  background: transparent;
+  color: var(--md-primary-bg-color);
+  border-bottom: none;
+  width: 100%;
+}
+
+.ossum-fullsearch--in-header .ossum-fullsearch__label {
+  color: var(--md-primary-bg-color);
+}
+
+/* Match Material's own header search field: translucent dark fill, light
+   text, so the two inputs read as a pair rather than as a stray widget.
+   
+   The extra selector depth is deliberate. pagefind-ui.css is loaded from
+   `extrahead`, i.e. AFTER extra.css, so at equal specificity Pagefind wins and
+   the input stayed 45px tall. Matching through .pagefind-ui__form outranks it
+   without resorting to !important. */
+.ossum-fullsearch--in-header .pagefind-ui .pagefind-ui__form .pagefind-ui__search-input {
+  background-color: #00000042;
+  color: var(--md-primary-bg-color);
+  border: none;
+  border-radius: 0.1rem;
+  height: 1.3rem;
+  min-height: 0;
+  font-size: 0.62rem;
+  padding: 0 1.6rem;
+  background-size: 0.75rem;
+  background-position: 0.4rem center;
+}
+
+.ossum-fullsearch--in-header .pagefind-ui__search-input::placeholder {
+  color: var(--md-primary-bg-color);
+  opacity: 0.7;
+}
+
+.ossum-fullsearch--in-header .pagefind-ui__search-clear {
+  color: var(--md-primary-bg-color);
+  background: transparent;
+  font-size: 0.6rem;
+}
+
+/* --- the results overlay ------------------------------------------------- */
+
+/* Pagefind renders results as a sibling of the input. Left in flow they would
+   shove the whole page down on every keystroke -- and inside the header they
+   would stretch the header itself. */
+.ossum-fullsearch__ui .pagefind-ui__drawer {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: 75vh;
+  overflow-y: auto;
+  z-index: 5;
+  padding: 0.4rem 0.8rem 0.8rem;
+
+  /* Explicitly the PAGE colours, not the header's: this hangs over page
+     content and must stay readable in both schemes. */
+  background: var(--md-default-bg-color);
+  color: var(--md-typeset-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0 0 0.1rem 0.1rem;
+  box-shadow: var(--md-shadow-z2);
+}
+
+.ossum-fullsearch__ui .pagefind-ui__drawer:empty,
+.ossum-fullsearch__ui .pagefind-ui__drawer--hidden {
+  display: none;
+}
+
+.ossum-fullsearch__note {
+  font-size: 0.62rem;
+}
+
+/* Narrow screens: the label costs more room than it explains. */
+@media screen and (max-width: 44.9375em) {
+  .ossum-fullsearch__label { display: none; }
+}
+
+/* Material's own header search field is taller than it needs to be; bring it
+   down so the two search rows sit compactly together. Material's default is
+   1.8rem. */
+.md-search__form { height: 1.3rem; }
+.md-search__input { font-size: 0.62rem; }
+.md-header .md-search__icon { height: 0.85rem; width: 0.85rem; }
+
+/* Pagefind's own control sizing, both mount points. */
+.ossum-fullsearch,
+#pagefind-search {
+  --pagefind-ui-scale: 0.5;
+  --pagefind-ui-primary: var(--md-primary-fg-color);
+  --pagefind-ui-text: var(--md-typeset-color);
+  --pagefind-ui-background: var(--md-default-bg-color);
+  --pagefind-ui-border: var(--md-default-fg-color--lightest);
+  --pagefind-ui-tag: var(--md-default-fg-color--lightest);
+}
+
+/* The drawer must not inherit the header's light-on-purple text. `mark` is
+   excluded: it keeps a yellow background in both schemes, so forcing the page
+   text colour onto it gives light-on-yellow in dark mode -- unreadable. */
+.ossum-fullsearch--in-header .pagefind-ui__drawer,
+.ossum-fullsearch--in-header .pagefind-ui__drawer *:not(mark) {
+  color: var(--md-typeset-color);
+}
+
+.ossum-fullsearch .pagefind-ui__drawer mark,
+#pagefind-search .pagefind-ui__drawer mark {
+  color: #000;
+  background-color: #ffd54f;
+}
+
+.ossum-fullsearch--in-header .pagefind-ui__result-link {
+  color: var(--md-primary-fg-color);
+}
+
+/* --- clickable result rows ----------------------------------------------- */
+
+/* The whole row navigates (delegated in overrides/main.html). Previously only
+   the title was a link, which readers did not discover -- the excerpt beneath
+   it looked like part of the same target and did nothing. The cursor and the
+   hover wash are what make the enlarged target visible; without them the
+   behaviour is there but unadvertised, which is barely better. */
+/* No padding is set here on purpose. Pagefind writes its own row padding as
+   `.pagefind-ui__result.svelte-XXXX.svelte-XXXX` -- it repeats the hash to
+   raise specificity -- and pagefind-ui.css loads from `extrahead`, i.e. AFTER
+   this file. Overriding it would mean a four-class selector carrying a
+   build-specific hash, for a purely cosmetic inset. The hover wash spans the
+   full row either way, which is what actually signals the target. */
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result,
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result-nested {
+  cursor: pointer;
+  border-radius: 0.1rem;
+}
+
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:hover,
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result-nested:hover {
+  background: var(--md-default-fg-color--lightest);
+}
+
+/* Sub-results sit inside their parent result, so hovering one would otherwise
+   light up both rows and make it unclear which would open. `:has` is not
+   universally supported; where it is missing both simply highlight, which is
+   untidy rather than broken. */
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:has(.pagefind-ui__result-nested:hover),
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:has(.pagefind-ui__result-nested:focus-within) {
+  background: transparent;
+}
+
+/* The anchor is still the keyboard-navigable element, so its focus ring has to
+   read as "this row", matching what the mouse target implies. */
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result:focus-within,
+.ossum-fullsearch .ossum-fullsearch__ui .pagefind-ui__result-nested:focus-within {
+  background: var(--md-default-fg-color--lightest);
+}
