@@ -11,19 +11,23 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-09-09
+## HANDOFF — as of 2026-09-11
 
-**Branch `main`.** Run `git status` for tree/push state.
+**Branch `main`.** Run `git status` for tree and push state.
 
-**Pinned to the STAGED riddl `2.1.1-26-4d17b1ef`**, not a release — the
-language work the docs now describe (`streamlet`, `on quiescence`, `send … at`,
-the A103 boundary rules) is past the 2.1.1 tag and in no published release.
-Scala unchanged at 3.9.0. Gate: **376 validated / 52 skipped / 0 failed,
-exit 0.**
+**`build.sbt` pins riddl `2.1.1-26-4d17b1ef`, Scala `3.9.0`. The staged
+`../bin/riddlc` is `2.1.1-33-dd3c2d80`** — verified by running it, 2026-09-11.
+They disagree, and that is the first thing to know.
 
-**The gate compiler is `../bin/riddlc` again — it has flipped THREE times in
-six weeks** (RCs → staged, 2.0.0 → PATH, 2.1.x dev → staged). Each flip was
-written down as confidently as this one. **Measure, never remember:**
+**Gate against `-33`: RED at 3** (373 / 52 / 3, one rule, `saga-step-no-tell`).
+**The docs are not broken** — they were verified green at **376 / 52 / 0**
+against `-26`, which is what the last commit claims and what was true then.
+This is an **un-started upgrade**. Full diagnosis with file:line and the
+upstream commit that changed the rule's severity is **BACKLOG 1h**.
+
+**The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
+behind. But it has flipped three times in six weeks, so **measure, never
+remember**:
 
 ```bash
 riddlc version && ../bin/riddlc version
@@ -34,60 +38,64 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 ### In flight
 
-Nothing half-edited. `task/` is empty — both incoming tasks closed 2026-09-09.
+Nothing half-edited; `task/` is empty. One thing is **finished in git but not
+on the site**: BACKLOG 2b's `mike delete` of the retired `next`, `2.0` and
+`1.31` directories. Its precondition is verified met (the `2.x`/`1.x` deploy
+landed, run `34377519216`) and it has **not** been run. Until it does, the
+version selector offers four entries. It is one command, deliberately left to
+Reid because it is destructive and outward-facing.
 
-**The version relabel is committed but NOT yet deployed.** `docs-version.yml`
-now declares evolving lines `2.x` (holding `latest`) and `1.x`; `gh-pages`
-still shows `2.0 [latest, next]` and `1.31`. Pushing publishes `2.x`/`1.x`, and
-**then** the three retired directories (`next`, `2.0`, `1.31`) need one manual
-`mike delete` — BACKLOG 2b, which must run *after* the deploy, never before.
+### Traps a fresh session would hit
 
-### The three things a fresh session would get wrong
-
-- **Green is not the same as right when the Computational Model has a ruling.**
-  The adaptor example was rewritten so an inbound adaptor published into an
-  *entity's* inlet. It validated with 0 errors and was **wrong**: CM §7.7 says
-  an inbound adaptor addresses its OWN context, which dispatches inward. Only
-  reading the CM caught it. Same failure the org CLAUDE.md warns about for
-  riddlg, reproduced in docs.
-- **`concepts/group.md:42` is still factually false** about the modality
-  aliases. Untouched again — no gate can see a wrong prose claim. BACKLOG
-  1e-remnant.
-- **The 1.31 gate still cannot run** (Homebrew removed the keg). BACKLOG 3b.
-
-### Traps, each of which has already bitten someone here
-
-- **Fix preludes and wrappers BEFORE fences.** 92 failures → 16 from ten
-  prelude lines; then 16 → 5 from one wrapper change. Chasing fences first
-  would have been days of wasted work. The tell is a message count far larger
-  than the fence count.
-- **Regenerate the grammar LAST**, and verify by hash against riddl at the
-  pinned commit (`git cat-file -p <sha>:language/.../ebnf-grammar.ebnf | md5 -q`).
-  That is a VERIFICATION, never a substitute for `sbt extractGrammar`.
-- **`sbt extractGrammar` can hang** at 0.0% CPU with a flat log. Do **not**
-  `pkill -f sbt` — it kills Reid's IDE. It ran fine this session.
+- **Green is not the same as right when the Computational Model has a
+  ruling.** An adaptor example validated at 0 errors and still modelled the
+  wrong thing; CM §7.7 says an inbound adaptor addresses its OWN context. Only
+  reading the CM caught it. Read it *before* deciding — see the org CLAUDE.md.
+- **Compare message count against failing-fence count before editing
+  anything.** A ratio far above 1 means the cause is a prelude or wrapper, not
+  the fences: ten prelude lines once produced 160 messages over 92 fences, and
+  fixing them took it to 16. BACKLOG 1h's ratio is ~1 per saga step, so that
+  one really is per-fence content.
+- **Renaming a mike version does not move the old one.** The retired directory
+  stays on `gh-pages`, serves frozen content forever, and never 404s — so the
+  redirect never fires. That is why 2b deletes rather than leaves.
+- **`scripts/gh-pages-404.html`'s `VERSION` regex must keep matching
+  `\d+\.x`.** Without it the loop guard stops firing and a real 404 inside
+  `/riddl/2.x/` rewrites to `/riddl/2.x/2.x/…`.
 - **Never conclude absence from a narrowly-scoped grep.**
-  `adaptor-implied-outlet-ambiguous` looked defined-but-dead in `language/`;
-  it is emitted from `passes/`.
-- **Never check `$?` through a pipe.** `… | tail` reports tail's status.
+  `adaptor-implied-outlet-ambiguous` looked dead in `language/`; it is emitted
+  from `passes/`.
+- **Never check `$?` through a pipe** — `… | tail` reports tail's status.
+- **`concepts/adaptor.md` documents a behaviour that has been RULED AGAINST.**
+  Reid ruled on 2026-09-10 to abolish implied adaptor ports (riddl
+  `e5b26745a`); implementation is paused on feasibility, so the compiler still
+  behaves that way and our fences still gate. **Do not pre-emptively rewrite
+  it** — that would document a language that does not exist. BACKLOG 1i.
 
 ### Certainty
 
-- **Verified this session (run, not recalled):** every compiler version; all 92
-  gate failures and their rule ids; all 15 missing lexer keywords AND that they
-  now tokenize as keywords; the grammar hash against the pinned commit; that a
-  connector between *related* domains validates; the CM-sanctioned inbound
-  adaptor shape.
-- **Assumed:** that `concepts/processor.md` keeping the word "processor" for
-  the abstraction matches riddl's intent. It follows from the commit's stated
-  reasoning, but was not confirmed with riddl.
+- **Verified by running, this session:** both compiler versions; the 3 gate
+  failures and their rule id and message; that the `2.x`/`1.x` deploy landed
+  and `2.x` carries the A103 content while `2.0` does not; that the three
+  retired directories are still present; that `BACKLOG.md` is tracked; that the
+  stale `gh-pages` worktree is pruned and the branch intact.
+- **Assumed, not verified:** that BACKLOG 1h's three fences need only a `tell
+  command` added per step. The diagnosis is measured; the *remedy* is a
+  judgement about what each example teaches. Also unverified — whether riddl's
+  `1037313f6` ("at most one of each special on-clause") affects the
+  `on quiescence` one-per-handler rule this repo now documents.
+- **Read `../riddl/task/` during a handoff, not just our own.** Both of this
+  session's late findings — the abolished implied ports and the saga rule —
+  came from riddl's tree and its log, and neither would have surfaced from
+  anything in this repo.
 
 ### Pointers
 
-- **BACKLOG.md** — **2b** (delete the stale `next` alias, one command), **2c**
-  (2.1.x is moving fast), **1e-remnant**, **3b**.
-- **CLAUDE.md** — the gate-compiler flip table, the lexer drift trap, and the
-  version-differences table now carrying the 2.1 rules.
+- **BACKLOG.md** — **1h first** (the `-33` upgrade), then **2b** (one manual
+  command), **1e-remnant** (`group.md:42` is still false), **3b** (the 1.x
+  gate has no compiler).
+- **CLAUDE.md** — the gate-compiler flip table, the evolving-lines versioning
+  model, the lexer drift trap, and the version-differences table.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 

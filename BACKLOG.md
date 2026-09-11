@@ -61,6 +61,96 @@ diagnostic there trains people to ignore diagnostics.
 
 ---
 
+## 1h. Upgrade to staged `2.1.1-33-dd3c2d80` — the gate is RED at 3  ← START HERE
+
+**The staged binary moved under us again**, the second time in three days.
+`../bin/riddlc` is **`2.1.1-33-dd3c2d80`**; `build.sbt:32` still pins
+`2.1.1-26-4d17b1ef`. Verified 2026-09-11 by running `../bin/riddlc version`.
+
+**Nothing is wrong with the docs.** The tree was verified green at
+**376 / 52 / 0** against `-26`, which is what the last commit claims and what
+was true. These three are an **un-started upgrade**, not a regression.
+
+Measured against `-33`: **373 validated / 52 skipped / 3 failed**, 8 messages,
+one rule:
+
+```
+[error] [saga-step-no-tell]
+SagaStep 'PlaceTheOrder' do-statements contain no 'tell command' to effect
+state changes:
+      step PlaceTheOrder is {
+```
+
+- `guides/authors/authoring-riddl.md:668` (in-context)
+- `guides/authors/index.md:606` (in-context)
+- `references/language-reference.md:2500` (in-context)
+
+8 messages over 3 fences because each saga has several steps — a ratio close to
+1 per step, so this is **per-fence content, not a prelude or wrapper problem**
+(cf. the 160-over-92 case that was). Fix the fences.
+
+**The rule changed severity deliberately.** riddl `950d14804` — *"A saga step
+that tells nothing is an ERROR, not a completeness warning"*. So this is not a
+bug to report upstream; the examples genuinely describe saga steps that effect
+nothing. Each needs a `tell command` in its `do` block, which is also better
+teaching: a saga step whose body only narrates is not a step.
+
+Related riddl commits in the same window, worth reading before editing:
+`534f67290` (the saga rulings and the framing error behind them),
+`56ebcc52a` (`saga-no-timeout` warns without blocking codegen),
+`1037313f6` (a handler may declare at most one of each special on-clause —
+may affect `on quiescence`, which this repo documents as one-per-handler).
+
+**Do the pin and the grammar together**, and regenerate the grammar **last**.
+Verify it by hash against riddl at whatever commit gets pinned.
+
+---
+
+## 1i. WATCH — implied adaptor ports are RULED ABOLISHED, and we document them
+
+**Found during the 2026-09-11 handoff**, by reading `../riddl/task/` rather
+than our own. Not actionable yet; it is here so nobody deepens the affected
+section or is blindsided when it flips.
+
+**`concepts/adaptor.md` documents implied adaptor ports as the design.** The
+"Ports are implied, and declaring one overrides that side" subsection, and the
+whole `adaptor-implied-outlet-ambiguous` explanation, rest on A103 giving a
+port-less adaptor one implied inlet and one implied outlet. Written 2026-09-09,
+gated green, and **correct against the compiler today**.
+
+**Reid ruled on 2026-09-10 to abolish them** — riddl `e5b26745a`, *"implied
+adaptor ports ruled, then paused on feasibility"*. The ruling stands; the
+implementation stopped **before any code changed**, so nothing in our docs is
+wrong yet.
+
+**Why it is paused, which is also why it may stay paused a while:**
+`Inlet.type_` is a TypeRef to a NAMED type, and of 411 port-less adaptors in
+riddl-models only 165 handle exactly one type while 190 handle two to five,
+with no single name to point at. Only 1 of 355 has a derivable outlet — the
+rest are prose stubs (`do` + `error`, no `tell`). Generating the ports would
+mean the compiler authoring user-facing alternation types. It is a feasibility
+objection, not a corpus-cost one.
+
+The open question sits in `riddl/task/2026-09-10-abolish-implied-adaptor-ports.md`.
+
+**Do NOT pre-emptively rewrite the section.** The compiler still behaves this
+way, the fences gate against it, and rewriting now would document a language
+that does not exist — the exact failure the `cp`-the-grammar ban exists to
+prevent. When the change lands:
+
+- the "Ports are implied" subsection of `concepts/adaptor.md` goes
+- `adaptor-implied-outlet-ambiguous` may disappear with it, so check before
+  citing it
+- the example's adaptors already declare their ports explicitly, so the FENCES
+  should survive; it is the prose that moves
+
+**Also unverified and worth checking in the same pass:** riddl `1037313f6`
+("a handler may declare at most one of each SPECIAL on-clause") may or may not
+bear on the one-`on quiescence`-per-handler rule we document in
+`concepts/onclause.md` and the language reference.
+
+---
+
 ## 2b. Retire `next`, `2.0` and `1.31` from gh-pages — manual, after the deploy
 
 **Reid's decision, 2026-09-09:** RIDDL doc versions are **evolving lines**.
@@ -86,9 +176,24 @@ mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next 2.0 1.31
 `-F` is required: mike reads `mkdocs.yml` from the working directory to resolve
 the branch, and there is no config at the repo root.
 
-**Run it AFTER the `2.x`/`1.x` deploy has landed**, never before — deleting
-`2.0` while nothing has published `2.x` yet leaves the RIDDL docs with no live
-version at all.
+**The precondition is MET — verified 2026-09-11.** The deploy landed (run
+`34377519216`, success, 57s). `gh-pages:riddl/versions.json` lists `2.x
+[latest]`, `2.0 [next]`, `1.31` and `1.x`; `/riddl/index.html` redirects to
+`latest/`; `latest` and `2.x` are byte-identical (`b67f1211…`); and `2.x`
+carries the new A103 content while `2.0` does not (5 hits vs 0 for "The Adaptor
+Is the Boundary"). **So this is runnable now, and has NOT been run** — all
+three retired directories are still on `gh-pages`.
+
+Until it runs the version selector offers **four** entries, which is the only
+visible symptom.
+
+The ordering rule that gated it is now satisfied, but keep it recorded: running
+before the deploy would have deleted `2.0` while nothing had published `2.x`,
+leaving the RIDDL docs with no live version at all.
+
+**The stale `gh-pages` worktree that would have blocked `git branch -f` was
+pruned on 2026-09-10.** `git worktree list` shows only the main tree; the
+branch itself is intact at `417bd6a`.
 
 **The URLs still in the wild are already handled.** `scripts/gh-pages-404.html`
 maps `2.0`→`2.x`, `1.31`→`1.x` and `next`→`latest`, preserving the rest of the
