@@ -2499,18 +2499,36 @@ warning.
 <!-- riddl: in-context -->
 ```riddl
 saga Checkout is {
-  step ReserveItems is { do "reserve the items" }
-    reverted by { do "release the reservation" }
-  step ChargeCard is { do "charge the card" }
-    reverted by { do "refund the charge" }
+  step ReserveStock is {
+    tell command ReserveItems(orderId = "o-1") to entity Inventory
+  } reverted by {
+    tell command ReleaseItems(orderId = "o-1") to entity Inventory
+  }
+  step ChargeCard is {
+    tell command ProcessPayment(orderId = "o-1") to entity PaymentService
+  } reverted by {
+    tell command RefundPayment(orderId = "o-1") to entity PaymentService
+  }
 } with { option timeout("PT5M") }
 ```
+
+Every step **tells a command** to something else. That is not a stylistic
+choice: a step whose do-block tells no command effects nothing, and its
+`reverted by` block then promises to compensate an action that never
+happened. riddlc makes that an **Error** (`saga-step-no-tell`) rather than a
+completeness warning, because it is a self-contradiction, not an omission —
+the step claims to be one step of a distributed transaction while performing
+none of it. A `send` does not satisfy the rule; a saga step drives a processor,
+and `tell` is how a processor is driven.
 
 !!! warning "Saga Validation"
     **Errors:**
 
     - A saga step that references a definition owned by a **different domain**.
       A saga orchestrates a transaction within one bounded domain.
+    - A saga step whose do-block contains no `tell command`
+      (`saga-step-no-tell`). See above: the step effects nothing, so there is
+      nothing for its `reverted by` block to compensate.
 
     **Warnings:**
 
@@ -2518,10 +2536,8 @@ saga Checkout is {
       A step's do/undo is all-or-nothing, so it should have at most one place
       it can fail — split the step. `send`, `tell`, `yield` and `put` can fail,
       as can each embedded `call` or `get`.
-
-    **Completeness Warnings:**
-
-    - Saga step do-statements that drive no command
+    - A saga with no `timeout` option (`saga-no-timeout`, a completeness
+      warning) — see "What an absent `timeout` means" above.
 
 ## Repositories
 

@@ -9,6 +9,8 @@ weight: 5
 
 <!-- riddl-prelude
   entity Inventory is { ??? }
+  entity Payments is { ??? }
+  entity Orders is { ??? }
   type Money is Currency(USD)
   type OrderId is String
   type CartId is String
@@ -613,23 +615,24 @@ saga PlaceOrder is {
   requires record PlaceOrderInput
 
   step ReserveInventory is {
-    send command ReserveItems(note = "a value") to outlet Commands
+    tell command ReserveItems(note = "a value") to entity Inventory
   } reverted by {
-    send command ReleaseReservation(note = "a value") to outlet Commands
+    tell command ReleaseReservation(note = "a value") to entity Inventory
   }
 
   step ChargePayment is {
-    send command ProcessPayment(note = "a value") to outlet Commands
+    tell command ProcessPayment(note = "a value") to entity Payments
   } reverted by {
-    send command RefundPayment(note = "a value") to outlet Commands
+    tell command RefundPayment(note = "a value") to entity Payments
   }
 
   step PlaceTheOrder is {
-    send command CreateOrder(note = "a value") to outlet Commands
+    tell command CreateOrder(note = "a value") to entity Orders
   } reverted by {
-    send command CancelOrder(note = "a value") to outlet Commands
+    tell command CancelOrder(note = "a value") to entity Orders
   }
 } with {
+  option timeout("PT10M")
   briefly "Orchestrates the order placement process"
   described as {
     |This saga coordinates placing an order across multiple contexts.
@@ -637,6 +640,12 @@ saga PlaceOrder is {
   }
 }
 ```
+
+Each step **tells a command** to the processor that does the work, and each
+`reverted by` block tells the command that undoes it. A step that tells no
+command is an Error (`saga-step-no-tell`): it effects nothing, so there is
+nothing to compensate. The `timeout` bounds the whole run; without it riddlc
+warns that compensation time is left to the implementation.
 
 ## Validation and Iteration
 

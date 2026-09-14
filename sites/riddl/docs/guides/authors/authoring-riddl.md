@@ -23,6 +23,14 @@
   outlet Events is type AccountEvent
   event OrderCompleted is { orderId: Id(Order) }
   event OrderFailed is { orderId: Id(Order), reason: String }
+  entity Inventory is { ??? }
+  entity Billing is { ??? }
+  command ReserveStock is { orderId: Id(Order) }
+  command ReleaseStock is { orderId: Id(Order) }
+  command ChargeCard is { orderId: Id(Order) }
+  command RefundCharge is { orderId: Id(Order) }
+  command FinalizeOrder is { orderId: Id(Order) }
+  command CancelOrder is { orderId: Id(Order) }
 -->
 
 
@@ -671,24 +679,31 @@ saga OrderSaga is {
   returns event OrderCompleted
 
   step ReserveInventory is {
-    // reserve inventory
+    tell command ReserveStock(orderId = "o-1") to entity Inventory
   } reverted by {
-    // release inventory on failure
+    tell command ReleaseStock(orderId = "o-1") to entity Inventory
   }
 
   step ProcessPayment is {
-    // charge payment
+    tell command ChargeCard(orderId = "o-1") to entity Billing
   } reverted by {
-    // refund payment on failure
+    tell command RefundCharge(orderId = "o-1") to entity Billing
   }
 
   step ConfirmOrder is {
-    // finalize order
+    tell command FinalizeOrder(orderId = "o-1") to entity Order
   } reverted by {
-    // mark the order cancelled
+    tell command CancelOrder(orderId = "o-1") to entity Order
   }
+} with {
+  option timeout("PT10M")
 }
 ```
+
+A step's do-block must **tell a command** to some other processor — that is
+what makes it a step. A step that tells nothing is an Error
+(`saga-step-no-tell`): it has no effect, so its `reverted by` block would be
+compensating an action that never happened.
 
 ---
 

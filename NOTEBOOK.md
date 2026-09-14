@@ -11,19 +11,24 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-09-11
+## HANDOFF — as of 2026-09-14
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins riddl `2.1.1-26-4d17b1ef`, Scala `3.9.0`. The staged
-`../bin/riddlc` is `2.1.1-33-dd3c2d80`** — verified by running it, 2026-09-11.
-They disagree, and that is the first thing to know.
+**`build.sbt` pins riddl `2.2.0`, Scala `3.9.0`, and `../bin/riddlc` IS
+`2.2.0`** — tag, staged binary and `~/.ivy2/local` artifact agree, verified
+2026-09-14. The grammar hashes identical to riddl's at the tag.
 
-**Gate against `-33`: RED at 3** (373 / 52 / 3, one rule, `saga-step-no-tell`).
-**The docs are not broken** — they were verified green at **376 / 52 / 0**
-against `-26`, which is what the last commit claims and what was true then.
-This is an **un-started upgrade**. Full diagnosis with file:line and the
-upstream commit that changed the rule's severity is **BACKLOG 1h**.
+**Gate against 2.2.0: GREEN, 376 / 52 / 0.** The three `saga-step-no-tell`
+fences (BACKLOG 1h, now closed) each tell a command per step.
+
+**In flight: the 2026-09-11 task file** (`task/`) — implied adaptor ports are
+abolished in riddl `2c2b8d5b2` and the compiler now enforces it, so
+`concepts/adaptor.md` §"Ports are implied" is WRONG on the live compiler
+(its fences stay green only because the new rule is a warning). Plus four
+language-reference additions: `stmt-forward-wrong-clause`, `append`/`remove`,
+`Advisory`. See the task file; it carries a gate-ready `append`/`remove`
+example.
 
 **The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
 behind. But it has flipped three times in six weeks, so **measure, never
@@ -66,11 +71,14 @@ Reid because it is destructive and outward-facing.
   `adaptor-implied-outlet-ambiguous` looked dead in `language/`; it is emitted
   from `passes/`.
 - **Never check `$?` through a pipe** — `… | tail` reports tail's status.
-- **`concepts/adaptor.md` documents a behaviour that has been RULED AGAINST.**
-  Reid ruled on 2026-09-10 to abolish implied adaptor ports (riddl
-  `e5b26745a`); implementation is paused on feasibility, so the compiler still
-  behaves that way and our fences still gate. **Do not pre-emptively rewrite
-  it** — that would document a language that does not exist. BACKLOG 1i.
+- **`concepts/adaptor.md` documents implied adaptor ports, which 2.2.0
+  ABOLISHED** (riddl `2c2b8d5b2`, 2026-09-11 — the "paused on feasibility"
+  note of 2026-09-11 was overtaken within hours). The page's fences still
+  gate green because the replacement rule is a *warning*; the prose is what
+  is wrong. BACKLOG 1i's premise is gone; the task file is the spec.
+- **`sbt extractGrammar` hangs because `sbtn` attaches to IntelliJ's sbt
+  shell.** `sbt --server -batch extractGrammar` finishes in seconds. CLAUDE.md
+  has the `lsof` diagnosis.
 
 ### Certainty
 
@@ -79,11 +87,9 @@ Reid because it is destructive and outward-facing.
   and `2.x` carries the A103 content while `2.0` does not; that the three
   retired directories are still present; that `BACKLOG.md` is tracked; that the
   stale `gh-pages` worktree is pruned and the branch intact.
-- **Assumed, not verified:** that BACKLOG 1h's three fences need only a `tell
-  command` added per step. The diagnosis is measured; the *remedy* is a
-  judgement about what each example teaches. Also unverified — whether riddl's
-  `1037313f6` ("at most one of each special on-clause") affects the
-  `on quiescence` one-per-handler rule this repo now documents.
+- **Assumed, not verified:** whether riddl's `1037313f6` ("at most one of
+  each special on-clause") affects the `on quiescence` one-per-handler rule
+  this repo now documents.
 - **Read `../riddl/task/` during a handoff, not just our own.** Both of this
   session's late findings — the abolished implied ports and the saga rule —
   came from riddl's tree and its log, and neither would have surfaced from
@@ -91,13 +97,46 @@ Reid because it is destructive and outward-facing.
 
 ### Pointers
 
-- **BACKLOG.md** — **1h first** (the `-33` upgrade), then **2b** (one manual
-  command), **1e-remnant** (`group.md:42` is still false), **3b** (the 1.x
-  gate has no compiler).
+- **BACKLOG.md** — **2b** (one manual command), **1e-remnant** (`group.md:42`
+  is still false), **3b** (the 1.x gate has no compiler). 1i is superseded by
+  the task file.
 - **CLAUDE.md** — the gate-compiler flip table, the evolving-lines versioning
   model, the lexer drift trap, and the version-differences table.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
+
+---
+
+### riddl 2.2.0: the saga rule, and why extractGrammar "hangs" ✅ **2026-09-14**
+
+**The upgrade was easy; the diagnosis of an old trap was the yield.** The pin
+went `2.1.1-26` → `2.2.0` directly, skipping the `-33` and `-51` staged builds
+that BACKLOG 1h and the last handoff were written against — a tagged release
+with all three legs (tag, binary, `~/.ivy2/local` artifact) landed the same
+morning. Gate: 373 / 52 / 3 before, **376 / 52 / 0** after, one rule.
+
+**`saga-step-no-tell` wants a `tell` of a COMMAND — `send` does not count.**
+`guides/authors/index.md` already sent a command to an outlet from every step
+and still failed. The implementation (`ValidationPass.scala:6598`) looks for a
+`TellStatement` whose operand widens to `CommandCase`. The fix for all three
+fences is `tell command X(...) to entity Y`; each page's prelude grew the
+entity stubs and commands it needed. Two collisions found by the gate, not
+by reading: a `step ReserveItems` next to a prelude `command ReserveItems`
+is `ref-ambiguous`, and `authoring-riddl.md` already has a `context Payments`,
+so its billing entity is `Billing`.
+
+**The extractGrammar hang has a cause.** Twice it sat at 0.0% CPU for ten
+minutes with a log ending at an IDE `sbt-structure` dump. `lsof -p <sbtn>`
+showed the client's socket peer was pid 58397 — IntelliJ's `-Didea.managed`
+sbt shell for this project, which answers the connection, echoes its import,
+and never runs the command. `sbt -batch shutdown` says "no sbt server is
+running" because, from sbtn's point of view, none is: it is talking to the
+IDE. **`sbt --server -batch extractGrammar`** skips the client and took 2 s.
+The 2026-08-31 "hang" was almost certainly the same thing; the identical
+temp filename across runs was the tell.
+
+**Grammar diff at 2.2.0:** `append_statement` and `remove_statement` only.
+Lexer check clean — `append`, `remove`, `where` were already reserved.
 
 ---
 

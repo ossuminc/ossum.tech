@@ -363,15 +363,21 @@ crawlers that every version of every page is the same URL.
   byte-identical to 2.0.0's, which is how that upgrade shipped a provably
   correct grammar while `extractGrammar` was unavailable (below).
 
-  **`sbt extractGrammar` can hang indefinitely against a contended sbt server.**
-  On 2026-08-31 it sat at **0.0% CPU for ~40 minutes** across two attempts,
-  with riddl 2.0.0 never reaching the Coursier cache; the log ended at an
-  IDE `sbt-structure` dump whose temp filename was *identical* between runs.
-  `sbt -batch shutdown` first did **not** help. Symptoms of a hang rather than
-  a slow build: flat log size, no `[info] compiling`, 0.0% CPU. Do **not**
-  `pkill -f sbt` to clear it — that kills the user's IDE and every other
-  project's server. Verify the grammar by hash instead and say so plainly. Same family as every other trap here: the signal that something
-  was skipped is ABSENT rather than wrong.
+  **`sbt extractGrammar` "hangs" because `sbtn` attaches to IntelliJ's sbt
+  shell. Run it as `sbt --server -batch extractGrammar`.** Diagnosed
+  2026-09-14 with `lsof`: the thin client's socket peer was the
+  `-Didea.managed=true` java process IntelliJ keeps open for this project,
+  which echoes its own `sbt-structure` import and never executes the batch
+  command. That is why the log always ends at an IDE `sbt-structure` dump
+  with the *same* temp filename, why `sbt -batch shutdown` reports "no sbt
+  server is running" while the hang persists, and why it sits at **0.0% CPU**
+  (~40 minutes on 2026-08-31, 2 × 10 minutes on 2026-09-14). `--server` runs
+  sbt in the foreground without the client and finished in **2 seconds**.
+  Symptoms of the hang rather than a slow build: flat log size, no
+  `[info] compiling`, 0.0% CPU. Still never `pkill -f sbt` — that kills the
+  IDE's shell and every other project's server. Same family as every other
+  trap here: the signal that something was skipped is ABSENT rather than
+  wrong.
 
   **The sbt build exists only for this task** — it produces no site content
   and is on no CI publishing path. It is **sbt 2.0.6** (bumped from 2.0.2 on
@@ -479,6 +485,7 @@ not carry an answer forward from a previous session; measure it.
 | 2.0 release candidates | `../bin/riddlc` | PATH was rc.5 against a staged rc.25 — twenty releases behind |
 | 2.0.0 shipped (2026-08-27) | **PATH** | Homebrew *became* the release; the staged build ran ahead of it |
 | 2.1.x development (2026-09-09) | **`../bin/riddlc`** | riddl tagged 2.1.0/2.1.1 and moved 26 commits past; PATH still serves **2.0.0** |
+| 2.2.0 shipped (2026-09-14) | **`../bin/riddlc`** — which IS `2.2.0` | tag, staged binary and `~/.ivy2/local` artifact all agree for once; PATH still serves **2.0.0** until Homebrew catches up |
 
 Each of those was written down as emphatically as this one. The instruction
 inverted twice **without a word of it changing**, and validating with the wrong
@@ -507,11 +514,12 @@ one-to-thirty-three commits past their tag, with only the staged version's JVM
 `_3` artifacts in `~/.ivy2/local`, so `build.sbt` had to pin the exact
 `git describe` version.
 
-**The 2.0.0 release ended that, for now:** the tag, a JVM `_3` artifact on
-GitHub Packages, and a working PATH compiler all exist together, so the pin is
-the clean `2.0.0`. Expect the RC pattern to return the moment 2.1 development
-starts. Check all three separately (tag, binary, artifact) and pin what the
-gate actually runs.
+**The 2.0.0 release ended that, for now,** and 2.1.x development brought it
+straight back: the pin went through `2.1.1-26-4d17b1ef` while the staged
+binary ran on to `-33` and `-51`. **2.2.0 (2026-09-14) reconciled all three
+again** — tag, `../bin/riddlc version`, and `riddl-language_3/2.2.0` in
+`~/.ivy2/local` — so the pin is the clean `2.2.0`. Check all three separately
+(tag, binary, artifact) and pin what the gate actually runs.
 
 **A tag in `riddl` means neither a staged binary nor a resolvable artifact.**
 These three drift apart and must be checked separately: the tag, what
@@ -526,8 +534,8 @@ resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
-# As of 2026-09-09 it is the STAGED build, because the docs describe 2.1.x
-# language work that no release contains.
+# As of 2026-09-14 it is the STAGED build, which is the clean 2.2.0 tag;
+# PATH (Homebrew) still serves 2.0.0.
 python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
@@ -590,7 +598,7 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-09-09, staged riddl **2.1.1-26-4d17b1ef**): the whole 2.0 tree
+**Status** (2026-09-14, riddl **2.2.0**): the whole 2.0 tree
 is **376 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
 is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
@@ -713,6 +721,7 @@ compilers):
 | multi-line `do` / `prompt` | — | brace a sequence of strings: `do { "one" "two" }`, `prompt({ "one" "two" }) as T`. The bare form takes **exactly one** string — statements have no terminator, so juxtaposition would be unparseable |
 | `prompt` statement | ✅ | `[deprecated] [prompt-statement]` — `do` is canonical. Unrelated to the `prompt(...)` **value**, which is current |
 | generic processor keyword | `processor` | **`streamlet`** (2.1.x) — `processor` is `[deprecated]` (`stream-processor-keyword`) and `riddlc validate --fix --fix-rule stream-processor-keyword` rewrites it. The ABSTRACTION is still called a processor; only the keyword moved |
+| saga step with no `tell command` | CompletenessWarning | **Error** (`saga-step-no-tell`, 2026-09-09) — a step that tells nothing effects nothing, so its `reverted by` compensates an action that never happened. A `send` does not satisfy it; only a `tell` of a **command** does |
 | `on quiescence <window>` | ❌ | ✅ 2.1.x — fires when the **instance** handled nothing for the window; clock restarts on every message; state-scoped arming. Window is a duration literal or a `Duration`-typed path (not a `let`). One per handler; never in a `correlation`. Unlike `on activate` it IS an effect block |
 | `send … at <instant>` | ❌ | ✅ 2.1.x — `TimeStamp`/`DateTime`/`ZonedDateTime` only (`stmt-send-at-not-instant`). A past instant delivers immediately; there is **no cancellation**, so schedule to yourself and decide at fire time. `send` only, never `tell` |
 | entity-instance reference | `reference to entity X` | **`Id(entity X)`** — all five spellings make the same `UniqueId`; the old ones are `[deprecated]` (`type-reference-to-is-id`) |
@@ -1045,7 +1054,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py riddlc sites/riddl/docs/quickstart.md` (PATH = the 2.0.0 release; see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary = 2.2.0 as of 2026-09-14; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
