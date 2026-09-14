@@ -61,51 +61,6 @@ diagnostic there trains people to ignore diagnostics.
 
 ---
 
-## 1i. WATCH — implied adaptor ports are RULED ABOLISHED, and we document them
-
-**Found during the 2026-09-11 handoff**, by reading `../riddl/task/` rather
-than our own. Not actionable yet; it is here so nobody deepens the affected
-section or is blindsided when it flips.
-
-**`concepts/adaptor.md` documents implied adaptor ports as the design.** The
-"Ports are implied, and declaring one overrides that side" subsection, and the
-whole `adaptor-implied-outlet-ambiguous` explanation, rest on A103 giving a
-port-less adaptor one implied inlet and one implied outlet. Written 2026-09-09,
-gated green, and **correct against the compiler today**.
-
-**Reid ruled on 2026-09-10 to abolish them** — riddl `e5b26745a`, *"implied
-adaptor ports ruled, then paused on feasibility"*. The ruling stands; the
-implementation stopped **before any code changed**, so nothing in our docs is
-wrong yet.
-
-**Why it is paused, which is also why it may stay paused a while:**
-`Inlet.type_` is a TypeRef to a NAMED type, and of 411 port-less adaptors in
-riddl-models only 165 handle exactly one type while 190 handle two to five,
-with no single name to point at. Only 1 of 355 has a derivable outlet — the
-rest are prose stubs (`do` + `error`, no `tell`). Generating the ports would
-mean the compiler authoring user-facing alternation types. It is a feasibility
-objection, not a corpus-cost one.
-
-The open question sits in `riddl/task/2026-09-10-abolish-implied-adaptor-ports.md`.
-
-**Do NOT pre-emptively rewrite the section.** The compiler still behaves this
-way, the fences gate against it, and rewriting now would document a language
-that does not exist — the exact failure the `cp`-the-grammar ban exists to
-prevent. When the change lands:
-
-- the "Ports are implied" subsection of `concepts/adaptor.md` goes
-- `adaptor-implied-outlet-ambiguous` may disappear with it, so check before
-  citing it
-- the example's adaptors already declare their ports explicitly, so the FENCES
-  should survive; it is the prose that moves
-
-**Also unverified and worth checking in the same pass:** riddl `1037313f6`
-("a handler may declare at most one of each SPECIAL on-clause") may or may not
-bear on the one-`on quiescence`-per-handler rule we document in
-`concepts/onclause.md` and the language reference.
-
----
-
 ## 2b. Retire `next`, `2.0` and `1.31` from gh-pages — manual, after the deploy
 
 **Reid's decision, 2026-09-09:** RIDDL doc versions are **evolving lines**.
@@ -198,8 +153,8 @@ the riddl version pinned in `build.sbt`. It moves often while 2.0 is in RC.
 **Do this, always:**
 ```bash
 # 1. set build.sbt's With.Riddl.library(version = ...) to match `riddlc version`
-# 2. then
-sbt extractGrammar
+# 2. then -- `--server`, or sbtn attaches to IntelliJ's sbt shell and hangs
+sbt --server -batch extractGrammar
 ```
 
 The pin and the GATE COMPILER must name the same version, or the docs describe

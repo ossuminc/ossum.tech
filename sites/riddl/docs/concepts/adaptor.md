@@ -89,6 +89,7 @@ context Orders is {
   command HandlePaymentFailure is { orderId is String }
   command ReserveItems is { orderId is String }
   type PaymentInbound is MarkAsPaid | HandlePaymentFailure
+  type PaymentEvents is Payments.PaymentCompleted | Payments.PaymentFailed
 
   // An INBOUND adaptor addresses its OWN context, so this context needs an
   // inlet and a boundary handler. The context then dispatches inward by its
@@ -110,6 +111,10 @@ context Orders is {
   }
 
   adaptor PaymentAdapter from context Payments is {
+    // Ports are DECLARED: what the handler receives needs an inlet, what it
+    // tells needs an outlet. Leave one out and riddlc reports the adaptor
+    // incomplete (stream-processor-no-inlet / -no-outlet), naming the types.
+    inlet FromPayments is type PaymentEvents
     outlet ToOrders is type PaymentInbound
 
     handler InboundPayments is {
@@ -135,6 +140,7 @@ context Orders is {
 
   // Declared so the outbound `tell` below has somewhere to land.
   adaptor InventoryAdapter to context Inventory is {
+    inlet FromOrders is command ReserveItems
     // A `tell` needs a modelled channel from the sender's OWN outlet to the
     // target's inlet; the connector below joins this one to Inventory.
     outlet ToInventory is command Inventory.ReserveStock
@@ -153,10 +159,10 @@ context Orders is {
 
 }
 
-// A connector may name the ADAPTOR as an endpoint. This is what makes the
-// crossing into Inventory a modelled delivery rather than an implied one.
-// It sits at DOMAIN scope: a connector joining two contexts is under-scoped
-// inside either of them (stream-crosses-contexts).
+// A connector endpoint names the adaptor's PORTLET, never the adaptor itself
+// (that is ref-wrong-kind: "resolved to Adaptor ... but an Outlet was
+// expected"). It sits at DOMAIN scope: a connector joining two contexts is
+// under-scoped inside either of them (stream-crosses-contexts).
 connector OrdersToInventory is
   from outlet Orders.InventoryAdapter.ToInventory
   to inlet Inventory.FromOrders
@@ -208,23 +214,57 @@ admitting the message type. Otherwise:
 `adaptor-target-no-admitting-inlet`. The boundary has to be **modelled**, not
 implied.
 
-### Ports are implied, and declaring one overrides that side
+### Ports are declared, and a missing one is incomplete
 
-A port-less adaptor is a `flow`. Because the shape is implied, ascribing
-`as source` to a one-outlet adaptor is now an Error rather than a
-clarification.
+An adaptor's ports are **declared**, exactly like every other processor's.
+Nothing is implied by its direction: a port-less adaptor is `void` by arity,
+not a `flow`, and an adaptor takes whatever shape its ports give it — two
+inlets and an outlet make a legal `merge`. An `as <shape>` ascription is
+checked against the declared arity as it is for any processor.
 
-A connector may name the **adaptor itself** as an endpoint —
-`from outlet Orders.PaymentAdapter.ToOrders` — which is what makes the
-crossing a modelled delivery.
+A connector endpoint names a **portlet** —
+`from outlet Orders.PaymentAdapter.ToOrders` — never the adaptor itself.
+`from outlet Orders.PaymentAdapter` is an Error, `ref-wrong-kind`: the path
+resolves to an Adaptor where an Outlet was expected.
 
-An implied outlet carries **one** type. An adaptor with no declared outlet
-that tells several distinct types to a context is therefore ambiguous —
-`adaptor-implied-outlet-ambiguous` — and riddlc says so rather than guessing,
-because a generator lowering the implied port has nothing single-valued to
-type it with. Declare an outlet typed with an alternation of those types (as
-the example above does with `PaymentInbound`), or split the translation across
-one adaptor per type.
+What an adaptor's handlers **do** decides which ports it **owes**. One whose
+clauses receive messages but declares no inlet, or whose clauses `tell`,
+`send` or `forward` but declares no outlet, is **incomplete** — the same fact
+a `???` body states, and reported the same way, as a **Missing** warning that
+names the types so you know what to write:
+
+```text
+[missing] [stream-processor-no-inlet]
+Adaptor 'PaymentAdapter' is incomplete: it handles Event 'PaymentCompleted',
+Event 'PaymentFailed' but declares no inlet to receive them on
+```
+
+Every processor kind gets this rule; only the id spelling varies. An
+**entity** reports `entity-no-inlet` / `entity-no-outlet`, ids that were
+published before the rule was generalised and are kept because a published
+code means the same thing forever. Every other kind — adaptor, context,
+projector, repository, streamlet — reports `stream-processor-no-inlet` /
+`stream-processor-no-outlet`.
+
+The other half of the rule is what keeps it from being a second demand: **a
+rule abstains on the side it cannot read.** Until the inlet is declared,
+nothing judges the shape ascription or asks whether a foreign message is
+admitted; until the outlet is declared, nothing asks whether a `tell` is
+reachable. A port-less adaptor that tells draws the one Missing warning, not
+that plus an unreachable-target Error, because there is nothing to say about
+a graph whose edges are not yet written.
+
+!!! note "This reverses an earlier design"
+    For five days in September 2026, an adaptor's two ports were *implied* by
+    its direction, so every port-less adaptor was a `flow` and
+    `adaptor-implied-outlet-ambiguous` complained when the implied outlet
+    would have needed several types. That was withdrawn: the implication was
+    invisible to the rules that read a processor's ports, so one omission
+    surfaced as two contradictory diagnostics, and it made adaptors the one
+    processor with an exception to learn. The rule id is retired. If you see
+    it in older output, declare the outlet with an alternation, as
+    `PaymentInbound` does above — which is the same remedy, and now the only
+    one.
 
 ### Exclusivity: no going around it
 

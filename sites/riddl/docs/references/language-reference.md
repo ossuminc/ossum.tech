@@ -1793,8 +1793,11 @@ delegation and which produces nothing itself.
 !!! warning "Validation"
     `forward` is legal **only** in a clause handling a command that declares
     [`yields`](#the-yields-and-replies-clauses) or a query that declares
-    `replies`. You cannot forward an **event** or a **result**: those record
-    what happened and owe no answer, so there is no obligation to pass on.
+    `replies` — anywhere else it is an Error, `stmt-forward-wrong-clause`,
+    because there is no obligation for it to discharge. You cannot forward an
+    **event** or a **result**: those record what happened and owe no answer.
+    A boundary handler that merely relays a message with no response owed
+    is not forwarding; write `send <bound> to outlet X`.
 
     The operand's **type** must match the handled message. Values are not
     compared, so a handler may adjust field contents and still be forwarding
@@ -1871,6 +1874,74 @@ set state ActiveOrder to record ActiveOrderData()
     State is also readable only inside the entity that owns it. Reaching into
     another entity's state is not a scoping inconvenience; it is the thing
     entity boundaries exist to prevent.
+
+### Append and Remove Statements
+
+Change a **collection** field of the entity's state by one element, in three
+forms:
+
+<!-- riddl: in-context -->
+```riddl
+record Line is { lineId: String, name: String }
+event-sourced entity Basket is {
+  record BasketData is { basketId: String, lines: Line*, labels: String* }
+  event LineAdded is { line: Line }
+  event LineRemoved is { lineId: String }
+  event LabelDropped is { label: String }
+  state Live of record Basket.BasketData
+  handler Folds is {
+    // append: the value goes on the END of the collection
+    on added: event Basket.LineAdded {
+      append added.line to field Basket.BasketData.lines
+    }
+    // keyed remove: EVERY element whose `lineId` equals the value
+    on removed: event Basket.LineRemoved {
+      remove from field Basket.BasketData.lines where lineId == removed.lineId
+    }
+    // by-value remove: EVERY element equal to the value
+    on dropped: event Basket.LabelDropped {
+      remove dropped.label from field Basket.BasketData.labels
+    }
+  }
+}
+```
+
+They exist for event sourcing. An event-sourced entity's `on event` folds must
+say how the event changes state, and until 2.2.0 a fold that added to or
+removed from a list could only be written as
+`set field S.items to prompt("items with the new item appended")` — which
+riddlc now reports as an incomplete *prose* fold
+(`entity-event-sourced-prose-folds`). These two statements give the common
+cases a real spelling. Arithmetic deliberately gets none: RIDDL does no
+arithmetic, and `set field S.balance to prompt("balance + points")` names its
+target and its operands, so it counts as a stated, *derived* fold rather than
+prose.
+
+Ordering is meaning for a sequence, so `append` always places at the end.
+Both `remove` forms remove **every** matching element, not the first.
+
+!!! warning "Validation"
+    - The target must be a **collection field** of the entity's current
+      state: a type with `*`, `+` or `{n,m}` cardinality, or a `sequence`,
+      `set` or `table` of. An optional (`T?`) is not a collection. Otherwise
+      `stmt-collection-field-not-collection`.
+    - The value must be assignment-compatible with the collection's
+      **element** type in the by-value forms, or with the **key field's** type
+      in the keyed form — the same typing `set` applies to its value, and the
+      same rule id on a mismatch.
+    - A keyed `remove` must name a field of the element record. A scalar
+      collection has none: `stmt-collection-key-not-a-field`.
+    - Everything that binds [`set`](#set-statement) binds these: legal only in
+      an Entity or Projector (`state-set-not-allowed` elsewhere); banned in a
+      function body; an *effect* for refusals-first, so a `require` or `error`
+      after one is an Error; and in an event-sourced entity legal only inside
+      an `on event` clause for one of the entity's own events
+      (`entity-event-sourced-mutation-scope`).
+    - Removing the last element of a `+` collection violates its cardinality.
+      That is a run-time refusal, not something riddlc can decide statically.
+
+`append`, `remove` and `where` were already reserved words, so no existing
+model changed meaning when the statements arrived.
 
 ### Let Statement
 
@@ -2687,7 +2758,32 @@ input ports (inlets) and output ports (outlets).
 - **Outlet**: A typed output port that sends messages
 
 Every processor kind may declare ports — not just streamlets. An entity may
-own an outlet; a projector may own an inlet.
+own an outlet; a projector may own an inlet. And every processor kind **must**
+declare the ports its handlers use: nothing is implied by the kind, the
+direction, or the shape, for an adaptor any more than for anything else.
+
+!!! warning "A missing port is incomplete"
+    A processor whose handler clauses **receive** messages but which declares
+    no inlet, or which `send`, `tell`, `forward`, `yield`, `reply` or `ask`
+    but declares no outlet, is incomplete in exactly the way a `???` body is —
+    and is reported the same way, as a **Missing** warning that names the
+    types so you know what to write:
+
+    ```text
+    Adaptor 'Bridge' is incomplete: it handles Event 'Happened' but declares
+    no inlet to receive them on
+    ```
+
+    One rule, **two id spellings**, on purpose. An **entity** reports
+    `entity-no-inlet` / `entity-no-outlet`, because those ids were published
+    first and a published code keeps its meaning. Every other kind reports
+    `stream-processor-no-inlet` / `stream-processor-no-outlet`.
+
+    Until the port is declared, **every rule that would read it abstains**:
+    the shape ascription is not judged, a `tell` from a port-less sender is
+    not reported unreachable, and a far context's inbound adaptor with no
+    inlet neither admits nor refuses a message. One omission draws one
+    message. An `error-sink` inlet is infrastructure and does not count.
 
 <!-- riddl: in-domain -->
 ```riddl
@@ -3207,8 +3303,10 @@ lowest to highest):
 
 | Severity | Kind | Description |
 |:---:|---|---|
+| 0 | Tip | Suggestions, shown with `--provide-tips` |
 | 0 | Info | Informational notes |
 | 1 | StyleWarning | Naming and style conventions |
+| 1 | **Advisory** | A structural fact consistent with the model as written but unusual for what such a declaration normally means. Not a warning |
 | 2 | MissingWarning | Missing optional content |
 | 3 | UsageWarning | Unused definitions or unreferenced declarations |
 | 3 | **Deprecation** | Use of a construct slated for removal |
@@ -3222,6 +3320,14 @@ than being folded in with ordinary warnings, so a model can be checked for zero
 deprecations independently of zero warnings. They surface under every command —
 `parse`, `validate`, `stats`, `bastify` and the prettify and generation
 commands — not only `validate`.
+
+**Advisory** (severity 1, since 2.2.0) is **not a warning**: `--fail-on warning`
+does not trip on it, `-w` does not hide it, and it never blocks generation.
+It has its own switch, `--show-advisories` (default `true`). The bar for one
+is that a modeller may dismiss it *by design*, not only by editing — the rule
+that made the kind necessary is `adaptor-direction-advisory`, which had been
+a Warning and so blocked generation for a design choice the model is entitled
+to make.
 
 **CompletenessWarning** (severity 4) identifies models that parse and validate
 correctly but are missing details needed for a complete, implementable

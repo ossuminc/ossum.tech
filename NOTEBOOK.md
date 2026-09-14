@@ -19,16 +19,8 @@ to the task file and note completion in this notebook.
 `2.2.0`** — tag, staged binary and `~/.ivy2/local` artifact agree, verified
 2026-09-14. The grammar hashes identical to riddl's at the tag.
 
-**Gate against 2.2.0: GREEN, 376 / 52 / 0.** The three `saga-step-no-tell`
-fences (BACKLOG 1h, now closed) each tell a command per step.
-
-**In flight: the 2026-09-11 task file** (`task/`) — implied adaptor ports are
-abolished in riddl `2c2b8d5b2` and the compiler now enforces it, so
-`concepts/adaptor.md` §"Ports are implied" is WRONG on the live compiler
-(its fences stay green only because the new rule is a warning). Plus four
-language-reference additions: `stmt-forward-wrong-clause`, `append`/`remove`,
-`Advisory`. See the task file; it carries a gate-ready `append`/`remove`
-example.
+**Gate against 2.2.0: GREEN, 377 / 52 / 0.** `task/` is empty; the
+2026-09-11 implied-ports task is in `task/done/` with its Results.
 
 **The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
 behind. But it has flipped three times in six weeks, so **measure, never
@@ -71,11 +63,16 @@ Reid because it is destructive and outward-facing.
   `adaptor-implied-outlet-ambiguous` looked dead in `language/`; it is emitted
   from `passes/`.
 - **Never check `$?` through a pipe** — `… | tail` reports tail's status.
-- **`concepts/adaptor.md` documents implied adaptor ports, which 2.2.0
-  ABOLISHED** (riddl `2c2b8d5b2`, 2026-09-11 — the "paused on feasibility"
-  note of 2026-09-11 was overtaken within hours). The page's fences still
-  gate green because the replacement rule is a *warning*; the prose is what
-  is wrong. BACKLOG 1i's premise is gone; the task file is the spec.
+- **A Missing warning is invisible to the gate.** The fence gate fails only
+  on `[error]`/`[severe]`/`[deprecated]`, so `concepts/adaptor.md` stayed
+  green for three days while its prose described abolished implied ports
+  and its own example drew the warning it now teaches. When a rule lands as
+  a warning, read the prose; and probe warnings with the gate's own `wrap()`
+  (a throwaway script did this on 2026-09-14) rather than a hand filter.
+- **A "paused" ruling can land within hours.** The 2026-09-11 handoff said
+  implied-port abolition was paused on feasibility and told the next
+  session not to pre-empt it; riddl `2c2b8d5b2` had already landed that
+  day. Verify the sender's claim against riddl's log, not the memory of it.
 - **`sbt extractGrammar` hangs because `sbtn` attaches to IntelliJ's sbt
   shell.** `sbt --server -batch extractGrammar` finishes in seconds. CLAUDE.md
   has the `lsof` diagnosis.
@@ -106,6 +103,33 @@ Reid because it is destructive and outward-facing.
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 ---
+
+### Implied adaptor ports abolished; `append`/`remove`; `Advisory` ✅ **2026-09-14**
+
+The 2026-09-11 task file, done in full on 2.2.0 — its Results section in
+`task/done/` has the file:line evidence. What it taught:
+
+**The task file was right and the handoff was wrong, by hours.** Memory and
+BACKLOG 1i both said "paused before any code changed"; `2c2b8d5b2` had landed
+the same day that note was written. Check-tasks' "verify the world, not the
+file" cut the other way this time: the *file* was current and our own record
+was the stale snapshot.
+
+**A warning-level rule needs a warning-level probe.** The adaptor page's
+example — `PaymentAdapter` handling two events with no inlet — drew
+`stream-processor-no-inlet` on the very page that now teaches the rule, and
+the gate could not see it. A 20-line script that imports the gate's `wrap()`
+and counts every `[kind] [id]` pair found it in one run.
+
+**Page preludes own more names than you think.** The task's gate-ready
+`append`/`remove` example collided four ways with the language reference's
+prelude (`Item`, `CartData`, `ItemAdded`, `entity Cart`), surfacing as
+`ref-ambiguous` at prelude line numbers and one misleading
+`stmt-collection-key-not-a-field`. Rename the example, never the prelude.
+
+**`Tip` was missing from the severity table too** — found only because
+adding `Advisory` meant reading `Messages.scala` end to end. An enumerated
+table is a claim; check the closed set when you touch it.
 
 ### riddl 2.2.0: the saga rule, and why extractGrammar "hangs" ✅ **2026-09-14**
 
