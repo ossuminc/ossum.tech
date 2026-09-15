@@ -22,6 +22,10 @@ to the task file and note completion in this notebook.
 **Gate against 2.2.0: GREEN, 377 / 52 / 0.** `task/` is empty; the
 2026-09-11 implied-ports task is in `task/done/` with its Results.
 
+**BACKLOG 2b is done on LOCAL `gh-pages` (`06d2032`) and NOT pushed** — the
+classifier declined the push. `git push origin gh-pages` first, then `main`;
+BACKLOG 2b has the verification and the ordering reason.
+
 **The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
 behind. But it has flipped three times in six weeks, so **measure, never
 remember**:
@@ -103,6 +107,33 @@ Reid because it is destructive and outward-facing.
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 ---
+
+### The adaptor page's example is a complete model ✅ **2026-09-15**
+
+**Reid's ruling:** *"I would rather the page drew zero warnings and was
+complete. Let's not fool learners into thinking that necessary definitions
+are unnecessary. That teaches bad habits."* — on my leaving the page's stub
+entities drawing `entity-no-inlet` as "out of scope".
+
+`concepts/adaptor.md`'s one fence is now `standalone`: a 192-line domain on
+which `riddlc -w -m -s -u -c -i --show-advisories validate` reports
+**nothing**. Getting there from 55 messages taught:
+
+- **The shared `in-domain` wrapper cannot reach zero** — its own
+  `Domain 'Example'` and `Author 'Reid'` draw description warnings and the
+  domain has no error sink. A zero-warning page needs its own domain.
+- **A repository inlet may not carry events** (`repo-inlet-carries-event`);
+  `put` is application-only. A complete entity-plus-repository inside Orders
+  would have tripled the example to teach nothing about adaptors, so Orders'
+  internals are `do` prose — which draws nothing and is honest.
+- **The error sink is wired from `Riddl.ForeverEmpty.void`**, as riddl-models
+  does: no modelled component emits a `GeneratorError`, generators do.
+- **Containers need `described as`; leaves need only `briefly`.** And the
+  one-line `described as { |x }` still does not parse — CLAUDE.md said so;
+  I wrote it anyway. The multi-line form only.
+- Two name collisions the gate found for me: an outlet named `ToInventory`
+  on both the context and the adaptor (`ref-ambiguous`), and a connector
+  sharing an outlet's name (`type-overloaded`).
 
 ### Implied adaptor ports abolished; `append`/`remove`; `Advisory` ✅ **2026-09-14**
 

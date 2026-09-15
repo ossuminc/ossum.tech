@@ -3,32 +3,6 @@ title: "Adaptor"
 draft: false
 ---
 
-<!-- riddl-domain-prelude
-context Payments is {
-  event PaymentCompleted is { orderId is String }
-  event PaymentFailed is { orderId is String }
-}
-context Inventory is {
-  record StockData is { orderId is String }
-  command ReserveStock is { orderId is String }
-  // An adaptor may address only a CONTEXT, and that context must declare an
-  // inlet ADMITTING the message -- the boundary has to be modelled, not
-  // implied (adaptor-target-no-admitting-inlet).
-  inlet FromOrders is command ReserveStock
-  // The tell addresses the CONTEXT, so the context is the sink and needs its
-  // own clause -- a contained entity's handler does not receive on its behalf.
-  handler InventoryBoundary is {
-    on command ReserveStock { ??? }
-    on other { error "Unexpected message at the Inventory boundary" }
-  }
-  entity Stock is {
-    state Held of record StockData is {
-      handler StockHandler is { on command ReserveStock { ??? } }
-    }
-  }
-}
--->
-
 An adaptor's purpose is to _adapt_ one [Context](context.md)
 to another [Context](context.md).  In Domain-Driven Design, 
 this concept is known as an _anti-corruption layer_ that keeps the
@@ -81,91 +55,210 @@ Outbound adaptors provide an adaptation that occurs from the
 
 ## Syntax
 
-<!-- riddl: in-domain -->
+The model below is **complete**: `riddlc validate` reports nothing on it with
+every message class switched on. That is deliberate. An adaptor is easy to
+show in isolation and easy to get subtly wrong that way — a port left out, a
+connector that names the adaptor instead of its portlet, a `tell` with no
+channel to travel — so this example carries everything the adaptors need to
+be real: the ports they declare, the connectors that join them, the inlets the
+far contexts declare to admit them, and a domain error sink. What happens to
+an order *inside* Orders is written as prose (`do "…"`) because this page is
+about the boundary, not the entity behind it; see [Entity](entity.md) for that.
+
+<!-- riddl: standalone -->
 ```riddl
-context Orders is {
-  record OrderData is { orderId is String, isPaid is Boolean }
-  command MarkAsPaid is { orderId is String }
-  command HandlePaymentFailure is { orderId is String }
-  command ReserveItems is { orderId is String }
-  type PaymentInbound is MarkAsPaid | HandlePaymentFailure
-  type PaymentEvents is Payments.PaymentCompleted | Payments.PaymentFailed
-
-  // An INBOUND adaptor addresses its OWN context, so this context needs an
-  // inlet and a boundary handler. The context then dispatches inward by its
-  // own rules -- the adaptor never names what is inside.
-  inlet FromPayments is type PaymentInbound
-  handler OrdersBoundary is {
-    on command MarkAsPaid { ??? }
-    on command HandlePaymentFailure { ??? }
-    on other { error "Unexpected message at the Orders boundary" }
-  }
-
-  entity Order is {
-    state Active of record OrderData is {
-      handler OrderHandler is {
-        on command MarkAsPaid { ??? }
-        on command HandlePaymentFailure { ??? }
-      }
+domain Shop is {
+  author Reid is {
+    name is "Reid Spencer"
+    email is "reid@ossuminc.com"
+  } with {
+    briefly "The model's author"
+    described as {
+      |Wrote this example.
     }
   }
 
-  adaptor PaymentAdapter from context Payments is {
-    // Ports are DECLARED: what the handler receives needs an inlet, what it
-    // tells needs an outlet. Leave one out and riddlc reports the adaptor
-    // incomplete (stream-processor-no-inlet / -no-outlet), naming the types.
-    inlet FromPayments is type PaymentEvents
-    outlet ToOrders is type PaymentInbound
+  type OrderId is UUID with { briefly "Identifies an order across every context" }
 
-    handler InboundPayments is {
-      on paid: event Payments.PaymentCompleted {
-        tell command MarkAsPaid(paid.orderId) to context Orders
-      }
-      on failed: event Payments.PaymentFailed {
-        tell command HandlePaymentFailure(failed.orderId) to context Orders
-      }
-      on other {
-        error "Unrecognized message from the Payments context"
-      }
+  external context Payments as source is {
+    event PaymentCompleted is { orderId: OrderId } with {
+      briefly "The payment provider took the money"
+    }
+    event PaymentFailed is { orderId: OrderId, reason: String } with {
+      briefly "The payment provider declined"
+    }
+    type PaymentEvent is PaymentCompleted | PaymentFailed with {
+      briefly "Everything Payments publishes"
+    }
+    outlet Outcomes is type PaymentEvent with {
+      briefly "Where Payments publishes its outcomes"
     }
   } with {
-    briefly as "Translates payment messages between Orders and Payments"
+    briefly "A third-party payment provider, outside the model"
+    described as {
+      |Modelled as external: we consume its events and never see its insides.
+    }
   }
 
-  // The channel the inbound `tell` travels. Intra-context, so context scope
-  // is right -- unlike the cross-context connector at the end of this example.
-  connector PaymentsToOrders is
-    from outlet PaymentAdapter.ToOrders
-    to inlet Orders.FromPayments
+  context Orders as flow is {
+    command MarkAsPaid is { orderId: OrderId } with { briefly "Record the payment" }
+    command HandlePaymentFailure is { orderId: OrderId, reason: String } with {
+      briefly "Record the failed payment"
+    }
+    command ReserveItems is { orderId: OrderId } with {
+      briefly "Ask Inventory to hold this order's stock"
+    }
+    type PaymentInbound is MarkAsPaid | HandlePaymentFailure with {
+      briefly "What the payment boundary lets in"
+    }
 
-  // Declared so the outbound `tell` below has somewhere to land.
-  adaptor InventoryAdapter to context Inventory is {
-    inlet FromOrders is command ReserveItems
-    // A `tell` needs a modelled channel from the sender's OWN outlet to the
-    // target's inlet; the connector below joins this one to Inventory.
-    outlet ToInventory is command Inventory.ReserveStock
-
-    handler OutboundInventory is {
-      on req: command ReserveItems {
-        tell command Inventory.ReserveStock(req.orderId) to context Inventory
+    // An INBOUND adaptor addresses its OWN context, so this context needs an
+    // inlet and a boundary handler. The context then dispatches inward by its
+    // own rules -- the adaptor never names what is inside.
+    inlet FromPayments is type PaymentInbound with {
+      briefly "The payment boundary"
+    }
+    outlet Reservations is command ReserveItems with {
+      briefly "Requests bound for the outbound Inventory adaptor"
+    }
+    handler OrdersBoundary is {
+      on paid: command MarkAsPaid {
+        do "Mark the order paid and start fulfilment"
+        send command ReserveItems(paid.orderId) to outlet Reservations
       }
-      on other {
-        error "Unrecognized outbound message"
+      on failed: command HandlePaymentFailure {
+        do "Record the failure against the order and notify the customer"
+      }
+      on other { error "Unexpected message at the Orders boundary" }
+    } with {
+      briefly "Dispatches admitted payment messages inward"
+    }
+
+    adaptor PaymentAdapter from context Payments as flow is {
+      inlet FromPayments is type Payments.PaymentEvent with {
+        briefly "What Payments publishes"
+      }
+      outlet ToOrders is type PaymentInbound with {
+        briefly "The translation, in Orders' vocabulary"
+      }
+      handler InboundPayments is {
+        on paid: event Payments.PaymentCompleted {
+          tell command MarkAsPaid(paid.orderId) to context Orders
+        }
+        on failed: event Payments.PaymentFailed {
+          tell command HandlePaymentFailure(failed.orderId, failed.reason) to context Orders
+        }
+        on other {
+          error "Unrecognized message from the Payments context"
+        }
+      } with { briefly "Translates payment outcomes into order commands" }
+    } with {
+      briefly "Translates payment messages from Payments into Orders' language"
+      described as {
+        |Inbound: it handles what Payments publishes and addresses its OWN
+        |context, which then dispatches inward by its own rules.
       }
     }
+
+    // The channel the inbound `tell` travels. Intra-context, so context scope
+    // is right -- unlike the cross-context connectors at the end.
+    connector PaymentTranslation is
+      from outlet PaymentAdapter.ToOrders to inlet Orders.FromPayments with {
+      briefly "The channel the inbound tell travels"
+    }
+
+    adaptor InventoryAdapter to context Inventory as flow is {
+      inlet FromOrders is command ReserveItems with {
+        briefly "What Orders asks of Inventory"
+      }
+      // A `tell` needs a modelled channel from the sender's OWN outlet to the
+      // target's inlet; the domain-level connector joins this to Inventory.
+      outlet ToInventory is command Inventory.ReserveStock with {
+        briefly "The request, in Inventory's vocabulary"
+      }
+      handler OutboundInventory is {
+        on req: command ReserveItems {
+          tell command Inventory.ReserveStock(req.orderId) to context Inventory
+        }
+        on other {
+          error "Unrecognized outbound message"
+        }
+      } with { briefly "Translates reservation requests into Inventory's language" }
+    } with {
+      briefly "Translates inventory requests from Orders to Inventory"
+      described as {
+        |Outbound: it handles Orders' own command and addresses the FAR context.
+      }
+    }
+
+    connector InventoryRequests is
+      from outlet Orders.Reservations to inlet InventoryAdapter.FromOrders with {
+      briefly "Orders hands reservation requests to its outbound adaptor"
+    }
   } with {
-    briefly as "Translates inventory requests from Orders to Inventory"
+    briefly "Customer orders"
+    described as {
+      |Owns the order lifecycle and defends its vocabulary at two boundaries.
+      |What happens to an order inside is prose here; this model is about the
+      |boundaries.
+    }
   }
 
+  context Inventory as sink is {
+    command ReserveStock is { orderId: OrderId } with {
+      briefly "Hold stock for an order"
+    }
+    // An adaptor may address only a CONTEXT, and that context must declare an
+    // inlet ADMITTING the message (adaptor-target-no-admitting-inlet).
+    inlet FromOrders is command ReserveStock with {
+      briefly "The boundary Orders addresses"
+    }
+    handler InventoryBoundary is {
+      on req: command ReserveStock {
+        do "Hold the stock this order needs"
+      }
+      on other { error "Unexpected message at the Inventory boundary" }
+    } with { briefly "Receives reservation requests" }
+  } with {
+    briefly "Stock on hand"
+    described as {
+      |Holds and releases stock on behalf of orders.
+    }
+  }
+
+  context Operations as sink is {
+    inlet Errors is record Riddl.GeneratorError with {
+      option is error-sink
+      briefly "Where anything unrecoverable ends up"
+    }
+  } with {
+    briefly "Operational plumbing"
+    described as {
+      |The destination for hard errors raised anywhere in Shop.
+    }
+  }
+
+  // Cross-context connectors sit at DOMAIN scope: inside either context they
+  // would be under-scoped (stream-crosses-contexts). Each endpoint names a
+  // PORTLET, never the adaptor itself (ref-wrong-kind).
+  persistent connector PaymentOutcomes is
+    from outlet Payments.Outcomes to inlet Orders.PaymentAdapter.FromPayments with {
+    briefly "Payments' outcomes cross into Orders through its inbound adaptor"
+  }
+  persistent connector OrdersToInventory is
+    from outlet Orders.InventoryAdapter.ToInventory to inlet Inventory.FromOrders with {
+    briefly "Orders' requests cross into Inventory from its outbound adaptor"
+  }
+  connector ErrorsToSink is
+    from outlet Riddl.ForeverEmpty.void to inlet Operations.Errors with {
+    briefly "No modelled component emits a GeneratorError; generators do"
+  }
+} with {
+  briefly "A shop with an external payment provider"
+  described as {
+    |Three contexts and the two adaptors that keep their vocabularies apart.
+  }
 }
-
-// A connector endpoint names the adaptor's PORTLET, never the adaptor itself
-// (that is ref-wrong-kind: "resolved to Adaptor ... but an Outlet was
-// expected"). It sits at DOMAIN scope: a connector joining two contexts is
-// under-scoped inside either of them (stream-crosses-contexts).
-connector OrdersToInventory is
-  from outlet Orders.InventoryAdapter.ToInventory
-  to inlet Inventory.FromOrders
 ```
 
 Note the operand order: `tell <message> to <processor>`, not the reverse.
@@ -231,7 +324,8 @@ What an adaptor's handlers **do** decides which ports it **owes**. One whose
 clauses receive messages but declares no inlet, or whose clauses `tell`,
 `send` or `forward` but declares no outlet, is **incomplete** — the same fact
 a `???` body states, and reported the same way, as a **Missing** warning that
-names the types so you know what to write:
+names the types so you know what to write. Delete `PaymentAdapter`'s inlet
+from the model above and this is what you get:
 
 ```text
 [missing] [stream-processor-no-inlet]

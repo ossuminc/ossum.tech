@@ -86,6 +86,16 @@ mike delete --push --deploy-prefix riddl -F sites/riddl/mkdocs.yml next 2.0 1.31
 `-F` is required: mike reads `mkdocs.yml` from the working directory to resolve
 the branch, and there is no config at the repo root.
 
+**RUN LOCALLY 2026-09-15 — the push is the only remaining step.** Local
+`gh-pages` carries `06d2032 Removed next, 2.0, 1.31 in riddl with mike
+2.2.0`, one commit ahead of `origin/gh-pages`; verified: `versions.json` is
+`2.x [latest]`, `1.x`; `/riddl/` still redirects to `latest/`; `latest` and
+`2.x` are identical trees; nothing outside `riddl/` changed; 404 map 39/39.
+The permission classifier declined the push from a Claude session, so:
+`git push origin gh-pages` — **before pushing `main`**, whose CI deploy would
+otherwise land on the old `origin/gh-pages` and make this push
+non-fast-forward. Once pushed, delete this section.
+
 **The precondition is MET — verified 2026-09-11.** The deploy landed (run
 `34377519216`, success, 57s). `gh-pages:riddl/versions.json` lists `2.x
 [latest]`, `2.0 [next]`, `1.31` and `1.x`; `/riddl/index.html` redirects to
