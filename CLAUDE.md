@@ -410,10 +410,13 @@ procedure file is now **historical** — there is no future promotion of this
 shape to run, since an evolving line never gets promoted; a new line simply
 appears when a new major ships.
 
-**Manual steps remain that CI cannot do**, because mike only adds and updates
-what the manifest declares and never removes what it stops declaring. Until
-they run, `/riddl/next/`, `/riddl/2.0/` and `/riddl/1.31/` all keep serving and
-stay in the version selector — see BACKLOG 2b.
+**Retiring a version is a manual step CI cannot do**, because mike only adds
+and updates what the manifest declares and never removes what it stops
+declaring. `next`, `2.0` and `1.31` were deleted from `gh-pages` on 2026-09-16
+(`06d2032`) with `mike delete --deploy-prefix riddl -F sites/riddl/mkdocs.yml
+<versions>` — run WITHOUT `--push` so the outward-facing push is a person's
+command, and pushed **before** any `main` push, since a CI deploy landing on
+the old `origin/gh-pages` would make the deletion non-fast-forward.
 
 **Renaming a version does not move the old one.** `mike deploy` at `2.x`
 creates a new directory; `2.0` is left exactly as last deployed. That is why

@@ -22,9 +22,9 @@ to the task file and note completion in this notebook.
 **Gate against 2.2.0: GREEN, 377 / 52 / 0.** `task/` is empty; the
 2026-09-11 implied-ports task is in `task/done/` with its Results.
 
-**BACKLOG 2b is done on LOCAL `gh-pages` (`06d2032`) and NOT pushed** — the
-classifier declined the push. `git push origin gh-pages` first, then `main`;
-BACKLOG 2b has the verification and the ordering reason.
+**BACKLOG 2b is DONE** (2026-09-16): `origin/gh-pages` is `06d2032`, the
+RIDDL selector offers `2.x` and `1.x` only, and the retired `next`/`2.0`/
+`1.31` URLs now reach the 404 handler's redirects.
 
 **The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
 behind. But it has flipped three times in six weeks, so **measure, never
@@ -39,12 +39,7 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 ### In flight
 
-Nothing half-edited; `task/` is empty. One thing is **finished in git but not
-on the site**: BACKLOG 2b's `mike delete` of the retired `next`, `2.0` and
-`1.31` directories. Its precondition is verified met (the `2.x`/`1.x` deploy
-landed, run `34377519216`) and it has **not** been run. Until it does, the
-version selector offers four entries. It is one command, deliberately left to
-Reid because it is destructive and outward-facing.
+Nothing half-edited; `task/` is empty.
 
 ### Traps a fresh session would hit
 
@@ -59,7 +54,9 @@ Reid because it is destructive and outward-facing.
   one really is per-fence content.
 - **Renaming a mike version does not move the old one.** The retired directory
   stays on `gh-pages`, serves frozen content forever, and never 404s — so the
-  redirect never fires. That is why 2b deletes rather than leaves.
+  redirect never fires. That is why 2b deleted rather than left them
+  (2026-09-16). `mike delete` without `--push` commits on local `gh-pages`,
+  which lets a person do the outward-facing push.
 - **`scripts/gh-pages-404.html`'s `VERSION` regex must keep matching
   `\d+\.x`.** Without it the loop guard stops firing and a real 404 inside
   `/riddl/2.x/` rewrites to `/riddl/2.x/2.x/…`.
@@ -98,9 +95,8 @@ Reid because it is destructive and outward-facing.
 
 ### Pointers
 
-- **BACKLOG.md** — **2b** (one manual command), **1e-remnant** (`group.md:42`
-  is still false), **3b** (the 1.x gate has no compiler). 1i is superseded by
-  the task file.
+- **BACKLOG.md** — **1e-remnant** (`group.md:42` is still false), **3b** (the
+  1.x gate has no compiler).
 - **CLAUDE.md** — the gate-compiler flip table, the evolving-lines versioning
   model, the lexer drift trap, and the version-differences table.
 
