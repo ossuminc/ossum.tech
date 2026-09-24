@@ -102,11 +102,16 @@ constant Zero is Whole = 0
 invariant BalanceNonNegative is balance >= Zero
 ```
 
-!!! warning "No numeric literals, and no arithmetic"
-    The boolean sub-language has no numeric literal atom, so `amount >= 0` does
-    not parse. Nor is arithmetic available inside a block: a `let` binds a
-    reference or a `call`, never an expression such as `balance - holdAmount`.
-    Both limitations predate the 2.0 invariant work.
+!!! tip "Literals and arithmetic are both available"
+    An invariant takes a full expression: `balance - holdAmount >= minimumFee`
+    and `count of items > MinimumOrder` are both legal, and a `let` inside a
+    block may bind an expression rather than only a reference or a `call`.
+
+    Two restrictions that used to apply are gone — the boolean sub-language
+    gained a numeric literal atom, and arithmetic arrived in 2.2. A bare
+    literal operand still draws the style warning
+    `value-literal-comparison-style`, which is why `balance >= Zero` reads
+    better than `balance >= 0`: the name says what the bound means.
 
 ## Scope: Where It Applies, and What It May Read
 

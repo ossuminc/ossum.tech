@@ -108,24 +108,25 @@ yield event OrderPlaced(orderId, total = cart.total, currency = "USD")
 
 ### Boolean Expressions
 
-Precedence runs `or` < `and` < `not` < comparison < atom, with parentheses to
-group. `and`, `or`, `not`, `true` and `false` are **context-sensitive**: they
+Precedence runs `or` < `and` < `not` < comparison < additive <
+multiplicative < atom, with parentheses to group. `and`, `or`, `not`, `true` and `false` are **context-sensitive**: they
 are recognized only inside a boolean expression, so they stay legal identifiers
 everywhere else.
 
-!!! warning "Comparisons are type-safe and reference-only"
-    Both operands of a comparison must be a **typed reference** — a value
-    reference, a `get from`, or a named [constant](constant.md). A literal is
-    not permitted, and this is enforced at **parse** time:
+!!! warning "Comparisons are type-CHECKED, not reference-only"
+    Either operand may be **any expression** — a value reference, a
+    `get from`, a named [constant](constant.md), a literal, arithmetic. The
+    validator decides what may sensibly be compared, so a bad comparison is
+    an Error rather than a parse failure:
 
-    <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
+    <!-- riddl: skip reason="deliberate counter-example; shows what the validator rejects" -->
     ```riddl
-    when count > 5 then ??? end        // fails to parse
-    when count > "5" then ??? end      // fails to parse
+    when count > "5" then ??? end   // Error: value-ordering-needs-numeric
+    when count > 5 then ??? end     // legal; style: value-literal-comparison-style
     ```
 
-    Name the threshold instead. The constant is a definition, declared
-    alongside the other definitions of its context:
+    Naming the threshold is still better style. The constant is a definition,
+    declared alongside the other definitions of its context:
 
     <!-- riddl: in-context no-prelude=MaxItems -->
     ```riddl

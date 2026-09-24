@@ -238,13 +238,16 @@ when order.isPaid and not (order.isCancelled or order.isRefunded) then ??? end
 recognized only inside a boolean expression, so they remain legal identifiers
 everywhere else in the language.
 
-!!! warning "Comparisons are type-safe and reference-only"
-    Both operands of a comparison must be a **typed reference** — a value
-    reference, a `get from`, or a named [constant](constant.md) — never a
-    literal. This is enforced at **parse** time, so `count > 5`,
-    `count > "5"`, `count > true` and `count > R(1)` all fail to parse.
+!!! warning "Comparisons are type-CHECKED, not reference-only"
+    Either operand of a comparison may be **any expression** — a value
+    reference, a `get from`, a named [constant](constant.md), a literal,
+    arithmetic, a `count of`. What may sensibly be compared is validation's
+    question rather than the grammar's, so `count > "5"` is reported as the
+    Error `value-ordering-needs-numeric` instead of failing to parse.
 
-    To compare against a fixed value, name it. The constant is a definition,
+    A literal operand is legal and draws the style warning
+    `value-literal-comparison-style`. Naming the value is still better style,
+    because the name records the intent. The constant is a definition,
     declared alongside the other definitions of its context:
 
     <!-- riddl: in-context no-prelude=MaxItems -->

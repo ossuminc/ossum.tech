@@ -1123,6 +1123,20 @@ predefined `Riddl.Envelope` carries the CloudEvents v1.0 context attributes —
 note its id field is spelled **`messageId`**. The option is scope-inherited, so
 declaring it on a context covers everything within.
 
+#### Reading a field through the binding
+
+`m.<field>` resolves in two steps: the **envelope's** own fields first, then a
+field **common to every message that could still reach this clause**. What can
+reach an `on other` is the processor's dataflow-inlet types — alternations
+expanded — minus whatever the sibling `on <message>` clauses already take,
+since `on other` is the `case _` of the handler.
+
+"Common" is strict: every remaining member must carry that field, at the same
+type. Where only some do, or they disagree on the type, the reference is the
+Error `handler-on-other-field-not-common` — the clause would otherwise read a
+field that half its possible inputs do not have. A processor with **no** inlets,
+or one where no message is left over, behaves as it always did.
+
 ### Naming the Handled Message
 
 An `on` clause may bind a local name to the message it is handling, using
@@ -1242,11 +1256,18 @@ invariant CanCoverFee is {
 }
 ```
 
-!!! warning "No numeric literals in a condition"
-    The boolean sub-language has no numeric literal atom, so `amount >= 0` does
-    not parse — compare against another named value instead (`amount >= floor`).
-    Arithmetic is not available either: a `let` binds a reference or a `call`,
-    not an expression such as `balance - holdAmount`.
+!!! tip "A condition takes a full expression"
+    Arithmetic, counts and quantifiers are all available inside a condition —
+    `balance - holdAmount >= minimumFee` is a legal invariant, and so is
+    `count of items > MinimumOrder`.
+
+    Two restrictions that used to apply are gone: the boolean sub-language now
+    has a numeric literal atom (so `amount >= 0` parses), and a `let` may bind
+    an expression rather than only a reference or a `call`. A literal operand
+    is legal but draws a **style** warning,
+    `value-literal-comparison-style` — a named constant says what the
+    threshold *means*, which is why `quantity >= Zero` reads better than
+    `quantity >= 0`.
 
 A literal string is an AI-fill site. A
 [boolean expression](#boolean-expressions) or a block already *is* the
@@ -1351,6 +1372,82 @@ needs a value, it accepts any of these forms:
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount") [as <type>]` | A value computed by AI at generation time; the optional ascription states its type |
 | Boolean | `a > b and not c` | A structured boolean expression |
+| Arithmetic | `subtotal + amount * rate` | `+ - * /` on numbers, `+` on strings, a timestamp ± a duration |
+| Duration literal | `30 days`, `1.50 hours` | A duration value written in units rather than as a string |
+| Constant reference | `constant MaxItems` | A named constant's value; the bare name works too |
+| Collection predicate | `all of items as i where i.quantity > Zero` | `all of` / `any of` / `none of` — a boolean |
+| Filter | `items as i where i.quantity > Zero` | The matching **elements** — not a boolean |
+| Count | `count of items` | How many elements, as a `Whole` |
+| Membership | `tags contains "urgent"` | Whether the collection holds that value |
+| Query | `query one reservations where id == q.id` | Reads stored rows; legal only in a repository |
+
+### Arithmetic
+
+`+ - * /` apply to numbers; `+` also concatenates two strings; and a timestamp
+takes a duration added or subtracted. There is no power, root or math function —
+those remain a `prompt("…")`, because RIDDL specifies *what* is computed and a
+model that needs a logarithm is describing an implementation.
+
+<!-- riddl: in-handler -->
+```riddl
+set field grandTotal to subtotal + amount * rate
+set field balance to balance - amount
+log "order " + orderId
+```
+
+The result type is the smallest constrained numeric type that contains both
+operands and the result:
+
+| Operands | Result | Why |
+|----------|--------|-----|
+| `Natural + Natural` | `Natural` | a sum of non-negatives cannot go below zero |
+| `Natural - Natural` | `Integer` | a difference can |
+| `Integer / Integer` | `Integer` | **truncating** — RIDDL does not silently widen to a fraction |
+| `Integer + Real` | `Real` | |
+| `Decimal + Decimal` | `Decimal` | |
+| `Real + Decimal` | `Number` | no constrained type contains both faithfully |
+
+Mixing what cannot be combined is the Error
+`value-arithmetic-operand-mismatch`, which names both types — a `String` plus a
+`Natural`, for instance.
+
+### Durations
+
+A duration may be written in **units** rather than as a string: `30 days`,
+`1.50 hours`, `250 milliseconds`. The unit is a word, singular or plural, from
+nanoseconds up to weeks. Abbreviations (`30d`) and ISO-8601 (`PT30M`) are *not*
+accepted here.
+
+Two places keep their **string** durations, because they are clause headers
+rather than value positions: the `on quiescence "<window>"` window and a
+correlation's `times out after "<duration>"`.
+
+`system.now` is the only spelling of the current instant. Added to or
+subtracted from a duration it gives another instant, which is what makes
+`send … at system.now + 30 days` work.
+
+### Constants
+
+A constant's value may be an expression, so long as every operand is itself
+fixed — a literal, a duration literal, or another constant:
+
+<!-- riddl: in-context -->
+```riddl
+constant PointsPerDollar is Natural = 5
+constant Bonus is Natural = PointsPerDollar * 2
+constant Window is Duration = 30 days
+```
+
+`is`, `:` and `=` are interchangeable as the readability word, so
+`constant Bonus: Natural = PointsPerDollar * 2` says the same thing.
+
+An operand that is not fixed is the Error `constant-operand-not-constant` — a
+field or a `let` cannot appear here, because a constant is resolved once, before
+anything runs. A value that does not fit the declared type is
+`constant-expression-type-mismatch`.
+
+In an expression a constant may be named plainly (`MaxItems`) or explicitly
+(`constant MaxItems`); both resolve to the same thing.
 
 ### Empty and None
 
@@ -1535,8 +1632,22 @@ Calling something with no declared `returns` is an Error.
 
 ### Boolean Expressions
 
-Boolean expressions have the usual precedence: `or` < `and` < `not` <
-comparison < atom. Parentheses group.
+Boolean expressions have the usual precedence, with the two arithmetic levels
+sitting between a comparison and its atoms:
+
+```text
+or  <  and  <  not  <  comparison  <  additive  <  multiplicative  <  atom
+```
+
+`*` and `/` bind tighter than `+` and `-`, all four fold left, and parentheses
+group. `count of` binds tighter than arithmetic, so `count of items + 1` is
+"one more than the number of items".
+
+!!! warning "Binary minus wants whitespace on its left"
+    `a - 3` subtracts; `a-3` is a single identifier, because a hyphen is a
+    legal character in a RIDDL name. This bites only the minus: `a+3` and
+    `a*3` are unambiguous. Write spaces around every operator and the question
+    never arises.
 
 <!-- riddl: in-handler -->
 ```riddl
@@ -1583,13 +1694,21 @@ to stay readable by people who are not computer scientists.
     is part of one two-character token — it is not the negation operator being
     applied to `= b`. `!x` and `x != y` share a character and nothing else.
 
-!!! warning "Comparisons are type-safe"
-    Both operands of a comparison must be **typed references** — a value
-    reference, a `get from`, or a named `constant`. A literal is not permitted:
-    `count > "5"`, `count > 5`, `count > true` and `count > R(1)` all fail at
-    parse time.
+!!! warning "Comparisons are type-checked, not syntactically restricted"
+    Either operand may be **any expression** — a reference, a literal, a
+    `get from`, a constant, arithmetic, a `count of`. What may sensibly be
+    compared is validation's question, not the grammar's, so a nonsense
+    comparison is reported by the validator rather than refused by the parser:
+    `count > "5"` is the Error `value-ordering-needs-numeric`, naming the types
+    it got.
 
-    To compare against a fixed value, name it:
+    `==` and `!=` require operands of the same category; `<`, `>`, `<=` and
+    `>=` require an ordered type — numeric, timestamp or duration — on both
+    sides.
+
+    A literal operand is legal and draws the style warning
+    `value-literal-comparison-style`. Naming the value is still better style,
+    because the name records the intent:
 
     <!-- riddl: skip reason="elided template; a context-level constant beside a statement" -->
     ```riddl
@@ -1598,10 +1717,45 @@ to stay readable by people who are not computer scientists.
     when cart.itemCount > MaxItems then error "too many items" end
     ```
 
-    This is deliberate. It removes magic constants from models and makes every
-    comparison check the types on both sides. `==` and `!=` require operands of
-    the same category; `<`, `>`, `<=` and `>=` require an ordered (numeric)
-    type on both sides.
+    (This reverses an earlier rule. Until 2.2 both operands had to be typed
+    references and every literal failed at parse time.)
+
+#### Quantifying over a collection
+
+`all of`, `any of` and `none of` turn a collection and a predicate into a
+boolean. The element binding is explicit and scoped to the predicate:
+
+<!-- riddl: in-handler -->
+```riddl
+when all of order.items as line where line.quantity > Zero then ??? end
+when any of cart.tags as tag where tag == "urgent" then ??? end
+when none of order.items as line where line.sku == "" then ??? end
+when count of order.items > MinimumOrder then ??? end
+when cart.tags contains "urgent" then ??? end
+```
+
+On an **empty** collection, `all of` is **true** and `any of` is **false** —
+the usual reading of "every element satisfies it" when there are no elements.
+`none of` is likewise true.
+
+Dropping the quantifier gives a **filter**, whose value is the matching
+elements rather than a boolean:
+
+<!-- riddl: in-handler -->
+```riddl
+let inStock = order.items as line where line.quantity > Zero
+let howMany = count of inStock
+```
+
+A filter is not a boolean, so `when order.items as line where …` does not
+parse. Pass it to `count of`, bind it with `let`, or quantify it.
+
+!!! info "There is no `map`"
+    Deliberately. A `map` would build a *new* collection of a *new* shape, and
+    that shape would have no declaration anywhere in the model — which is
+    exactly the thing RIDDL refuses to synthesise. Filtering and counting
+    narrow what a model already declares; transforming would invent something
+    it does not.
 
 ## Statement Syntax
 
@@ -1646,11 +1800,14 @@ An optional `at` clause states **when** the message should be delivered:
 ```riddl
 send event ItemAdded(sku = order.id) to outlet CartEvents at order.dueAt
 send event ItemAdded(sku = order.id) to outlet CartEvents at system.now
+send event ItemAdded(sku = order.id) to outlet CartEvents at system.now + 30 days
 ```
 
 The instant must type as `TimeStamp`, `DateTime` or `ZonedDateTime` (through
-aliases): a message or state field, a constant, or `system.now`. A `Date` or a
-`String` is an Error — `stmt-send-at-not-instant`, which names the type it got.
+aliases). It may be any expression of that type: a message or state field, a
+constant, `system.now`, or — since 2.2 — a timestamp with a duration added or
+subtracted, as the third line shows. A `Date` or a `String` is an Error —
+`stmt-send-at-not-instant`, which names the type it got.
 
 It states an **instant, never a mechanism.** Whether that becomes a timer, a
 scheduler entry, a delay queue or a poll is the generator's choice, and RIDDL
@@ -1912,10 +2069,14 @@ removed from a list could only be written as
 `set field S.items to prompt("items with the new item appended")` — which
 riddlc now reports as an incomplete *prose* fold
 (`entity-event-sourced-prose-folds`). These two statements give the common
-cases a real spelling. Arithmetic deliberately gets none: RIDDL does no
-arithmetic, and `set field S.balance to prompt("balance + points")` names its
-target and its operands, so it counts as a stated, *derived* fold rather than
-prose.
+cases a real spelling.
+
+**Arithmetic folds have a real spelling too**, as of 2.2:
+`set field S.balance to S.balance + points`. The older
+`set field S.balance to prompt("balance + points")` still validates — it names
+its target and its operands, so it counts as a stated, *derived* fold rather
+than prose — but it is legacy, and the arithmetic form is what a generator can
+act on without guessing.
 
 Ordering is meaning for a sequence, so `append` always places at the end.
 Both `remove` forms remove **every** matching element, not the first.
@@ -1948,15 +2109,131 @@ model changed meaning when the statements arrived.
 Creates a local variable binding, with an optional type annotation. When no
 annotation is given, the type is inferred from the bound expression:
 
-<!-- riddl: skip reason="calls `Cart.Total`, a function this page never defines, and annotates a `let` with the predefined `Decimal`, which does not resolve as a type path" -->
+<!-- riddl: in-handler -->
 ```riddl
-let totalPrice = call function Cart.Total(subtotal, tax, shipping)
-let discount: Decimal = "totalPrice * 0.1"
+let totalPrice = subtotal + amount
+let discount = totalPrice * rate
 let ready = order.isPaid and not order.isCancelled
 ```
 
 A `let` is lexically scoped and statement-ordered: it is visible only after its
 declaration and is shadowed inside nested blocks.
+
+!!! warning "A type annotation must be a type NAME"
+    The annotation is a path, so it names a declared type: `let discount: Price`
+    works where `type Price is Decimal(10, 2)` is in scope. An inline
+    parameterised type does **not** parse — `let discount: Decimal(10, 2)` stops
+    at the `(` — and a bare predefined `Decimal` does not resolve as a path
+    either. Name the type once and annotate with the name, or leave the
+    annotation off and let the expression's type stand.
+
+### Log Statement
+
+`log <value>` records a value for a human reader:
+
+<!-- riddl: in-handler -->
+```riddl
+log "processing order " + orderId
+log amount
+log order.confirmationNumber
+```
+
+It is **deterministic** — never an AI-fill site, unlike a bare string in a
+`do`. It is not state, not a message, and it produces nothing a later statement
+can read, so it is legal wherever a statement is, a **function body
+included**: logging observes a value without being an effect on the model.
+
+The common idiom is a journal sink for whatever a handler did not recognise:
+
+<!-- riddl: skip reason="needs `option message_envelope` in scope; `on other as m` is shown whole in the standard-module page" -->
+```riddl
+on other as m is { log m }
+```
+
+!!! warning "`+` concatenates strings, it does not stringify"
+    `log "count: " + count` is the Error `value-arithmetic-operand-mismatch`
+    when `count` is numeric — `+` on a `String` needs a `String` on the other
+    side. Either log the value on its own line (`log count`) or concatenate
+    two strings. There is no implicit conversion, by design: RIDDL does not
+    choose a number's rendering for you.
+
+### Repository Statements
+
+Four statements change stored data and one value reads it. All five are legal
+**only inside a repository** — a repository owns the storage, so nothing else
+may write it:
+
+<!-- riddl: in-context -->
+```riddl
+record StoredBooking is {
+  bookingId: String, guestName: String, assignedTable: String, partySize: Integer
+}
+command RecordBooking is { bookingId: String, guestName: String, partySize: Integer }
+command SeatBooking is { bookingId: String, confirmedTable: String }
+command CancelBooking is { bookingId: String }
+query FindBooking replies result BookingFound is { bookingId: String }
+result BookingFound is { guestName: String }
+type BookingChange is RecordBooking | SeatBooking | CancelBooking
+
+repository BookingStore is {
+  schema BookingSchema is relational
+    of bookings as record StoredBooking
+    key on field StoredBooking.bookingId
+    index on field StoredBooking.guestName
+
+  inlet Changes is type BookingChange
+  inlet Questions is query FindBooking
+  outlet Answers is result BookingFound
+
+  handler Storage is {
+    on add: command RecordBooking {
+      store record StoredBooking(
+        bookingId = add.bookingId, guestName = add.guestName,
+        assignedTable = "", partySize = add.partySize
+      ) in BookingSchema.bookings
+    }
+    on seat: command SeatBooking {
+      // unqualified table name: this repository declares one schema
+      update bookings set assignedTable = seat.confirmedTable
+        where bookingId == seat.bookingId
+    }
+    on drop: command CancelBooking {
+      delete from BookingSchema.bookings where bookingId == drop.bookingId
+    }
+    on ask: query FindBooking {
+      let found = query one BookingSchema.bookings where bookingId == ask.bookingId
+      reply result BookingFound(guestName = found.guestName)
+    }
+  }
+}
+```
+
+| Form | Meaning |
+|------|---------|
+| `store <record> in <table>` | Adds a row |
+| `upsert <record> in <table>` | Adds it, or replaces the row with the same key |
+| `update <table> set f = v, … where <cond>` | Changes named fields of matching rows |
+| `delete from <table> where <cond>` | Removes matching rows |
+| `query [one] <table> [where <cond>]` | **A value**, not a statement: reads rows |
+
+A table is named `Schema.table`, or by the bare `table` when the repository
+declares exactly one schema, as the `update` above shows.
+
+!!! warning "Inside `where` and `set`, a bare name is a ROW field"
+    That is the whole point — these clauses talk about stored rows — but it
+    means a bare name **shadows a same-named field of the handled message**.
+    In the `update` above, `bookingId` is the row's column and
+    `seat.bookingId` is the command's field. Qualify the message field always;
+    the row field never needs it.
+
+`query` without `one` reads **every** matching row, in **unspecified order** —
+if order matters, the model must say so some other way, because a repository
+makes no promise about it. `query one` reads the first match, or `empty` when
+nothing matches.
+
+`upsert` requires the schema to declare a `key on` a field of the stored
+record: without a key there is no definition of "the same row", so there is
+nothing for it to replace.
 
 ### Ask
 
@@ -2635,6 +2912,42 @@ repository CartRepository is {
   briefly as "Persistent storage for shopping cart data"
 }
 ```
+
+### Schema Clauses
+
+A `schema` names its kind, then takes its clauses in a fixed order: `of …`,
+`link …`, `key on …`, `index on …`, and finally its own `with { … }`.
+
+| Clause | Says |
+|--------|------|
+| `of <table> as <record>` | This table stores that record |
+| `of <table> as <record> with history` | …and keep an append-only history of it |
+| `link <name> as field A to field B` | A relationship between two stored fields |
+| `key on field F` | `F` is a **unique natural key** |
+| `index on field F` | `F` is expected to be searched on |
+
+<!-- riddl: in-context no-prelude=Item -->
+```riddl
+record Item is { itemId: String, ticketId: String, name: String }
+
+repository TicketStore is {
+  schema TicketSchema is relational
+    of items as record Item with history
+    key on field Item.itemId
+    index on field Item.ticketId
+}
+```
+
+**A key is not an index.** An index says a field will be searched on; a key
+says no two stored rows may share its value, which is what gives `upsert` its
+meaning of "the same row". A keyed schema counts as indexed on that field, so
+there is no need to write both for one field. There are no **composite** keys:
+a key names exactly one field of the stored record.
+
+`with history` asks the generator for an append-only history of the table —
+every version retained rather than each write overwriting the last. It states
+the *requirement*, not the mechanism: whether that becomes a temporal table, an
+audit sidecar or an event log is the generator's choice.
 
 ### Repositories at Domain Scope
 
@@ -3344,9 +3657,10 @@ addressed before considering a model ready for translation or code generation.
 2. **Be Explicit**: Always specify reference kinds (entity, command, event…).
 3. **Ascribe Shapes**: Write `as <shape>` on any processor with ports, so the
    intent is stated rather than inferred.
-4. **Name Constants**: Comparisons require typed references, so give thresholds
-   names — `constant MaxItems is Natural = 100` — rather than embedding
-   magic numbers.
+4. **Name Constants**: a literal comparison operand is legal but draws a style
+   warning, so give thresholds names — `constant MaxItems is Natural = 100` —
+   rather than embedding magic numbers. The name records what the threshold
+   means; the number alone does not.
 5. **Declare `yields`**: A command or query that declares its response gives
    generators a precise signature and lets the validator check conformance.
 6. **Mark `initial`**: Marking the starting state and handler explicitly makes
@@ -3475,8 +3789,8 @@ blocks and doc blocks.
 3. Always include reference kinds before identifiers.
 4. `state … of` and `morph … with` take a **record**, not a message.
 5. `send` targets an **outlet**; use `tell` for direct delivery to a processor.
-6. A comparison operand must be a reference or a named constant, never a
-   literal.
+6. A comparison operand may be any expression, literals included — but a bare
+   literal draws a style warning, so name the value.
 7. Place comments only where definitions are allowed, not within clauses.
 8. Metadata blocks follow their definitions rather than being nested within
    them.

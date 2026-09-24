@@ -11,20 +11,17 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-09-14
+## HANDOFF — as of 2026-09-24
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins riddl `2.2.0`, Scala `3.9.0`, and `../bin/riddlc` IS
-`2.2.0`** — tag, staged binary and `~/.ivy2/local` artifact agree, verified
-2026-09-14. The grammar hashes identical to riddl's at the tag.
+**`build.sbt` pins the STAGED `2.2.0-13-b8581131`, Scala `3.9.0`, and that is
+what `../bin/riddlc` is** — tag+13, with a matching `~/.ivy2/local` artifact,
+verified 2026-09-24. The grammar is regenerated from it and hashes identical to
+riddl at `b85811315`. PATH is still 2.0.0.
 
-**Gate against 2.2.0: GREEN, 377 / 52 / 0.** `task/` is empty; the
-2026-09-11 implied-ports task is in `task/done/` with its Results.
-
-**BACKLOG 2b is DONE** (2026-09-16): `origin/gh-pages` is `06d2032`, the
-RIDDL selector offers `2.x` and `1.x` only, and the retired `next`/`2.0`/
-`1.31` URLs now reach the 404 handler's redirects.
+**Gate: GREEN, 385 / 52 / 0.** `task/` is empty — five language-reference
+tasks (B2/B3/B4/B5/B7) went to `task/done/` with Results on 2026-09-24.
 
 **The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
 behind. But it has flipped three times in six weeks, so **measure, never
@@ -157,6 +154,42 @@ prelude (`Item`, `CartData`, `ItemAdded`, `entity Cart`), surfacing as
 **`Tip` was missing from the severity table too** — found only because
 adding `Advisory` meant reading `Messages.scala` end to end. An enumerated
 table is a claim; check the closed set when you touch it.
+
+### 2.2.x: six language changes, and a rule that had spread to five pages ✅ **2026-09-24**
+
+Five task files (B4 arithmetic, B5 collection predicates, B3 schema keys, B2
+repository statements, B7 `log`), plus B1 folded in, against staged
+`2.2.0-13-b8581131`. Gate 377 → **385 / 52 / 0**. Each file's Results carry the
+evidence; what the session taught:
+
+- **A reversed rule does not stay in one file.** B4's tasking named only
+  `language-reference.md`, but "comparison operands must be typed references,
+  a literal fails at PARSE time" also sat in `cheat-sheet.md`,
+  `concepts/value.md`, `concepts/invariant.md` and `concepts/statement.md`.
+  Fixing only the named file would have left four pages contradicting the
+  reference on the exact point of the task. **When a task says a rule
+  reversed, grep the tree for the rule, not for the file.**
+- **riddl's own fixture contradicted a riddl rule.**
+  `language/input/repository-statements.riddl` draws
+  `[error] [repo-inlet-carries-event]` — a repository inlet carrying events.
+  Pasting it would have reddened our gate, so the example is a command-driven
+  re-derivation. Reported upstream in the task's Results. Third time the
+  "authored, not quoted" rule has paid for itself.
+- **A skip can become a validated fence.** The `let` example had been skipped
+  for annotating with predefined `Decimal`; writing it as arithmetic made it
+  gateable. Worth re-reading old `skip` reasons after a language change —
+  some of them expire.
+- **`let` annotations take a type NAME.** `let d: Decimal(10,2)` stops at the
+  `(`. Found because B4 asked for a spelling that cannot exist.
+- **Nine lexer keywords** were missing (`count delete history key log none
+  store update upsert`) — the drift trap, on schedule. Verified by tokenizing.
+- **Two of the thirteen commits needed no doc change at all**, and saying so
+  is the work: the `dump --json` fix is tooling, and the origination ruling
+  (`b85811315`) has no doc surface here — our only "originates" statements are
+  about `ForeverEmpty`, which still hold. Recorded in CLAUDE.md's table anyway,
+  because a future streaming fence will need it.
+- **Two task files asked for a "statement census" that does not exist** in
+  these docs. Grep beat assumption; both Results say so.
 
 ### riddl 2.2.0: the saga rule, and why extractGrammar "hangs" ✅ **2026-09-14**
 

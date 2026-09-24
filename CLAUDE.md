@@ -489,6 +489,7 @@ not carry an answer forward from a previous session; measure it.
 | 2.0.0 shipped (2026-08-27) | **PATH** | Homebrew *became* the release; the staged build ran ahead of it |
 | 2.1.x development (2026-09-09) | **`../bin/riddlc`** | riddl tagged 2.1.0/2.1.1 and moved 26 commits past; PATH still serves **2.0.0** |
 | 2.2.0 shipped (2026-09-14) | **`../bin/riddlc`** — which IS `2.2.0` | tag, staged binary and `~/.ivy2/local` artifact all agree for once; PATH still serves **2.0.0** until Homebrew catches up |
+| 2.2.x development (2026-09-24) | **`../bin/riddlc`** — staged `2.2.0-13-b8581131` | riddl moved 13 commits past the tag with six language changes; PATH still serves **2.0.0** |
 
 Each of those was written down as emphatically as this one. The instruction
 inverted twice **without a word of it changing**, and validating with the wrong
@@ -537,8 +538,8 @@ resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
-# As of 2026-09-14 it is the STAGED build, which is the clean 2.2.0 tag;
-# PATH (Homebrew) still serves 2.0.0.
+# As of 2026-09-24 it is the STAGED build, `2.2.0-13-b8581131` -- 13 commits
+# past the tag, with six language changes in them. PATH still serves 2.0.0.
 python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
@@ -601,8 +602,8 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-09-14, riddl **2.2.0**): the whole 2.0 tree
-is **376 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
+**Status** (2026-09-24, staged riddl **2.2.0-13-b8581131**): the whole 2.0 tree
+is **385 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
 is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
 
@@ -724,6 +725,17 @@ compilers):
 | multi-line `do` / `prompt` | — | brace a sequence of strings: `do { "one" "two" }`, `prompt({ "one" "two" }) as T`. The bare form takes **exactly one** string — statements have no terminator, so juxtaposition would be unparseable |
 | `prompt` statement | ✅ | `[deprecated] [prompt-statement]` — `do` is canonical. Unrelated to the `prompt(...)` **value**, which is current |
 | generic processor keyword | `processor` | **`streamlet`** (2.1.x) — `processor` is `[deprecated]` (`stream-processor-keyword`) and `riddlc validate --fix --fix-rule stream-processor-keyword` rewrites it. The ABSTRACTION is still called a processor; only the keyword moved |
+| arithmetic | ❌ — no numeric literal atom, no expressions | ✅ **2.2.x** — `+ - * /` on numbers, `+` on two strings, timestamp ± duration. No power/roots (`prompt` those). Result is the smallest constrained type containing the operands: `Natural - Natural` → **Integer**, `Integer / Integer` truncates, `Real + Decimal` → `Number`. Mismatch = `value-arithmetic-operand-mismatch` |
+| comparison operands | typed references ONLY; a literal failed at PARSE time | **any expression** (2.2.x) — validation decides what compares. `count > "5"` is the Error `value-ordering-needs-numeric`; a bare literal is legal and draws the STYLE warning `value-literal-comparison-style`. **This reversed a rule stated in five of our pages** |
+| duration literal | ❌ | ✅ 2.2.x — `30 days`, `1.50 hours`; unit WORDS, singular or plural, nanoseconds..weeks. Not `30d`, not `PT30M` — `on quiescence` and `times out after` keep their STRING durations. `system.now` is the only spelling of now |
+| constant value | a literal | an **expression** of literals/durations/constants (2.2.x). `constant-operand-not-constant` otherwise. Note `is = ["is"|"are"|":"|"="]`, so `constant X: T = v` and `constant X is T = v` are the same |
+| `let` type annotation | — | a type **NAME** only. `let d: Decimal(10,2)` does NOT parse (stops at `(`) and bare predefined `Decimal` does not resolve as a path. Name the type, or omit the annotation |
+| collection predicates | ❌ | ✅ 2.2.x — `all of c as e where p` / `any of` / `none of` (boolean); `c as e where p` (a **filter**, not a boolean, so `when <filter>` will not parse); `count of c` (a `Whole`, binds tighter than arithmetic); `c contains v`. On an EMPTY collection `all of` and `none of` are **true**. **No `map`**, deliberately — it would build an undeclared shape |
+| `log` statement | ❌ | ✅ 2.2.x — `log <value>`, deterministic (never an AI fill), not state, not a message, legal anywhere including a function body. `log "x: " + <number>` is an Error: `+` on a String needs a String |
+| repository statements | ❌ | ✅ 2.2.x — `store`/`upsert`/`update`/`delete` and the `query [one]` VALUE, **repository handlers only**. Table is `Schema.table` or bare `table` with one schema. In `where`/`set` a bare name is a ROW field and SHADOWS a message field of the same name. `upsert` needs a `key on`. `query` without `one` = every match, UNSPECIFIED order |
+| schema `key on` / `with history` | ❌ | ✅ 2.2.x — `key on field F` is a UNIQUE natural key (an index is not); a keyed schema counts as indexed; **no composite keys**. `with history` asks for append-only history. Clause order is fixed: `of`, `link`, `key on`, `index on`, then `with` |
+| `m.<field>` under `on other as m` | — | resolves the ENVELOPE's field first, then a field **common to every message that can still reach the clause** (inlet types minus what sibling `on` clauses take). Partial coverage = Error `handler-on-other-field-not-common` |
+| origination (chain head) | outlet + no inbound edge | **an outlet AND no dataflow inlet admitting a command or query** (2026-09-23). A `yield`/`reply` sender originates that reply, so receiving a command or query makes a processor a responder, never an origin. No inlets satisfies it vacuously. Fixes an `application context … as merge` never being able to be a head |
 | saga step with no `tell command` | CompletenessWarning | **Error** (`saga-step-no-tell`, 2026-09-09) — a step that tells nothing effects nothing, so its `reverted by` compensates an action that never happened. A `send` does not satisfy it; only a `tell` of a **command** does |
 | `on quiescence <window>` | ❌ | ✅ 2.1.x — fires when the **instance** handled nothing for the window; clock restarts on every message; state-scoped arming. Window is a duration literal or a `Duration`-typed path (not a `let`). One per handler; never in a `correlation`. Unlike `on activate` it IS an effect block |
 | `send … at <instant>` | ❌ | ✅ 2.1.x — `TimeStamp`/`DateTime`/`ZonedDateTime` only (`stmt-send-at-not-instant`). A past instant delivers immediately; there is **no cancellation**, so schedule to yourself and decide at fire time. `send` only, never `tell` |
@@ -1062,7 +1074,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary = 2.2.0 as of 2026-09-14; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary = `2.2.0-13-b8581131` as of 2026-09-24; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |

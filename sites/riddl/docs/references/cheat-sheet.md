@@ -703,11 +703,21 @@ Wherever a statement needs a value, any of these is accepted:
 | Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it. **Never inside a saga.** |
 | Initiate | `initiate entity Order` | Creates an instance; the value is its `Id`. Entity-only; an effect. |
 | Self | `self`, `self.id` | The instance running now (`id`, `version`). Pass `self.id`, never `self`. |
+| Arithmetic | `subtotal + amount * rate` | `+ - * /` on numbers, `+` on two strings, timestamp ± duration. No power or roots — those stay a `prompt`. |
+| Duration literal | `30 days`, `1.50 hours` | Unit words, singular or plural. Not `30d`, not `PT30M` — those remain the strings used by `on quiescence` and `times out after`. |
+| Collection predicate | `all of items as i where i.qty > Zero` | `all of` / `any of` / `none of` — a boolean. On an empty collection `all of` and `none of` are **true**, `any of` is false. |
+| Filter | `items as i where i.qty > Zero` | The matching **elements**, not a boolean — so `when <filter>` does not parse. There is deliberately no `map`. |
+| Count | `count of items` | How many elements, as a `Whole`. Binds tighter than arithmetic. |
+| Membership | `tags contains "urgent"` | Whether the collection holds that value |
+| Query | `query one bookings where id == q.id` | Reads stored rows. Repository handlers only; without `one`, every match in **unspecified** order. |
 
-!!! warning "Comparisons are type-safe and ref-only"
-    Both operands must be a value reference, a `get from`, or a named
-    `constant` — never a literal. `count > 5`, `count > "5"` and
-    `count > true` all fail at **parse** time. Name the threshold instead:
+!!! warning "Comparisons are type-CHECKED, not reference-only"
+    Either operand may be any expression — a reference, a literal, a
+    `get from`, a constant, arithmetic, a `count of`. Nonsense is caught by
+    the validator, not the parser: `count > "5"` is the Error
+    `value-ordering-needs-numeric`. A bare literal parses and draws the style
+    warning `value-literal-comparison-style`, so naming the threshold is still
+    better style:
 
     <!-- riddl: skip reason="a constant beside a condition that would use it; not one construct" -->
     ```riddl
@@ -824,7 +834,9 @@ the value denotes something AI computes.
 | Functions | when, match, foreach, require, let, return, do, error, code |
 | `on activate` / `on passivate` | Side-effect free only — no send, tell, yield, morph, become |
 | `on event` | No require or error — an event must always be accepted |
-| Saga steps | send, tell, yield, put, do, error |
+| Saga steps | send, tell, yield, put, do, error — and at least one `tell command`, or the step effects nothing |
+| Repository handlers | All above + store, upsert, update, delete (and the `query` value) |
+| Anywhere, functions included | log — deterministic, not state, not a message |
 
 #### Deprecated Statements
 
