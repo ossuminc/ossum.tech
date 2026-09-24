@@ -66,9 +66,11 @@ class RiddlLexer(RegexLexer):
     CONTROL_KEYWORDS = (
         'ask', 'become', 'call', 'default', 'do', 'else', 'error', 'execute',
         'for', 'foreach', 'forward', 'get', 'if', 'initial', 'initiate',
-        'let', 'match', 'morph', 'on', 'prompt', 'put', 'require', 'return',
-        'reverted', 'send', 'set', 'stop', 'take', 'tell', 'terminate',
-        'then', 'when', 'yield',
+        'let', 'log', 'match', 'morph', 'on', 'prompt', 'put', 'require',
+        'return', 'reverted', 'send', 'set', 'stop', 'take', 'tell',
+        'terminate', 'then', 'when', 'yield',
+        # B2 (2026-09-22): the repository storage statements.
+        'delete', 'store', 'update', 'upsert',
     )
 
     # Boolean-expression operators and literals, new in 2.0. These are
@@ -107,13 +109,15 @@ class RiddlLexer(RegexLexer):
         'final', 'quiescence', 'replies', 'self', 'system',
         'animation', 'any', 'append', 'attachment', 'benefit', 'block',
         'body', 'brief', 'briefly', 'button', 'capability', 'chooses',
-        'column', 'commands', 'condition', 'container', 'contains', 'create',
+        'column', 'commands', 'condition', 'container', 'contains', 'count',
+        'create',
         'described', 'description', 'details', 'dialog', 'direct',
         'displays', 'document', 'email', 'emits', 'end', 'enters', 'example',
         'explained', 'explanation', 'figma', 'file', 'focus', 'form',
-        'frame', 'fully', 'index', 'init', 'initiates', 'inlets', 'item',
+        'frame', 'fully', 'history', 'index', 'init', 'initiates', 'inlets',
+        'item', 'key',
         'items', 'label', 'link', 'many', 'mapping', 'menu', 'message',
-        'name', 'node', 'one', 'option', 'optional', 'options',
+        'name', 'node', 'none', 'one', 'option', 'optional', 'options',
         'organization', 'other', 'outlets', 'page', 'pane', 'parallel',
         'passivate', 'picklist', 'picks', 'picture', 'popup', 'presents',
         'provides', 'range', 'reads', 'reference', 'refuses', 'remove',
