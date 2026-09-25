@@ -489,7 +489,7 @@ not carry an answer forward from a previous session; measure it.
 | 2.0.0 shipped (2026-08-27) | **PATH** | Homebrew *became* the release; the staged build ran ahead of it |
 | 2.1.x development (2026-09-09) | **`../bin/riddlc`** | riddl tagged 2.1.0/2.1.1 and moved 26 commits past; PATH still serves **2.0.0** |
 | 2.2.0 shipped (2026-09-14) | **`../bin/riddlc`** — which IS `2.2.0` | tag, staged binary and `~/.ivy2/local` artifact all agree for once; PATH still serves **2.0.0** until Homebrew catches up |
-| 2.2.x development (2026-09-24) | **`../bin/riddlc`** — staged `2.2.0-13-b8581131` | riddl moved 13 commits past the tag with six language changes; PATH still serves **2.0.0** |
+| 2.3.0 shipped (2026-09-24) | **`../bin/riddlc`** — whose version string still reads `2.2.0-13-b8581131` | **2.3.0 is tagged at exactly that commit** (`b8581131`), so the staged binary IS 2.3.0's code; PATH still serves **2.0.0** |
 
 Each of those was written down as emphatically as this one. The instruction
 inverted twice **without a word of it changing**, and validating with the wrong
@@ -520,10 +520,28 @@ one-to-thirty-three commits past their tag, with only the staged version's JVM
 
 **The 2.0.0 release ended that, for now,** and 2.1.x development brought it
 straight back: the pin went through `2.1.1-26-4d17b1ef` while the staged
-binary ran on to `-33` and `-51`. **2.2.0 (2026-09-14) reconciled all three
-again** — tag, `../bin/riddlc version`, and `riddl-language_3/2.2.0` in
-`~/.ivy2/local` — so the pin is the clean `2.2.0`. Check all three separately
-(tag, binary, artifact) and pin what the gate actually runs.
+binary ran on to `-33` and `-51`. 2.2.0 reconciled all three, then the B-series
+moved the pin to the staged `2.2.0-13-b8581131` again. **2.3.0 (2026-09-24) is
+the resting point**: it is tagged at that exact commit, so the pin is the clean
+`2.3.0` for identical code. Check all three separately (tag, binary, artifact)
+and pin what the gate actually runs.
+
+**Prefer a published tag over a staged build whenever one exists at the same
+commit.** A `-N-hash` pin resolves only from `~/.ivy2/local`, which exists on
+one machine; the tagged version resolves from GitHub Packages, so CI and a
+fresh clone can build it. Verified 2026-09-25: after pinning `2.3.0`,
+`riddl-language_3-2.3.0.jar` appears in the **Coursier** cache and on
+`dependencyClasspathFiles`, where every `2.2.0-13-b8581131` artifact had lived
+in ivy-local only. The code was byte-identical — the grammar regenerated to the
+same md5 — so this bought reproducibility and nothing else, which is exactly
+why it is worth doing as soon as the tag appears.
+
+**A staged binary's version string does not update when a tag lands on its
+commit.** `../bin/riddlc version` still prints `2.2.0-13-b8581131` while being
+2.3.0's code, because sbt-dynver stamped it at BUILD time from a `git describe`
+that predated the tag. Compare the COMMIT, not the string:
+`git rev-parse 2.3.0^{commit}` against the hash in the version. A session that
+trusts the string will conclude the binary is behind a release it actually is.
 
 **A tag in `riddl` means neither a staged binary nor a resolvable artifact.**
 These three drift apart and must be checked separately: the tag, what
@@ -538,8 +556,8 @@ resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
-# As of 2026-09-24 it is the STAGED build, `2.2.0-13-b8581131` -- 13 commits
-# past the tag, with six language changes in them. PATH still serves 2.0.0.
+# As of 2026-09-25 it is `../bin/riddlc`, which prints 2.2.0-13-b8581131 but IS
+# 2.3.0's code -- the tag landed on that very commit. PATH still serves 2.0.0.
 python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
@@ -602,7 +620,7 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-09-24, staged riddl **2.2.0-13-b8581131**): the whole 2.0 tree
+**Status** (2026-09-25, riddl **2.3.0**): the whole 2.0 tree
 is **385 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
 is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
@@ -725,15 +743,15 @@ compilers):
 | multi-line `do` / `prompt` | — | brace a sequence of strings: `do { "one" "two" }`, `prompt({ "one" "two" }) as T`. The bare form takes **exactly one** string — statements have no terminator, so juxtaposition would be unparseable |
 | `prompt` statement | ✅ | `[deprecated] [prompt-statement]` — `do` is canonical. Unrelated to the `prompt(...)` **value**, which is current |
 | generic processor keyword | `processor` | **`streamlet`** (2.1.x) — `processor` is `[deprecated]` (`stream-processor-keyword`) and `riddlc validate --fix --fix-rule stream-processor-keyword` rewrites it. The ABSTRACTION is still called a processor; only the keyword moved |
-| arithmetic | ❌ — no numeric literal atom, no expressions | ✅ **2.2.x** — `+ - * /` on numbers, `+` on two strings, timestamp ± duration. No power/roots (`prompt` those). Result is the smallest constrained type containing the operands: `Natural - Natural` → **Integer**, `Integer / Integer` truncates, `Real + Decimal` → `Number`. Mismatch = `value-arithmetic-operand-mismatch` |
-| comparison operands | typed references ONLY; a literal failed at PARSE time | **any expression** (2.2.x) — validation decides what compares. `count > "5"` is the Error `value-ordering-needs-numeric`; a bare literal is legal and draws the STYLE warning `value-literal-comparison-style`. **This reversed a rule stated in five of our pages** |
-| duration literal | ❌ | ✅ 2.2.x — `30 days`, `1.50 hours`; unit WORDS, singular or plural, nanoseconds..weeks. Not `30d`, not `PT30M` — `on quiescence` and `times out after` keep their STRING durations. `system.now` is the only spelling of now |
-| constant value | a literal | an **expression** of literals/durations/constants (2.2.x). `constant-operand-not-constant` otherwise. Note `is = ["is"|"are"|":"|"="]`, so `constant X: T = v` and `constant X is T = v` are the same |
+| arithmetic | ❌ — no numeric literal atom, no expressions | ✅ **2.3.0** — `+ - * /` on numbers, `+` on two strings, timestamp ± duration. No power/roots (`prompt` those). Result is the smallest constrained type containing the operands: `Natural - Natural` → **Integer**, `Integer / Integer` truncates, `Real + Decimal` → `Number`. Mismatch = `value-arithmetic-operand-mismatch` |
+| comparison operands | typed references ONLY; a literal failed at PARSE time | **any expression** (2.3.0) — validation decides what compares. `count > "5"` is the Error `value-ordering-needs-numeric`; a bare literal is legal and draws the STYLE warning `value-literal-comparison-style`. **This reversed a rule stated in five of our pages** |
+| duration literal | ❌ | ✅ 2.3.0 — `30 days`, `1.50 hours`; unit WORDS, singular or plural, nanoseconds..weeks. Not `30d`, not `PT30M` — `on quiescence` and `times out after` keep their STRING durations. `system.now` is the only spelling of now |
+| constant value | a literal | an **expression** of literals/durations/constants (2.3.0). `constant-operand-not-constant` otherwise. Note `is = ["is"|"are"|":"|"="]`, so `constant X: T = v` and `constant X is T = v` are the same |
 | `let` type annotation | — | a type **NAME** only. `let d: Decimal(10,2)` does NOT parse (stops at `(`) and bare predefined `Decimal` does not resolve as a path. Name the type, or omit the annotation |
-| collection predicates | ❌ | ✅ 2.2.x — `all of c as e where p` / `any of` / `none of` (boolean); `c as e where p` (a **filter**, not a boolean, so `when <filter>` will not parse); `count of c` (a `Whole`, binds tighter than arithmetic); `c contains v`. On an EMPTY collection `all of` and `none of` are **true**. **No `map`**, deliberately — it would build an undeclared shape |
-| `log` statement | ❌ | ✅ 2.2.x — `log <value>`, deterministic (never an AI fill), not state, not a message, legal anywhere including a function body. `log "x: " + <number>` is an Error: `+` on a String needs a String |
-| repository statements | ❌ | ✅ 2.2.x — `store`/`upsert`/`update`/`delete` and the `query [one]` VALUE, **repository handlers only**. Table is `Schema.table` or bare `table` with one schema. In `where`/`set` a bare name is a ROW field and SHADOWS a message field of the same name. `upsert` needs a `key on`. `query` without `one` = every match, UNSPECIFIED order |
-| schema `key on` / `with history` | ❌ | ✅ 2.2.x — `key on field F` is a UNIQUE natural key (an index is not); a keyed schema counts as indexed; **no composite keys**. `with history` asks for append-only history. Clause order is fixed: `of`, `link`, `key on`, `index on`, then `with` |
+| collection predicates | ❌ | ✅ 2.3.0 — `all of c as e where p` / `any of` / `none of` (boolean); `c as e where p` (a **filter**, not a boolean, so `when <filter>` will not parse); `count of c` (a `Whole`, binds tighter than arithmetic); `c contains v`. On an EMPTY collection `all of` and `none of` are **true**. **No `map`**, deliberately — it would build an undeclared shape |
+| `log` statement | ❌ | ✅ 2.3.0 — `log <value>`, deterministic (never an AI fill), not state, not a message, legal anywhere including a function body. `log "x: " + <number>` is an Error: `+` on a String needs a String |
+| repository statements | ❌ | ✅ 2.3.0 — `store`/`upsert`/`update`/`delete` and the `query [one]` VALUE, **repository handlers only**. Table is `Schema.table` or bare `table` with one schema. In `where`/`set` a bare name is a ROW field and SHADOWS a message field of the same name. `upsert` needs a `key on`. `query` without `one` = every match, UNSPECIFIED order |
+| schema `key on` / `with history` | ❌ | ✅ 2.3.0 — `key on field F` is a UNIQUE natural key (an index is not); a keyed schema counts as indexed; **no composite keys**. `with history` asks for append-only history. Clause order is fixed: `of`, `link`, `key on`, `index on`, then `with` |
 | `m.<field>` under `on other as m` | — | resolves the ENVELOPE's field first, then a field **common to every message that can still reach the clause** (inlet types minus what sibling `on` clauses take). Partial coverage = Error `handler-on-other-field-not-common` |
 | origination (chain head) | outlet + no inbound edge | **an outlet AND no dataflow inlet admitting a command or query** (2026-09-23). A `yield`/`reply` sender originates that reply, so receiving a command or query makes a processor a responder, never an origin. No inlets satisfies it vacuously. Fixes an `application context … as merge` never being able to be a head |
 | saga step with no `tell command` | CompletenessWarning | **Error** (`saga-step-no-tell`, 2026-09-09) — a step that tells nothing effects nothing, so its `reverted by` compensates an action that never happened. A `send` does not satisfy it; only a `tell` of a **command** does |
@@ -1074,7 +1092,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary = `2.2.0-13-b8581131` as of 2026-09-24; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary is 2.3.0's code as of 2026-09-25, though it prints `2.2.0-13-b8581131`; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |

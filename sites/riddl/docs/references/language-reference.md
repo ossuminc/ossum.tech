@@ -1717,8 +1717,8 @@ to stay readable by people who are not computer scientists.
     when cart.itemCount > MaxItems then error "too many items" end
     ```
 
-    (This reverses an earlier rule. Until 2.2 both operands had to be typed
-    references and every literal failed at parse time.)
+    (This reverses an earlier rule. Through 2.2 both operands had to be typed
+    references and every literal failed at parse time; 2.3.0 lifted that.)
 
 #### Quantifying over a collection
 
@@ -1805,8 +1805,8 @@ send event ItemAdded(sku = order.id) to outlet CartEvents at system.now + 30 day
 
 The instant must type as `TimeStamp`, `DateTime` or `ZonedDateTime` (through
 aliases). It may be any expression of that type: a message or state field, a
-constant, `system.now`, or — since 2.2 — a timestamp with a duration added or
-subtracted, as the third line shows. A `Date` or a `String` is an Error —
+constant, `system.now`, or — since 2.3.0 — a timestamp with a duration added
+or subtracted, as the third line shows. A `Date` or a `String` is an Error —
 `stmt-send-at-not-instant`, which names the type it got.
 
 It states an **instant, never a mechanism.** Whether that becomes a timer, a
@@ -2071,7 +2071,7 @@ riddlc now reports as an incomplete *prose* fold
 (`entity-event-sourced-prose-folds`). These two statements give the common
 cases a real spelling.
 
-**Arithmetic folds have a real spelling too**, as of 2.2:
+**Arithmetic folds have a real spelling too**, as of 2.3.0:
 `set field S.balance to S.balance + points`. The older
 `set field S.balance to prompt("balance + points")` still validates — it names
 its target and its operands, so it counts as a stated, *derived* fold rather

@@ -108,7 +108,7 @@ invariant BalanceNonNegative is balance >= Zero
     block may bind an expression rather than only a reference or a `call`.
 
     Two restrictions that used to apply are gone — the boolean sub-language
-    gained a numeric literal atom, and arithmetic arrived in 2.2. A bare
+    gained a numeric literal atom, and arithmetic arrived in 2.3.0. A bare
     literal operand still draws the style warning
     `value-literal-comparison-style`, which is why `balance >= Zero` reads
     better than `balance >= 0`: the name says what the bound means.

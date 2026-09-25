@@ -15,10 +15,14 @@ to the task file and note completion in this notebook.
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins the STAGED `2.2.0-13-b8581131`, Scala `3.9.0`, and that is
-what `../bin/riddlc` is** — tag+13, with a matching `~/.ivy2/local` artifact,
-verified 2026-09-24. The grammar is regenerated from it and hashes identical to
-riddl at `b85811315`. PATH is still 2.0.0.
+**`build.sbt` pins the released `2.3.0`, Scala `3.9.0`.** 2.3.0 is tagged at
+`b8581131`, the exact commit the previous staged pin named, so the code is
+identical and the grammar regenerated to the same md5 — the upgrade bought a
+resolvable artifact, not new behaviour.
+
+**`../bin/riddlc` still PRINTS `2.2.0-13-b8581131` and is 2.3.0's code.**
+sbt-dynver stamped it before the tag existed. Compare the commit
+(`git rev-parse 2.3.0^{commit}`), never the string. PATH is still 2.0.0.
 
 **Gate: GREEN, 385 / 52 / 0.** `task/` is empty — five language-reference
 tasks (B2/B3/B4/B5/B7) went to `task/done/` with Results on 2026-09-24.
@@ -155,7 +159,33 @@ prelude (`Item`, `CartData`, `ItemAdded`, `entity Cart`), surfacing as
 adding `Advisory` meant reading `Messages.scala` end to end. An enumerated
 table is a claim; check the closed set when you touch it.
 
-### 2.2.x: six language changes, and a rule that had spread to five pages ✅ **2026-09-24**
+### 2.3.0 lands on the commit we already had ✅ **2026-09-25**
+
+The pin went from the staged `2.2.0-13-b8581131` to the released **`2.3.0`**,
+and the two are the **same commit** — `git rev-parse 2.3.0^{commit}` is
+`b8581131`, and `git log b8581131..2.3.0` is empty. So:
+
+- **No content changed and no fence moved.** The grammar regenerated to the
+  identical md5 (`8a5ea15a`), which is the proof rather than an assumption.
+- **What it bought is reproducibility.** A `-N-hash` version resolves only
+  from `~/.ivy2/local` — one machine. After the bump,
+  `riddl-language_3-2.3.0.jar` is in the **Coursier** cache and on
+  `dependencyClasspathFiles`, i.e. fetched from GitHub Packages. Worth doing
+  the moment a tag appears at a commit you are already pinning.
+- **Verify a warm 3-second build actually resolved the new version.** It
+  succeeded at `cache 66%`, which is exactly when to check; the Coursier jar
+  and the classpath are what settled it, not the exit code.
+- **The release number corrected four prose claims.** Yesterday these features
+  had no release, so I hedged them as "2.2". They ship in **2.3.0**, and
+  `git tag --contains <commit>` is how each was settled: `append`/`remove` and
+  `Advisory` really are 2.2.0, while arithmetic, the timestamp-plus-duration
+  instant and the arithmetic fold are 2.3.0. A version claim in prose is a
+  claim like any other — check it against the tags.
+
+### 2.3.0's language changes: six of them, and a rule that had spread to five pages ✅ **2026-09-24**
+
+*(Done against the staged `2.2.0-13-b8581131`; that commit was tagged `2.3.0`
+the next day, so everything below is 2.3.0's content.)*
 
 Five task files (B4 arithmetic, B5 collection predicates, B3 schema keys, B2
 repository statements, B7 `log`), plus B1 folded in, against staged
