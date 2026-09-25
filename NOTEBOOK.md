@@ -15,14 +15,9 @@ to the task file and note completion in this notebook.
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins the released `2.3.0`, Scala `3.9.0`.** 2.3.0 is tagged at
-`b8581131`, the exact commit the previous staged pin named, so the code is
-identical and the grammar regenerated to the same md5 — the upgrade bought a
-resolvable artifact, not new behaviour.
-
-**`../bin/riddlc` still PRINTS `2.2.0-13-b8581131` and is 2.3.0's code.**
-sbt-dynver stamped it before the tag existed. Compare the commit
-(`git rev-parse 2.3.0^{commit}`), never the string. PATH is still 2.0.0.
+**`build.sbt` pins the released `2.3.1`, Scala `3.9.0`, and `../bin/riddlc`
+prints `2.3.1`.** The grammar has not moved since 2.3.0 — md5 `8a5ea15a` at
+both tags and in our copy. PATH is still 2.0.0.
 
 **Gate: GREEN, 385 / 52 / 0.** `task/` is empty — five language-reference
 tasks (B2/B3/B4/B5/B7) went to `task/done/` with Results on 2026-09-24.
@@ -158,6 +153,33 @@ prelude (`Item`, `CartData`, `ItemAdded`, `entity Cart`), surfacing as
 **`Tip` was missing from the severity table too** — found only because
 adding `Advisory` meant reading `Messages.scala` end to end. An enumerated
 table is a claim; check the closed set when you touch it.
+
+### 2.3.1: one rule changed its question, and none of it reached us ✅ **2026-09-25**
+
+Pin `2.3.0` → `2.3.1`. One substantive commit (`da31fa2f2`): the rule
+`handler-streamlet-foreign-message` stopped asking a sink why it does not
+dispatch to an entity and started asking whether it has said what it does with
+what it receives — executable work satisfies it, prose or nothing does not, and
+`do` is deliberately not work. Reid's reasoning: "a sink dispatches into
+entities" is a fact about one *use* of sinks, so every new boundary (a display,
+a log) arrived as a false positive; enumerating exempt kinds was the wrong
+shape of rule.
+
+**No doc surface, verified rather than assumed.** We never document that rule
+id, our three "foreign message" hits are all about adaptors, and CLAUDE.md's
+"chain end" row is about what terminates a chain, which is untouched. The
+grammar is byte-identical at both tags and the keyword count is unchanged at
+178. Gate held at 385 / 52 / 0.
+
+**The interesting part was the resolution leg.** 2.3.1 resolved from
+`~/.ivy2/local` with **nothing** in the Coursier cache — the same signature as
+the rc.11 incident where a tag existed but its JVM `_3` artifact was published
+nowhere. It would have been easy to report "2.3.1 is not on GitHub Packages
+yet". It is: ivy-local simply wins the resolver chain. The registry's
+`maven-metadata.xml` lists it, and fetching the jar directly gave HTTP 200,
+4 MB, a valid archive whose embedded grammar hashes to `8a5ea15a`. **A cache
+miss is not evidence of absence — ask the registry.** CLAUDE.md carries the
+two curl probes.
 
 ### 2.3.0 lands on the commit we already had ✅ **2026-09-25**
 

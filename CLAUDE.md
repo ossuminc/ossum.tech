@@ -489,7 +489,8 @@ not carry an answer forward from a previous session; measure it.
 | 2.0.0 shipped (2026-08-27) | **PATH** | Homebrew *became* the release; the staged build ran ahead of it |
 | 2.1.x development (2026-09-09) | **`../bin/riddlc`** | riddl tagged 2.1.0/2.1.1 and moved 26 commits past; PATH still serves **2.0.0** |
 | 2.2.0 shipped (2026-09-14) | **`../bin/riddlc`** — which IS `2.2.0` | tag, staged binary and `~/.ivy2/local` artifact all agree for once; PATH still serves **2.0.0** until Homebrew catches up |
-| 2.3.0 shipped (2026-09-24) | **`../bin/riddlc`** — whose version string still reads `2.2.0-13-b8581131` | **2.3.0 is tagged at exactly that commit** (`b8581131`), so the staged binary IS 2.3.0's code; PATH still serves **2.0.0** |
+| 2.3.0 shipped (2026-09-24) | **`../bin/riddlc`** — whose version string still read `2.2.0-13-b8581131` | **2.3.0 is tagged at exactly that commit** (`b8581131`), so the staged binary IS 2.3.0's code; PATH still serves **2.0.0** |
+| 2.3.1 shipped (2026-09-25) | **`../bin/riddlc`** — rebuilt, and now prints `2.3.1` | one substantive commit past 2.3.0; PATH still serves **2.0.0** |
 
 Each of those was written down as emphatically as this one. The instruction
 inverted twice **without a word of it changing**, and validating with the wrong
@@ -526,6 +527,27 @@ the resting point**: it is tagged at that exact commit, so the pin is the clean
 `2.3.0` for identical code. Check all three separately (tag, binary, artifact)
 and pin what the gate actually runs.
 
+**An ivy-local hit does NOT mean the artifact is missing from GitHub
+Packages.** `~/.ivy2/local` wins the resolver chain, so a `publishLocal` of a
+tagged version makes the build resolve locally and leave the Coursier cache
+empty — which looks exactly like the rc.11 case where the JVM `_3` artifact
+really was unpublished. Do not conclude from a Coursier miss. Ask the registry:
+
+```bash
+curl -s -u "reid-spencer:$GITHUB_TOKEN" \
+  https://maven.pkg.github.com/ossuminc/riddl/com/ossuminc/riddl-language_3/maven-metadata.xml \
+  | grep -oE '<version>[^<]+</version>' | tail -5
+# and fetch the jar itself; 200 plus a valid archive is the proof
+curl -sL -u "reid-spencer:$GITHUB_TOKEN" -o /tmp/probe.jar \
+  https://maven.pkg.github.com/.../riddl-language_3/<ver>/riddl-language_3-<ver>.jar
+```
+
+Measured 2026-09-25 for `2.3.1`: it resolved from ivy-local with nothing in
+Coursier, yet the registry listed it and the jar came back HTTP 200 at 4 MB
+with a grammar resource hashing to the same md5 as ours. So CI was never at
+risk. Always name the repo in the URL (`ossuminc/riddl`), since GitHub
+Packages is per-repository.
+
 **Prefer a published tag over a staged build whenever one exists at the same
 commit.** A `-N-hash` pin resolves only from `~/.ivy2/local`, which exists on
 one machine; the tagged version resolves from GitHub Packages, so CI and a
@@ -556,8 +578,8 @@ resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
-# As of 2026-09-25 it is `../bin/riddlc`, which prints 2.2.0-13-b8581131 but IS
-# 2.3.0's code -- the tag landed on that very commit. PATH still serves 2.0.0.
+# As of 2026-09-25 it is `../bin/riddlc`, rebuilt and printing 2.3.1.
+# PATH still serves 2.0.0.
 python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
@@ -620,7 +642,7 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-09-25, riddl **2.3.0**): the whole 2.0 tree
+**Status** (2026-09-25, riddl **2.3.1**): the whole 2.0 tree
 is **385 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
 is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
@@ -1092,7 +1114,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary is 2.3.0's code as of 2026-09-25, though it prints `2.2.0-13-b8581131`; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary is `2.3.1` as of 2026-09-25; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |
