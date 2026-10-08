@@ -279,7 +279,8 @@ statement = when_statement | match_statement | foreach_statement | send_statemen
    forward_statement |
     yield_statement | reply_statement | the_set_statement | append_statement | remove_statement |
     let_statement | put_statement |
-    return_statement | terminate_statement | prompt_statement | code_statement | error_statement |
+    return_statement | terminate_statement | prompt_statement | log_statement | code_statement |
+    store_statement | upsert_statement | update_statement | delete_statement | error_statement |
     require_statement | morph_statement | become_statement | comment ;
 
 (* Control flow *)
@@ -360,33 +361,71 @@ remove_statement = "remove" ( "from" field_ref "where" identifier "==" value
                             | value "from" field_ref ) ;
 let_statement = "let" identifier [":" type_ref] "=" value ;
 
-(* A54: value expressions. A value is pseudo-code text, an AI-computed `prompt(...)`, a message/record
-   constructor, a `get from` read of a UI input or entity state, (A28) a boolean expression whose
-   bare atom is a value reference or literal, or a numeric literal (tried last, deliberately). This
-   ordering is LOAD-BEARING now that `comparand` (widened 2026-08-14) accepts numeric_literal:
-   trying boolean_expression first is what keeps `5 > 3` parsing as a comparison rather than
-   numeric_literal matching the bare `5` and leaving `> 3` dangling. *)
+(* A54: value expressions. A value is an AI-computed `prompt(...)`, a message/record constructor,
+   a `get from` read of a UI input or entity state, `empty`, or (A28 + B4) an EXPRESSION built by
+   the ladder below -- whose bare atom is a literal string, a numeric literal, a duration literal,
+   a reference, `self`, `system`, `true`/`false`. A literal with no operator after it IS the
+   value; that is why literal_string and numeric_literal no longer appear here directly
+   (B4, 2026-09-21: `"a" + b` and `5 * n` need them as operands). *)
 (* `empty_value` sits BEFORE boolean_expression: that rule's atom accepts a bare path and would
    otherwise swallow `empty` as a value_ref, leaving any ascription dangling. *)
-value = literal_string | prompt_value | call | ask | initiate | constructor | get_value
-      | empty_value | boolean_expression | numeric_literal ;
+value = prompt_value | call | ask | initiate | query_value | constructor | get_value
+      | empty_value | boolean_expression ;
+(* B2: reading the repository's own storage. `query one` is the first match or empty; without
+   `one` it is every match, in UNSPECIFIED order. Tried before `constructor`, whose `query Q(…)`
+   form shares the keyword. *)
+query_value = "query" ["one"] table_ref ["where" value] ;
 
 (* The minimum-cardinality inhabitant of a type. `none` is a SYNONYM, not a second construct: both
    spellings produce the identical AST and prettify converges them to `empty`. Legal exactly where
    the minimum cardinality is zero -- `T?`, `T*`, `T{0,n}` -- and an error on `T+`, `T{1,n}` or a
    bare `T`. The ascription is what lets it be written where the position supplies no expected
    type, notably a constructor argument. *)
-empty_value = ( "empty" | "none" ) [ !statement_start type_expression ] ;
+empty_value = ( "empty" | "none" ) [ !ascription_stop type_expression ] ;
 
-(* The ascription is OPTIONAL and an aliased type expression is a bare path, while RIDDL statements
-   are whitespace-separated with no terminator -- so without this guard `set x to empty` followed by
-   `set y to ...` parses the second statement as the first's ascription. Every statement begins with
-   a reserved keyword, so refusing those is a complete fix rather than a heuristic: a type can never
-   be named one. Kept in step with `statementStart` in StatementParser.scala. *)
+(* BACKLOG [1.26] (Reid, Q7): what may NOT begin `empty`'s optional ascription. Any word that can
+   follow a value was read as a type -- `update T set f = empty where ...` read `where`, `put empty
+   to ...` read `to`, `store empty in ...` read `in` -- because the old guard was a LIST of
+   follow-words nobody extended. The guard is by CATEGORY: a statement start, a readability word
+   (not reserved, so listed separately), or any reserved word EXCEPT one that can begin a type
+   expression, which keeps the retired expression ascriptions parsing so validation can name the
+   fix. Kept in step with `ascriptionStop` in StatementParser.scala; `reserved_word` with
+   `Keyword.allKeywords` (checked by EbnfReservedWordsTest). *)
+ascription_stop = statement_start | readability_word | ( !type_expression_start reserved_word ) ;
+type_expression_start = "type" | "command" | "query" | "event" | "result" | "record" | "graph"
+                      | "table" | "many" | "optional" | "any" | "one" | "sequence" | "mapping"
+                      | "replica" | "range" | "reference" ;
+readability_word = "and" | "are" | "as" | "at" | "by" | "for" | "from" | "in" | "is" | "of" | "so"
+                 | "that" | "to" | "wants" | "with" ;
+reserved_word =
+    "acquires" | "activate" | "adaptor" | "after" | "all" | "any" | "append" | "ask" |
+    "attachment" | "author" | "become" | "benefit" | "body" | "brief" | "briefly" | "call" |
+    "capability" | "case" | "command" | "commands" | "condition" | "connector" | "constant" |
+    "container" | "contains" | "context" | "copyright" | "correlation" | "count" | "create" |
+    "default" | "delete" | "described" | "description" | "details" | "direct" | "do" | "domain" |
+    "else" | "email" | "end" | "entity" | "epic" | "error" | "event" | "example" | "execute" |
+    "explained" | "explanation" | "field" | "figma" | "file" | "final value" | "flow" | "focus" |
+    "for" | "foreach" | "form" | "forward" | "from" | "fully" | "function" | "get" | "graph" |
+    "group" | "handler" | "history" | "if" | "import" | "include" | "index" | "init" | "initial" |
+    "initiate" | "inlet" | "inlets" | "input" | "invariant" | "items" | "key" | "label" | "let" |
+    "link" | "log" | "many" | "mapping" | "match" | "merge" | "message" | "module" | "morph" |
+    "name" | "nebula" | "node" | "none" | "on" | "one" | "option" | "optional" | "options" |
+    "or" | "organization" | "other" | "out" | "outlet" | "outlets" | "output" | "parallel" |
+    "passivate" | "pipe" | "plant" | "presents" | "processor" | "projector" | "prompt" | "put" |
+    "query" | "quiescence" | "range" | "record" | "reference" | "refuses" | "relationship" |
+    "remove" | "replica" | "replies" | "reply" | "repository" | "require" | "required" |
+    "requires" | "result" | "results" | "return" | "returns" | "reverted" | "router" | "saga" |
+    "schema" | "selects" | "self" | "send" | "sequence" | "set" | "show" | "shown" | "sink" |
+    "source" | "split" | "state" | "step" | "stop" | "store" | "story" | "streamlet" | "system" |
+    "table" | "take" | "tell" | "term" | "terminate" | "then" | "times" | "title" | "type" |
+    "update" | "updates" | "upsert" | "url" | "user" | "version" | "void" | "when" | "where" |
+    "with" | "yield" | "yields" ;
+(* The statement-leading words. *)
 statement_start = ( "set" | "tell" | "send" | "forward" | "yield" | "reply" | "morph" | "become"
                   | "do" | "prompt" | "let" | "call" | "foreach" | "when" | "match" | "error"
                   | "require" | "put" | "return" | "terminate" | "code" | "focus" | "stop"
-                  | "read" | "write" | "ask" | "initiate" | "if" | "else" | "append" | "remove" ) ;
+                  | "read" | "write" | "ask" | "initiate" | "if" | "else" | "append" | "remove"
+                  | "log" | "store" | "upsert" | "update" | "delete" ) ;
 prompt_value = "prompt" "(" literal_string_block ")" [ "as" type_expression ] ;
 (* Numeric literals - integers and reals, written directly. No digit separators and no radix     *)
 (* prefixes: declined deliberately, and pure additions later if wanted.                           *)
@@ -443,7 +482,34 @@ value_ref = path_identifier ;
 boolean_expression = and_expression {"or" and_expression} ;
 and_expression = not_expression {"and" not_expression} ;
 not_expression = ("not" | "!") not_expression | comparison ;
-comparison = comparand comparison_operator comparand | boolean_atom ;
+(* B4 (2026-09-21): a comparison's operands are additive expressions -- full values -- and two
+   arithmetic levels sit between comparison and the atom: or < and < not < comparison < additive
+   < multiplicative < atom. `*` and `/` bind tighter than `+` and `-`; all four fold left. A `/`
+   is never the start of a `//` comment because comments are stripped first. What may be
+   combined or compared is validation's question, not the grammar's. *)
+comparison = postfix_expression [ comparison_operator postfix_expression ] ;
+(* B5 (2026-09-23): the two INFIX collection forms. `contains` is collection-FIRST because
+   `x in xs` would consume the `in` of B2's `store <value> in <table>`. *)
+postfix_expression = additive_expression [ "as" identifier "where" value
+                                         | "contains" additive_expression ] ;
+additive_expression = multiplicative_expression { ("+" | "-") multiplicative_expression } ;
+multiplicative_expression = arithmetic_atom { ("*" | "/") arithmetic_atom } ;
+(* BACKLOG [1.26]: `empty_value` is an atom so `x == empty` compares -- the opposite operand
+   supplies its type. Before boolean_atom, whose bare path would read `empty` as a reference. *)
+arithmetic_atom = collection_predicate | count_value | duration_literal | literal_string
+                | constant_ref | numeric_literal | empty_value | boolean_atom ;
+(* B5: `all of xs as e where p` and its `any`/`none` siblings -- a boolean; the element binding
+   is explicit and scoped to the predicate. `count of xs` is a Whole. *)
+collection_predicate = ("all" | "any" | "none") "of" additive_expression "as" identifier
+                       "where" value ;
+count_value = "count" "of" additive_expression ;
+(* `30 days`, `1 hour`: a numeric literal and a unit word, singular or plural. The abbreviated and
+   ISO-8601 spellings stay in the STRING duration used by `on quiescence` and `times out after`. *)
+duration_literal = numeric_literal duration_unit ;
+duration_unit = "nanoseconds" | "nanosecond" | "microseconds" | "microsecond" | "milliseconds"
+              | "millisecond" | "seconds" | "second" | "minutes" | "minute" | "hours" | "hour"
+              | "days" | "day" | "weeks" | "week" ;
+(* `comparand` now types ONLY the match-case comparison pattern. *)
 (* system_value precedes ref_or_lookup for the same reason it does in boolean_atom: ordered
    choice means a bare `system` would otherwise be consumed as an ordinary path. *)
 comparand = get_value | constant_ref | numeric_literal | system_value | ref_or_lookup ;
@@ -494,6 +560,17 @@ terminate_statement = "terminate" value [ "with" "(" [constructor_arg {"," const
 
 (* General statements. A54: `do` is canonical; the `prompt` statement is a deprecated synonym. *)
 prompt_statement = ("do" | "prompt") literal_string_block ;
+(* B7 (2026-09-21): record a value for humans -- deterministic, not state, not a message. *)
+log_statement = "log" value ;
+(* B2 (2026-09-22): the four repository storage statements. A table is one path: the last
+   segment is the schema's data entry, the prefix is the schema (empty = the enclosing
+   repository's only schema). The assigned names in `set` are BARE row fields. *)
+table_ref = path_identifier ;
+store_statement = "store" value "in" table_ref ;
+upsert_statement = "upsert" value "in" table_ref ;
+update_statement = "update" table_ref "set" identifier "=" value {"," identifier "=" value}
+                   "where" value ;
+delete_statement = "delete" "from" table_ref "where" value ;
 code_statement = "```" ("scala" | "java" | "python" | "mojo") code_contents "```" ;
 code_contents = {any_char_except_triple_backtick} ;
 error_statement = "error" literal_string ;
@@ -515,7 +592,10 @@ pseudo_code_contents = [undefined] {statement} ;
 
 (* Constants and Invariants *)
 constant = "constant" identifier is type_expression "=" constant_value [with_metadata] ;
-constant_value = literal_string | numeric_literal | boolean_literal | prompt_value ;
+(* B4: a constant may be an expression of literals, durations and other constants (a bare path
+   must RESOLVE to a constant -- validation's check). The ladder also builds shapes a constant may
+   not hold (a comparison, `a and b`, a lookup); the parser refuses those. *)
+constant_value = prompt_value | additive_expression ;
 (* An invariant applies IMPLICITLY across every clause of its declaring scope, as a precondition.
    `requires state S` narrows an entity-level invariant to one state and stays implicit;
    `requires <type_ref>` makes it explicit-only (see require_statement). No `returns`: the
@@ -593,11 +673,14 @@ repository = "repository" identifier [as_shape] is "{" repository_body "}" [with
 repository_body = {undefined | repository_definitions} ;
 repository_definitions = {processor_definition_contents | schema | repository_include} ;
 repository_include = "include" literal_string ;
-schema = "schema" identifier is schema_kind {data} {link} {index} [with_metadata] ;
+(* B3 (2026-09-21): `key on` is a UNIQUE natural key, distinct from an index; `with history`
+   on a data line asks the generator for an append-only history of that entry. *)
+schema = "schema" identifier is schema_kind {data} {link} {key} {index} [with_metadata] ;
 schema_kind = "flat" | "relational" | "time-series" | "graphical" | "hierarchical" | "star" | "document" | "columnar" | "vector" | "other" ;
-data = "of" identifier byAs type_ref ;
+data = "of" identifier byAs type_ref ["with" "history"] ;
 link = "link" identifier byAs field_ref "to" field_ref ;
 index = "index" "on" field_ref ;
+key = "key" "on" field_ref ;
 
 (* Adaptor-related *)
 adaptor = "adaptor" identifier adaptor_direction context_ref [as_shape] is "{" adaptor_body "}" [with_metadata] ;

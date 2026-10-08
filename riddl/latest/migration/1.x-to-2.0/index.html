@@ -6153,7 +6153,7 @@ domain entity is now an Error. See
 expressions require <strong>typed references</strong> on both sides. A literal operand
 fails at <em>parse</em> time:</p>
 <!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="m">5</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>          <span class="c1">// does not parse</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">when</span> <span class="kr">count</span> <span class="o">&gt;</span> <span class="m">5</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>          <span class="c1">// does not parse</span>
 </span></code></pre></div>
 <p>Name the threshold instead:</p>
 <!-- riddl: skip reason="two fragments at different depths in one fence: a context-level constant beside a handler-level statement" -->

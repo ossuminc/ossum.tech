@@ -5732,12 +5732,16 @@ inline:</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">constant</span> <span class="n">Zero</span> <span class="kp">is</span> <span class="nb">Whole</span> <span class="o">=</span> <span class="m">0</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span></code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">No numeric literals, and no arithmetic</p>
-<p>The boolean sub-language has no numeric literal atom, so <code>amount &gt;= 0</code> does
-not parse. Nor is arithmetic available inside a block: a <code>let</code> binds a
-reference or a <code>call</code>, never an expression such as <code>balance - holdAmount</code>.
-Both limitations predate the 2.0 invariant work.</p>
+<div class="admonition tip">
+<p class="admonition-title">Literals and arithmetic are both available</p>
+<p>An invariant takes a full expression: <code>balance - holdAmount &gt;= minimumFee</code>
+and <code>count of items &gt; MinimumOrder</code> are both legal, and a <code>let</code> inside a
+block may bind an expression rather than only a reference or a <code>call</code>.</p>
+<p>Two restrictions that used to apply are gone — the boolean sub-language
+gained a numeric literal atom, and arithmetic arrived in 2.3.0. A bare
+literal operand still draws the style warning
+<code>value-literal-comparison-style</code>, which is why <code>balance &gt;= Zero</code> reads
+better than <code>balance &gt;= 0</code>: the name says what the bound means.</p>
 </div>
 <h2 id="scope-where-it-applies-and-what-it-may-read">Scope: Where It Applies, and What It May Read<a class="headerlink" href="#scope-where-it-applies-and-what-it-may-read" title="Permanent link">&para;</a></h2>
 <p>These are the same question, and the answer is in the declaration — never at the

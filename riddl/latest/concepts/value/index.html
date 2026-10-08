@@ -3864,6 +3864,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#where-its-type-comes-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where its type comes from
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-type-ascription" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5628,6 +5639,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#where-its-type-comes-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where its type comes from
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-type-ascription" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5738,6 +5760,8 @@
 
 <!-- riddl-prelude
 constant MaxItems is Natural = 100
+type Tags is String*
+type Nickname is String?
 record DoneData is { note is String }
 record SignupData is { email is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
@@ -5777,7 +5801,7 @@ pseudo-code remains available where structure would be false precision.</p>
 </tr>
 <tr>
 <td>Empty</td>
-<td><code>empty</code>, <code>none</code>, <code>empty String*</code></td>
+<td><code>empty</code>, <code>none</code>, <code>empty Tags</code></td>
 <td>The minimum-cardinality inhabitant of a type — the absence of a value</td>
 </tr>
 <tr>
@@ -5921,12 +5945,16 @@ inside the parentheses.</p>
 determines the type — a constructor argument, a field — the ascription must
 agree with it. Writing one is opt-in: unascribed <code>prompt(...)</code> is unchanged and
 still valid, and is the right form wherever the position already says enough.</p>
+<p>When written, the ascription is a type <strong>name</strong>. A bare predefined type such as
+<code>Real</code> or <code>TimeStamp</code> is a name; <code>String(1,30)</code> or <code>Recipe*</code> is a type
+expression, and ascribing one is the Error <code>value-ascription-not-a-name</code> —
+declare the type with <code>type</code> and name it instead.</p>
 <h2 id="empty-and-none">Empty and None<a class="headerlink" href="#empty-and-none" title="Permanent link">&para;</a></h2>
 <p><code>empty</code> denotes the <strong>minimum-cardinality inhabitant</strong> of a type: no value at
 all, written where a value is expected.</p>
 <!-- riddl: in-handler -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">nickname</span> <span class="kp">to</span> <span class="n">empty</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">tags</span> <span class="kp">to</span> <span class="n">none</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">set</span> <span class="kd">field</span> <span class="n">tags</span> <span class="kp">to</span> <span class="kr">none</span>
 </span></code></pre></div>
 <p><code>none</code> is a <strong>synonym</strong>, not a second construct. Both spellings produce the
 identical AST, and <code>prettify</code> converges them on <code>empty</code>. Use whichever reads
@@ -5936,48 +5964,71 @@ collection — but expect formatted output to say <code>empty</code>.</p>
 <p><code>empty</code> is meaningful only for a type that admits having no value: an optional
 <code>T?</code>, a sequence <code>T*</code>, or an explicit range starting at zero, <code>T{0,n}</code>. A bare
 <code>T</code> or a <code>T+</code> requires at least one value, so <code>empty</code> is not an inhabitant of
-it, and asking for one is the <code>value-empty-needs-zero-cardinality</code> Error.</p>
-<h3 id="the-type-ascription">The type ascription<a class="headerlink" href="#the-type-ascription" title="Permanent link">&para;</a></h3>
-<p><code>empty</code> may carry a type, which is what lets it be written in a position that
-does not itself supply one — most often a constructor argument:</p>
+it. A bare <code>empty</code> in such a position is the <code>value-empty-not-allowed</code> Error,
+and ascribing such a type (below) is <code>value-empty-needs-zero-cardinality</code>. Type
+names are read through, so <code>empty</code> fits a <code>type Tags is String*</code> just as it fits
+<code>String*</code>.</p>
+<h3 id="where-its-type-comes-from">Where its type comes from<a class="headerlink" href="#where-its-type-comes-from" title="Permanent link">&para;</a></h3>
+<p>Every value in RIDDL is typed. <code>empty</code> does not say which type in its own
+spelling, so it takes the type of its <strong>position</strong> — the field it is assigned
+to, a constructor or call argument, a <code>let</code>'s declared type, an output, a
+function's <code>returns</code>, a stored row, or the operand on the other side of a
+comparison:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">let</span> <span class="n">noTags</span> <span class="o">=</span> <span class="n">empty</span> <span class="nb">String</span><span class="o">*</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">let</span> <span class="n">unset</span>  <span class="o">=</span> <span class="n">none</span> <span class="nb">String</span><span class="o">?</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">let</span> <span class="n">t</span><span class="p">:</span> <span class="n">Tags</span> <span class="o">=</span> <span class="n">empty</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">when</span> <span class="n">tags</span> <span class="o">==</span> <span class="n">empty</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span></code></pre></div>
-<p>The ascription is where the cardinality rule is checked, so <code>empty String</code> —
-a bare, one-or-more type — is the Error above, while <code>empty String*</code> is fine.</p>
+<h3 id="the-type-ascription">The type ascription<a class="headerlink" href="#the-type-ascription" title="Permanent link">&para;</a></h3>
+<p>Where no position supplies a type, write one after <code>empty</code>. It must be a type
+<strong>name</strong>, never a type expression:</p>
+<!-- riddl: in-handler -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">let</span> <span class="n">noTags</span> <span class="o">=</span> <span class="n">empty</span> <span class="n">Tags</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">let</span> <span class="n">unset</span>  <span class="o">=</span> <span class="kr">none</span> <span class="n">Nickname</span>
+</span></code></pre></div>
+<p>Here <code>Tags</code> is <code>String*</code> and <code>Nickname</code> is <code>String?</code>, each declared with
+<code>type</code>. Writing <code>empty String*</code> instead is the Error
+<code>value-ascription-not-a-name</code>, and a bare <code>empty</code> with nothing to type it is
+<code>value-empty-untyped</code>.</p>
+<p>An ascription <strong>restates</strong> the position's type and never overrides it: where a
+position does supply one, the ascription must be syntactically that declared
+type, or it is <code>value-empty-ascription-contradicts</code>. A field declared inline,
+like <code>tags is String*</code>, has no name to restate, so it takes only a bare <code>empty</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Why the ascription cannot be followed by just anything</p>
-<p>A type expression is a bare path, and RIDDL statements are separated by
+<p>A type name is a bare path, and RIDDL statements are separated by
 whitespace with no terminator. Without a guard, <code>set x to empty</code> followed
 by <code>set y to …</code> would read the second statement's <code>set</code> as the first's
-ascription. Every statement begins with a reserved keyword, so the parser
-refuses those in the ascription position — a complete fix rather than a
-heuristic, since no type can be named <code>set</code>.</p>
+ascription, and <code>put empty to …</code> would read <code>to</code>. So the parser stops an
+ascription at any word that can follow a value: a statement keyword, a
+readability word such as <code>to</code>, <code>in</code> or <code>where</code>, or any reserved word that
+cannot begin a type.</p>
 </div>
 <h2 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h2>
 <p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; atom, with parentheses to
 group:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="kp">or</span> <span class="n">order</span><span class="p">.</span><span class="n">isRefunded</span><span class="p">)</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">when</span> <span class="n">order</span><span class="p">.</span><span class="n">isPaid</span> <span class="kp">and</span> <span class="k">not</span> <span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="n">isCancelled</span> <span class="kp">or</span> <span class="n">order</span><span class="p">.</span><span class="n">isRefunded</span><span class="p">)</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>
 </span></code></pre></div>
 <p><code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they are
 recognized only inside a boolean expression, so they remain legal identifiers
 everywhere else in the language.</p>
 <div class="admonition warning">
-<p class="admonition-title">Comparisons are type-safe and reference-only</p>
-<p>Both operands of a comparison must be a <strong>typed reference</strong> — a value
-reference, a <code>get from</code>, or a named <a href="../constant/">constant</a> — never a
-literal. This is enforced at <strong>parse</strong> time, so <code>count &gt; 5</code>,
-<code>count &gt; "5"</code>, <code>count &gt; true</code> and <code>count &gt; R(1)</code> all fail to parse.</p>
-<p>To compare against a fixed value, name it. The constant is a definition,
+<p class="admonition-title">Comparisons are type-CHECKED, not reference-only</p>
+<p>Either operand of a comparison may be <strong>any expression</strong> — a value
+reference, a <code>get from</code>, a named <a href="../constant/">constant</a>, a literal,
+arithmetic, a <code>count of</code>. What may sensibly be compared is validation's
+question rather than the grammar's, so <code>count &gt; "5"</code> is reported as the
+Error <code>value-ordering-needs-numeric</code> instead of failing to parse.</p>
+<p>A literal operand is legal and draws the style warning
+<code>value-literal-comparison-style</code>. Naming the value is still better style,
+because the name records the intent. The constant is a definition,
 declared alongside the other definitions of its context:</p>
 <p><!-- riddl: in-context no-prelude=MaxItems -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
 </span></code></pre></div></p>
 <p>and the comparison is a statement, written inside an on-clause:</p>
 <p><!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many items"</span> <span class="kr">end</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many items"</span> <span class="kr">end</span>
 </span></code></pre></div></p>
 <p>The point is to remove magic constants from models and to make every
 comparison check the types on both sides. <code>==</code> and <code>!=</code> require operands
@@ -5990,8 +6041,8 @@ type on both sides.</p>
 <p><code>initiate</code> brings a new instance of an entity into being, and its <strong>value is
 that instance's identity</strong>:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="k">initiate</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ExampleWelcome</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">fresh</span><span class="p">)</span> <span class="kp">to</span> <span class="n">fresh</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="k">initiate</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ExampleWelcome</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">fresh</span><span class="p">)</span> <span class="kp">to</span> <span class="n">fresh</span>
 </span></code></pre></div>
 <p>It is not a second way to exist — construction still completes only when
 <code>on init</code> finishes. But without it no <code>Id</code> value could ever come into being,
@@ -6008,8 +6059,8 @@ using it means the instance was created and immediately made unreachable.</p>
 <p><code>self</code> is the instance executing right now. Its type is a <strong>synthesized
 record</strong> carrying <code>id</code> and <code>version</code>:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">me</span>  <span class="o">=</span> <span class="kr">self</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">let</span> <span class="n">who</span> <span class="o">=</span> <span class="kr">self</span><span class="p">.</span><span class="n">id</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">let</span> <span class="n">me</span>  <span class="o">=</span> <span class="kr">self</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">let</span> <span class="n">who</span> <span class="o">=</span> <span class="kr">self</span><span class="p">.</span><span class="n">id</span>
 </span></code></pre></div>
 <p>Because that type is an ordinary record, <code>self.id</code> resolves by the same path
 walk as any other value — which is why no resolution rule has to know <code>self</code>

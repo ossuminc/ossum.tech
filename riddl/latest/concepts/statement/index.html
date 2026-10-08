@@ -6105,21 +6105,22 @@ count, name, order and (best effort) type:</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">cart</span><span class="p">.</span><span class="n">total</span><span class="p">,</span> <span class="n">currency</span> <span class="o">=</span> <span class="s2">"USD"</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="boolean-expressions">Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permanent link">&para;</a></h3>
-<p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; atom, with parentheses to
-group. <code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they
+<p>Precedence runs <code>or</code> &lt; <code>and</code> &lt; <code>not</code> &lt; comparison &lt; additive &lt;
+multiplicative &lt; atom, with parentheses to group. <code>and</code>, <code>or</code>, <code>not</code>, <code>true</code> and <code>false</code> are <strong>context-sensitive</strong>: they
 are recognized only inside a boolean expression, so they stay legal identifiers
 everywhere else.</p>
 <div class="admonition warning">
-<p class="admonition-title">Comparisons are type-safe and reference-only</p>
-<p>Both operands of a comparison must be a <strong>typed reference</strong> — a value
-reference, a <code>get from</code>, or a named <a href="../constant/">constant</a>. A literal is
-not permitted, and this is enforced at <strong>parse</strong> time:</p>
-<p><!-- riddl: skip reason="deliberate counter-example; shows what does NOT work" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="m">5</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>        <span class="c1">// fails to parse</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="s2">"5"</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>      <span class="c1">// fails to parse</span>
+<p class="admonition-title">Comparisons are type-CHECKED, not reference-only</p>
+<p>Either operand may be <strong>any expression</strong> — a value reference, a
+<code>get from</code>, a named <a href="../constant/">constant</a>, a literal, arithmetic. The
+validator decides what may sensibly be compared, so a bad comparison is
+an Error rather than a parse failure:</p>
+<p><!-- riddl: skip reason="deliberate counter-example; shows what the validator rejects" -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">when</span> <span class="kr">count</span> <span class="o">&gt;</span> <span class="s2">"5"</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>   <span class="c1">// Error: value-ordering-needs-numeric</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="kr">count</span> <span class="o">&gt;</span> <span class="m">5</span> <span class="k">then</span> <span class="gr">???</span> <span class="kr">end</span>     <span class="c1">// legal; style: value-literal-comparison-style</span>
 </span></code></pre></div></p>
-<p>Name the threshold instead. The constant is a definition, declared
-alongside the other definitions of its context:</p>
+<p>Naming the threshold is still better style. The constant is a definition,
+declared alongside the other definitions of its context:</p>
 <p><!-- riddl: in-context no-prelude=MaxItems -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
 </span></code></pre></div></p>

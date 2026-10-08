@@ -7768,8 +7768,8 @@ interactions between definitions, not full implementations.</p>
 </tr>
 <tr>
 <td>Empty</td>
-<td><code>empty</code>, <code>none</code>, <code>empty String*</code></td>
-<td>No value at all. <code>none</code> is a synonym; prettify emits <code>empty</code>. Only where min cardinality is 0 (<code>T?</code>, <code>T*</code>, <code>T{0,n}</code>) — an Error on <code>T</code> or <code>T+</code>.</td>
+<td><code>empty</code>, <code>none</code>, <code>empty Tags</code></td>
+<td>No value at all. <code>none</code> is a synonym; prettify emits <code>empty</code>. Typed by its position (<code>x == empty</code> too); where none supplies a type, ascribe a type NAME — <code>empty String*</code> is an Error. Only where min cardinality is 0 (<code>T?</code>, <code>T*</code>, <code>T{0,n}</code>) — an Error on <code>T</code> or <code>T+</code>.</td>
 </tr>
 <tr>
 <td>Value reference</td>
@@ -7793,8 +7793,8 @@ interactions between definitions, not full implementations.</p>
 </tr>
 <tr>
 <td>Prompt</td>
-<td><code>prompt("compute the discount") [as &lt;type&gt;]</code></td>
-<td>A typed hole: the type is checked at compile time, the computation is prose an AI fills in</td>
+<td><code>prompt("compute the discount") [as &lt;type name&gt;]</code></td>
+<td>A typed hole: the type is checked at compile time, the computation is prose an AI fills in. The ascription is a type NAME (<code>as Real</code>, <code>as Recipes</code>), never an expression like <code>as String(1,30)</code></td>
 </tr>
 <tr>
 <td>Boolean</td>
@@ -7816,13 +7816,51 @@ interactions between definitions, not full implementations.</p>
 <td><code>self</code>, <code>self.id</code></td>
 <td>The instance running now (<code>id</code>, <code>version</code>). Pass <code>self.id</code>, never <code>self</code>.</td>
 </tr>
+<tr>
+<td>Arithmetic</td>
+<td><code>subtotal + amount * rate</code></td>
+<td><code>+ - * /</code> on numbers, <code>+</code> on two strings, timestamp ± duration. No power or roots — those stay a <code>prompt</code>.</td>
+</tr>
+<tr>
+<td>Duration literal</td>
+<td><code>30 days</code>, <code>1.50 hours</code></td>
+<td>Unit words, singular or plural. Not <code>30d</code>, not <code>PT30M</code> — those remain the strings used by <code>on quiescence</code> and <code>times out after</code>.</td>
+</tr>
+<tr>
+<td>Collection predicate</td>
+<td><code>all of items as i where i.qty &gt; Zero</code></td>
+<td><code>all of</code> / <code>any of</code> / <code>none of</code> — a boolean. On an empty collection <code>all of</code> and <code>none of</code> are <strong>true</strong>, <code>any of</code> is false.</td>
+</tr>
+<tr>
+<td>Filter</td>
+<td><code>items as i where i.qty &gt; Zero</code></td>
+<td>The matching <strong>elements</strong>, not a boolean — so <code>when &lt;filter&gt;</code> does not parse. There is deliberately no <code>map</code>.</td>
+</tr>
+<tr>
+<td>Count</td>
+<td><code>count of items</code></td>
+<td>How many elements, as a <code>Whole</code>. Binds tighter than arithmetic.</td>
+</tr>
+<tr>
+<td>Membership</td>
+<td><code>tags contains "urgent"</code></td>
+<td>Whether the collection holds that value</td>
+</tr>
+<tr>
+<td>Query</td>
+<td><code>query one bookings where id == q.id</code></td>
+<td>Reads stored rows. Repository handlers only; without <code>one</code>, every match in <strong>unspecified</strong> order.</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition warning">
-<p class="admonition-title">Comparisons are type-safe and ref-only</p>
-<p>Both operands must be a value reference, a <code>get from</code>, or a named
-<code>constant</code> — never a literal. <code>count &gt; 5</code>, <code>count &gt; "5"</code> and
-<code>count &gt; true</code> all fail at <strong>parse</strong> time. Name the threshold instead:</p>
+<p class="admonition-title">Comparisons are type-CHECKED, not reference-only</p>
+<p>Either operand may be any expression — a reference, a literal, a
+<code>get from</code>, a constant, arithmetic, a <code>count of</code>. Nonsense is caught by
+the validator, not the parser: <code>count &gt; "5"</code> is the Error
+<code>value-ordering-needs-numeric</code>. A bare literal parses and draws the style
+warning <code>value-literal-comparison-style</code>, so naming the threshold is still
+better style:</p>
 <p><!-- riddl: skip reason="a constant beside a condition that would use it; not one construct" -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">constant</span> <span class="n">MaxItems</span> <span class="kp">is</span> <span class="nb">Natural</span> <span class="o">=</span> <span class="m">100</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">when</span> <span class="n">cart</span><span class="p">.</span><span class="n">itemCount</span> <span class="o">&gt;</span> <span class="n">MaxItems</span> <span class="k">then</span> <span class="k">error</span> <span class="s2">"too many"</span> <span class="kr">end</span>
@@ -8098,7 +8136,15 @@ the value denotes something AI computes.</p>
 </tr>
 <tr>
 <td>Saga steps</td>
-<td>send, tell, yield, put, do, error</td>
+<td>send, tell, yield, put, do, error — and at least one <code>tell command</code>, or the step effects nothing</td>
+</tr>
+<tr>
+<td>Repository handlers</td>
+<td>All above + store, upsert, update, delete (and the <code>query</code> value)</td>
+</tr>
+<tr>
+<td>Anywhere, functions included</td>
+<td>log — deterministic, not state, not a message</td>
 </tr>
 </tbody>
 </table>
