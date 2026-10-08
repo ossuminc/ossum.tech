@@ -11,16 +11,16 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-09-24
+## HANDOFF — as of 2026-10-08
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins the released `2.3.1`, Scala `3.9.0`, and `../bin/riddlc`
-prints `2.3.1`.** The grammar has not moved since 2.3.0 — md5 `8a5ea15a` at
-both tags and in our copy. PATH is still 2.0.0.
+**`build.sbt` pins the released `2.4.0`, Scala `3.9.0`, and `../bin/riddlc`
+prints `2.4.0`.** Grammar md5 `aa423f29`, equal to riddl's at the `2.4.0` tag.
+PATH is still 2.0.0.
 
-**Gate: GREEN, 385 / 52 / 0.** `task/` is empty — five language-reference
-tasks (B2/B3/B4/B5/B7) went to `task/done/` with Results on 2026-09-24.
+**Gate: GREEN, 386 / 52 / 0.** `task/` is empty — the 2.4.0 upgrade and "typed by a
+NAME" tasks went to `task/done/` with Results on 2026-10-08.
 
 **The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
 behind. But it has flipped three times in six weeks, so **measure, never
@@ -97,6 +97,41 @@ Nothing half-edited; `task/` is empty.
   model, the lexer drift trap, and the version-differences table.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
+
+---
+
+### 2.4.0: every value is typed, by a type NAME ✅ **2026-10-08**
+
+riddl task `riddl-every-value-typed-by-name.md`. A bare `empty` takes its
+POSITION's type; where none supplies one, `empty T` with `T` a type NAME, and
+the same for `prompt(…) as T`. `empty String*` is now
+`value-ascription-not-a-name` — and was taught as valid in language-reference,
+value.md and the cheat sheet. Exactly those two fences failed the 2.4.0
+baseline gate and nothing else did, so the upgrade introduced no other breakage.
+
+**The task file listed three of the seven sites.** The tables at
+language-reference `:1368` and value.md `:40`, value.md's prose calling
+`empty String*` "fine", and our own CLAUDE.md row were all found by grepping
+the TREE for the spelling — [[a-reversed-rule-is-never-in-one-file]] again.
+
+**Probing found two things the task did not say:**
+
+- **The "wrong cardinality" Error now has two ids.** Ascribed (`empty Name`
+  with `Name is String`) is `value-empty-needs-zero-cardinality`; a bare
+  `empty` in a position (`set field isValid to empty`, `let s: String =
+  empty`) is `value-empty-not-allowed`. Our pages named only the first.
+- **CLAUDE.md's "`set field X to empty` on a `String+` draws nothing" is
+  superseded** — 2.4.0 checks a bare `empty` at every typed position. Marked
+  superseded in place, not deleted, so it is not "corrected" back.
+
+**The old docs' justification was backwards.** They said the ascription exists
+for positions with no type, "such as a constructor argument". A constructor
+argument supplies its field's type; `record Profile(label = "x", labels =
+empty)` validates. (Note `record`/`event` prefix: a bare `Profile(...)` does
+not parse as a constructor — that cost a probe round.)
+
+Both preludes gained named types (`Tags`, and in value.md `Nickname`), since an
+`in-handler` fence cannot declare a type.
 
 ---
 

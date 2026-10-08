@@ -8,6 +8,8 @@ description: >-
 
 <!-- riddl-prelude
 constant MaxItems is Natural = 100
+type Tags is String*
+type Nickname is String?
 record DoneData is { note is String }
 record SignupData is { email is String }
 event OrderPlaced is { orderId is String, total is Natural, currency is String }
@@ -37,7 +39,7 @@ pseudo-code remains available where structure would be false precision.
 | Form | Syntax | Meaning |
 |------|--------|---------|
 | Literal | `"some text"` | Opaque pseudo-code, or a literal constant |
-| Empty | `empty`, `none`, `empty String*` | The minimum-cardinality inhabitant of a type — the absence of a value |
+| Empty | `empty`, `none`, `empty Tags` | The minimum-cardinality inhabitant of a type — the absence of a value |
 | Value reference | `order.total` | A field, state field, function input, or `let` local |
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
@@ -179,6 +181,11 @@ determines the type — a constructor argument, a field — the ascription must
 agree with it. Writing one is opt-in: unascribed `prompt(...)` is unchanged and
 still valid, and is the right form wherever the position already says enough.
 
+When written, the ascription is a type **name**. A bare predefined type such as
+`Real` or `TimeStamp` is a name; `String(1,30)` or `Recipe*` is a type
+expression, and ascribing one is the Error `value-ascription-not-a-name` —
+declare the type with `type` and name it instead.
+
 ## Empty and None
 
 `empty` denotes the **minimum-cardinality inhabitant** of a type: no value at
@@ -200,29 +207,54 @@ collection — but expect formatted output to say `empty`.
 `empty` is meaningful only for a type that admits having no value: an optional
 `T?`, a sequence `T*`, or an explicit range starting at zero, `T{0,n}`. A bare
 `T` or a `T+` requires at least one value, so `empty` is not an inhabitant of
-it, and asking for one is the `value-empty-needs-zero-cardinality` Error.
+it. A bare `empty` in such a position is the `value-empty-not-allowed` Error,
+and ascribing such a type (below) is `value-empty-needs-zero-cardinality`. Type
+names are read through, so `empty` fits a `type Tags is String*` just as it fits
+`String*`.
 
-### The type ascription
+### Where its type comes from
 
-`empty` may carry a type, which is what lets it be written in a position that
-does not itself supply one — most often a constructor argument:
+Every value in RIDDL is typed. `empty` does not say which type in its own
+spelling, so it takes the type of its **position** — the field it is assigned
+to, a constructor or call argument, a `let`'s declared type, an output, a
+function's `returns`, a stored row, or the operand on the other side of a
+comparison:
 
 <!-- riddl: in-handler -->
 ```riddl
-let noTags = empty String*
-let unset  = none String?
+let t: Tags = empty
+when tags == empty then ??? end
 ```
 
-The ascription is where the cardinality rule is checked, so `empty String` —
-a bare, one-or-more type — is the Error above, while `empty String*` is fine.
+### The type ascription
+
+Where no position supplies a type, write one after `empty`. It must be a type
+**name**, never a type expression:
+
+<!-- riddl: in-handler -->
+```riddl
+let noTags = empty Tags
+let unset  = none Nickname
+```
+
+Here `Tags` is `String*` and `Nickname` is `String?`, each declared with
+`type`. Writing `empty String*` instead is the Error
+`value-ascription-not-a-name`, and a bare `empty` with nothing to type it is
+`value-empty-untyped`.
+
+An ascription **restates** the position's type and never overrides it: where a
+position does supply one, the ascription must be syntactically that declared
+type, or it is `value-empty-ascription-contradicts`. A field declared inline,
+like `tags is String*`, has no name to restate, so it takes only a bare `empty`.
 
 !!! note "Why the ascription cannot be followed by just anything"
-    A type expression is a bare path, and RIDDL statements are separated by
+    A type name is a bare path, and RIDDL statements are separated by
     whitespace with no terminator. Without a guard, `set x to empty` followed
     by `set y to …` would read the second statement's `set` as the first's
-    ascription. Every statement begins with a reserved keyword, so the parser
-    refuses those in the ascription position — a complete fix rather than a
-    heuristic, since no type can be named `set`.
+    ascription, and `put empty to …` would read `to`. So the parser stops an
+    ascription at any word that can follow a value: a statement keyword, a
+    readability word such as `to`, `in` or `where`, or any reserved word that
+    cannot begin a type.
 
 ## Boolean Expressions
 

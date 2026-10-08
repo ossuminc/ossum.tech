@@ -693,12 +693,12 @@ Wherever a statement needs a value, any of these is accepted:
 | Form | Syntax | Meaning |
 |---|---|---|
 | Literal | `"some text"` | Opaque pseudo-code or a literal constant |
-| Empty | `empty`, `none`, `empty String*` | No value at all. `none` is a synonym; prettify emits `empty`. Only where min cardinality is 0 (`T?`, `T*`, `T{0,n}`) — an Error on `T` or `T+`. |
+| Empty | `empty`, `none`, `empty Tags` | No value at all. `none` is a synonym; prettify emits `empty`. Typed by its position (`x == empty` too); where none supplies a type, ascribe a type NAME — `empty String*` is an Error. Only where min cardinality is 0 (`T?`, `T*`, `T{0,n}`) — an Error on `T` or `T+`. |
 | Value reference | `order.total` | A field, state field, function input, or `let` local |
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record; positional args first, then named |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
-| Prompt | `prompt("compute the discount") [as <type>]` | A typed hole: the type is checked at compile time, the computation is prose an AI fills in |
+| Prompt | `prompt("compute the discount") [as <type name>]` | A typed hole: the type is checked at compile time, the computation is prose an AI fills in. The ascription is a type NAME (`as Real`, `as Recipes`), never an expression like `as String(1,30)` |
 | Boolean | `a > b and not c` | A structured boolean expression. `!` is a synonym for `not`; prettify emits `not`. Unrelated to `!=`. |
 | Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it. **Never inside a saga.** |
 | Initiate | `initiate entity Order` | Creates an instance; the value is its `Id`. Entity-only; an effect. |

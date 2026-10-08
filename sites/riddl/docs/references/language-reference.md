@@ -9,6 +9,7 @@ description: >-
     type OrderId is String   // String, to match the shared wrapper's orderId
     type ProductId is UUID
     type CartId is UUID
+    type Tags is String*
     // Declared as EVENTS to match the domain prelude: an `on event X`
     // clause rejects a String-typed X, and a portlet reference must name
     // the declared kind (rc.24). Context-level copies are needed because
@@ -1365,7 +1366,7 @@ needs a value, it accepts any of these forms:
 | Form | Syntax | Meaning |
 |------|--------|---------|
 | Literal | `"some text"` | Opaque pseudo-code or a literal constant |
-| Empty | `empty`, `none`, `empty String*` | The minimum-cardinality inhabitant of a type; the optional ascription states which type |
+| Empty | `empty`, `none`, `empty Tags` | The minimum-cardinality inhabitant of a type; typed by its position, or by an ascription that names a type |
 | Value reference | `order.total` | A named field, state field, function input, or `let` local |
 | Constructor | `OrderPlaced(total, id = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
@@ -1459,18 +1460,39 @@ In an expression a constant may be named plainly (`MaxItems`) or explicitly
 ```riddl
 set field nickname to empty
 set field tags to none
-let noTags = empty String*
+let noTags = empty Tags
+when tags == empty then ??? end
 ```
 
-It is legal exactly where the minimum cardinality is **zero** — `T?`, `T*` or
-`T{0,n}`. A bare `T` or a `T+` demands at least one value, and asking `empty`
-of one is the `value-empty-needs-zero-cardinality` Error.
+**Every value in RIDDL is typed**, and `empty` is one of only two values whose
+spelling does not say which type (the other is `prompt(…)`). So it gets its type
+one of two ways:
 
-The optional type ascription lets `empty` appear where the position supplies no
-expected type, such as a constructor argument. A type expression is a bare
-path and statements have no terminator, so the ascription may not begin with a
-statement keyword — otherwise `set x to empty` followed by `set y to …` would
-swallow the second statement as the first's type.
+- **From its position.** A bare `empty` takes the type of whatever it fills: the
+  field it is assigned to, a constructor or call argument, a `let`'s declared
+  type (`let t: Tags = empty`), an output, a function's `returns`, a stored row,
+  or the operand opposite it in a comparison — which is what makes
+  `tags == empty` legal.
+- **From an ascription, where no position supplies one.** `empty T` names the
+  type, and **`T` is a type NAME, never a type expression.** Declare
+  `type Tags is String*` and write `empty Tags`; `empty String*` is the Error
+  `value-ascription-not-a-name`. A bare `empty` with no type anywhere is
+  `value-empty-untyped`.
+
+An ascription must be **syntactically the position's declared type**, or it is
+`value-empty-ascription-contradicts`. A field declared inline (`tags is
+String*`) has no name to restate, so it takes only a bare `empty`.
+
+It is legal exactly where the minimum cardinality is **zero** — `T?`, `T*` or
+`T{0,n}`, read through any type names. A bare `T` or a `T+` demands at least one
+value. Ascribing such a type is `value-empty-needs-zero-cardinality`; a bare
+`empty` in such a position is `value-empty-not-allowed`.
+
+A type name is a bare path and statements have no terminator, so the parser
+stops an ascription at any word that can follow a value — a statement keyword,
+a readability word such as `to`, `in` or `where`, or any reserved word that
+cannot begin a type. That is why `put empty to …`, `store empty in …` and
+`update T set f = empty where …` read as intended.
 
 ### Constructors
 
@@ -1588,6 +1610,11 @@ The ascription **restates the position's type; it never overrides it.** A
 determines the type — a constructor argument, a field — the ascription must
 agree with it. Writing one is opt-in: unascribed `prompt(...)` is unchanged and
 still valid, and is the right form wherever the position already says enough.
+
+**When written, the ascription is a type NAME**, exactly as for `empty`. A bare
+predefined type — `Real`, `Boolean`, `TimeStamp`, `String` — is a name;
+`String(1,30)` and `Recipe*` are type expressions, and ascribing one is the
+Error `value-ascription-not-a-name`. Declare the type and name it.
 
 ### Get
 
