@@ -81,7 +81,7 @@ option used on the wrong kind of definition draws a nudge.
 | [On Clause](onclause.md) | `timeout`, `idempotent` |
 | [Adaptor](adaptor.md) | `circuit-breaker`, `protocol` |
 | [Projector](projector.md) | `cacheable`, `batch`, `microservice`, `protocol` |
-| [Repository](repository.md) | `transient`, `batch`, `microservice`, `protocol` |
+| [Repository](repository.md) | `transient`, `available`, `consistent`, `batch`, `microservice`, `protocol` |
 | [Streamlet](streamlet.md) | `protocol` |
 | [Epic](epic.md) | `sync` |
 

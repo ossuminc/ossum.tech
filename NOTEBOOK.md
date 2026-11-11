@@ -11,20 +11,21 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-10-08
+## HANDOFF — as of 2026-11-11
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins the released `2.4.0`, Scala `3.9.0`, and `../bin/riddlc`
-prints `2.4.0`.** Grammar md5 `aa423f29`, equal to riddl's at the `2.4.0` tag.
-PATH is still 2.0.0.
+**`build.sbt` pins the released `2.6.0`, Scala `3.9.0`.** Grammar md5
+`aa423f29`, equal to riddl's at the `2.6.0` tag — unchanged since 2.4.0, since
+2.5.0 and 2.6.0 added validation rules only.
 
-**Gate: GREEN, 386 / 52 / 0.** `task/` is empty — the 2.4.0 upgrade and "typed by a
-NAME" tasks went to `task/done/` with Results on 2026-10-08.
+**Gate: GREEN, 390 / 52 / 0.** `task/` is empty — both upgrade tasks (2.5.0,
+superseded, and 2.6.0) went to `task/done/` with Results on 2026-11-11.
 
-**The gate compiler is `../bin/riddlc`** — PATH is still `2.0.0`, two releases
-behind. But it has flipped three times in six weeks, so **measure, never
-remember**:
+**`../bin/riddlc` and PATH BOTH print `2.6.0`** — the first agreement since
+2.0.0, because Homebrew finally shipped a working macOS binary. That is a
+coincidence of timing and will not last past riddl's next commit, so
+**measure, never remember**:
 
 ```bash
 riddlc version && ../bin/riddlc version
@@ -99,6 +100,57 @@ Nothing half-edited; `task/` is empty.
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 ---
+
+### 2.4.0 → 2.6.0: tell routes by type, folds may not read the clock ✅ **2026-11-11**
+
+Two task files arrived (2.5.0 on 2026-10-31, then 2.6.0 superseding it).
+Upgraded straight from 2.4.0 to 2.6.0, as the 2.6.0 file allowed, while still
+documenting 2.5.0's rules, which 2.6.0 contains.
+
+**Nothing broke.** Grammar byte-identical to the 2.6.0 tag, gate 386/52/0
+before any edits. Neither new Error fired on an existing fence.
+
+**Every rule was probed before a word was written**, with throwaway models
+against `../bin/riddlc` 2.6.0, including each remedy:
+
+- `msg-tell-no-route-for-type` — both causes reproduced (target inlet does not
+  admit the type; a relay that receives without sending on). A relay that
+  `send`s it on clears it.
+- `msg-tell-route-ambiguous` — two sender outlets connected to two target
+  inlets.
+- `stmt-duplicate-send-same-outlet` — two identical `send`s in one clause.
+- `entity-event-sourced-fold-nondeterministic` — `system.now` in a fold's
+  `set` ("set a different state") and in a `when` ("compute a different
+  value"). Carrying the instant on the event clears it.
+
+**The probes found a claim on the site that was already false:**
+`language-reference.md` said an unreachable `tell` "draws a **Warning**". It is
+an **Error** (`msg-tell-target-unreachable`). Fixed. A release note describes
+what CHANGED; it would never have mentioned this.
+
+**`option available` on a repository needed proving, not assuming.** It drew
+no diagnostic, but neither does an unvalidated option set. Two more probes
+settled it: `option is wibble` draws `opt-unrecognized`, and `option is
+aggregate` on a repository draws `opt-misplaced` — so riddlc validates options
+PER KIND, and silence for `available`/`consistent` means they are genuinely
+repository options. `concepts/option.md`'s table omitted both; fixed.
+
+**Where it went:** language reference (`#a-route-must-carry-the-message`, a
+duplicate-send note under Send, the corrected severity), `concepts/
+statement.md`, the author guide's Event Sourcing Rules (four → five, with a
+gated `Ledger` fence plus a negative test proving the fence really is
+validated), and a new **Ordering and Concurrency** section in
+`concepts/repository.md` (per-entity single writer, first-`Id(E)` rule,
+`option available` as the CAP choice) — Reid asked for that last one.
+
+**Not changed, filed as BACKLOG 6:** three `tell event … to entity …` fences
+in the language reference, including the page's first `tell` example. They
+pass only through the no-inlet exemption, and they model exactly what 2.5.0
+names as the usual failure.
+
+The 2.5.0 file's criterion "`sbt clean test` passes" could not apply: this
+repo's sbt build has no tests. The fence gate stood in for it, and its Results
+say so.
 
 ### 2.4.0: every value is typed, by a type NAME ✅ **2026-10-08**
 

@@ -492,6 +492,7 @@ not carry an answer forward from a previous session; measure it.
 | 2.3.0 shipped (2026-09-24) | **`../bin/riddlc`** — whose version string still read `2.2.0-13-b8581131` | **2.3.0 is tagged at exactly that commit** (`b8581131`), so the staged binary IS 2.3.0's code; PATH still serves **2.0.0** |
 | 2.3.1 shipped (2026-09-25) | **`../bin/riddlc`** — rebuilt, and now prints `2.3.1` | one substantive commit past 2.3.0; PATH still serves **2.0.0** |
 | 2.4.0 shipped (2026-10-07) | **`../bin/riddlc`** — rebuilt at the tag, prints a clean `2.4.0` | tag, binary and GitHub Packages artifact all agree; PATH still serves **2.0.0** |
+| 2.6.0 shipped (2026-11-07) | **either** — both print `2.6.0` | **PATH caught up for the first time since 2.0.0**: Homebrew stable and installed are 2.6.0 (2.5.0's macOS binary aborted at load on an `openssl@4` link, fixed in 2.6.0). Tag `95537470`, artifact on GitHub Packages. This agreement is a coincidence of timing, not a new rule |
 
 Each of those was written down as emphatically as this one. The instruction
 inverted twice **without a word of it changing**, and validating with the wrong
@@ -579,8 +580,8 @@ resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
-# As of 2026-10-08 it is `../bin/riddlc`, rebuilt and printing 2.4.0.
-# PATH still serves 2.0.0.
+# As of 2026-11-11 both `../bin/riddlc` and PATH print 2.6.0. They will
+# drift apart again at the next riddl commit; measure, do not assume.
 python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
 
@@ -643,8 +644,8 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-10-08, riddl **2.4.0**): the whole 2.0 tree
-is **386 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
+**Status** (2026-11-11, riddl **2.6.0**): the whole 2.0 tree
+is **390 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
 is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
 
@@ -782,7 +783,11 @@ compilers):
 | `send … at <instant>` | ❌ | ✅ 2.1.x — `TimeStamp`/`DateTime`/`ZonedDateTime` only (`stmt-send-at-not-instant`). A past instant delivers immediately; there is **no cancellation**, so schedule to yourself and decide at fire time. `send` only, never `tell` |
 | entity-instance reference | `reference to entity X` | **`Id(entity X)`** — all five spellings make the same `UniqueId`; the old ones are `[deprecated]` (`type-reference-to-is-id`) |
 | outlet a processor may `send` on | any in scope | only one it **OWNS** (`stmt-outlet-not-owned`) — an enclosing context's outlet does not count |
-| `tell` | direct delivery | needs a **modelled channel**: a connector from an outlet the SENDER owns to the target's inlet (`msg-tell-target-unreachable`). It is sugar for exactly that `send`. Between **unrelated** domains it is an Error however wired |
+| `tell` | direct delivery | needs a **modelled channel**: a connector from an outlet the SENDER owns to the target's inlet (`msg-tell-target-unreachable`, an **Error**). It is sugar for exactly that `send`. Between **unrelated** domains it is an Error however wired |
+| `tell` routing | — | **by message TYPE** (2.5.0): the message arrives only at an inlet that admits it and passes a processor only if that processor's `on` clause sends it on; no handler = passes nothing. Connectors that cannot carry the type → Error `msg-tell-no-route-for-type` (usually an event told to an entity whose inlets admit only commands). Reachable from >1 of the sender's outlets → Warning `msg-tell-route-ambiguous`. Same graph as `stream-graph-cycle` |
+| same value sent twice on one outlet | silent | Warning `stmt-duplicate-send-same-outlet` (2.5.0), non-blocking — `send`, `forward`, or a `tell` whose only route is that outlet; two message ids, two deliveries |
+| fold reads `system.now`/`system.random` | — | **Error** `entity-event-sourced-fold-nondeterministic` (2.6.0) in an event-sourced entity's `on event` for its OWN event — replay would rebuild a different state. Read it in the command handler, carry it on the event. Foreign-event clauses exempt |
+| repository write order | unstated | **per ENTITY** (CM §5.6/§5.7, 2.6.0 — docs only, riddlc unchanged): one entity's writes in arrival order, different entities concurrent, **no total order**. The entity is named by the message's FIRST `Id(E)` field. `option available` = keep operating during a partition, give up consistency. `available`/`consistent` are recognised repository options (an entity-only option draws `opt-misplaced`) |
 | adaptor targets | any processor | a **Context** only (`adaptor-targets-context-only`), which must declare an **admitting inlet**. Outbound addresses the far context, inbound its OWN context |
 | adaptor ports | — | **DECLARED**, like every processor's (2.2.0, reversing the 2026-09-06 implied-port design). A port-less adaptor is `void`, not `flow`; two inlets and an outlet is a legal `merge`. A connector endpoint names the **portlet** (`outlet C.A.P`); naming the adaptor is `ref-wrong-kind`. `adaptor-implied-outlet-ambiguous` is retired |
 | missing port | silent | **Missing warning** for EVERY processor kind (2.2.0): handlers receive but no inlet, or transmit but no outlet → "is incomplete: it handles X but declares no inlet", naming the types. Two id spellings on purpose: entity keeps `entity-no-inlet`/`-outlet`, everything else `stream-processor-no-inlet`/`-outlet`. Rules that read the missing side **abstain** — one omission, one message |
@@ -805,11 +810,12 @@ stands; the instance does not.) General lesson: **a grammar comment describes in
 only a probe describes behaviour** — the same family as the enumerated-table
 trap, since no fence gate can catch a prose claim that is merely too strong.
 
-**`event-sourced` is not decoration in 2.0.** It turns on four Errors: every
+**`event-sourced` is not decoration in 2.0.** It turns on five Errors: every
 handled command's type must declare `yields`; every event so named needs an
 `on event` clause; `set`/`morph`/`become` may appear **only** in `on event`
 clauses (no exemption for `on init`); and a foreign event may not touch state —
-it must yield one of the entity's own first. In practice that means declaring
+it must yield one of the entity's own first; and (2.6.0) a fold of its own
+event may not read `system.now` or `system.random`. In practice that means declaring
 an event-sourced entity's commands and events **inside** it. Several examples
 claimed event sourcing while being structurally impossible to event-source, and
 rc.9 started rejecting them.
@@ -1118,7 +1124,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary is `2.4.0` as of 2026-10-08; PATH is still 2.0.0 — see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (both the staged binary and PATH are `2.6.0` as of 2026-11-11 — re-measure, see § "Compiling RIDDL examples") |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |

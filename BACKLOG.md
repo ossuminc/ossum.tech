@@ -206,3 +206,23 @@ confirmed; several predate the per-product versioning migration.
 |------|------|-------|
 | Type examples | `references/language-reference.md` | Add specialized examples |
 | Synapify generation docs | `synapify/generation.md` | Use preserved config |
+
+---
+
+## 6. The language reference teaches `tell event … to entity`
+
+Filed 2026-11-11 during the 2.6.0 upgrade. Three fences tell an **event** to an
+entity, which riddl 2.5.0's release notes name as the usual cause of
+`msg-tell-no-route-for-type` (an entity's inlets normally admit commands):
+
+- `sites/riddl/docs/references/language-reference.md:1887`, the **first**
+  `tell` example on the page, under "Tell Statement"
+- the same file, lines 2551 and 2554 (`OrderPending`, `OrderShipped`)
+
+**Verified:** they pass the gate on 2.6.0 only because the wrapper's target
+declares no inlets, which is one of the rule's exemptions. The gate cannot see
+the problem. The example is legal; the thing it shows readers is not.
+
+**Wanted:** tell a command, or say why an event is right there and show the
+inlet that admits it. Line numbers move; grep for `tell event`.
+

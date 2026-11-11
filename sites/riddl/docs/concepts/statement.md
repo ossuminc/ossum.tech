@@ -289,6 +289,17 @@ on add: command AddItem {
     satisfy it: an enclosing context's outlet is not the sender's own. Without
     one, `msg-tell-target-unreachable`.
 
+    The channel must also **carry the message**. Since 2.5.0 routing follows
+    message types: the told message arrives only at an inlet that admits it,
+    and passes through an intermediate processor only if that processor's `on`
+    clause sends it on. Connectors that join the two ends but cannot carry the
+    type are `msg-tell-no-route-for-type` — most often an *event* told to an
+    entity whose inlets admit only *commands*. A message that can arrive from
+    more than one of the sender's outlets draws the Warning
+    `msg-tell-route-ambiguous`, because the model no longer says which channel
+    the `tell` uses. See
+    [A route must carry the message](../references/language-reference.md#a-route-must-carry-the-message).
+
     Authors usually meet this rule in two steps, and the second surprises
     them: you declare the target's inlet, and now riddlc says the inlet is not
     connected. That is correct and is the point — it is asking you to model the

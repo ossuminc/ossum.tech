@@ -83,6 +83,72 @@ update works and may optionally yield an
 [Event message](message.md#event) but generally that is
 handled at a higher level of abstraction. 
 
+## Ordering and Concurrency
+
+A repository is a [processor](processor.md), so it handles messages one at a
+time — but the "one" is an **entity**, not the whole repository.
+
+- **Queries always run concurrently.** They change nothing, so the worst a
+  concurrent read can do is see slightly old data, and the cure for that is to
+  ask again.
+- **Writes about ONE entity are applied one at a time, in arrival order.** The
+  create happens before the updates, and two updates to the same order never
+  interleave.
+- **Writes about DIFFERENT entities run concurrently.** There is **no total
+  order** across a repository. An implementation that serializes every write
+  is not being more careful; it is imposing an order the model never asked
+  for, and charging every unrelated write for it.
+
+A write names its entity by the **first field of its message typed
+[`Id(entity E)`](type.md)**. If a message carries several such fields, the
+first one declared decides which entity's sequence the write joins. A write
+message carrying none names no entity and so has no order at all. A code
+generator should say so rather than quietly pick one.
+
+<!-- riddl: in-context -->
+```riddl
+entity Order is { ??? }
+entity Customer is { ??? }
+
+// Ordered with the other writes about the same `order`. `customer` is also
+// an Id, but it comes second, so it does not decide the ordering.
+command RecordShipment is {
+  order: Id(entity Order),
+  customer: Id(entity Customer),
+  carrier: String
+}
+```
+
+### `option available`: the CAP choice
+
+A distributed store cannot be consistent, available and partition-tolerant all
+at once — that is the CAP theorem. Partitions happen whether you plan for them
+or not, so the real choice is what to give up **while one is in progress**:
+
+| | During a partition | Write ordering |
+|---|---|---|
+| Default | Stays consistent — may refuse or delay a write it cannot order | Per entity, as above |
+| `option available` | Keeps operating — gives up consistency | Whatever the storage engine's transactions provide |
+
+An `available` repository asks its implementation to aim for **continuous
+operation**: handle failures where they happen, and restart only when there
+is truly no alternative. The [entity](entity.md) option of the same name makes
+the same choice for an entity.
+
+<!-- riddl: in-context -->
+```riddl
+repository Clickstream is { ??? } with {
+  option is available
+  briefly as "Losing order between visits beats losing the visits"
+}
+```
+
+!!! note "This is a ruling for implementations"
+    riddlc does not check any of this; none of it changed validation. It is
+    what RIDDL's computational model requires of anything that *generates* a
+    repository from a model, as clarified with the 2.6.0 release. A generator must keep per-entity ordering under the default
+    and must not invent a total order across entities.
+
 ## Repositories at Domain Scope
 
 A repository normally lives in a [Context](context.md). But a repository that
@@ -114,8 +180,10 @@ domain Commerce is {
 ## Options
 
 `transient` marks a repository whose contents are not durably persisted — a
-cache-like store. `batch` (1 argument), `microservice` and `protocol` are also
-available.
+cache-like store. `available` and `consistent` choose a side of the CAP
+trade-off, as [described above](#option-available-the-cap-choice); `consistent`
+is the default and need not be written. `batch` (1 argument), `microservice`
+and `protocol` are also accepted.
 
 ## Occurs In
 * [Context](context.md)

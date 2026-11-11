@@ -439,8 +439,8 @@ there is nothing to snapshot.
 
 Replay rebuilds an entity's state by re-applying its recorded events in order,
 so the *same* state changes must happen again. That is only possible if the
-model is shaped for it, and RIDDL now checks four things. All four are Errors,
-and all four apply only when the entity is `event-sourced`.
+model is shaped for it, and RIDDL now checks five things. All five are Errors,
+and all five apply only when the entity is `event-sourced`.
 
 1. **Every handled command declares what it yields.** Write it on the command's
    type, between the name and `is` — otherwise there is nothing to record.
@@ -466,6 +466,41 @@ and all four apply only when the entity is `event-sourced`.
     on event Sales.PaymentTaken { yield event Order.Placed }
     on event Order.Placed { set field Main.total to "1" }
     ```
+
+5. **A fold may not read the clock or the dice** (since 2.6.0). An `on event`
+   clause applying one of the entity's *own* events may not read `system.now`
+   or `system.random` (`entity-event-sourced-fold-nondeterministic`). Replay
+   runs the fold again, and both values are re-read each time: set into state,
+   recovery would rebuild a *different* state; used anywhere else in the fold,
+   such as a condition or a `tell` argument, the fold would compute something
+   different on every replay. Read the value once, in the command handler,
+   and carry it on the event:
+
+    <!-- riddl: in-context no-prelude=Ledger -->
+    ```riddl
+    event-sourced entity Ledger is {
+      record Fields is { lastPosted: TimeStamp }
+      command Post yields event Posted is { amount: Integer }
+      event Posted is { amount: Integer, at: TimeStamp }
+
+      state Main of record Ledger.Fields is {
+        handler Behavior is {
+          on post: command Ledger.Post {
+            // Read the clock here, once, and record what it said...
+            yield event Ledger.Posted(amount = post.amount, at = system.now)
+          }
+          on posted: event Ledger.Posted {
+            // ...so replay re-applies the same instant.
+            set field Main.lastPosted to posted.at
+          }
+        }
+      }
+    }
+    ```
+
+    Command handlers are unaffected, and so are clauses handling events
+    declared outside the entity — those are not folds, since rule 4 already
+    keeps them from changing state.
 
 Together these give the shape every event-sourced entity takes: the command
 handler validates and yields, and the event handler performs the change.

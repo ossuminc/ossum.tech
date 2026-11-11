@@ -1819,6 +1819,15 @@ send command ProcessPayment(orderId) to outlet PaymentRequests
     consumer are built on, so a consumer typed by it simply cannot receive the
     value.
 
+!!! note "Sending the same value twice is two messages"
+    One statement list that puts the **same value** onto the **same outlet**
+    twice draws a **Warning** (`stmt-duplicate-send-same-outlet`, since 2.5.0).
+    It counts `send`, `forward`, and a `tell` whose only route is that outlet.
+    Each transmission gets its own message id, so the receiver sees two
+    distinct deliveries and no downstream deduplication will recognise them as
+    one. If that is what you meant, the warning is harmless: it does not block
+    code generation, and a generator must deliver both.
+
 #### Scheduling a delivery: `send … at <instant>`
 
 An optional `at` clause states **when** the message should be delivered:
@@ -1901,8 +1910,10 @@ an entity can be *ended*, but any processor can be *addressed* — a singleton's
 it takes a portlet, not a processor, so an `Id` cannot apply.
 
 !!! warning "Validation"
-    A `tell` whose target is not reachable through any modeled connector draws
-    a **Warning**.
+    A `tell` whose target is not reachable through any modeled connector is an
+    **Error** (`msg-tell-target-unreachable`). A connector path is not enough,
+    either: the path must **carry the told message**. See
+    [A route must carry the message](#a-route-must-carry-the-message) below.
 
     A `tell` whose target declares **no clause receiving that message type**
     draws a **CompletenessWarning** — nothing would happen when it arrived. The
@@ -1910,6 +1921,55 @@ it takes a portlet, not a processor, so an `Id` cannot apply.
     processor handles nowhere is reported even if nothing sends to it. An
     `on other` clause satisfies both, because stating a policy for anything
     unmatched *is* saying what arriving means.
+
+#### A route must carry the message
+
+Since 2.5.0, `tell` routing is worked out **by message type**, not by connector
+topology alone. A told message arrives only at an inlet whose type **admits**
+it, and travels on through an intermediate processor only if that processor's
+`on` clause for it **sends it again**. A processor with no clause for the
+message passes nothing on. These are the same rules the infinite-message-loop
+check (`stream-graph-cycle`) uses.
+
+So connectors joining sender and target do not settle the question. When they
+exist but no path can carry the type, the `tell` is an **Error**,
+`msg-tell-no-route-for-type`, and the message names which of two causes
+applies:
+
+- **None of the target's inlets admits the type.** The usual case is telling an
+  entity an *event* when its inlets admit only *commands*.
+- **Every path passes through a processor that drops it**: one that does not
+  admit the message, or that receives it without sending it on.
+
+The remedy is one of three: remove a redundant `tell`, declare (and connect) an
+inlet that admits the message, or tell a type the target already accepts. A
+relay in the middle must pass the message on explicitly:
+
+<!-- riddl: in-context -->
+```riddl
+command ExampleRelayed is { note: String }
+streamlet Relay is {
+  inlet incoming is command ExampleRelayed
+  outlet outgoing is command ExampleRelayed
+  handler Passing is {
+    // Without this `send`, the relay swallows the command and a `tell`
+    // routed through it is msg-tell-no-route-for-type.
+    on relayed: command ExampleRelayed { send relayed to outlet outgoing }
+  }
+}
+```
+
+This is a different fault from `msg-tell-target-unreachable`, which means
+there is no connector path *at all*. Both share the same exemptions:
+predefined targets, `???` bodies, targets with no inlets, senders with no
+outlets, and a processor telling itself.
+
+The route must also be **one** route. If the message can reach the target
+from more than one of the sender's own outlets, the model does not say which
+channel the `tell` travels on, and that is a **Warning**,
+`msg-tell-route-ambiguous`. Before routing followed message types, this
+looked true of 1,821 tells in the riddl-models corpus; with type-aware
+routing, none of them are ambiguous.
 
 #### Addressing is structural
 
