@@ -10202,6 +10202,9 @@ that match specific message kinds and execute statements.</p>
 </tr>
 </tbody>
 </table>
+<p>A handler takes <strong>at most one</strong> each of <code>on init</code>, <code>on term</code>, <code>on activate</code>,
+<code>on passivate</code> and <code>on other</code>; a second is the Error
+<code>handler-duplicate-special-clause</code>. Branch inside the one clause instead.</p>
 <p><code>on init</code> and <code>on term</code> are once-ever lifecycle events. <code>on activate</code> and
 <code>on passivate</code> fire on every rehydration and eviction, are <strong>entity-only</strong>, and
 must be side-effect free: <code>send</code>, <code>tell</code>, <code>yield</code>, <code>morph</code> and <code>become</code> are
@@ -10919,6 +10922,10 @@ boolean. The element binding is explicit and scoped to the predicate:</p>
 <p>On an <strong>empty</strong> collection, <code>all of</code> is <strong>true</strong> and <code>any of</code> is <strong>false</strong> —
 the usual reading of "every element satisfies it" when there are no elements.
 <code>none of</code> is likewise true.</p>
+<p>Every one of these forms — the quantifiers, a filter, <code>count of</code> and
+<code>contains</code> — needs a collection: a <code>T*</code> or <code>T+</code> field, a <code>set of</code>,
+<code>sequence of</code>, mapping or table. Anything else, such as a <code>String</code>, is the
+Error <code>value-not-a-collection</code>.</p>
 <p>Dropping the quantifier gives a <strong>filter</strong>, whose value is the matching
 elements rather than a boolean:</p>
 <!-- riddl: in-handler -->
@@ -11430,6 +11437,22 @@ nothing matches.</p>
 <p><code>upsert</code> requires the schema to declare a <code>key on</code> a field of the stored
 record: without a key there is no definition of "the same row", so there is
 nothing for it to replace.</p>
+<div class="admonition warning">
+<p class="admonition-title">Validation</p>
+<p>Each is an <strong>Error</strong>:</p>
+<ul>
+<li><code>query</code> outside a repository: <code>value-query-outside-repository</code>. Ask the
+  repository instead (<code>ask query … of repository …</code>).</li>
+<li>A table name that is not a data entry of a schema in scope:
+  <code>repo-table-not-in-schema</code>.</li>
+<li><code>store</code> or <code>upsert</code> of a value that is not the record the table stores:
+  <code>stmt-store-value-not-table-record</code>.</li>
+<li><code>update … set f = v</code> where <code>f</code> is not a field of that record:
+  <code>stmt-update-field-not-in-row</code>.</li>
+<li><code>upsert</code> into a table whose schema has no <code>key on</code> a field of its
+  record: <code>stmt-upsert-needs-key</code>.</li>
+</ul>
+</div>
 <h3 id="ask">Ask<a class="headerlink" href="#ask" title="Permanent link">&para;</a></h3>
 <p><code>ask</code> states that two messages are two halves of <strong>one</strong> interaction: a query
 sent to a processor, and the reply that answers it. It is a <strong>value</strong>, not a
@@ -12092,22 +12115,40 @@ and <code>tell</code> is how a processor is driven.</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-92-1"><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a><span class="c1">// `record Cart` here, not the page's `entity Cart`: a schema stores DATA.</span>
 </span><span id="__span-92-2"><a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a><span class="kd">record</span> <span class="n">CartLine</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">id</span><span class="p">:</span> <span class="n">ProductId</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">Natural</span> <span class="p">}</span>
 </span><span id="__span-92-3"><a id="__codelineno-92-3" name="__codelineno-92-3" href="#__codelineno-92-3"></a><span class="kd">record</span> <span class="n">Cart</span> <span class="kp">is</span> <span class="p">{</span> <span class="kr">items</span><span class="p">:</span> <span class="kr">many</span> <span class="n">CartLine</span> <span class="p">}</span>
-</span><span id="__span-92-4"><a id="__codelineno-92-4" name="__codelineno-92-4" href="#__codelineno-92-4"></a>
-</span><span id="__span-92-5"><a id="__codelineno-92-5" name="__codelineno-92-5" href="#__codelineno-92-5"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-92-6"><a id="__codelineno-92-6" name="__codelineno-92-6" href="#__codelineno-92-6"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span>
-</span><span id="__span-92-7"><a id="__codelineno-92-7" name="__codelineno-92-7" href="#__codelineno-92-7"></a>    <span class="n">cart</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">Cart</span>
-</span><span id="__span-92-8"><a id="__codelineno-92-8" name="__codelineno-92-8" href="#__codelineno-92-8"></a>    <span class="kr">link</span> <span class="n">cartItems</span> <span class="kp">as</span> <span class="kd">field</span> <span class="n">Cart</span><span class="p">.</span><span class="kr">items</span><span class="p">.</span><span class="n">id</span> <span class="kp">to</span> <span class="kd">field</span> <span class="n">Product</span><span class="p">.</span><span class="n">id</span>
-</span><span id="__span-92-9"><a id="__codelineno-92-9" name="__codelineno-92-9" href="#__codelineno-92-9"></a>
-</span><span id="__span-92-10"><a id="__codelineno-92-10" name="__codelineno-92-10" href="#__codelineno-92-10"></a>  <span class="kd">handler</span> <span class="n">CartRepositoryHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-92-11"><a id="__codelineno-92-11" name="__codelineno-92-11" href="#__codelineno-92-11"></a>    <span class="k">on</span> <span class="kd">event</span> <span class="n">CartCreated</span> <span class="p">{</span>
-</span><span id="__span-92-12"><a id="__codelineno-92-12" name="__codelineno-92-12" href="#__codelineno-92-12"></a>      <span class="k">do</span> <span class="s2">"Persist the new cart record to the database"</span>
-</span><span id="__span-92-13"><a id="__codelineno-92-13" name="__codelineno-92-13" href="#__codelineno-92-13"></a>    <span class="p">}</span>
-</span><span id="__span-92-14"><a id="__codelineno-92-14" name="__codelineno-92-14" href="#__codelineno-92-14"></a>    <span class="k">on</span> <span class="kr">other</span> <span class="p">{</span> <span class="k">error</span> <span class="s2">"Unrecognized message"</span> <span class="p">}</span>
-</span><span id="__span-92-15"><a id="__codelineno-92-15" name="__codelineno-92-15" href="#__codelineno-92-15"></a>  <span class="p">}</span>
-</span><span id="__span-92-16"><a id="__codelineno-92-16" name="__codelineno-92-16" href="#__codelineno-92-16"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-92-17"><a id="__codelineno-92-17" name="__codelineno-92-17" href="#__codelineno-92-17"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">"Persistent storage for shopping cart data"</span>
-</span><span id="__span-92-18"><a id="__codelineno-92-18" name="__codelineno-92-18" href="#__codelineno-92-18"></a><span class="p">}</span>
+</span><span id="__span-92-4"><a id="__codelineno-92-4" name="__codelineno-92-4" href="#__codelineno-92-4"></a><span class="kd">command</span> <span class="n">SaveCart</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">cart</span><span class="p">:</span> <span class="n">Cart</span> <span class="p">}</span>
+</span><span id="__span-92-5"><a id="__codelineno-92-5" name="__codelineno-92-5" href="#__codelineno-92-5"></a>
+</span><span id="__span-92-6"><a id="__codelineno-92-6" name="__codelineno-92-6" href="#__codelineno-92-6"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-92-7"><a id="__codelineno-92-7" name="__codelineno-92-7" href="#__codelineno-92-7"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span> <span class="kp">of</span>
+</span><span id="__span-92-8"><a id="__codelineno-92-8" name="__codelineno-92-8" href="#__codelineno-92-8"></a>    <span class="n">cart</span> <span class="kp">as</span> <span class="kd">record</span> <span class="n">Cart</span>
+</span><span id="__span-92-9"><a id="__codelineno-92-9" name="__codelineno-92-9" href="#__codelineno-92-9"></a>    <span class="kr">link</span> <span class="n">cartItems</span> <span class="kp">as</span> <span class="kd">field</span> <span class="n">Cart</span><span class="p">.</span><span class="kr">items</span><span class="p">.</span><span class="n">id</span> <span class="kp">to</span> <span class="kd">field</span> <span class="n">Product</span><span class="p">.</span><span class="n">id</span>
+</span><span id="__span-92-10"><a id="__codelineno-92-10" name="__codelineno-92-10" href="#__codelineno-92-10"></a>
+</span><span id="__span-92-11"><a id="__codelineno-92-11" name="__codelineno-92-11" href="#__codelineno-92-11"></a>  <span class="kd">inlet</span> <span class="n">Saves</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">SaveCart</span>
+</span><span id="__span-92-12"><a id="__codelineno-92-12" name="__codelineno-92-12" href="#__codelineno-92-12"></a>
+</span><span id="__span-92-13"><a id="__codelineno-92-13" name="__codelineno-92-13" href="#__codelineno-92-13"></a>  <span class="kd">handler</span> <span class="n">CartRepositoryHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-92-14"><a id="__codelineno-92-14" name="__codelineno-92-14" href="#__codelineno-92-14"></a>    <span class="k">on</span> <span class="n">save</span><span class="p">:</span> <span class="kd">command</span> <span class="n">SaveCart</span> <span class="p">{</span>
+</span><span id="__span-92-15"><a id="__codelineno-92-15" name="__codelineno-92-15" href="#__codelineno-92-15"></a>      <span class="k">store</span> <span class="n">save</span><span class="p">.</span><span class="n">cart</span> <span class="kp">in</span> <span class="n">CartData</span><span class="p">.</span><span class="n">cart</span>
+</span><span id="__span-92-16"><a id="__codelineno-92-16" name="__codelineno-92-16" href="#__codelineno-92-16"></a>    <span class="p">}</span>
+</span><span id="__span-92-17"><a id="__codelineno-92-17" name="__codelineno-92-17" href="#__codelineno-92-17"></a>  <span class="p">}</span>
+</span><span id="__span-92-18"><a id="__codelineno-92-18" name="__codelineno-92-18" href="#__codelineno-92-18"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-92-19"><a id="__codelineno-92-19" name="__codelineno-92-19" href="#__codelineno-92-19"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">"Persistent storage for shopping cart data"</span>
+</span><span id="__span-92-20"><a id="__codelineno-92-20" name="__codelineno-92-20" href="#__codelineno-92-20"></a><span class="p">}</span>
 </span></code></pre></div>
+<p>A repository is changed by <strong>commands</strong> and read by <strong>queries</strong>, never by
+events. An event that should be stored is first turned into a command by
+whatever handles it — usually a <a href="#projectors">projector</a> or an entity.</p>
+<div class="admonition warning">
+<p class="admonition-title">Validation</p>
+<ul>
+<li><strong>Error</strong> (<code>repo-inlet-carries-event</code>): an inlet whose type is, or
+  includes, an event.</li>
+<li><strong>Warning</strong> (<code>handler-repository-handles-events</code>): an <code>on event</code> clause
+  in a repository's handler.</li>
+<li><strong>Warning</strong> (<code>repo-no-commands-or-queries</code>): handlers that take no
+  command and no query at all.</li>
+<li><strong>Missing</strong> (<code>repo-no-handler</code>): a repository with content but no
+  handler.</li>
+</ul>
+</div>
 <h3 id="schema-clauses">Schema Clauses<a class="headerlink" href="#schema-clauses" title="Permanent link">&para;</a></h3>
 <p>A <code>schema</code> names its kind, then takes its clauses in a fixed order: <code>of …</code>,
 <code>link …</code>, <code>key on …</code>, <code>index on …</code>, and finally its own <code>with { … }</code>.</p>
@@ -12155,11 +12196,69 @@ and <code>tell</code> is how a processor is driven.</p>
 says no two stored rows may share its value, which is what gives <code>upsert</code> its
 meaning of "the same row". A keyed schema counts as indexed on that field, so
 there is no need to write both for one field. There are no <strong>composite</strong> keys:
-a key names exactly one field of the stored record.</p>
+a key names exactly one field of the stored record. A key on a field of some
+record the schema does <em>not</em> store is the Error
+<code>repo-schema-key-not-stored-field</code>.</p>
 <p><code>with history</code> asks the generator for an append-only history of the table —
 every version retained rather than each write overwriting the last. It states
 the <em>requirement</em>, not the mechanism: whether that becomes a temporal table, an
 audit sidecar or an event log is the generator's choice.</p>
+<div class="admonition info">
+<p class="admonition-title">What riddlc checks about a schema's kind</p>
+<p>The kind is suggestive, not a storage engine, but a few shapes contradict
+it. Each is a <strong>Warning</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Warned when</th>
+<th>Rule id</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flat</code></td>
+<td>more than one data entry</td>
+<td><code>repo-flat-schema-many-nodes</code></td>
+</tr>
+<tr>
+<td><code>flat</code>, <code>document</code>, <code>columnar</code>, <code>vector</code></td>
+<td>any <code>link</code></td>
+<td><code>repo-schema-should-not-have-links</code></td>
+</tr>
+<tr>
+<td><code>vector</code></td>
+<td>more than one data entry</td>
+<td><code>repo-vector-many-nodes</code></td>
+</tr>
+<tr>
+<td><code>time-series</code></td>
+<td>no <code>index on</code></td>
+<td><code>repo-time-series-no-indices</code></td>
+</tr>
+<tr>
+<td><code>relational</code></td>
+<td>several data entries, no links</td>
+<td><code>repo-relational-no-links</code></td>
+</tr>
+<tr>
+<td><code>hierarchical</code></td>
+<td>several data entries, no links</td>
+<td><code>repo-hierarchical-no-links</code></td>
+</tr>
+<tr>
+<td><code>star</code></td>
+<td>several data entries, no links</td>
+<td><code>repo-star-no-links</code></td>
+</tr>
+<tr>
+<td><code>graphical</code></td>
+<td>data but no links</td>
+<td><code>repo-graph-no-links</code></td>
+</tr>
+</tbody>
+</table>
+</div>
 <h3 id="repositories-at-domain-scope">Repositories at Domain Scope<a class="headerlink" href="#repositories-at-domain-scope" title="Permanent link">&para;</a></h3>
 <p>A repository that synthesizes messages from entities across several contexts,
 and is queried by several contexts, may be declared directly in a Domain rather
@@ -12169,10 +12268,12 @@ than in a Context.</p>
 <p>A repository's <strong>reach</strong> is the set of contexts owning the messages its
 <code>on</code> clauses handle.</p>
 <ul>
-<li><strong>Error</strong>: a domain-scoped repository reaching only ONE context. It is
-  provably unnecessary at domain scope — move it into that context.</li>
-<li><strong>CompletenessWarning</strong>: a context-scoped repository reaching another
-  context. Consider promoting it to domain scope.</li>
+<li><strong>Error</strong> (<code>repo-domain-scope-misplaced</code>): a domain-scoped repository
+  reaching only ONE context. It is provably unnecessary at domain scope —
+  move it into that context.</li>
+<li><strong>CompletenessWarning</strong> (<code>repo-handles-foreign-contexts</code>): a
+  context-scoped repository reaching another context. Consider promoting
+  it to domain scope.</li>
 </ul>
 </div>
 <h2 id="adaptors">Adaptors<a class="headerlink" href="#adaptors" title="Permanent link">&para;</a></h2>

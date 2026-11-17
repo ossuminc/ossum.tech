@@ -5644,6 +5644,11 @@ the message and the sender of any statements that send messages.</p>
 and <code>on passivate</code> bracket each <em>residency</em>: an entity that is evicted from
 memory and later rehydrated passivates and activates repeatedly without ever
 being initialized or terminated again.</p>
+<p>A handler holds <strong>at most one</strong> each of <code>on init</code>, <code>on term</code>, <code>on activate</code>,
+<code>on passivate</code> and <code>on other</code>. A second is an Error
+(<code>handler-duplicate-special-clause</code>): a handler has one construction, one
+termination, one residual-message policy. Branch inside the one clause when
+several outcomes are needed.</p>
 <p>A new instance runs <strong><code>on init</code> only</strong>. A <a href="../value/#create"><code>create</code></a> puts it in
 memory, but that is not an activation — <code>on activate</code> is reserved for an
 instance that already existed and is coming back.</p>

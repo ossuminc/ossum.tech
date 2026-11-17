@@ -5765,8 +5765,9 @@ orders.</p>
 </span></code></pre></div>
 <p>The index on <code>currentStation</code> enables the kitchen display to quickly filter
 tickets by station — the grill station only sees grill tickets. A repository
-that answers queries and declares no index at all draws a warning, because it
-is a sequential scan by construction.</p>
+that answers queries and declares no index at all draws a warning
+(<code>repo-queried-without-index</code>), because it is a sequential scan by
+construction.</p>
 <h2 id="projector-kitchendisplay">Projector: KitchenDisplay<a class="headerlink" href="#projector-kitchendisplay" title="Permanent link">&para;</a></h2>
 <p>The KitchenDisplay projector provides the real-time screen that
 replaces printed and handwritten tickets:</p>

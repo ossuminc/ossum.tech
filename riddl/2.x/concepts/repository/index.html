@@ -5549,7 +5549,12 @@ are related, and a set of indices defines which fields the database indexes. </p
 <p>A repository may define multiple schemas, each with its own <em>kind</em>. The kind of
 schema may be: flat, relational, time-series, graphical, hierarchical, star, 
 document, columnar, vector, or other. These are only suggestive of the kind of
-storage layout the repository uses. </p>
+storage layout the repository uses — but riddlc warns about a few shapes that
+contradict the kind, such as a <code>graphical</code> schema with no links
+(<code>repo-graph-no-links</code>) or a <code>flat</code> one with several data entries
+(<code>repo-flat-schema-many-nodes</code>). The
+<a href="../../references/language-reference/#schema-clauses">language reference</a> lists
+all eight.</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">repository</span> <span class="n">CartRepository</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kr">schema</span> <span class="n">CartData</span> <span class="kp">is</span> <span class="n">relational</span>
@@ -5561,8 +5566,8 @@ storage layout the repository uses. </p>
 <div class="admonition warning">
 <p class="admonition-title">A queried repository with no index at all</p>
 <p>A repository that answers <code>on query</code> clauses but whose schemas declare <strong>no
-index</strong> draws a <strong>CompletenessWarning</strong>: a store queried without any index
-is a sequential scan by construction.</p>
+index</strong> draws a <strong>CompletenessWarning</strong> (<code>repo-queried-without-index</code>): a
+store queried without any index is a sequential scan by construction.</p>
 <p>It is a warning and not an Error because the model may be under-specified
 rather than self-contradictory — the author may know the table is small. It
 stays silent for a <code>???</code> stub, a repository with no schema, and a
@@ -5596,6 +5601,12 @@ repository are updates to the repository. The handler should define how the
 update works and may optionally yield an
 <a href="../message/#event">Event message</a> but generally that is
 handled at a higher level of abstraction. </p>
+<p>A repository is never changed by an <strong>event</strong>. An inlet that carries one is
+an Error (<code>repo-inlet-carries-event</code>), and an <code>on event</code> clause draws a
+Warning (<code>handler-repository-handles-events</code>). Have a
+<a href="../projector/">projector</a> or an entity turn the event into a command and send
+that. A repository with content but no handler at all draws
+<code>repo-no-handler</code>.</p>
 <h2 id="ordering-and-concurrency">Ordering and Concurrency<a class="headerlink" href="#ordering-and-concurrency" title="Permanent link">&para;</a></h2>
 <p>A repository is a <a href="../processor/">processor</a>, so it handles messages one at a
 time — but the "one" is an <strong>entity</strong>, not the whole repository.</p>
@@ -5688,12 +5699,14 @@ inside any one context would misrepresent who owns it.</p>
 <p>A repository's <strong>reach</strong> is the set of contexts owning the messages its
 <code>on</code> clauses handle.</p>
 <ul>
-<li><strong>Error</strong> — a domain-scoped repository reaching only ONE context. It is
+<li><strong>Error</strong> (<code>repo-domain-scope-misplaced</code>) — a domain-scoped repository
+  reaching only ONE context. It is
   provably unnecessary at domain scope; move it into that context. Zero
   resolvable contexts means an incomplete model rather than proof, so that
   draws nothing.</li>
-<li><strong>CompletenessWarning</strong> — a context-scoped repository reaching another
-  context. Consider promoting it to domain scope.</li>
+<li><strong>CompletenessWarning</strong> (<code>repo-handles-foreign-contexts</code>) — a
+  context-scoped repository reaching another context. Consider promoting
+  it to domain scope.</li>
 </ul>
 </div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>

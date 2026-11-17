@@ -5460,7 +5460,8 @@ because they <em>span</em> the contexts beneath it:</p>
 <li>A <a href="../connector/">Connector</a> whose two ends are ports in different contexts</li>
 </ul>
 <p>Both are validated for correct scope. A domain-scoped repository that reaches
-only one context is an <strong>Error</strong> — it is provably unnecessary there. A
+only one context is an <strong>Error</strong> (<code>repo-domain-scope-misplaced</code>) — it is
+provably unnecessary there. A
 context-scoped connector whose ends cross contexts is likewise an Error, and so
 is the reverse.</p>
 <h2 id="authorship-and-attribution">Authorship and Attribution<a class="headerlink" href="#authorship-and-attribution" title="Permanent link">&para;</a></h2>
