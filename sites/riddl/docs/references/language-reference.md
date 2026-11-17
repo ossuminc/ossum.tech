@@ -2124,6 +2124,15 @@ handler, and the wrong pairing — `yield result` or `reply event` — is an Err
     migrating a 1.x model, `reply` is a destination rather than something to
     rewrite away.
 
+!!! note "A `prompt(...)` as a yield argument draws an Advisory"
+    `yield event Booked(at = prompt("the time it was booked") as TimeStamp)`
+    draws `stmt-yield-argument-prompt`, an
+    [Advisory](#validation-message-severity). A prompt is the hole an AI fills worst, and a
+    yielded event's field is nearly always something the handler already has:
+    a message or state field, `system.now`, or an expression. If the value
+    really has to be computed, leave the field off the event and let the
+    `on event` fold compute it.
+
 ### Set Statement
 
 Assigns a value to a field or a state:
@@ -2393,9 +2402,48 @@ rather than on every query.
       under a state.
     - Asking **anywhere inside a saga step**, including as a value nested in a
       larger expression. See below.
+    - No connector carries the query from the asker to the callee
+      (`msg-ask-target-unreachable`), or none carries the answer back
+      (`msg-ask-reply-unreachable`). See "Both legs must be wired" below.
 
     An ask whose callee **refuses** is expected, not an error: recording a
     rejection settles the obligation, consistent with the discharge rule.
+
+**Both legs must be wired.** An `ask` is two messages, and like a
+[`tell`](#tell-statement) each one needs a modelled channel. The query needs a
+connector from an outlet the asker owns to the callee's inlet. The reply needs
+one from the callee's outlet back to an inlet of the asker. A missing leg is an
+**Error**, and each leg has its own rule, so a model missing both gets two
+messages:
+
+<!-- riddl: in-context -->
+```riddl
+command CheckStock is { sku: String }
+result StockLevel is { onHand: Whole }
+query GetStock replies result StockLevel is { sku: String }
+
+entity Storefront is {
+  inlet Orders is command CheckStock
+  inlet Answers is result StockLevel
+  outlet Questions is query GetStock
+  handler Shop is {
+    on c: command CheckStock {
+      let level = ask query GetStock of entity Warehouse
+      do "decide what to show from level"
+    }
+    on result StockLevel { do "the answer arrives here" }
+  }
+}
+entity Warehouse is {
+  inlet Asked is query GetStock
+  outlet Told is result StockLevel
+  handler Stock is {
+    on query GetStock { reply result StockLevel(onHand = 0) }
+  }
+}
+connector Ask is { from outlet Storefront.Questions to inlet Warehouse.Asked }
+connector Answer is { from outlet Warehouse.Told to inlet Storefront.Answers }
+```
 
 !!! warning "A saga may not `ask`"
     A saga must not depend on dynamic state, or the same inputs could yield
@@ -2780,6 +2828,12 @@ list is an **Error**.
     common idiom, and it is expressible precisely because a `send` may sit
     before an `error`.
 
+    **A transmission issued before a refusal is delivered.** The refusal does
+    not recall it. The refusal goes back to the refused message's sender, and
+    nothing is rolled back, because nothing local has changed yet. A generator
+    must not hold the earlier `send` until the clause completes. If it did, the
+    rejection event the refusal announces would never be published.
+
 <!-- riddl: in-clauses -->
 ```riddl
 on cmd: command Withdraw {
@@ -2820,6 +2874,17 @@ The bare form takes exactly one string. The same block shape is what
     Do not confuse it with the `prompt(...)` **value**, which is a different
     construct distinguished by its parentheses — it denotes a value computed by
     AI rather than an action described for a human.
+
+!!! tip "Validation in prose belongs in a type"
+    `do "validate b.partySize is between 1 and 20"` draws the style warning
+    `stmt-do-validates-a-range`. A `do` that checks a field against a range,
+    a set or a bound is better said as the field's **type**: a range such as
+    `Integer(1,20)`, an enumeration (`any of { … }`) or a pattern. Then the
+    constructor validates the field for free, and the prose can go. The rule
+    matches a `do` that *begins* with a verb (`validate`, `check`, `ensure`,
+    `verify`, `require`), then a field, then a bound such as `is between`,
+    `one of` or `at least`. A `do` that only mentions "between" in passing
+    is not flagged.
 
 ### Code Statement
 
@@ -3779,6 +3844,13 @@ is that a modeller may dismiss it *by design*, not only by editing — the rule
 that made the kind necessary is `adaptor-direction-advisory`, which had been
 a Warning and so blocked generation for a design choice the model is entitled
 to make.
+
+The other Advisories in 2.7.0 are the three journal counts on an entity
+(`entity-event-sourced-unread-history`, `entity-event-sourced-snapshot-events`
+and `entity-crud-with-transitions-consumed`; see
+[Does the journal earn its keep?](../concepts/entity.md#does-the-journal-earn-its-keep)),
+and `stmt-yield-argument-prompt` (see
+[Yield and Reply Statements](#yield-and-reply-statements)).
 
 **CompletenessWarning** (severity 4) identifies models that parse and validate
 correctly but are missing details needed for a complete, implementable

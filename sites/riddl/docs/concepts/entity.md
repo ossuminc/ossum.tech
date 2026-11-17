@@ -68,10 +68,77 @@ state. By definition, this means they refer to the same entity.  However, when
 you compare "John Smith" with "Jane Smith", they are not the same entity, even
 if all their other attributes are the same.
 
+## Intentions
+
+Six words written **before** `entity` say what the entity *means*. They are
+not options, because a generator may not treat them as hints:
+
+<!-- riddl: in-context -->
+```riddl
+aggregate event-sourced entity Order is { ??? }
+```
+
+They fall into three independent groups, and any order parses:
+
+| Group | Word | Meaning |
+|-------|------|---------|
+| Role | `aggregate` | An aggregate root: commands and queries for the entities it aggregates go through it |
+| Consistency | `consistent` | Favour consistency over availability, in [Eric Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer) [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem) |
+| | `available` | Favour availability over consistency |
+| Persistence | `event-sourced` | Store state as a log of the entity's own events, rebuilt by replay |
+| | `persistent` | Store only the latest value, with no event log |
+| | `transient` | Keep state in memory only; it is lost when the service stops |
+
+!!! warning "These were options before 2.0"
+    `option is event-sourced`, `aggregate`, `transient`, `consistent` and
+    `available` in a `with { }` block still parse, but each emits a
+    `[deprecated]` message (`entity-option-to-intention`), and they are slated
+    for removal in 3.0. `option is value` is the old spelling of `persistent`.
+    `riddlc prettify` moves all of them in front of `entity`.
+
+### event-sourced is enforced
+
+`event-sourced` is not decoration. It turns on Errors that a CRUD entity never
+sees. Every handled command must declare the event it `yields`. State may
+change only in an `on event` clause for one of the entity's own events. And
+such a fold may not read `system.now` or `system.random`, because a replay
+would rebuild a different state. See
+[Event Sourcing Rules](../guides/authors/authoring-riddl.md#event-sourcing-rules)
+for each rule.
+
+### Does the journal earn its keep?
+
+riddlc also counts what an entity does with the journal it asked for, and
+reports what it finds as an **Advisory**. An Advisory is not a warning: it
+never blocks generation, and a modeller may dismiss it by design. Each one
+describes a fact about the model that is unusual for what the declaration
+normally means:
+
+- **`entity-event-sourced-unread-history`**: the entity is `event-sourced`,
+  but has one state, no transitions, and none of its events is handled
+  anywhere else. The journal has no reader but the entity. If only the latest
+  row matters, this is a `persistent` entity. If history matters, model what
+  reads it: a projector or saga handling its events.
+- **`entity-event-sourced-snapshot-events`**: every event carries the whole
+  state, and every fold copies it straight back. Replay then reproduces only
+  the last row, so the journal buys a durable log and nothing else. If the
+  history is meant to carry meaning, record what *changed* in each event.
+- **`entity-crud-with-transitions-consumed`**, the inverse: the entity is
+  **not** event-sourced, but it has several states and transitions, and other
+  processors handle the events it yields. Its history is being consumed from a
+  store that keeps only the latest row. If the consumers need the history,
+  declare it `event-sourced`; if the latest row is all they need, it is fine
+  as written.
+
+A fourth count, `entity-event-sourced-prose-folds`, reports folds written as
+prose (`set … to prompt("…")`); see
+[`append` and `remove`](../references/language-reference.md#append-and-remove-statements).
+
 ## Options
-Entities can have various optional characteristics as shown in the sections
-below. These options are typically used by generators (code, documentation,
-API, etc.) to make implementation decisions.
+
+Options go in the entity's `with { }` block. They are hints to generators
+(code, documentation, API, etc.) about how to implement the entity, not
+statements about what it means.
 
 ### technology
 * *Arguments*: Multiple, a list of the names of technologies intended to be
@@ -79,38 +146,13 @@ API, etc.) to make implementation decisions.
 * *Implication*: This does not impact the behavior of the entity except in the
   differences provided by various implementation technologies.
 
-### event-sourced
+### snapshots
 * *Arguments*: None
-* *Implication*: The entity should use event sourcing to store its state as a
-  log of change events.
-
-### value
-* *Arguments*: None
-* *Implication*: The entity should store only its latest value without using 
-  event sourcing.
-
-### transient
-* *Arguments*: None
-* *Implication*: The entity should not persist its state at all and is only  
-  available in transient memory. All entity values will be lost when the 
-  service is stopped.
-
-### aggregate
-* *Arguments*: None
-* *Implication*: The entity is an aggregate root entity through which all 
-  commands and queries are sent on behalf of the aggregated entities.
-
-### consistent
-* *Arguments*: None
-* *Implication*: The entity's implementation should favor consistency over
-  availability in [Eric Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
-  [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem).
-
-### available
-* *Arguments*: None
-* *Implication*: The entity's implementation should favor availability over
-  consistency in [Eric Brewer's](../introduction/who-made-riddl-possible.md#eric-brewer)
-  [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). 
+* *Implications*: Replay may start from a snapshot rather than from the
+  beginning of the log. Says only *whether*, never how often. Legal only on an
+  `event-sourced` entity; elsewhere it is an Error. Its absence means "replay
+  the whole log", and that is a real choice too. See
+  [`option is snapshots`](../guides/authors/authoring-riddl.md#option-is-snapshots).
 
 ### finite-state-machine
 * *Arguments*: None

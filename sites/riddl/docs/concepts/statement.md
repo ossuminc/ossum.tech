@@ -415,6 +415,8 @@ ambient scope cannot supply.
     than state, and `put` writes to an [output](output.md). None of them can
     leave this definition half-changed, so none has to wait for the refusals —
     which is what makes "refuse **and** publish a rejection event" expressible.
+    A transmission issued before a refusal is **delivered**: the refusal does
+    not recall it.
 
     Each statement list is checked independently, so each branch of a `when`,
     `match` or `foreach` body is its own list. A refusal after an effect in the

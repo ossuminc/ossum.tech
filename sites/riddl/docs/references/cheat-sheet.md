@@ -795,7 +795,8 @@ The message operand may be a bare reference or an inline constructor.
 
     `send`, `tell` and `yield` are transmissions, `become` changes behaviour,
     and `put` writes to an output — none can leave this definition
-    half-changed, so none of them is an effect for this rule.
+    half-changed, so none of them is an effect for this rule. A transmission
+    issued before a refusal is **delivered**; the refusal does not recall it.
 
 !!! warning "`error` and `terminate` end their block"
     A statement after either is unreachable and is an **Error**. `require` is

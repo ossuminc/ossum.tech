@@ -565,6 +565,11 @@ Both `error` and `require` count as refusals. A refusing clause that yields the
 *wrong* event is still an error — the exemption excuses silence, not a
 mismatch.
 
+A refusal does not undo what the clause already **sent**. A `send`, `tell`,
+`yield` or `put` before the `error` is delivered. So "publish a rejection
+event, then refuse" really does publish the event. See
+[Refusals Before Effects](../../references/language-reference.md#refusals-before-effects).
+
 ---
 
 ## Handler Statements

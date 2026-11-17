@@ -281,6 +281,12 @@ Lexer check: clean, `create` was already a keyword.
   `external context`, so prose contradicts the code beside it.
 - **DONE 2026-11-17 (with S2).** **S6. `cheat-sheet.md:405`** gives streamlet syntax as
   `processor OrderEnricher as flow is { ... }`.
+- **DONE 2026-11-17.** **S8. `concepts/entity.md` § Options taught the six
+  entity intentions as options** (found while doing M6, missed by the delta).
+  `event-sourced`/`value`/`transient`/`aggregate`/`consistent`/`available`
+  are `entity-option-to-intention` deprecations since 2.0, and `value` is
+  `persistent`. The page now has an Intentions section, and `option is
+  snapshots` is added to Options.
 - **S7. = BACKLOG 6** (`tell event … to entity`, 2.5.0 routing).
 
 ### Missing — the language has it, the site does not
@@ -295,23 +301,23 @@ Lexer check: clean, `create` was already a keyword.
   `streamlet X`. Nowhere on the site. Also re-read
   `language-reference.md:1900` ("every processor reference is keyword-led")
   in that light.
-- **M3. A transmission before a refusal is delivered** (CM §0.3 ruling 3,
+- **DONE 2026-11-17.** **M3. A transmission before a refusal is delivered** (CM §0.3 ruling 3,
   2026-11-16): the refusal does not recall a prior `send`/`tell`/`yield`/
   `put`. Add to the "Refusals before effects" boxes (`cheat-sheet.md:787`,
   language reference) and `guides/authors/authoring-riddl.md:564`.
 - **DONE 2026-11-17.** **M4. Creation runs `on init`, never `on activate`** (CM §4.5/§13.7,
   2026-11-16). `language-reference.md:1059`, `concepts/onclause.md:41`.
-- **M5. Both legs of an `ask` must be wired** (CM §40.7, 2026-09-10;
+- **DONE 2026-11-17.** **M5. Both legs of an `ask` must be wired** (CM §40.7, 2026-09-10;
   `msg-ask-target-unreachable` Error, `msg-ask-reply-unreachable`, 2.2.0).
   Language reference § Ask says nothing about connectors. Probe severity of
   the reply-leg rule before writing it.
-- **M6. Journal-shape diagnostics** (CM 2026-09-12, 2.2.0):
+- **DONE 2026-11-17.** **M6. Journal-shape diagnostics** (CM 2026-09-12, 2.2.0):
   `entity-event-sourced-unread-history`,
   `entity-crud-with-transitions-consumed`,
   `entity-event-sourced-snapshot-events`. When event sourcing buys nothing,
   and when a CRUD entity's history is being consumed. Event-sourcing
   section of the language reference / `concepts/entity.md`. Probe severity.
-- **M7. Two authoring lints** (CM B6/B8, 2.3.0): `stmt-yield-argument-prompt`
+- **DONE 2026-11-17.** **M7. Two authoring lints** (CM B6/B8, 2.3.0): `stmt-yield-argument-prompt`
   (Advisory — a yielded field is usually a value the handler already has)
   and `stmt-do-validates-a-range` (a `do` that validates a range in prose
   should be a range/enumeration/pattern TYPE). § yield and § do.
