@@ -242,8 +242,9 @@ repository KitchenTicketRepository as merge is {
 
 The index on `currentStation` enables the kitchen display to quickly filter
 tickets by station — the grill station only sees grill tickets. A repository
-that answers queries and declares no index at all draws a warning, because it
-is a sequential scan by construction.
+that answers queries and declares no index at all draws a warning
+(`repo-queried-without-index`), because it is a sequential scan by
+construction.
 
 ## Projector: KitchenDisplay
 

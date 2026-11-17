@@ -43,6 +43,12 @@ and `on passivate` bracket each *residency*: an entity that is evicted from
 memory and later rehydrated passivates and activates repeatedly without ever
 being initialized or terminated again.
 
+A handler holds **at most one** each of `on init`, `on term`, `on activate`,
+`on passivate` and `on other`. A second is an Error
+(`handler-duplicate-special-clause`): a handler has one construction, one
+termination, one residual-message policy. Branch inside the one clause when
+several outcomes are needed.
+
 A new instance runs **`on init` only**. A [`create`](value.md#create) puts it in
 memory, but that is not an activation — `on activate` is reserved for an
 instance that already existed and is coming back.

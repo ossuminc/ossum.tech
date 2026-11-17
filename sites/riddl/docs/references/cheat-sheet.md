@@ -286,12 +286,15 @@ contexts.
 
 - Defines a `schema` (flat, relational, time-series, graphical,
   hierarchical, star, document, columnar, vector, other)
-- Handlers typically react to events and persist data
+- Handlers take **commands** (writes) and **queries** (reads), never events:
+  an inlet carrying an event is an **Error** (`repo-inlet-carries-event`), an
+  `on event` clause a Warning (`handler-repository-handles-events`)
 - Usually paired with a Projector for CQRS read-side writes
 - A repository's **reach** is the set of contexts owning the messages its
   `on` clauses handle. A domain-scoped repository reaching only one context
-  is an **Error**; a context-scoped one reaching another context draws a
-  **CompletenessWarning** suggesting promotion.
+  is an **Error** (`repo-domain-scope-misplaced`); a context-scoped one
+  reaching another context draws a **CompletenessWarning**
+  (`repo-handles-foreign-contexts`) suggesting promotion.
 
 > *[For more details →](../concepts/repository.md)*
 

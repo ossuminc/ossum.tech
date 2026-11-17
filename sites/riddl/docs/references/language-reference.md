@@ -1093,6 +1093,10 @@ that match specific message kinds and execute statements.
 | `on quiescence <window>` | Execute when nothing arrived for the window | `on quiescence "PT30M" { ... }` |
 | `on other` | Handle any unmatched message | `on other { ... }` |
 
+A handler takes **at most one** each of `on init`, `on term`, `on activate`,
+`on passivate` and `on other`; a second is the Error
+`handler-duplicate-special-clause`. Branch inside the one clause instead.
+
 `on init` and `on term` are once-ever lifecycle events. `on activate` and
 `on passivate` fire on every rehydration and eviction, are **entity-only**, and
 must be side-effect free: `send`, `tell`, `yield`, `morph` and `become` are
@@ -1809,6 +1813,11 @@ On an **empty** collection, `all of` is **true** and `any of` is **false** —
 the usual reading of "every element satisfies it" when there are no elements.
 `none of` is likewise true.
 
+Every one of these forms — the quantifiers, a filter, `count of` and
+`contains` — needs a collection: a `T*` or `T+` field, a `set of`,
+`sequence of`, mapping or table. Anything else, such as a `String`, is the
+Error `value-not-a-collection`.
+
 Dropping the quantifier gives a **filter**, whose value is the matching
 elements rather than a boolean:
 
@@ -2376,6 +2385,20 @@ nothing matches.
 `upsert` requires the schema to declare a `key on` a field of the stored
 record: without a key there is no definition of "the same row", so there is
 nothing for it to replace.
+
+!!! warning "Validation"
+    Each is an **Error**:
+
+    - `query` outside a repository: `value-query-outside-repository`. Ask the
+      repository instead (`ask query … of repository …`).
+    - A table name that is not a data entry of a schema in scope:
+      `repo-table-not-in-schema`.
+    - `store` or `upsert` of a value that is not the record the table stores:
+      `stmt-store-value-not-table-record`.
+    - `update … set f = v` where `f` is not a field of that record:
+      `stmt-update-field-not-in-row`.
+    - `upsert` into a table whose schema has no `key on` a field of its
+      record: `stmt-upsert-needs-key`.
 
 ### Ask
 
@@ -3126,22 +3149,38 @@ Repositories define persistence:
 // `record Cart` here, not the page's `entity Cart`: a schema stores DATA.
 record CartLine is { id: ProductId, quantity: Natural }
 record Cart is { items: many CartLine }
+command SaveCart is { cart: Cart }
 
 repository CartRepository is {
   schema CartData is relational of
     cart as record Cart
     link cartItems as field Cart.items.id to field Product.id
 
+  inlet Saves is command SaveCart
+
   handler CartRepositoryHandler is {
-    on event CartCreated {
-      do "Persist the new cart record to the database"
+    on save: command SaveCart {
+      store save.cart in CartData.cart
     }
-    on other { error "Unrecognized message" }
   }
 } with {
   briefly as "Persistent storage for shopping cart data"
 }
 ```
+
+A repository is changed by **commands** and read by **queries**, never by
+events. An event that should be stored is first turned into a command by
+whatever handles it — usually a [projector](#projectors) or an entity.
+
+!!! warning "Validation"
+    - **Error** (`repo-inlet-carries-event`): an inlet whose type is, or
+      includes, an event.
+    - **Warning** (`handler-repository-handles-events`): an `on event` clause
+      in a repository's handler.
+    - **Warning** (`repo-no-commands-or-queries`): handlers that take no
+      command and no query at all.
+    - **Missing** (`repo-no-handler`): a repository with content but no
+      handler.
 
 ### Schema Clauses
 
@@ -3172,12 +3211,29 @@ repository TicketStore is {
 says no two stored rows may share its value, which is what gives `upsert` its
 meaning of "the same row". A keyed schema counts as indexed on that field, so
 there is no need to write both for one field. There are no **composite** keys:
-a key names exactly one field of the stored record.
+a key names exactly one field of the stored record. A key on a field of some
+record the schema does *not* store is the Error
+`repo-schema-key-not-stored-field`.
 
 `with history` asks the generator for an append-only history of the table —
 every version retained rather than each write overwriting the last. It states
 the *requirement*, not the mechanism: whether that becomes a temporal table, an
 audit sidecar or an event log is the generator's choice.
+
+!!! info "What riddlc checks about a schema's kind"
+    The kind is suggestive, not a storage engine, but a few shapes contradict
+    it. Each is a **Warning**:
+
+    | Kind | Warned when | Rule id |
+    |------|-------------|---------|
+    | `flat` | more than one data entry | `repo-flat-schema-many-nodes` |
+    | `flat`, `document`, `columnar`, `vector` | any `link` | `repo-schema-should-not-have-links` |
+    | `vector` | more than one data entry | `repo-vector-many-nodes` |
+    | `time-series` | no `index on` | `repo-time-series-no-indices` |
+    | `relational` | several data entries, no links | `repo-relational-no-links` |
+    | `hierarchical` | several data entries, no links | `repo-hierarchical-no-links` |
+    | `star` | several data entries, no links | `repo-star-no-links` |
+    | `graphical` | data but no links | `repo-graph-no-links` |
 
 ### Repositories at Domain Scope
 
@@ -3189,10 +3245,12 @@ than in a Context.
     A repository's **reach** is the set of contexts owning the messages its
     `on` clauses handle.
 
-    - **Error**: a domain-scoped repository reaching only ONE context. It is
-      provably unnecessary at domain scope — move it into that context.
-    - **CompletenessWarning**: a context-scoped repository reaching another
-      context. Consider promoting it to domain scope.
+    - **Error** (`repo-domain-scope-misplaced`): a domain-scoped repository
+      reaching only ONE context. It is provably unnecessary at domain scope —
+      move it into that context.
+    - **CompletenessWarning** (`repo-handles-foreign-contexts`): a
+      context-scoped repository reaching another context. Consider promoting
+      it to domain scope.
 
 ## Adaptors
 

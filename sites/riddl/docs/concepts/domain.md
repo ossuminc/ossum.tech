@@ -42,7 +42,8 @@ because they *span* the contexts beneath it:
 - A [Connector](connector.md) whose two ends are ports in different contexts
 
 Both are validated for correct scope. A domain-scoped repository that reaches
-only one context is an **Error** — it is provably unnecessary there. A
+only one context is an **Error** (`repo-domain-scope-misplaced`) — it is
+provably unnecessary there. A
 context-scoped connector whose ends cross contexts is likewise an Error, and so
 is the reverse.
 

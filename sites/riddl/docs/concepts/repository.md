@@ -28,7 +28,12 @@ are related, and a set of indices defines which fields the database indexes.
 A repository may define multiple schemas, each with its own _kind_. The kind of
 schema may be: flat, relational, time-series, graphical, hierarchical, star, 
 document, columnar, vector, or other. These are only suggestive of the kind of
-storage layout the repository uses. 
+storage layout the repository uses — but riddlc warns about a few shapes that
+contradict the kind, such as a `graphical` schema with no links
+(`repo-graph-no-links`) or a `flat` one with several data entries
+(`repo-flat-schema-many-nodes`). The
+[language reference](../references/language-reference.md#schema-clauses) lists
+all eight.
 
 <!-- riddl: in-context -->
 ```riddl
@@ -42,8 +47,8 @@ repository CartRepository is {
 
 !!! warning "A queried repository with no index at all"
     A repository that answers `on query` clauses but whose schemas declare **no
-    index** draws a **CompletenessWarning**: a store queried without any index
-    is a sequential scan by construction.
+    index** draws a **CompletenessWarning** (`repo-queried-without-index`): a
+    store queried without any index is a sequential scan by construction.
 
     It is a warning and not an Error because the model may be under-specified
     rather than self-contradictory — the author may know the table is small. It
@@ -82,6 +87,13 @@ repository are updates to the repository. The handler should define how the
 update works and may optionally yield an
 [Event message](message.md#event) but generally that is
 handled at a higher level of abstraction. 
+
+A repository is never changed by an **event**. An inlet that carries one is
+an Error (`repo-inlet-carries-event`), and an `on event` clause draws a
+Warning (`handler-repository-handles-events`). Have a
+[projector](projector.md) or an entity turn the event into a command and send
+that. A repository with content but no handler at all draws
+`repo-no-handler`.
 
 ## Ordering and Concurrency
 
@@ -170,12 +182,14 @@ domain Commerce is {
     A repository's **reach** is the set of contexts owning the messages its
     `on` clauses handle.
 
-    - **Error** — a domain-scoped repository reaching only ONE context. It is
+    - **Error** (`repo-domain-scope-misplaced`) — a domain-scoped repository
+      reaching only ONE context. It is
       provably unnecessary at domain scope; move it into that context. Zero
       resolvable contexts means an incomplete model rather than proof, so that
       draws nothing.
-    - **CompletenessWarning** — a context-scoped repository reaching another
-      context. Consider promoting it to domain scope.
+    - **CompletenessWarning** (`repo-handles-foreign-contexts`) — a
+      context-scoped repository reaching another context. Consider promoting
+      it to domain scope.
 
 ## Options
 
