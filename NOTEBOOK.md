@@ -35,10 +35,6 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **BACKLOG 7a–7c**: a `--fix` table cell owed at riddl's next release, the D1
 deferral, and three riddl reports.
 
-**The audit's commits are held unpushed until Reid confirms** (2026-11-17).
-He said to push once the audit was finished, and it now is, but a push
-deploys the site. `git status` gives the count.
-
 **A deprecated spelling lasts until the NEXT MAJOR** (Reid, 2026-11-17).
 "Removed in 3.0" is correct. riddl has since reworded its "forever" rule
 (`42f582ccc`), and Reid ruled that API and binary compatibility follow the
