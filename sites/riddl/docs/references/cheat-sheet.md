@@ -402,14 +402,15 @@ transformation, filtering, merging, or routing stages.
 **Lives in**: Context, or any other processor body.
 **Contains**: Inlet, Outlet, plus all processor contents.
 
-**Syntax**: `processor OrderEnricher as flow is { ... }`
+**Syntax**: `streamlet OrderEnricher as flow is { ... }`. The keyword was
+`processor` before 2.1; that spelling is deprecated (`stream-processor-keyword`).
 
 See [Streaming Shapes](#streaming-shapes) for the arity table.
 
 !!! warning "Deprecated shape keywords"
     `source`, `sink`, `flow`, `merge`, `split` and `router` as standalone
-    keywords still parse but emit a `[deprecated]` message. Write
-    `processor <id> as <shape>` instead.
+    keywords still parse but emit a `[deprecated]` message (`shape-keyword`).
+    Write `streamlet <id> as <shape>` instead.
 
 > *[For more details →](../concepts/streamlet.md)*
 

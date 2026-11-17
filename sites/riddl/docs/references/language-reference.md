@@ -302,8 +302,9 @@ suppressible **StyleWarning** nudging you to say what you meant.
 
 !!! warning "Deprecated shape keywords"
     The dedicated keywords `source`, `sink`, `flow`, `merge`, `split` and
-    `router` still parse but emit a `[deprecated]` message. Write
-    `processor <id> as <shape>` instead. They are slated for removal in 3.0.
+    `router` still parse but emit a `[deprecated]` message (`shape-keyword`).
+    Write `streamlet <id> as <shape>` instead; `riddlc prettify` does it for
+    you. They are slated for removal in 3.0.
 
 ### Domain Hierarchy
 
@@ -3973,14 +3974,30 @@ domain ShopifyCart is {
 Everything below still parses in 2.x and emits a `[deprecated]` message. All of
 it is slated for removal in 3.0.
 
-| Deprecated | Replacement |
-|------------|-------------|
-| `source`/`sink`/`flow`/`merge`/`split`/`router` keywords | `processor <id> as <shape>` |
-| `prompt "..."` statement | `do "..."` |
-| `Abstract` type | `Anything` |
-| `state X is record R`, or no introducer at all | `state X of record R` |
-| `when "a natural-language condition"` | `when prompt("…")` |
-| `send … to inlet X` | `send … to outlet Y`, or `tell` |
-| anonymous nebula (top-level definitions with no wrapper) | `module <Name> is { … }` |
-| `option is gateway`/`service`/`external`/`wrapper` | the context intention prefix |
-| `requires { … }` inline aggregation | `requires <TypeRef>` |
+| Deprecated | Write instead | Rule id | Fixed by |
+|------------|---------------|---------|----------|
+| `processor P is { … }` | `streamlet P is { … }` | `stream-processor-keyword` | `--fix`, prettify |
+| `source`/`sink`/`flow`/`merge`/`split`/`router` as keywords | `streamlet <id> as <shape>` | `shape-keyword` | prettify |
+| `initiate entity E` | `create entity E` | `value-initiate-keyword` | `--fix`, prettify |
+| `prompt "..."` statement | `do "..."` | `prompt-statement` | `--fix`, prettify |
+| `Abstract` | `Anything` | `abstract-type` | `--fix`, prettify |
+| a quoted numeric constant, `= "5"` | `= 5` | `quoted-constant-literal` | `--fix`, prettify |
+| `reference to entity E` | `Id(entity E)` | `type-reference-to-is-id` | prettify |
+| `type C is command { … }` (any message kind) | `command C is { … }` | `type-first-aggregate` | prettify |
+| `state X is record R`, or no introducer | `state X of record R` | `state-is-record` | prettify |
+| entity `option is event-sourced`/`aggregate`/`transient`/`consistent`/`available` | that word before `entity` | `entity-option-to-intention` | prettify |
+| entity `option is value` | `persistent` before `entity` (renamed) | `entity-option-to-intention` | prettify |
+| connector `option persistent`/`at-least-once`/`at-most-once`/`exactly-once` | that word before `connector` | `connector-option-to-intention` | prettify |
+| context `option is gateway`/`service`/`external` | that word before `context` | `opt-deprecated` | by hand |
+| context `option is wrapper` | an [adaptor](../concepts/adaptor.md) | `opt-deprecated` | by hand |
+| `option is package` | `option is namespace` | `opt-deprecated` | by hand |
+| `when "a natural-language condition"` | `when prompt("…")`, or a boolean expression | `bare-string-condition` | by hand |
+| `send … to inlet X` | `send … to outlet Y`, or `tell` | `send-to-inlet` | by hand |
+| `requires { … }` / `returns { … }` inline aggregation | `requires <TypeRef>` / `returns <TypeRef>` | `func-inline-aggregation` | by hand |
+| `one of { A }`, an alternation of one | a second alternative, or `A` itself | `single-alternation` | by hand |
+| an anonymous *nebula* (definitions with no wrapper) | `module <Name> is { … }` | `anonymous-nebula` | by hand |
+
+**Fixed by** says what migrates it mechanically. `--fix` is `riddlc validate --fix`, which
+rewrites the file in place; prettify is `riddlc prettify`, which writes a normalized copy.
+"By hand" means neither does: the replacement needs a judgement the tool cannot make. Checked
+against riddlc 2.7.0.

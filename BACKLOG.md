@@ -252,7 +252,7 @@ Lexer check: clean, `create` was already a keyword.
   `concepts/value.md`, `concepts/onclause.md`,
   `references/language-reference.md`, `references/cheat-sheet.md`,
   `introduction/what-is-riddl-based-on.md`.
-- **S2. Both deprecation tables recommend a deprecated spelling.**
+- **DONE 2026-11-17.** **S2. Both deprecation tables recommend a deprecated spelling.**
   `language-reference.md` § Deprecated Constructs and
   `migration/1.x-to-2.0.md` § 2 say shape keywords → `processor <id> as
   <shape>`. `processor` itself is deprecated (`stream-processor-keyword`,
@@ -264,7 +264,7 @@ Lexer check: clean, `create` was already a keyword.
   onward") is what is wrong, and the grammar/RuleId comments that repeat it
   ("keeps parsing forever", "goes on parsing indefinitely"). Reported to
   riddl as R4. Keep "removed in 3.0" wording when rewriting the tables (S4).
-- **S4. Both deprecation tables are incomplete.** RuleId has 18 deprecation
+- **DONE 2026-11-17.** **S4. Both deprecation tables are incomplete.** RuleId has 18 deprecation
   emitters. Missing from the language-reference table: `processor` →
   `streamlet`, `initiate` → `create`, `reference to entity X` →
   `Id(entity X)`, entity options → intentions, connector
@@ -279,7 +279,7 @@ Lexer check: clean, `create` was already a keyword.
   `tutorials/rbbq/patterns.md:335,390`,
   `tutorials/rbbq/backoffice/index.md:86`. Its own fences already write
   `external context`, so prose contradicts the code beside it.
-- **S6. `cheat-sheet.md:405`** gives streamlet syntax as
+- **DONE 2026-11-17 (with S2).** **S6. `cheat-sheet.md:405`** gives streamlet syntax as
   `processor OrderEnricher as flow is { ... }`.
 - **S7. = BACKLOG 6** (`tell event … to entity`, 2.5.0 routing).
 

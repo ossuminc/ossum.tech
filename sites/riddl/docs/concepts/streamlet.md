@@ -68,9 +68,10 @@ streamlet TemperatureProcessor as split is {
 
 !!! warning "The dedicated shape keywords are deprecated"
     `source`, `sink`, `flow`, `merge`, `split` and `router` still parse as
-    standalone keywords, but each emits a `[deprecated]` message telling you to
-    write `processor <id> as <keyword>` instead. They are slated for removal in
-    3.0. Prettified output normalizes them, so running `riddlc prettify` over a
+    standalone keywords, but each emits a `[deprecated]` message
+    (`shape-keyword`) telling you to write `streamlet <id> as <keyword>`
+    instead. They are slated for removal in 3.0. `riddlc validate --fix` cannot
+    rewrite them, but `riddlc prettify` normalizes them, so running it over a
     1.x model migrates them for you.
 
 ## Sources
