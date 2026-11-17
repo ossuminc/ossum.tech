@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -2645,6 +2645,34 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ordering-and-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordering and Concurrency
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ordering and Concurrency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-available-the-cap-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        option available: the CAP choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5400,6 +5428,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ordering-and-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordering and Concurrency
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ordering and Concurrency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-available-the-cap-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        option available: the CAP choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#repositories-at-domain-scope" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5540,18 +5596,92 @@ repository are updates to the repository. The handler should define how the
 update works and may optionally yield an
 <a href="../message/#event">Event message</a> but generally that is
 handled at a higher level of abstraction. </p>
+<h2 id="ordering-and-concurrency">Ordering and Concurrency<a class="headerlink" href="#ordering-and-concurrency" title="Permanent link">&para;</a></h2>
+<p>A repository is a <a href="../processor/">processor</a>, so it handles messages one at a
+time — but the "one" is an <strong>entity</strong>, not the whole repository.</p>
+<ul>
+<li><strong>Queries always run concurrently.</strong> They change nothing, so the worst a
+  concurrent read can do is see slightly old data, and the cure for that is to
+  ask again.</li>
+<li><strong>Writes about ONE entity are applied one at a time, in arrival order.</strong> The
+  create happens before the updates, and two updates to the same order never
+  interleave.</li>
+<li><strong>Writes about DIFFERENT entities run concurrently.</strong> There is <strong>no total
+  order</strong> across a repository. An implementation that serializes every write
+  is not being more careful; it is imposing an order the model never asked
+  for, and charging every unrelated write for it.</li>
+</ul>
+<p>A write names its entity by the <strong>first field of its message typed
+<a href="../type/"><code>Id(entity E)</code></a></strong>. If a message carries several such fields, the
+first one declared decides which entity's sequence the write joins. A write
+message carrying none names no entity and so has no order at all. A code
+generator should say so rather than quietly pick one.</p>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">entity</span> <span class="n">Customer</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// Ordered with the other writes about the same `order`. `customer` is also</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">// an Id, but it comes second, so it does not decide the ordering.</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">command</span> <span class="n">RecordShipment</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  <span class="n">order</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="kd">entity</span> <span class="n">Order</span><span class="p">),</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  <span class="n">customer</span><span class="p">:</span> <span class="nb">Id</span><span class="p">(</span><span class="kd">entity</span> <span class="n">Customer</span><span class="p">),</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  <span class="n">carrier</span><span class="p">:</span> <span class="nb">String</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="option-available-the-cap-choice"><code>option available</code>: the CAP choice<a class="headerlink" href="#option-available-the-cap-choice" title="Permanent link">&para;</a></h3>
+<p>A distributed store cannot be consistent, available and partition-tolerant all
+at once — that is the CAP theorem. Partitions happen whether you plan for them
+or not, so the real choice is what to give up <strong>while one is in progress</strong>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>During a partition</th>
+<th>Write ordering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default</td>
+<td>Stays consistent — may refuse or delay a write it cannot order</td>
+<td>Per entity, as above</td>
+</tr>
+<tr>
+<td><code>option available</code></td>
+<td>Keeps operating — gives up consistency</td>
+<td>Whatever the storage engine's transactions provide</td>
+</tr>
+</tbody>
+</table>
+<p>An <code>available</code> repository asks its implementation to aim for <strong>continuous
+operation</strong>: handle failures where they happen, and restart only when there
+is truly no alternative. The <a href="../entity/">entity</a> option of the same name makes
+the same choice for an entity.</p>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">repository</span> <span class="n">Clickstream</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kr">option</span> <span class="kp">is</span> <span class="no">available</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kr">briefly</span> <span class="kp">as</span> <span class="s2">"Losing order between visits beats losing the visits"</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">This is a ruling for implementations</p>
+<p>riddlc does not check any of this; none of it changed validation. It is
+what RIDDL's computational model requires of anything that <em>generates</em> a
+repository from a model, as clarified with the 2.6.0 release. A generator must keep per-entity ordering under the default
+and must not invent a total order across entities.</p>
+</div>
 <h2 id="repositories-at-domain-scope">Repositories at Domain Scope<a class="headerlink" href="#repositories-at-domain-scope" title="Permanent link">&para;</a></h2>
 <p>A repository normally lives in a <a href="../context/">Context</a>. But a repository that
 <strong>synthesizes</strong> messages from entities across several contexts, and is queried
 by several contexts, belongs to the <a href="../domain/">Domain</a> instead — putting it
 inside any one context would misrepresent who owns it.</p>
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">domain</span> <span class="n">Commerce</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="kd">repository</span> <span class="n">SalesData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>   <span class="c1">// reaches Orders, Catalog and Shipping</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="kd">context</span> <span class="n">Orders</span>   <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">context</span> <span class="n">Catalog</span>  <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="kd">context</span> <span class="n">Shipping</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">domain</span> <span class="n">Commerce</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">repository</span> <span class="n">SalesData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>   <span class="c1">// reaches Orders, Catalog and Shipping</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="kd">context</span> <span class="n">Orders</span>   <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  <span class="kd">context</span> <span class="n">Catalog</span>  <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="kd">context</span> <span class="n">Shipping</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Scope validation</p>
@@ -5568,8 +5698,10 @@ inside any one context would misrepresent who owns it.</p>
 </div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <p><code>transient</code> marks a repository whose contents are not durably persisted — a
-cache-like store. <code>batch</code> (1 argument), <code>microservice</code> and <code>protocol</code> are also
-available.</p>
+cache-like store. <code>available</code> and <code>consistent</code> choose a side of the CAP
+trade-off, as <a href="#option-available-the-cap-choice">described above</a>; <code>consistent</code>
+is the default and need not be written. <code>batch</code> (1 argument), <code>microservice</code>
+and <code>protocol</code> are also accepted.</p>
 <h2 id="occurs-in">Occurs In<a class="headerlink" href="#occurs-in" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../context/">Context</a></li>
@@ -5784,10 +5916,10 @@ available.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -5644,6 +5644,9 @@ the message and the sender of any statements that send messages.</p>
 and <code>on passivate</code> bracket each <em>residency</em>: an entity that is evicted from
 memory and later rehydrated passivates and activates repeatedly without ever
 being initialized or terminated again.</p>
+<p>A new instance runs <strong><code>on init</code> only</strong>. A <a href="../value/#create"><code>create</code></a> puts it in
+memory, but that is not an activation — <code>on activate</code> is reserved for an
+instance that already existed and is coming back.</p>
 <!-- riddl: in-entity -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="k">on</span> <span class="kr">init</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">"load configuration"</span> <span class="p">}</span>
@@ -5696,7 +5699,7 @@ projector, repository or streamlet. Two rules bound it:</p>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Unlike <code>on activate</code> and <code>on passivate</code>, this is an effect block</p>
-<p><code>yield</code>, <code>tell</code>, <code>send</code>, <code>terminate</code>, <code>morph</code> and <code>initiate</code> are all legal
+<p><code>yield</code>, <code>tell</code>, <code>send</code>, <code>terminate</code>, <code>morph</code> and <code>create</code> are all legal
 inside <code>on quiescence</code>. Timing out is a real business event — a cart is
 abandoned, a session expires — and saying so usually means emitting
 something.</p>
@@ -5998,10 +6001,10 @@ clause's metadata.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

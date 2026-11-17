@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -5573,6 +5573,11 @@ drawing that spurious warning.</p>
 <td style="text-align: center;">1</td>
 <td>Backstage catalog generation hints</td>
 </tr>
+<tr>
+<td><code>message_envelope</code></td>
+<td style="text-align: center;">1</td>
+<td>Names the envelope a generator wraps messages in</td>
+</tr>
 </tbody>
 </table>
 <h3 id="options-by-definition-kind">Options By Definition Kind<a class="headerlink" href="#options-by-definition-kind" title="Permanent link">&para;</a></h3>
@@ -5586,31 +5591,31 @@ drawing that spurious warning.</p>
 <tbody>
 <tr>
 <td><a href="../entity/">Entity</a></td>
-<td><code>aggregate</code>, <code>auto-id</code>, <code>available</code>, <code>consistent</code>, <code>event-sourced</code>, <code>finite-state-machine</code>, <code>message-queue</code>, <code>transient</code>, <code>value</code>, <code>bulkhead</code>, <code>microservice</code>, <code>protocol</code>, <code>rate-limit</code></td>
+<td><code>auto-id</code>, <code>bulkhead</code>, <code>finite-state-machine</code>, <code>message-queue</code>, <code>microservice</code>, <code>protocol</code>, <code>rate-limit</code>, <code>snapshots</code></td>
 </tr>
 <tr>
 <td><a href="../context/">Context</a></td>
-<td><code>bulkhead</code>, <code>microservice</code>, <code>namespace</code>, <code>package</code>, <code>protocol</code>, plus the deprecated <code>external</code>, <code>gateway</code>, <code>service</code>, <code>wrapper</code></td>
+<td><code>bulkhead</code>, <code>clustered</code>, <code>microservice</code>, <code>namespace</code>, <code>protocol</code></td>
 </tr>
 <tr>
 <td><a href="../domain/">Domain</a></td>
-<td><code>external</code>, <code>namespace</code>, <code>package</code></td>
+<td><code>namespace</code>, <code>confluence_space</code>, <code>confluence_parent</code></td>
 </tr>
 <tr>
 <td><a href="../connector/">Connector</a></td>
-<td><code>persistent</code>, <code>ordered</code>, <code>unordered</code>, <code>partitioned</code>, <code>at-least-once</code>, <code>at-most-once</code>, <code>exactly-once</code>, <code>circuit-breaker</code></td>
+<td><code>ordered</code>, <code>unordered</code>, <code>partitioned</code>, <code>circuit-breaker</code></td>
 </tr>
 <tr>
 <td><a href="../inlet/">Inlet</a></td>
-<td><code>async</code>, <code>ordered</code>, <code>unordered</code></td>
+<td><code>async</code>, <code>ordered</code>, <code>unordered</code>, <code>error-sink</code></td>
 </tr>
 <tr>
 <td><a href="../outlet/">Outlet</a></td>
-<td><code>async</code></td>
+<td><code>async</code>, <code>lowering</code></td>
 </tr>
 <tr>
 <td><a href="../saga/">Saga</a></td>
-<td><code>compensate</code>, <code>parallel</code>, <code>microservice</code>, <code>protocol</code></td>
+<td><code>parallel</code>, <code>timeout</code>, <code>retry</code>, <code>undo-retry</code>, <code>failure-message</code>, <code>microservice</code>, <code>protocol</code></td>
 </tr>
 <tr>
 <td>Saga Step</td>
@@ -5626,19 +5631,19 @@ drawing that spurious warning.</p>
 </tr>
 <tr>
 <td><a href="../adaptor/">Adaptor</a></td>
-<td><code>circuit-breaker</code>, <code>protocol</code></td>
+<td><code>circuit-breaker</code>, <code>clustered</code>, <code>protocol</code></td>
 </tr>
 <tr>
 <td><a href="../projector/">Projector</a></td>
-<td><code>cacheable</code>, <code>batch</code>, <code>microservice</code>, <code>protocol</code></td>
+<td><code>cacheable</code>, <code>batch</code>, <code>clustered</code>, <code>microservice</code>, <code>protocol</code></td>
 </tr>
 <tr>
 <td><a href="../repository/">Repository</a></td>
-<td><code>transient</code>, <code>batch</code>, <code>microservice</code>, <code>protocol</code></td>
+<td><code>transient</code>, <code>available</code>, <code>consistent</code>, <code>batch</code>, <code>clustered</code>, <code>microservice</code>, <code>protocol</code></td>
 </tr>
 <tr>
 <td><a href="../streamlet/">Streamlet</a></td>
-<td><code>protocol</code></td>
+<td><code>clustered</code>, <code>lowering</code>, <code>protocol</code></td>
 </tr>
 <tr>
 <td><a href="../epic/">Epic</a></td>
@@ -5646,14 +5651,30 @@ drawing that spurious warning.</p>
 </tr>
 </tbody>
 </table>
+<p>Every definition also takes the options in the table above. Both tables were
+checked against riddl 2.7.0's option registry.</p>
+<div class="admonition warning">
+<p class="admonition-title">Deprecated options</p>
+<p>These still parse, emit <code>[deprecated]</code>, and are slated for removal in 3.0.
+See <a href="../../references/language-reference/#deprecated-constructs">Deprecated Constructs</a>
+for each one's replacement:</p>
+<ul>
+<li>on an <strong>entity</strong>: <code>aggregate</code>, <code>available</code>, <code>consistent</code>,
+  <code>event-sourced</code>, <code>transient</code>, <code>value</code>. Write them as
+  <a href="../entity/#intentions">intentions</a> before <code>entity</code>.</li>
+<li>on a <strong>connector</strong>: <code>persistent</code>, <code>at-least-once</code>, <code>at-most-once</code>,
+  <code>exactly-once</code>. Write them before <code>connector</code>.</li>
+<li>on a <strong>context</strong>: <code>external</code>, <code>gateway</code>, <code>service</code>, <code>wrapper</code>.</li>
+<li>on a <strong>domain</strong> or <strong>context</strong>: <code>external</code>, and <code>package</code> (use
+  <code>namespace</code>).</li>
+</ul>
+</div>
 <h3 id="notable-options">Notable Options<a class="headerlink" href="#notable-options" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong><code>technology</code></strong> — Names the implementation technologies, adapted from
   <a href="https://www.linkedin.com/in/simonbrownjersey/">Simon Brown's</a>
   <a href="https://c4model.com/#Notation">C4 Model</a>: <code>option is technology("Kafka")</code></li>
 <li><strong><code>auto-id</code></strong> — An entity is assigned a ULID at instantiation</li>
-<li><strong><code>compensate</code></strong> — On failure, a saga runs the accumulated steps' undo
-  blocks in reverse</li>
 <li><strong><code>parallel</code></strong> — A saga's steps all start at once, rather than in sequence.
   A saga is sequential by definition, so <code>parallel</code> declares the exception.</li>
 <li><strong><code>async</code></strong> — Marks a port as a deliberate codegen async boundary, so the
@@ -5898,10 +5919,10 @@ string arguments.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

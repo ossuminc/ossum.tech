@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -5506,7 +5506,7 @@ entity Inventory is { ??? }
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="k">tell</span> <span class="kd">command</span> <span class="n">ReleaseItems</span><span class="p">(</span><span class="n">CheckoutInputs</span><span class="p">.</span><span class="n">orderId</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">entity</span> <span class="n">Inventory</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  <span class="p">}</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">}</span> <span class="kp">with</span> <span class="p">{</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>  <span class="kr">option</span> <span class="kp">is</span> <span class="no">compensate</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>  <span class="kr">option</span> <span class="kp">is</span> <span class="n">timeout</span><span class="p">(</span><span class="s2">"PT5M"</span><span class="p">)</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>A saga must define <strong>at least two</strong> steps — a one-step saga has nothing to
@@ -5521,10 +5521,6 @@ or the reference becomes ambiguous.</p>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>compensate</code></td>
-<td>On failure, run the accumulated steps' undo blocks in reverse</td>
-</tr>
 <tr>
 <td><code>parallel</code></td>
 <td>Start all steps at once; the coordinator gathers results asynchronously. Any one failure compensates in reverse order of the original sends.</td>
@@ -5587,8 +5583,8 @@ compensate in reverse, so it wants a plain handler instead.</p>
 <p class="admonition-title">One failure point per step</p>
 <p>A step's do/undo is all-or-nothing: the compensation assumes all or none
 of the do-block happened. So a step should have <strong>at most one</strong> potential
-failure point, and more than one draws a <strong>Warning</strong> suggesting the step
-be split.</p>
+failure point, and more than one draws a <strong>Warning</strong>
+(<code>saga-step-too-many-fail-points</code>) suggesting the step be split.</p>
 <p><code>send</code>, <code>tell</code>, <code>yield</code> and <code>put</code> can fail, and so can each embedded
 <code>call</code> or <code>get</code> — <code>let x = call F(get from input I)</code> counts as two.</p>
 </div>
@@ -5831,10 +5827,10 @@ functions and includes.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

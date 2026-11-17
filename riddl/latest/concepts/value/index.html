@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -3902,10 +3902,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#initiate" class="md-nav__link">
+  <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Initiate
+        Create
       
     </span>
   </a>
@@ -5677,10 +5677,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#initiate" class="md-nav__link">
+  <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Initiate
+        Create
       
     </span>
   </a>
@@ -5840,9 +5840,9 @@ pseudo-code remains available where structure would be false precision.</p>
 <td>A query paired with the reply that answers it</td>
 </tr>
 <tr>
-<td>Initiate</td>
-<td><code>initiate entity Order</code></td>
-<td>Brings an instance into being; <strong>yields its <code>Id</code></strong></td>
+<td>Create</td>
+<td><code>create entity Order("A-1001")</code></td>
+<td>Brings an instance into being, runs its <code>on init</code>; <strong>yields its <code>Id</code></strong></td>
 </tr>
 <tr>
 <td>Self</td>
@@ -6037,23 +6037,34 @@ type on both sides.</p>
 <p><code>true</code> and <code>false</code> remain valid boolean <em>atoms</em> — usable with <code>and</code>, <code>or</code>,
 <code>not</code>, and standalone — just not as comparison operands.</p>
 </div>
-<h2 id="initiate">Initiate<a class="headerlink" href="#initiate" title="Permanent link">&para;</a></h2>
-<p><code>initiate</code> brings a new instance of an entity into being, and its <strong>value is
+<h2 id="create">Create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p><code>create</code> brings a new instance of an entity into being, and its <strong>value is
 that instance's identity</strong>:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="k">initiate</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="kr">create</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ExampleWelcome</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">fresh</span><span class="p">)</span> <span class="kp">to</span> <span class="n">fresh</span>
 </span></code></pre></div>
-<p>It is not a second way to exist — construction still completes only when
-<code>on init</code> finishes. But without it no <code>Id</code> value could ever come into being,
-so nothing could be addressed.</p>
-<p><code>initiate</code> and <a href="../statement/"><code>terminate</code></a> are <strong>entity-only</strong> and are both
+<p>Creation is two steps with one name. The instance is <strong>created</strong> — given a
+place for its values and an <code>Id</code> — and then <strong>initialized</strong> by its
+<a href="../onclause/"><code>on init</code></a> clause, which receives any arguments you pass:
+<code>create entity Order("A-1001")</code>. Only <code>on init</code> runs; <code>on activate</code> is for an
+instance that already exists coming back into memory, never a new one.</p>
+<p>It is not a second way to exist — construction completes only when <code>on init</code>
+finishes. But without it no <code>Id</code> value could ever come into being, so nothing
+could be addressed.</p>
+<p><code>create</code> and <a href="../statement/"><code>terminate</code></a> are <strong>entity-only</strong> and are both
 <strong>effects</strong>: banned in a function body, in <code>on activate</code>/<code>on passivate</code>, and
 in a correlation fold; legal in a saga step.</p>
 <div class="admonition warning">
 <p class="admonition-title">Discarding the id is a warning</p>
-<p>The id is the only thing <code>initiate</code> produces, so binding it and never
+<p>The id is the only thing <code>create</code> produces, so binding it and never
 using it means the instance was created and immediately made unreachable.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Formerly <code>initiate</code></p>
+<p>Before 2.7.0 this value was spelled <code>initiate</code>. That spelling still
+parses, as a deprecation (<code>value-initiate-keyword</code>) that
+<code>riddlc validate --fix</code> rewrites to <code>create</code>, until 3.0.</p>
 </div>
 <h2 id="self">Self<a class="headerlink" href="#self" title="Permanent link">&para;</a></h2>
 <p><code>self</code> is the instance executing right now. Its type is a <strong>synthesized
@@ -6318,10 +6329,10 @@ arguments, and a boolean expression's operands are all themselves values.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

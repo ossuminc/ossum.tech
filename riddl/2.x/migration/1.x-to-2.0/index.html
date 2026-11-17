@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -6319,66 +6319,144 @@ slated for removal in 3.0.</p>
 <thead>
 <tr>
 <th>Deprecated</th>
-<th>Replacement</th>
+<th>Write instead</th>
+<th>Rule id</th>
+<th>Fixed by</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>source</code>/<code>sink</code>/<code>flow</code>/<code>merge</code>/<code>split</code>/<code>router</code> keywords</td>
-<td><code>processor &lt;id&gt; as &lt;shape&gt;</code></td>
+<td><code>processor P is { … }</code></td>
+<td><code>streamlet P is { … }</code></td>
+<td><code>stream-processor-keyword</code></td>
+<td><code>--fix</code>, prettify</td>
+</tr>
+<tr>
+<td><code>source</code>/<code>sink</code>/<code>flow</code>/<code>merge</code>/<code>split</code>/<code>router</code> as keywords</td>
+<td><code>streamlet &lt;id&gt; as &lt;shape&gt;</code></td>
+<td><code>shape-keyword</code></td>
+<td>prettify</td>
+</tr>
+<tr>
+<td><code>initiate entity E</code></td>
+<td><code>create entity E</code></td>
+<td><code>value-initiate-keyword</code></td>
+<td><code>--fix</code>, prettify</td>
 </tr>
 <tr>
 <td><code>prompt "..."</code> statement</td>
 <td><code>do "..."</code></td>
+<td><code>prompt-statement</code></td>
+<td><code>--fix</code>, prettify</td>
 </tr>
 <tr>
 <td><code>Abstract</code></td>
 <td><code>Anything</code></td>
+<td><code>abstract-type</code></td>
+<td><code>--fix</code>, prettify</td>
+</tr>
+<tr>
+<td>a quoted numeric constant, <code>= "5"</code></td>
+<td><code>= 5</code></td>
+<td><code>quoted-constant-literal</code></td>
+<td><code>--fix</code>, prettify</td>
+</tr>
+<tr>
+<td><code>reference to entity E</code></td>
+<td><code>Id(entity E)</code></td>
+<td><code>type-reference-to-is-id</code></td>
+<td>prettify</td>
+</tr>
+<tr>
+<td><code>type C is command { … }</code> (any message kind)</td>
+<td><code>command C is { … }</code></td>
+<td><code>type-first-aggregate</code></td>
+<td>prettify</td>
 </tr>
 <tr>
 <td><code>state X is record R</code>, or no introducer</td>
 <td><code>state X of record R</code></td>
+<td><code>state-is-record</code></td>
+<td>prettify</td>
 </tr>
 <tr>
-<td><code>when "a natural-language condition"</code></td>
-<td><code>when prompt("…")</code></td>
+<td>entity <code>option is event-sourced</code>/<code>aggregate</code>/<code>transient</code>/<code>consistent</code>/<code>available</code></td>
+<td>that word before <code>entity</code></td>
+<td><code>entity-option-to-intention</code></td>
+<td>prettify</td>
 </tr>
 <tr>
-<td><code>send … to inlet X</code></td>
-<td><code>send … to outlet Y</code>, or <code>tell</code></td>
+<td>entity <code>option is value</code></td>
+<td><code>persistent</code> before <code>entity</code> (renamed)</td>
+<td><code>entity-option-to-intention</code></td>
+<td>prettify</td>
 </tr>
 <tr>
-<td>anonymous nebula</td>
-<td><code>module &lt;Name&gt; is { … }</code></td>
+<td>connector <code>option persistent</code>/<code>at-least-once</code>/<code>at-most-once</code>/<code>exactly-once</code></td>
+<td>that word before <code>connector</code></td>
+<td><code>connector-option-to-intention</code></td>
+<td>prettify</td>
 </tr>
 <tr>
-<td><code>option is gateway</code>/<code>service</code>/<code>external</code>/<code>wrapper</code></td>
-<td>the context intention prefix</td>
+<td>context <code>option is gateway</code>/<code>service</code>/<code>external</code></td>
+<td>that word before <code>context</code></td>
+<td><code>opt-deprecated</code></td>
+<td>by hand</td>
 </tr>
 <tr>
-<td><code>option is event-sourced</code>/<code>aggregate</code>/<code>transient</code>/<code>consistent</code>/<code>available</code></td>
-<td>the <strong>entity</strong> intention prefix</td>
-</tr>
-<tr>
-<td><code>option is value</code> on an entity</td>
-<td><code>persistent</code> before <code>entity</code> (the keyword was renamed)</td>
-</tr>
-<tr>
-<td><code>requires { … }</code> inline aggregation</td>
-<td><code>requires &lt;TypeRef&gt;</code></td>
+<td>context <code>option is wrapper</code></td>
+<td>an <a href="../../concepts/adaptor/">adaptor</a></td>
+<td><code>opt-deprecated</code></td>
+<td>by hand</td>
 </tr>
 <tr>
 <td><code>option is package</code></td>
 <td><code>option is namespace</code></td>
+<td><code>opt-deprecated</code></td>
+<td>by hand</td>
+</tr>
+<tr>
+<td><code>when "a natural-language condition"</code></td>
+<td><code>when prompt("…")</code>, or a boolean expression</td>
+<td><code>bare-string-condition</code></td>
+<td>by hand</td>
+</tr>
+<tr>
+<td><code>send … to inlet X</code></td>
+<td><code>send … to outlet Y</code>, or <code>tell</code></td>
+<td><code>send-to-inlet</code></td>
+<td>by hand</td>
+</tr>
+<tr>
+<td><code>requires { … }</code> / <code>returns { … }</code> inline aggregation</td>
+<td><code>requires &lt;TypeRef&gt;</code> / <code>returns &lt;TypeRef&gt;</code></td>
+<td><code>func-inline-aggregation</code></td>
+<td>by hand</td>
+</tr>
+<tr>
+<td><code>one of { A }</code>, an alternation of one</td>
+<td>a second alternative, or <code>A</code> itself</td>
+<td><code>single-alternation</code></td>
+<td>by hand</td>
+</tr>
+<tr>
+<td>an anonymous <em>nebula</em> (definitions with no wrapper)</td>
+<td><code>module &lt;Name&gt; is { … }</code></td>
+<td><code>anonymous-nebula</code></td>
+<td>by hand</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Fixed by</strong> says what migrates it mechanically. <code>--fix</code> is <code>riddlc validate --fix</code>, which
+rewrites the file in place; prettify is <code>riddlc prettify</code>, which writes a normalized copy.
+"By hand" means neither does: the replacement needs a judgement the tool cannot make. Checked
+against riddlc 2.7.0.</p>
 <div class="admonition tip">
 <p class="admonition-title">Prettify does much of this for you</p>
-<p><code>riddlc prettify</code> normalizes the deprecated shape keywords to
-<code>processor … as …</code>, rewrites <code>prompt</code> to <code>do</code>, and emits <code>Anything</code> for
-<code>Abstract</code>. Running it over a 1.x model performs a good part of this table
-mechanically.</p>
+<p><code>riddlc prettify</code> normalizes every row marked prettify above, so running it
+over a 1.x model performs most of this table mechanically. Validate its
+output afterwards: the rows marked "by hand" still emit <code>[deprecated]</code>, and
+those are the ones left for you.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title"><code>reply</code> is NOT one of them — it went the other way</p>
@@ -6819,10 +6897,10 @@ questions the 1.x model had left unanswered.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

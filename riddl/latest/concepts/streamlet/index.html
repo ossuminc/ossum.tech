@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -2783,6 +2783,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#referring-to-a-streamlet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Referring to a Streamlet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#connecting-processors" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5477,6 +5488,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#referring-to-a-streamlet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Referring to a Streamlet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#connecting-processors" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5691,9 +5713,10 @@ the abstraction kept the older name while the keyword changed.</p>
 <div class="admonition warning">
 <p class="admonition-title">The dedicated shape keywords are deprecated</p>
 <p><code>source</code>, <code>sink</code>, <code>flow</code>, <code>merge</code>, <code>split</code> and <code>router</code> still parse as
-standalone keywords, but each emits a <code>[deprecated]</code> message telling you to
-write <code>processor &lt;id&gt; as &lt;keyword&gt;</code> instead. They are slated for removal in
-3.0. Prettified output normalizes them, so running <code>riddlc prettify</code> over a
+standalone keywords, but each emits a <code>[deprecated]</code> message
+(<code>shape-keyword</code>) telling you to write <code>streamlet &lt;id&gt; as &lt;keyword&gt;</code>
+instead. They are slated for removal in 3.0. <code>riddlc validate --fix</code> cannot
+rewrite them, but <code>riddlc prettify</code> normalizes them, so running it over a
 1.x model migrates them for you.</p>
 </div>
 <h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
@@ -5740,6 +5763,13 @@ send notifications, update external systems, or log and archive data.</p>
 </span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  <span class="p">}</span>
 </span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">}</span>
 </span></code></pre></div>
+<h2 id="referring-to-a-streamlet">Referring to a Streamlet<a class="headerlink" href="#referring-to-a-streamlet" title="Permanent link">&para;</a></h2>
+<p>Elsewhere in a model, such as in a <code>tell</code> or a use-case step, a streamlet is
+named with <code>streamlet</code> or with any shape keyword: <code>tell … to streamlet
+Enricher</code> and <code>tell … to flow Enricher</code> mean the same. Prefer <code>streamlet</code>:
+the keyword is not checked against the shape. And in a use-case step's
+<code>send … from</code>, <code>flow X</code> means a UI <em>group</em>, not a streamlet. See
+<a href="../../references/language-reference/#referring-to-a-streamlet">Referring to a streamlet</a>.</p>
 <h2 id="connecting-processors">Connecting Processors<a class="headerlink" href="#connecting-processors" title="Permanent link">&para;</a></h2>
 <p>Processors are wired together with <a href="../connector/">Connectors</a>, which link an
 outlet to an inlet:</p>
@@ -6055,10 +6085,10 @@ too, and often does — that is how it publishes its events into a stream.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

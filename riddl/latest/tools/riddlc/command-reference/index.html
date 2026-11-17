@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -6427,9 +6427,20 @@ diff and writes nothing.</p>
 <p>Creates a <code>.bast</code> file next to the input file. BAST files can be loaded
 significantly faster than parsing RIDDL source, making them useful for
 large models.</p>
+<div class="admonition warning">
+<p class="admonition-title">A <code>.bast</code> is tied to its format revision</p>
+<p>Each <code>.bast</code> records the BAST format revision it was written with, and
+riddlc reads only its own. riddlc 2.7.0 is revision <strong>31</strong>, so a <code>.bast</code>
+written by 2.6.0 or earlier fails to load with exit status 7:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Invalid BAST file: BAST format revision 30 does not match expected
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>revision 31; regenerate .bast files with the current riddlc
+</span></code></pre></div>
+<p>Re-run <code>bastify</code> on the source after upgrading. A <code>.bast</code> is a cache,
+never a source of truth.</p>
+</div>
 <h3 id="unbastify">unbastify<a class="headerlink" href="#unbastify" title="Permanent link">&para;</a></h3>
 <p>Convert a BAST file back to RIDDL source:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>riddlc<span class="w"> </span>unbastify<span class="w"> </span>input-file.bast<span class="w"> </span>-o<span class="w"> </span>output-dir
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>riddlc<span class="w"> </span>unbastify<span class="w"> </span>input-file.bast<span class="w"> </span>-o<span class="w"> </span>output-dir
 </span></code></pre></div>
 <p>Options:</p>
 <table>
@@ -6460,19 +6471,20 @@ authority; it rejects the call.)</p>
 </div>
 <h3 id="dump">dump<a class="headerlink" href="#dump" title="Permanent link">&para;</a></h3>
 <p>Print the model's AST. With <code>--json</code>, print a flat, machine-readable
-<strong>projection</strong> of it instead — one record per definition, which is what makes
-a model scriptable:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>riddlc<span class="w"> </span>dump<span class="w"> </span>model.riddl<span class="w"> </span>--json
+<strong>projection</strong> of it instead. It holds one record per definition, per
+statement, and, since 2.7.0, per composite value (<code>create</code>, <code>ask</code>, a
+message constructor, …). That is what makes a model scriptable:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>riddlc<span class="w"> </span>dump<span class="w"> </span>model.riddl<span class="w"> </span>--json
 </span></code></pre></div>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"domain"</span><span class="p">,</span>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shop"</span><span class="p">,</span>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">  </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shop"</span><span class="p">,</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">  </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"model.riddl"</span><span class="p">,</span>
-</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">  </span><span class="nt">"span"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"start"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"line"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"col"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">},</span>
-</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">            </span><span class="nt">"end"</span><span class="p">:</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="nt">"line"</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="nt">"offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">610</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
-</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">  </span><span class="nt">"brief"</span><span class="p">:</span><span class="w"> </span><span class="s2">"p"</span>
-</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"domain"</span><span class="p">,</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shop"</span><span class="p">,</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shop"</span><span class="p">,</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">  </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"model.riddl"</span><span class="p">,</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">  </span><span class="nt">"span"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"start"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"line"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"col"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">            </span><span class="nt">"end"</span><span class="p">:</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="nt">"line"</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="nt">"offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">610</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">  </span><span class="nt">"brief"</span><span class="p">:</span><span class="w"> </span><span class="s2">"p"</span>
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="p">}</span>
 </span></code></pre></div>
 <table>
 <thead>
@@ -6506,11 +6518,11 @@ a model scriptable:</p>
 </table>
 <p>Use <code>--jsonl</code> when piping a whole corpus through <code>jq</code> or a script: it streams
 rather than requiring the entire array to be parsed at once.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># --json is one ARRAY, so jq needs `.[]` to iterate it</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>riddlc<span class="w"> </span>dump<span class="w"> </span>model.riddl<span class="w"> </span>--json<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.[] | select(.kind=="entity") | .path'</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># --jsonl is one record per line, so it does not</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>riddlc<span class="w"> </span>dump<span class="w"> </span>model.riddl<span class="w"> </span>--jsonl<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'select(.kind=="entity") | .path'</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># --json is one ARRAY, so jq needs `.[]` to iterate it</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>riddlc<span class="w"> </span>dump<span class="w"> </span>model.riddl<span class="w"> </span>--json<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.[] | select(.kind=="entity") | .path'</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># --jsonl is one record per line, so it does not</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>riddlc<span class="w"> </span>dump<span class="w"> </span>model.riddl<span class="w"> </span>--jsonl<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'select(.kind=="entity") | .path'</span>
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title"><code>dump --json</code> versus <code>find</code></p>
@@ -6523,10 +6535,10 @@ inventory or a report.</p>
 <p>Search a model for definitions, in the manner of Unix <code>find</code>. The expression
 follows a <code>--</code> separator, which keeps riddlc's own options from competing with
 the expression's:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-name<span class="w"> </span><span class="s1">'Order*'</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-name<span class="w"> </span><span class="s1">'Order*'</span>
 </span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>model.riddl:7:5: entity Order is {
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>[info] 1 matched
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>model.riddl:7:5: entity Order is {
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>[info] 1 matched
 </span></code></pre></div>
 <p><code>find</code> operates on the <strong>resolved model</strong>, not on the text, so it sees what the
 compiler sees: a definition's kind, its path, what it carries, whether it is a
@@ -6542,7 +6554,7 @@ stub. That is the difference between it and <code>grep</code>.</p>
 <tbody>
 <tr>
 <td><code>-type &lt;kind&gt;</code></td>
-<td>definitions of that kind — <code>entity</code>, <code>context</code>, <code>command</code>, <code>handler</code>, …</td>
+<td>nodes of that kind: definitions (<code>entity</code>, <code>context</code>, <code>command</code>, <code>handler</code>, …), statements, and since 2.7.0 composite <strong>values</strong> (<code>create</code>, <code>ask</code>, …)</td>
 </tr>
 <tr>
 <td><code>-name &lt;glob&gt;</code></td>
@@ -6622,13 +6634,21 @@ stub. That is the difference between it and <code>grep</code>.</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Values are selectable since 2.7.0.</strong> Before then <code>find</code> visited definitions
+and statements but never a value held inside one, so a search for every
+<code>create</code>, or every <code>ask</code>, matched nothing. Now every composite value is a node
+<code>-type</code> can name. Plain literals and bare value references are not:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>create
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>ask<span class="w"> </span>-location
+</span></code></pre></div>
+<p><code>-type initiate</code> still works and means <code>create</code>.</p>
 <h4 id="combining-them">Combining them<a class="headerlink" href="#combining-them" title="Permanent link">&para;</a></h4>
 <p>Predicates juxtaposed are <strong>and</strong>-ed. <code>-o</code> (or <code>-or</code>) is disjunction, <code>!</code> (or
 <code>-not</code>) negates, and parentheses group — quoted, so the shell does not eat
 them:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-o<span class="w"> </span>-type<span class="w"> </span>event
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span><span class="s1">'('</span><span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-o<span class="w"> </span>-type<span class="w"> </span>context<span class="w"> </span><span class="s1">')'</span><span class="w"> </span>-stub
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span><span class="s1">'!'</span><span class="w"> </span>-name<span class="w"> </span><span class="s1">'Test*'</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-o<span class="w"> </span>-type<span class="w"> </span>event
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span><span class="s1">'('</span><span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-o<span class="w"> </span>-type<span class="w"> </span>context<span class="w"> </span><span class="s1">')'</span><span class="w"> </span>-stub
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span><span class="s1">'!'</span><span class="w"> </span>-name<span class="w"> </span><span class="s1">'Test*'</span>
 </span></code></pre></div>
 <h4 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h4>
 <table>
@@ -6687,8 +6707,8 @@ them:</p>
 </table>
 <p><code>-expect-min</code> is the one worth knowing for CI. It turns a search into an
 assertion:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-expect-min<span class="w"> </span><span class="m">3</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"EXIT=</span><span class="nv">$?</span><span class="s2">"</span><span class="w">     </span><span class="c1"># 7 if fewer than three entities exist</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-expect-min<span class="w"> </span><span class="m">3</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"EXIT=</span><span class="nv">$?</span><span class="s2">"</span><span class="w">     </span><span class="c1"># 7 if fewer than three entities exist</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Check <code>$?</code> directly</p>
@@ -6721,8 +6741,8 @@ and they carry their own safety options:</p>
 </tr>
 </tbody>
 </table>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># See what it would do, first</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-name<span class="w"> </span><span class="s1">'Legacy*'</span><span class="w"> </span>-delete<span class="w"> </span>-dry-run
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># See what it would do, first</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>riddlc<span class="w"> </span>find<span class="w"> </span>model.riddl<span class="w"> </span>--<span class="w"> </span>-type<span class="w"> </span>entity<span class="w"> </span>-name<span class="w"> </span><span class="s1">'Legacy*'</span><span class="w"> </span>-delete<span class="w"> </span>-dry-run
 </span></code></pre></div>
 <div class="admonition danger">
 <p class="admonition-title">Run <code>-dry-run</code> first, and have the file in version control</p>
@@ -6730,7 +6750,7 @@ and they carry their own safety options:</p>
 </div>
 <h3 id="flatten">flatten<a class="headerlink" href="#flatten" title="Permanent link">&para;</a></h3>
 <p>Collapse a multi-file model into a single file:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>riddlc<span class="w"> </span>flatten<span class="w"> </span>input-file.riddl<span class="w"> </span>-o<span class="w"> </span>output-file.riddl
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>riddlc<span class="w"> </span>flatten<span class="w"> </span>input-file.riddl<span class="w"> </span>-o<span class="w"> </span>output-file.riddl
 </span></code></pre></div>
 <p>This removes every <code>include</code> and <code>import</code> node, promoting its children into
 the enclosing container. In RIDDL 2.0 it covers <strong>both</strong>: <code>import</code> nodes from
@@ -6751,17 +6771,17 @@ unflattened model as the source of truth.</p>
 </div>
 <h3 id="stats">stats<a class="headerlink" href="#stats" title="Permanent link">&para;</a></h3>
 <p>Generate statistics about a RIDDL model:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>riddlc<span class="w"> </span>stats<span class="w"> </span>-I<span class="w"> </span>input-file.riddl
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>riddlc<span class="w"> </span>stats<span class="w"> </span>-I<span class="w"> </span>input-file.riddl
 </span></code></pre></div>
 <p>Reports counts of domains, contexts, entities, types, and other definitions.</p>
 <h3 id="from">from<a class="headerlink" href="#from" title="Permanent link">&para;</a></h3>
 <p>Load options from a HOCON configuration file:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>riddlc<span class="w"> </span>from<span class="w"> </span>config-file.conf<span class="w"> </span>target-command
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>riddlc<span class="w"> </span>from<span class="w"> </span>config-file.conf<span class="w"> </span>target-command
 </span></code></pre></div>
 <p>See <a href="../configuration/">Configuration</a> for details on the configuration format.</p>
 <h3 id="repeat">repeat<a class="headerlink" href="#repeat" title="Permanent link">&para;</a></h3>
 <p>Support edit-build-check cycles by repeating a command:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>riddlc<span class="w"> </span>repeat<span class="w"> </span>config-file.conf<span class="w"> </span>target-command<span class="w"> </span><span class="o">[</span>refresh-rate<span class="o">]</span><span class="w"> </span><span class="o">[</span>max-cycles<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>riddlc<span class="w"> </span>repeat<span class="w"> </span>config-file.conf<span class="w"> </span>target-command<span class="w"> </span><span class="o">[</span>refresh-rate<span class="o">]</span><span class="w"> </span><span class="o">[</span>max-cycles<span class="o">]</span>
 </span></code></pre></div>
 <p>Options:</p>
 <table>
@@ -6788,22 +6808,22 @@ unflattened model as the source of truth.</p>
 </table>
 <h3 id="onchange">onchange<a class="headerlink" href="#onchange" title="Permanent link">&para;</a></h3>
 <p>Watch a directory and run a command when changes occur:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>riddlc<span class="w"> </span>onchange<span class="w"> </span>config-file.conf<span class="w"> </span>watch-directory<span class="w"> </span>target-command
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>riddlc<span class="w"> </span>onchange<span class="w"> </span>config-file.conf<span class="w"> </span>watch-directory<span class="w"> </span>target-command
 </span></code></pre></div>
 <h3 id="info">info<a class="headerlink" href="#info" title="Permanent link">&para;</a></h3>
 <p>Display build information:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>riddlc<span class="w"> </span>info
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>riddlc<span class="w"> </span>info
 </span></code></pre></div>
 <p>Example output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>[info] About riddlc:
-</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>[info]            name: riddlc
-</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>[info]         version: 2.0.0-rc.1
-</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>[info]      git commit: ebce6ba945739bef06907445e5a570b2d030591b
-</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>[info]   documentation: https://ossum.tech/riddl
-</span><span id="__span-30-6"><a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>[info]       copyright: © 2019-2026 Ossum Inc.
-</span><span id="__span-30-7"><a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>[info]        licenses: Apache License, Version 2.0
-</span><span id="__span-30-8"><a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>[info]    organization: Ossum Inc.
-</span><span id="__span-30-9"><a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>[info]   scala version: 3.9.0
+<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>[info] About riddlc:
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>[info]            name: riddlc
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>[info]         version: 2.0.0-rc.1
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>[info]      git commit: ebce6ba945739bef06907445e5a570b2d030591b
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>[info]   documentation: https://ossum.tech/riddl
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>[info]       copyright: © 2019-2026 Ossum Inc.
+</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>[info]        licenses: Apache License, Version 2.0
+</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>[info]    organization: Ossum Inc.
+</span><span id="__span-32-9"><a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>[info]   scala version: 3.9.0
 </span></code></pre></div>
 <p><code>git commit</code> is new in RIDDL 2.0: the full source SHA the binary was built
 from. It lets a model repository locate the exact compiler changes a given
@@ -6813,16 +6833,16 @@ build did not produce. Outside a git checkout it reads <code>unknown</code>.</p>
 <p>Report remediation advice for a model. Pairs with <code>--provide-tips</code>, which
 attaches a suggested fix to each message that has one — intended for
 AI-assisted correction.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>riddlc<span class="w"> </span>advise<span class="w"> </span>model.riddl
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>riddlc<span class="w"> </span>advise<span class="w"> </span>model.riddl
 </span></code></pre></div>
 <h3 id="help">help<a class="headerlink" href="#help" title="Permanent link">&para;</a></h3>
 <p>Display usage information:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>riddlc<span class="w"> </span><span class="nb">help</span>
-</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>riddlc<span class="w"> </span><span class="nb">help</span><span class="w"> </span>validate<span class="w">  </span><span class="c1"># Help for specific command</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>riddlc<span class="w"> </span><span class="nb">help</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>riddlc<span class="w"> </span><span class="nb">help</span><span class="w"> </span>validate<span class="w">  </span><span class="c1"># Help for specific command</span>
 </span></code></pre></div>
 <h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
 <p>Display the version number:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>riddlc<span class="w"> </span>version
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>riddlc<span class="w"> </span>version
 </span></code></pre></div>
 
 
@@ -7022,10 +7042,10 @@ AI-assisted correction.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

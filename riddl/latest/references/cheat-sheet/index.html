@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -7387,13 +7387,13 @@ contexts and must either complete entirely or be undone.</p>
   them alongside steps, functions and includes.</li>
 <li><strong>A saga needs at least two steps.</strong> One step is an Error — a
   single-step transaction has nothing to coordinate.</li>
-<li>Options: <code>compensate</code> (run undo blocks in reverse on failure),
-  <code>parallel</code> (start all steps at once). Sequential is the default, so there
-  is no <code>sequential</code> option.</li>
+<li>Options: <code>parallel</code> (start all steps at once). Sequential is the
+  default, so there is no <code>sequential</code> option. Compensation is not an
+  option: every step's <code>reverted by</code> runs in reverse on failure, always.</li>
 <li>A step referencing a definition owned by a <strong>different domain</strong> is an
   <strong>Error</strong> — a saga orchestrates within one bounded domain</li>
 <li>A step whose do-block has more than one potential failure point draws a
-  <strong>Warning</strong>; split the step</li>
+  <strong>Warning</strong> (<code>saga-step-too-many-fail-points</code>); split the step</li>
 </ul>
 <blockquote>
 <p><em><a href="../../concepts/saga/">For more details →</a></em></p>
@@ -7438,13 +7438,14 @@ building data pipelines.</p>
 transformation, filtering, merging, or routing stages.</p>
 <p><strong>Lives in</strong>: Context, or any other processor body.
 <strong>Contains</strong>: Inlet, Outlet, plus all processor contents.</p>
-<p><strong>Syntax</strong>: <code>processor OrderEnricher as flow is { ... }</code></p>
+<p><strong>Syntax</strong>: <code>streamlet OrderEnricher as flow is { ... }</code>. The keyword was
+<code>processor</code> before 2.1; that spelling is deprecated (<code>stream-processor-keyword</code>).</p>
 <p>See <a href="#streaming-shapes">Streaming Shapes</a> for the arity table.</p>
 <div class="admonition warning">
 <p class="admonition-title">Deprecated shape keywords</p>
 <p><code>source</code>, <code>sink</code>, <code>flow</code>, <code>merge</code>, <code>split</code> and <code>router</code> as standalone
-keywords still parse but emit a <code>[deprecated]</code> message. Write
-<code>processor &lt;id&gt; as &lt;shape&gt;</code> instead.</p>
+keywords still parse but emit a <code>[deprecated]</code> message (<code>shape-keyword</code>).
+Write <code>streamlet &lt;id&gt; as &lt;shape&gt;</code> instead.</p>
 </div>
 <blockquote>
 <p><em><a href="../../concepts/streamlet/">For more details →</a></em></p>
@@ -7477,7 +7478,7 @@ messages, states, and parameters in RIDDL.</p>
   processor: adaptor, context, entity, projector, repository or
   streamlet. <code>Id(entity Order)</code> is canonical, <code>Id(Order)</code>
   shorthand; a keyword contradicting the referent's kind is an
-  <strong>Error</strong>. Only entities can be <code>initiate</code>d and <code>terminate</code>d,
+  <strong>Error</strong>. Only entities can be <code>create</code>d and <code>terminate</code>d,
   but every processor can be named</li>
 <li><code>URL(scheme)</code> — URL with a specific scheme</li>
 <li><code>Range(min, max)</code> — bounded integer range</li>
@@ -7807,9 +7808,9 @@ interactions between definitions, not full implementations.</p>
 <td>A query paired with the reply that answers it. <strong>Never inside a saga.</strong></td>
 </tr>
 <tr>
-<td>Initiate</td>
-<td><code>initiate entity Order</code></td>
-<td>Creates an instance; the value is its <code>Id</code>. Entity-only; an effect.</td>
+<td>Create</td>
+<td><code>create entity Order("A-1001")</code></td>
+<td>Creates an instance and runs its <code>on init</code> with the arguments; the value is its <code>Id</code>. Entity-only; an effect. Formerly <code>initiate</code> (deprecated).</td>
 </tr>
 <tr>
 <td>Self</td>
@@ -8036,7 +8037,8 @@ refusing would leave a partial change behind. Each branch of a <code>when</code>
 <strong>Error</strong>.</p>
 <p><code>send</code>, <code>tell</code> and <code>yield</code> are transmissions, <code>become</code> changes behaviour,
 and <code>put</code> writes to an output — none can leave this definition
-half-changed, so none of them is an effect for this rule.</p>
+half-changed, so none of them is an effect for this rule. A transmission
+issued before a refusal is <strong>delivered</strong>; the refusal does not recall it.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title"><code>error</code> and <code>terminate</code> end their block</p>
@@ -8499,7 +8501,7 @@ behavioral flags, or classification metadata.</p>
 </tr>
 <tr>
 <td>Saga</td>
-<td><code>compensate</code>, <code>parallel</code>, <code>retry</code>, <code>undo-retry</code>, <code>failure-message</code>, <code>timeout</code></td>
+<td><code>parallel</code>, <code>retry</code>, <code>undo-retry</code>, <code>failure-message</code>, <code>timeout</code></td>
 </tr>
 <tr>
 <td>Inlet</td>
@@ -9009,10 +9011,10 @@ directly instantiated in RIDDL models:</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

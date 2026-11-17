@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
   
@@ -6152,8 +6152,8 @@ category; <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> and <code>&gt
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">A bare string condition is deprecated</p>
-<p><code>when prompt("the user is authenticated") then</code> parses but draws a <code>[deprecated]</code>
-message; write <code>when prompt("…")</code>. Everywhere else a bare string is a
+<p><code>when "the user is authenticated" then</code> parses but draws a <code>[deprecated]</code>
+message (<code>bare-string-condition</code>); write <code>when prompt("…")</code>. Everywhere else a bare string is a
 <strong>literal</strong>, while <code>prompt(…)</code> marks a value an AI decides — and a
 natural-language condition is the latter.</p>
 </div>
@@ -6254,6 +6254,16 @@ inlet</strong> — not a way to skip the streaming model. So there must be a
 target's inlet, and "something, somewhere connects to the target" does not
 satisfy it: an enclosing context's outlet is not the sender's own. Without
 one, <code>msg-tell-target-unreachable</code>.</p>
+<p>The channel must also <strong>carry the message</strong>. Since 2.5.0 routing follows
+message types: the told message arrives only at an inlet that admits it,
+and passes through an intermediate processor only if that processor's <code>on</code>
+clause sends it on. Connectors that join the two ends but cannot carry the
+type are <code>msg-tell-no-route-for-type</code> — most often an <em>event</em> told to an
+entity whose inlets admit only <em>commands</em>. A message that can arrive from
+more than one of the sender's outlets draws the Warning
+<code>msg-tell-route-ambiguous</code>, because the model no longer says which channel
+the <code>tell</code> uses. See
+<a href="../../references/language-reference/#a-route-must-carry-the-message">A route must carry the message</a>.</p>
 <p>Authors usually meet this rule in two steps, and the second surprises
 them: you declare the target's inlet, and now riddlc says the inlet is not
 connected. That is correct and is the point — it is asking you to model the
@@ -6349,7 +6359,9 @@ Acting and then refusing would leave a partial change behind.</p>
 state they cause is elsewhere and later. <code>become</code> changes behaviour rather
 than state, and <code>put</code> writes to an <a href="../output/">output</a>. None of them can
 leave this definition half-changed, so none has to wait for the refusals —
-which is what makes "refuse <strong>and</strong> publish a rejection event" expressible.</p>
+which is what makes "refuse <strong>and</strong> publish a rejection event" expressible.
+A transmission issued before a refusal is <strong>delivered</strong>: the refusal does
+not recall it.</p>
 <p>Each statement list is checked independently, so each branch of a <code>when</code>,
 <code>match</code> or <code>foreach</code> body is its own list. A refusal after an effect in the
 same list is an <strong>Error</strong>.</p>
@@ -6720,10 +6732,10 @@ even inside an <code>application</code> context because it is handler-only.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.tooltips", "header.autohide", "navigation.footer", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.share", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>
