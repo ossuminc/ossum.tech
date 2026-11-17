@@ -64,26 +64,44 @@ option used on the wrong kind of definition draws a nudge.
 | `event_catalog_version` | 1 | Version pinning for EventCatalog generation |
 | `sql_dialect`, `sql_table` | 1 | SQL DDL generation hints |
 | `backstage_owner`, `backstage_lifecycle`, `backstage_type` | 1 | Backstage catalog generation hints |
+| `message_envelope` | 1 | Names the envelope a generator wraps messages in |
 
 ### Options By Definition Kind
 
 | Definition | Options |
 |------------|---------|
-| [Entity](entity.md) | `aggregate`, `auto-id`, `available`, `consistent`, `event-sourced`, `finite-state-machine`, `message-queue`, `transient`, `value`, `bulkhead`, `microservice`, `protocol`, `rate-limit` |
-| [Context](context.md) | `bulkhead`, `microservice`, `namespace`, `package`, `protocol`, plus the deprecated `external`, `gateway`, `service`, `wrapper` |
-| [Domain](domain.md) | `external`, `namespace`, `package` |
-| [Connector](connector.md) | `persistent`, `ordered`, `unordered`, `partitioned`, `at-least-once`, `at-most-once`, `exactly-once`, `circuit-breaker` |
-| [Inlet](inlet.md) | `async`, `ordered`, `unordered` |
-| [Outlet](outlet.md) | `async` |
-| [Saga](saga.md) | `compensate`, `parallel`, `microservice`, `protocol` |
+| [Entity](entity.md) | `auto-id`, `bulkhead`, `finite-state-machine`, `message-queue`, `microservice`, `protocol`, `rate-limit`, `snapshots` |
+| [Context](context.md) | `bulkhead`, `clustered`, `microservice`, `namespace`, `protocol` |
+| [Domain](domain.md) | `namespace`, `confluence_space`, `confluence_parent` |
+| [Connector](connector.md) | `ordered`, `unordered`, `partitioned`, `circuit-breaker` |
+| [Inlet](inlet.md) | `async`, `ordered`, `unordered`, `error-sink` |
+| [Outlet](outlet.md) | `async`, `lowering` |
+| [Saga](saga.md) | `parallel`, `timeout`, `retry`, `undo-retry`, `failure-message`, `microservice`, `protocol` |
 | Saga Step | `timeout`, `retry`, `delay` |
 | [Handler](handler.md) | `timeout`, `retry`, `idempotent`, `cacheable`, `rate-limit` |
 | [On Clause](onclause.md) | `timeout`, `idempotent` |
-| [Adaptor](adaptor.md) | `circuit-breaker`, `protocol` |
-| [Projector](projector.md) | `cacheable`, `batch`, `microservice`, `protocol` |
-| [Repository](repository.md) | `transient`, `available`, `consistent`, `batch`, `microservice`, `protocol` |
-| [Streamlet](streamlet.md) | `protocol` |
+| [Adaptor](adaptor.md) | `circuit-breaker`, `clustered`, `protocol` |
+| [Projector](projector.md) | `cacheable`, `batch`, `clustered`, `microservice`, `protocol` |
+| [Repository](repository.md) | `transient`, `available`, `consistent`, `batch`, `clustered`, `microservice`, `protocol` |
+| [Streamlet](streamlet.md) | `clustered`, `lowering`, `protocol` |
 | [Epic](epic.md) | `sync` |
+
+Every definition also takes the options in the table above. Both tables were
+checked against riddl 2.7.0's option registry.
+
+!!! warning "Deprecated options"
+    These still parse, emit `[deprecated]`, and are slated for removal in 3.0.
+    See [Deprecated Constructs](../references/language-reference.md#deprecated-constructs)
+    for each one's replacement:
+
+    - on an **entity**: `aggregate`, `available`, `consistent`,
+      `event-sourced`, `transient`, `value`. Write them as
+      [intentions](entity.md#intentions) before `entity`.
+    - on a **connector**: `persistent`, `at-least-once`, `at-most-once`,
+      `exactly-once`. Write them before `connector`.
+    - on a **context**: `external`, `gateway`, `service`, `wrapper`.
+    - on a **domain** or **context**: `external`, and `package` (use
+      `namespace`).
 
 ### Notable Options
 
@@ -91,8 +109,6 @@ option used on the wrong kind of definition draws a nudge.
   [Simon Brown's](https://www.linkedin.com/in/simonbrownjersey/)
   [C4 Model](https://c4model.com/#Notation): `option is technology("Kafka")`
 - **`auto-id`** — An entity is assigned a ULID at instantiation
-- **`compensate`** — On failure, a saga runs the accumulated steps' undo
-  blocks in reverse
 - **`parallel`** — A saga's steps all start at once, rather than in sequence.
   A saga is sequential by definition, so `parallel` declares the exception.
 - **`async`** — Marks a port as a deliberate codegen async boundary, so the

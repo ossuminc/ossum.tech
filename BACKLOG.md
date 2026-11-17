@@ -211,6 +211,10 @@ confirmed; several predate the per-product versioning migration.
 
 ## 6. The language reference teaches `tell event … to entity`
 
+**DONE 2026-11-17 (BACKLOG 7 S7).** All three fences now tell a command:
+`EscalateReview` to `Review`, `ProcessPayment` to `PaymentService`, and
+`ConfirmOrder` to `Order`, each of which the page prelude handles.
+
 Filed 2026-11-11 during the 2.6.0 upgrade. Three fences tell an **event** to an
 entity, which riddl 2.5.0's release notes name as the usual cause of
 `msg-tell-no-route-for-type` (an entity's inlets normally admit commands):
@@ -286,8 +290,25 @@ Lexer check: clean, `create` was already a keyword.
   `event-sourced`/`value`/`transient`/`aggregate`/`consistent`/`available`
   are `entity-option-to-intention` deprecations since 2.0, and `value` is
   `persistent`. The page now has an Intentions section, and `option is
-  snapshots` is added to Options.
-- **S7. = BACKLOG 6** (`tell event … to entity`, 2.5.0 routing).
+  snapshots` is added to Options. `concepts/option.md`'s per-kind table
+  had the same fault, plus deprecated connector/context/domain options as
+  current. It is now regenerated from `RecognizedOptions` at 2.7.0, which
+  also added `clustered`, `lowering`, `error-sink`, `confluence_*` and
+  `message_envelope`.
+- **DONE 2026-11-17.** **S9. `compensate` taught as a saga option in seven
+  places** (language reference ×2, `saga.md` ×2, `sagastep.md`,
+  `option.md`, cheat sheet ×2). The CM (§ saga) says it is deliberately NOT an
+  option and must never be re-introduced. riddl deregistered it on
+  2026-07-31 (`2fab83255`, before 2.0.0), and it draws `opt-unrecognized`.
+  The fences passed because that is a Style warning. Each fence now carries a
+  `timeout` instead, and the options tables say compensation is not a
+  switch.
+- **DONE 2026-11-17.** **S10. Two "bare string condition" warnings showed
+  the CURRENT form as the deprecated one** (`when prompt("…")` "draws a
+  `[deprecated]`… write `when prompt("…")`"): `language-reference.md` §
+  When, `concepts/statement.md:170`. This is a bulk-replace casualty from
+  `9075a19`.
+- **DONE 2026-11-17.** **S7. = BACKLOG 6** (`tell event … to entity`, 2.5.0 routing).
 
 ### Missing — the language has it, the site does not
 
@@ -321,10 +342,10 @@ Lexer check: clean, `create` was already a keyword.
   (Advisory — a yielded field is usually a value the handler already has)
   and `stmt-do-validates-a-range` (a `do` that validates a range in prose
   should be a range/enumeration/pattern TYPE). § yield and § do.
-- **M8. `riddlc find`/`dump` select values** (2.7.0): `-type create`,
+- **DONE 2026-11-17.** **M8. `riddlc find`/`dump` select values** (2.7.0): `-type create`,
   `-type ask`, …; `tools/riddlc/command-reference.md:371` says definitions
   only.
-- **M9. BAST revision 31** (2.7.0): `.bast` from 2.6.0 or earlier must be
+- **DONE 2026-11-17.** **M9. BAST revision 31** (2.7.0): `.bast` from 2.6.0 or earlier must be
   re-`bastify`'d. `command-reference.md` § bastify. Low.
 
 ### Deliberately deferred (proposed)
@@ -337,7 +358,7 @@ Lexer check: clean, `create` was already a keyword.
   ids are absent. The site has never promised an id per rule.
 - **D2. → now M10 (Reid, 2026-11-17: not deferred).**
 
-- **M10. Rule ids for ten existing diagnostics** (2.7.0): add ONLY the id
+- **DONE 2026-11-17.** **M10. Rule ids for ten existing diagnostics** (2.7.0): add ONLY the id
   where the site already describes the diagnostic — `entity-empty-handlers`,
   `entity-fsm-too-few-states`, `entity-state-no-handlers`,
   `entity-no-handlers-or-states`, `field-method-should-be-lowercase`,
@@ -367,6 +388,9 @@ cell for `type-reference-to-is-id` gains `--fix`.
 
 - **R5. `prettify` joins definitions onto one line** and drops a function's
   `???` body. Filed `riddl/task/2026-11-17-prettify-joins-definitions-onto-one-line.md`.
+- **R7. A domain's `option external` deprecation says "use the `external`
+  context intention prefix"**, which a domain cannot take. Filed
+  `riddl/task/2026-11-17-domain-option-external-message.md`.
 - **R6. A processor reference's keyword is not kind-checked.**
   `tell … to repository F` validates silently when `F` is a streamlet. The
   docs now say "prefer `streamlet`" rather than promise a check. Filed

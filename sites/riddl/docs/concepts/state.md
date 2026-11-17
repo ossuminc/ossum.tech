@@ -67,7 +67,8 @@ state ActiveOrder of record ActiveOrderData
 ```
 
 !!! warning "Every state must have a handler somewhere"
-    `State 'X' in Entity 'Y' has no handlers` is an **Error**, so a state
+    `State 'X' in Entity 'Y' has no handlers` is an **Error**
+    (`entity-state-no-handlers`), so a state
     with no body is only valid when the *entity* declares a handler that
     covers it. Handlers may sit at either level, and an entity may carry
     both: a state-scoped handler for behavior that differs by state, and an

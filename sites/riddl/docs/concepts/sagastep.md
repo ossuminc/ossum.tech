@@ -88,7 +88,7 @@ saga ProcessPayment is {
     tell command CancelOrder(PaymentInputs.orderId) to entity OrderService
   }
 } with {
-  option is compensate
+  option is timeout("PT5M")
 }
 ```
 

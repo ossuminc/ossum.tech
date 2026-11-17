@@ -43,7 +43,7 @@ saga CheckoutProcess is {
     tell command ReleaseItems(CheckoutInputs.orderId) to entity Inventory
   }
 } with {
-  option is compensate
+  option is timeout("PT5M")
 }
 ```
 
@@ -55,7 +55,6 @@ or the reference becomes ambiguous.
 
 | Option | Meaning |
 |--------|---------|
-| `compensate` | On failure, run the accumulated steps' undo blocks in reverse |
 | `parallel` | Start all steps at once; the coordinator gathers results asynchronously. Any one failure compensates in reverse order of the original sends. |
 | `timeout("30s")` | How long the whole saga may take |
 | `retry(3)` | How many times to retry a step that fails |
@@ -103,8 +102,8 @@ These options are contracts for the code generator rather than behavior
 !!! warning "One failure point per step"
     A step's do/undo is all-or-nothing: the compensation assumes all or none
     of the do-block happened. So a step should have **at most one** potential
-    failure point, and more than one draws a **Warning** suggesting the step
-    be split.
+    failure point, and more than one draws a **Warning**
+    (`saga-step-too-many-fail-points`) suggesting the step be split.
 
     `send`, `tell`, `yield` and `put` can fail, and so can each embedded
     `call` or `get` — `let x = call F(get from input I)` counts as two.

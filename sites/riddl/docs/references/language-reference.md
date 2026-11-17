@@ -817,11 +817,17 @@ there is nothing to read without it.
       names a non-result
     - Pairing the wrong keyword with the use case: `yields` on a query, or
       `replies` on a command
+    - A `Pattern("…")` whose regular expression does not compile
+      (`type-pattern-invalid-regex`; RIDDL uses Java regex syntax)
 
     **Style Warnings:**
 
     - Defining a type whose name is a case-variant of a predefined type
       (e.g., `type timestamp is TimeStamp`)
+    - A field, method or method argument whose name does not begin with a
+      lower-case letter (`field-should-be-lowercase`,
+      `field-method-should-be-lowercase`,
+      `field-method-arg-should-be-lowercase`)
 
     **Completeness Warnings:**
 
@@ -986,6 +992,12 @@ entity Order is {
     - More than one `initial` state, or more than one `initial` handler in a
       state
     - Defining a type whose name exactly matches a predefined type
+    - An entity with no handlers and no states that have handlers
+      (`entity-no-handlers-or-states`)
+    - A state with no handler, where the entity declares none to cover it
+      either (`entity-state-no-handlers`)
+    - An entity with `option finite-state-machine` and fewer than two states
+      (`entity-fsm-too-few-states`)
 
     **Warnings:**
 
@@ -993,6 +1005,8 @@ entity Order is {
       context (move it to the context level)
     - Entity Id type defined at domain level or beyond (scope too broad)
     - Entity Id type not defined at all
+    - An entity whose handlers are all empty (`entity-empty-handlers`, a
+      missing-content warning)
 
     **Completeness Warnings:**
 
@@ -1914,7 +1928,7 @@ Delivers a message directly to a processor:
 
 <!-- riddl: in-handler -->
 ```riddl
-tell event ItemAdded(sku = "the item") to entity Cart
+tell command EscalateReview(orderId) to entity Review
 tell command ProcessPayment(orderId) to entity PaymentService
 ```
 
@@ -2618,8 +2632,9 @@ A bare reference is resolved and checked to be Boolean-typed; a clearly
 non-Boolean condition is an Error.
 
 !!! warning "A bare string condition is deprecated"
-    `when prompt("the user is authenticated") then` still parses but draws a
-    `[deprecated]` message. Write `when prompt("…")` instead.
+    `when "the user is authenticated" then` still parses but draws a
+    `[deprecated]` message (`bare-string-condition`). Write
+    `when prompt("the user is authenticated")` instead.
 
     The reason is consistency: everywhere else in RIDDL a bare quoted string
     denotes a **literal value**, while `prompt(…)` marks something an AI
@@ -2647,10 +2662,10 @@ Pattern matching over a typed subject. The subject is a value reference, a
 ```riddl
 match orderStatus {
   case Pending {
-    tell event OrderPending(orderId) to entity Order
+    tell command ProcessPayment(orderId) to entity PaymentService
   }
   case Shipped when order.isPaid {
-    tell event OrderShipped(orderId) to entity Order
+    tell command ConfirmOrder(orderId) to entity Order
   }
   default {
     error "Unknown order state"
@@ -3016,7 +3031,7 @@ saga CheckoutProcess is {
     briefly as "Holds the items until payment settles"
   }
 } with {
-  option is compensate
+  option is timeout("PT5M")
   briefly as "Orchestrates the checkout process steps"
 }
 ```
@@ -3025,11 +3040,18 @@ saga CheckoutProcess is {
 
 | Option | Meaning |
 |--------|---------|
-| `compensate` | On failure, run the accumulated steps' undo blocks in reverse |
 | `parallel` | Start all steps at once; the coordinator gathers results asynchronously. Any one failure compensates in reverse order of the original sends. |
 | `timeout("<duration>")` | How long the saga's run may take before compensation fires |
 
 A saga is sequential by default, so there is no `sequential` option.
+
+!!! warning "There is no `compensate` option"
+    Compensation is not a switch. Every step must declare `reverted by`, and
+    on failure the saga runs the completed steps' undo blocks in reverse
+    order. That is what a saga *is*. An `option compensate` used to be
+    accepted, and a generator read it as a switch, so it abandoned completed
+    steps on failure unless the model carried it. It was removed before 2.0.
+    Writing it now draws `opt-unrecognized`.
 
 #### What an absent `timeout` means
 
@@ -3083,10 +3105,14 @@ and `tell` is how a processor is driven.
 
     **Warnings:**
 
-    - A step's do-block containing more than one potential failure point.
+    - A step's do-block containing more than one potential failure point
+      (`saga-step-too-many-fail-points`).
       A step's do/undo is all-or-nothing, so it should have at most one place
       it can fail — split the step. `send`, `tell`, `yield` and `put` can fail,
       as can each embedded `call` or `get`.
+    - A step whose undo block does not target everything its do block targets
+      (`saga-step-uncompensated`, a style warning): something the step changed
+      has no compensation.
     - A saga with no `timeout` option (`saga-no-timeout`, a completeness
       warning) — see "What an absent `timeout` means" above.
 

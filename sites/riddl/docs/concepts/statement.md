@@ -167,8 +167,8 @@ The `end` keyword is required. A condition may be:
 - an AI-evaluated prompt: `when prompt("the user is authenticated") then`
 
 !!! warning "A bare string condition is deprecated"
-    `when prompt("the user is authenticated") then` parses but draws a `[deprecated]`
-    message; write `when prompt("…")`. Everywhere else a bare string is a
+    `when "the user is authenticated" then` parses but draws a `[deprecated]`
+    message (`bare-string-condition`); write `when prompt("…")`. Everywhere else a bare string is a
     **literal**, while `prompt(…)` marks a value an AI decides — and a
     natural-language condition is the latter.
 

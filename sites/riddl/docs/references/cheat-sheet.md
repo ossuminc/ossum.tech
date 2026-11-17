@@ -342,13 +342,13 @@ contexts and must either complete entirely or be undone.
   them alongside steps, functions and includes.
 - **A saga needs at least two steps.** One step is an Error — a
   single-step transaction has nothing to coordinate.
-- Options: `compensate` (run undo blocks in reverse on failure),
-  `parallel` (start all steps at once). Sequential is the default, so there
-  is no `sequential` option.
+- Options: `parallel` (start all steps at once). Sequential is the
+  default, so there is no `sequential` option. Compensation is not an
+  option: every step's `reverted by` runs in reverse on failure, always.
 - A step referencing a definition owned by a **different domain** is an
   **Error** — a saga orchestrates within one bounded domain
 - A step whose do-block has more than one potential failure point draws a
-  **Warning**; split the step
+  **Warning** (`saga-step-too-many-fail-points`); split the step
 
 > *[For more details →](../concepts/saga.md)*
 
@@ -1172,7 +1172,7 @@ behavioral flags, or classification metadata.
 | Applies to | Options |
 |---|---|
 | Entity | `message-queue`, `auto-id`, `finite-state-machine` |
-| Saga | `compensate`, `parallel`, `retry`, `undo-retry`, `failure-message`, `timeout` |
+| Saga | `parallel`, `retry`, `undo-retry`, `failure-message`, `timeout` |
 | Inlet | `error-sink` |
 | Inlet / Outlet | `async` |
 | Connector / Inlet | `ordered`, `unordered`, `persistent` |
