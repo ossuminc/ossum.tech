@@ -30,17 +30,19 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 ### In flight
 
-**The 2.7.0 language-docs audit** —
-`task/2026-11-17-audit-language-docs-against-riddl-2.7.0.md`, which also
-closes `task/upgrade-riddl-2.7.0.md`. The delta is **BACKLOG 7**; Reid set the
-order on 2026-11-17: (1) S1+M1+M4 `create` — **done**; (2) S2+S4 deprecation
-tables; (3) S5, S6, M2; (4) M3, M5, M6, M7 (probe first); (5) S7, M8, M9, M10;
-(6) proofs. Neither task closes until step 6.
+**Nothing half-done.** The 2.7.0 audit and upgrade tasks are closed (in
+`task/done/` with Results), and `task/` is empty. Open follow-ups are
+**BACKLOG 7a–7c**: a `--fix` table cell owed at riddl's next release, the D1
+deferral, and three riddl reports.
 
-**S3 was withdrawn by Reid:** a deprecated spelling lasts until the NEXT
-MAJOR, so "removed in 3.0" is correct. riddl's own CLAUDE.md, grammar comments
-and RuleId comments say "forever" and are WRONG — filed as
-`riddl/task/2026-11-17-deprecations-last-until-the-next-major.md`.
+**The audit's commits are held unpushed until Reid confirms** (2026-11-17).
+He said to push once the audit was finished, and it now is, but a push
+deploys the site. `git status` gives the count.
+
+**A deprecated spelling lasts until the NEXT MAJOR** (Reid, 2026-11-17).
+"Removed in 3.0" is correct. riddl has since reworded its "forever" rule
+(`42f582ccc`), and Reid ruled that API and binary compatibility follow the
+same rule.
 
 ### Traps a fresh session would hit
 
@@ -81,29 +83,113 @@ and RuleId comments say "forever" and are WRONG — filed as
 
 ### Certainty
 
-- **Verified by running, this session:** both compiler versions; the 3 gate
-  failures and their rule id and message; that the `2.x`/`1.x` deploy landed
-  and `2.x` carries the A103 content while `2.0` does not; that the three
-  retired directories are still present; that `BACKLOG.md` is tracked; that the
-  stale `gh-pages` worktree is pruned and the branch intact.
-- **Assumed, not verified:** whether riddl's `1037313f6` ("at most one of
-  each special on-clause") affects the `on quiescence` one-per-handler rule
-  this repo now documents.
-- **Read `../riddl/task/` during a handoff, not just our own.** Both of this
-  session's late findings — the abolished implied ports and the saga rule —
-  came from riddl's tree and its log, and neither would have surfaced from
-  anything in this repo.
+- **Verified by running, 2026-11-17:**
+  - The whole-tree gate on `../bin/riddlc` 2.7.0: 392 / 52 / 0, exit 0.
+  - All five strict builds are clean, and cross-site links show 80 checked,
+    0 broken.
+  - The lexer check passes, and `create` tokenizes as a keyword.
+  - The grammar md5 equals the tag's.
+  - Every severity and `--fix`/prettify claim made in the audit was probed;
+    the NOTEBOOK entry below names each one.
+- **Assumed, not verified:** that `1037313f6` ("at most one of each special
+  on-clause") does not change the `on quiescence` one-per-handler rule.
 
 ### Pointers
 
-- **BACKLOG.md** — **1e-remnant** (`group.md:42` is still false), **3b** (the
-  1.x gate has no compiler).
+- **BACKLOG.md** — **7a–7c** (2.7.0 audit follow-ups), **1e-remnant**
+  (`group.md:42` is still false), **3b** (the 1.x gate has no compiler).
 - **CLAUDE.md** — the gate-compiler flip table, the evolving-lines versioning
   model, the lexer drift trap, and the version-differences table.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
 
 ---
+
+### 2.7.0: the language-docs audit, derived from riddl rather than from us ✅ **2026-11-17**
+
+**Why an audit, not another upgrade pass.** Every earlier pass worked from
+that release's summary, so anything a summary left out never reached the
+site. This one derived the delta from riddl's own artifacts at tag `2.7.0`:
+- the grammar, diffed release by release from 2.0.0;
+- the 56 rule ids added since 2.0.0;
+- every deprecation emitter;
+- the CM log since 2.0.0;
+- the release notes.
+
+It also closed `task/upgrade-riddl-2.7.0.md`, a subset of the same work.
+
+**Result: 10 stale items, 10 missing, 1 deferral, 7 riddl reports.** The fence
+gate on 2.7.0 failed only on `initiate` (3 fences). **Every other gap was in
+prose or in a fence that passes despite a Style warning**, which the gate
+cannot see. Three of the stale items (S8, S9, S10) were found while doing
+other items, not by the derivation. That says the derivation was necessary
+but not sufficient.
+
+**What changed on the site:**
+
+- **`create` replaces `initiate`** (S1, M1, M4).
+  - Arguments bind to `on init`'s parameters.
+  - Arity → `handler-clause-wrong-arity`.
+  - Non-entity → `stmt-not-instantiable`.
+  - Creation runs `on init`, never `on activate`.
+- **Deprecation tables (S2, S4).** Both are one table now, with all 17
+  deprecation rule ids. A "Fixed by" column came from probing each
+  deprecation with a minimal model:
+  - `--fix` rewrites five: `processor`, `initiate`, `prompt`, `Abstract`,
+    and the quoted constant;
+  - prettify also handles the shape keywords, `reference to`, type-first
+    aggregates, `state is record`, and the entity and connector options;
+  - the rest need a person.
+- **Streamlet references (M2).** 2.7.0 made `flow`, `router`, `streamlet`
+  and `processor` reference keywords. In a use-case step, `flow X` parses as
+  a group.
+- **New rules documented:**
+  - **M3**: a refusal does not recall an earlier transmission.
+  - **M5**: both legs of an `ask` must be wired, each its own Error.
+  - **M6**: three journal Advisories.
+    `entity-crud-with-transitions-consumed` counts YIELDED events only.
+  - **M7**: `stmt-yield-argument-prompt` (Advisory) and
+    `stmt-do-validates-a-range` (Style).
+  - **M8**: `find -type create`, and value records in `dump --json`.
+  - **M9**: BAST revision 31 rejects a 2.6.0 `.bast` with exit 7.
+  - **M10**: ten rule ids.
+- **S9: `compensate` was taught as a saga option in seven places**, all
+  through 2.x. riddl deregistered it on 2026-07-31, and the CM says it must
+  never return: a generator once treated it as a switch and abandoned
+  completed steps. It draws `opt-unrecognized`, a **Style** warning, so the
+  fences that carried it stayed green.
+- **S8: `concepts/entity.md` and `concepts/option.md` presented the entity
+  intentions as options.** `option.md`'s per-kind table is now regenerated
+  from `RecognizedOptions`.
+- **S10: two warnings said `when prompt("…")` was the DEPRECATED form.** This
+  is a bulk-replace casualty from `9075a19`, in a sentence that then told the
+  reader to write the same thing.
+
+**What it taught:**
+
+- **A Style-level rule is as invisible to the gate as a Missing one.** The
+  existing trap names Missing warnings; S9 adds Style. A fence that "passes"
+  can carry `opt-unrecognized` indefinitely.
+- **An enumerated table goes stale even when it is the subject of a page.**
+  `option.md` already had an admonition explaining that the per-kind lists
+  are DERIVED from the registry, sitting above a hand-written list that was
+  not.
+- **Probing turned up behaviour neither riddl's docs nor ours stated:**
+  - **R6**: a reference's keyword is not checked against the target's kind,
+    so `tell … to repository F` passes for a streamlet.
+  - Prettify migrates far more than `--fix`.
+  - **R5**: prettify's output joins definitions onto one line.
+- **riddl acts fast on a filed task.** R1–R4 were fixed in `42f582ccc` within
+  the session. Re-read `riddl/task/` before writing a follow-up into a file
+  that may already be in `done/`.
+
+**Reid's rulings this session:**
+- **S3 was withdrawn.** A deprecated spelling lasts until the next major.
+- **D2 was not deferred**; it became M10.
+- **The order of work** was set by Reid.
+
+The full delta as it stood mid-audit is in `git show 096f57a:BACKLOG.md`
+§ 7.
 
 ### 2.4.0 → 2.6.0: tell routes by type, folds may not read the clock ✅ **2026-11-11**
 

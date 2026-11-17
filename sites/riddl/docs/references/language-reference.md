@@ -2982,7 +2982,8 @@ function CalculateTotal is {
 }
 ```
 
-The inline aggregation form still works:
+The inline aggregation form still parses, but it is deprecated
+(`func-inline-aggregation`) and slated for removal in 3.0:
 
 <!-- riddl: skip reason="declares its inputs and outputs as inline anonymous aggregates, which 2.0 marks deprecated in favour of a named record" -->
 ```riddl

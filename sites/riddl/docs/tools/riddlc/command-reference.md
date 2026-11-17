@@ -314,8 +314,9 @@ Options:
 ### dump
 
 Print the model's AST. With `--json`, print a flat, machine-readable
-**projection** of it instead — one record per definition, which is what makes
-a model scriptable:
+**projection** of it instead. It holds one record per definition, per
+statement, and, since 2.7.0, per composite value (`create`, `ask`, a
+message constructor, …). That is what makes a model scriptable:
 
 ```bash
 riddlc dump model.riddl --json

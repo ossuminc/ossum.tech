@@ -209,203 +209,28 @@ confirmed; several predate the per-product versioning migration.
 
 ---
 
-## 6. The language reference teaches `tell event … to entity`
+## 7. Follow-ups from the 2.7.0 language-docs audit
 
-**DONE 2026-11-17 (BACKLOG 7 S7).** All three fences now tell a command:
-`EscalateReview` to `Review`, `ProcessPayment` to `PaymentService`, and
-`ConfirmOrder` to `Order`, each of which the page prelude handles.
+The audit itself is done (2026-11-17). Its full delta, S1–S10 and M1–M10, is
+recorded in NOTEBOOK.md § "2.7.0 language-docs audit". What remains:
 
-Filed 2026-11-11 during the 2.6.0 upgrade. Three fences tell an **event** to an
-entity, which riddl 2.5.0's release notes name as the usual cause of
-`msg-tell-no-route-for-type` (an entity's inlets normally admit commands):
-
-- `sites/riddl/docs/references/language-reference.md:1887`, the **first**
-  `tell` example on the page, under "Tell Statement"
-- the same file, lines 2551 and 2554 (`OrderPending`, `OrderShipped`)
-
-**Verified:** they pass the gate on 2.6.0 only because the wrapper's target
-declares no inlets, which is one of the rule's exemptions. The gate cannot see
-the problem. The example is legal; the thing it shows readers is not.
-
-**Wanted:** tell a command, or say why an event is right there and show the
-inlet that admits it. Line numbers move; grep for `tell event`.
-
-
-## 7. Language-docs audit against riddl 2.7.0 (task 2026-11-17)
-
-Derived 2026-11-17 from riddl's own artifacts at tag `2.7.0`: the grammar
-diffed release by release from 2.0.0, the 56 rule ids added to
-`rule-ids.txt` since 2.0.0, every deprecation emitter in `*/src/main`, the
-CM log since 2026-08-27, and the 2.7.0 release notes. Not derived from this
-repo's own "documented" claims.
-
-**Already done:** pin `2.7.0`; grammar regenerated with
-`sbt --server -batch extractGrammar`, `cmp` identical to tag 2.7.0.
-
-**Baseline gate on `../bin/riddlc` 2.7.0 (whole tree): 387 / 52 / 3 failed.**
-All three failures are `[value-initiate-keyword]`: `concepts/value.md:311`,
-`references/language-reference.md:1895` and `:2453`. Nothing else in the
-fence corpus regressed. So everything below is PROSE or skipped fences,
-which the gate cannot see.
-
-Lexer check: clean, `create` was already a keyword.
-
-### Stale — teaches something wrong
-
-- **DONE 2026-11-17.** **S1. `initiate` taught as current** (2.7.0). 17 lines outside the grammar:
-  `concepts/value.md`, `concepts/onclause.md`,
-  `references/language-reference.md`, `references/cheat-sheet.md`,
-  `introduction/what-is-riddl-based-on.md`.
-- **DONE 2026-11-17.** **S2. Both deprecation tables recommend a deprecated spelling.**
-  `language-reference.md` § Deprecated Constructs and
-  `migration/1.x-to-2.0.md` § 2 say shape keywords → `processor <id> as
-  <shape>`. `processor` itself is deprecated (`stream-processor-keyword`,
-  2.1.0); the answer is `streamlet <id> as <shape>`. Same advice at
-  `language-reference.md:306` and `concepts/streamlet.md:72`.
-- **S3. WITHDRAWN (Reid, 2026-11-17).** "Slated for removal in 3.0" is
-  CORRECT: a deprecated spelling lasts until the next major release, not
-  forever. riddl's `CLAUDE.md` rule 3 ("deprecation is FOREVER from 3.0
-  onward") is what is wrong, and the grammar/RuleId comments that repeat it
-  ("keeps parsing forever", "goes on parsing indefinitely"). Reported to
-  riddl as R4. Keep "removed in 3.0" wording when rewriting the tables (S4).
-- **DONE 2026-11-17.** **S4. Both deprecation tables are incomplete.** RuleId has 18 deprecation
-  emitters. Missing from the language-reference table: `processor` →
-  `streamlet`, `initiate` → `create`, `reference to entity X` →
-  `Id(entity X)`, entity options → intentions, connector
-  `option persistent`/`at-least-once`/`at-most-once`/`exactly-once` →
-  intentions, `type X is command { … }` → `command X is { … }`, quoted
-  numeric constant `"5"` → `5`, single-alternative `one of { A }`,
-  `option is package` → `namespace`. The migration table lacks most of the
-  same. Each row should name its rule id and whether `--fix` handles it.
-- **DONE 2026-11-17.** **S5. The RBBQ tutorial teaches `option is external`** as the current
-  form (`opt-deprecated` since 2.0.0) in 6 places:
-  `tutorials/rbbq/external-contexts.md:10,13,37`,
-  `tutorials/rbbq/patterns.md:335,390`,
-  `tutorials/rbbq/backoffice/index.md:86`. Its own fences already write
-  `external context`, so prose contradicts the code beside it.
-- **DONE 2026-11-17 (with S2).** **S6. `cheat-sheet.md:405`** gives streamlet syntax as
-  `processor OrderEnricher as flow is { ... }`.
-- **DONE 2026-11-17.** **S8. `concepts/entity.md` § Options taught the six
-  entity intentions as options** (found while doing M6, missed by the delta).
-  `event-sourced`/`value`/`transient`/`aggregate`/`consistent`/`available`
-  are `entity-option-to-intention` deprecations since 2.0, and `value` is
-  `persistent`. The page now has an Intentions section, and `option is
-  snapshots` is added to Options. `concepts/option.md`'s per-kind table
-  had the same fault, plus deprecated connector/context/domain options as
-  current. It is now regenerated from `RecognizedOptions` at 2.7.0, which
-  also added `clustered`, `lowering`, `error-sink`, `confluence_*` and
-  `message_envelope`.
-- **DONE 2026-11-17.** **S9. `compensate` taught as a saga option in seven
-  places** (language reference ×2, `saga.md` ×2, `sagastep.md`,
-  `option.md`, cheat sheet ×2). The CM (§ saga) says it is deliberately NOT an
-  option and must never be re-introduced. riddl deregistered it on
-  2026-07-31 (`2fab83255`, before 2.0.0), and it draws `opt-unrecognized`.
-  The fences passed because that is a Style warning. Each fence now carries a
-  `timeout` instead, and the options tables say compensation is not a
-  switch.
-- **DONE 2026-11-17.** **S10. Two "bare string condition" warnings showed
-  the CURRENT form as the deprecated one** (`when prompt("…")` "draws a
-  `[deprecated]`… write `when prompt("…")`"): `language-reference.md` §
-  When, `concepts/statement.md:170`. This is a bulk-replace casualty from
-  `9075a19`.
-- **DONE 2026-11-17.** **S7. = BACKLOG 6** (`tell event … to entity`, 2.5.0 routing).
-
-### Missing — the language has it, the site does not
-
-- **DONE 2026-11-17.** **M1. `create`** (2.7.0): the value, `create entity Order(…)` yielding
-  the new instance's `Id`, and that it runs `on init`. Language reference
-  § values, `concepts/value.md`, cheat-sheet.
-- **DONE 2026-11-17.** **M2. Streamlet references** (2.7.0): `streamlet_ref` keyword set is
-  `source | sink | merge | split | void | flow | router | streamlet`
-  (+ deprecated `processor`); and the one exception: in an epic step's
-  `send … from`, `flow X` is a GROUP (`flow_group_ref`) — write
-  `streamlet X`. Nowhere on the site. Also re-read
-  `language-reference.md:1900` ("every processor reference is keyword-led")
-  in that light.
-- **DONE 2026-11-17.** **M3. A transmission before a refusal is delivered** (CM §0.3 ruling 3,
-  2026-11-16): the refusal does not recall a prior `send`/`tell`/`yield`/
-  `put`. Add to the "Refusals before effects" boxes (`cheat-sheet.md:787`,
-  language reference) and `guides/authors/authoring-riddl.md:564`.
-- **DONE 2026-11-17.** **M4. Creation runs `on init`, never `on activate`** (CM §4.5/§13.7,
-  2026-11-16). `language-reference.md:1059`, `concepts/onclause.md:41`.
-- **DONE 2026-11-17.** **M5. Both legs of an `ask` must be wired** (CM §40.7, 2026-09-10;
-  `msg-ask-target-unreachable` Error, `msg-ask-reply-unreachable`, 2.2.0).
-  Language reference § Ask says nothing about connectors. Probe severity of
-  the reply-leg rule before writing it.
-- **DONE 2026-11-17.** **M6. Journal-shape diagnostics** (CM 2026-09-12, 2.2.0):
-  `entity-event-sourced-unread-history`,
-  `entity-crud-with-transitions-consumed`,
-  `entity-event-sourced-snapshot-events`. When event sourcing buys nothing,
-  and when a CRUD entity's history is being consumed. Event-sourcing
-  section of the language reference / `concepts/entity.md`. Probe severity.
-- **DONE 2026-11-17.** **M7. Two authoring lints** (CM B6/B8, 2.3.0): `stmt-yield-argument-prompt`
-  (Advisory — a yielded field is usually a value the handler already has)
-  and `stmt-do-validates-a-range` (a `do` that validates a range in prose
-  should be a range/enumeration/pattern TYPE). § yield and § do.
-- **DONE 2026-11-17.** **M8. `riddlc find`/`dump` select values** (2.7.0): `-type create`,
-  `-type ask`, …; `tools/riddlc/command-reference.md:371` says definitions
-  only.
-- **DONE 2026-11-17.** **M9. BAST revision 31** (2.7.0): `.bast` from 2.6.0 or earlier must be
-  re-`bastify`'d. `command-reference.md` § bastify. Low.
-
-### Deliberately deferred (proposed)
-
-- **D1. Rule ids for behaviour already described.** The 2.3.0 repository
-  Errors (`repo-*`, `stmt-store-*`, `stmt-update-*`, `stmt-upsert-needs-key`,
-  `value-query-outside-repository`, `value-not-a-collection`,
-  `value-membership-type-mismatch`) and 2.2.0
-  `handler-duplicate-special-clause`: the RULES are in the prose; only the
-  ids are absent. The site has never promised an id per rule.
-- **D2. → now M10 (Reid, 2026-11-17: not deferred).**
-
-- **DONE 2026-11-17.** **M10. Rule ids for ten existing diagnostics** (2.7.0): add ONLY the id
-  where the site already describes the diagnostic — `entity-empty-handlers`,
-  `entity-fsm-too-few-states`, `entity-state-no-handlers`,
-  `entity-no-handlers-or-states`, `field-method-should-be-lowercase`,
-  `field-method-arg-should-be-lowercase`, `type-pattern-invalid-regex`,
-  `saga-step-uncompensated`, `saga-step-too-many-fail-points`, and
-  `field-should-be-lowercase` (which the field-name check now reports).
-  Text and severity are unchanged per the release notes.
-
-### Verified covered (no action)
-
-Generic `streamlet` keyword; `on quiescence`; `send … at`; `append`/`remove`;
-`log`; `store`/`upsert`/`update`/`delete`; `query [one]`; arithmetic and
-result types; duration literals; collection predicates, `count of`,
-`contains`; constant expressions; `key on`/`with history`; typed `empty`
-(2.4.0); typed `tell` routing and duplicate-send (2.5.0); fold determinism
-(2.6.0); `Id(entity …)`; adaptor targeting/ports; `stream-graph-cycle`;
-`on other` as `case _`. Spot-checked by grep plus the gate, not re-read
-line by line.
-
-### Reported to riddl (`riddl/task/`)
-
-**R1–R4 are done in riddl** (`42f582ccc`, after 2.7.0; task in
-`riddl/task/done/`). Reid also ruled there that API and binary
-compatibility follow the same rule: stable within a major, fair game at the
-next. When the release after 2.7.0 ships, the deprecation tables' "Fixed by"
-cell for `type-reference-to-is-id` gains `--fix`.
-
-- **R5. `prettify` joins definitions onto one line** and drops a function's
-  `???` body. Filed `riddl/task/2026-11-17-prettify-joins-definitions-onto-one-line.md`.
-- **R7. A domain's `option external` deprecation says "use the `external`
-  context intention prefix"**, which a domain cannot take. Filed
-  `riddl/task/2026-11-17-domain-option-external-message.md`.
-- **R6. A processor reference's keyword is not kind-checked.**
-  `tell … to repository F` validates silently when `F` is a streamlet. The
-  docs now say "prefer `streamlet`" rather than promise a check. Filed
-  `riddl/task/2026-11-17-processor-ref-keyword-not-kind-checked.md`.
-- **R1.** `type-reference-to-is-id` and `opt-deprecated` are emitted as
-  deprecations but lack `deprecates = true`, so `RuleId.deprecations`
-  omits them — the exact failure mode `RuleId`'s doc comment says the enum
-  exists to prevent.
-- **R2.** `type-reference-to-is-id` is emitted `autoFixable = true`, but
-  `riddlc validate --fix` reports it "no mechanical fix". Probed on 2.7.0.
-- **R3.** `StreamingParser.scala:195` comment still names
-  `processor <id> as <shape>` as the replacement.
-- **R4. The never-delete rule is wrong (Reid, 2026-11-17).** A deprecated
-  spelling lasts until the NEXT MAJOR release. riddl `CLAUDE.md` rule 3,
-  `BACKLOG.md:128`, the grammar comments (`ebnf-grammar.ebnf:167,635`) and
-  `RuleId.scala:207,213` / `StreamingParser.scala:269` say "forever". The
-  diagnostics that say "removed in 3.0" (`send-to-inlet`) are the RIGHT ones;
-  `state-is-record`'s "a future major version" should say 3.0 too.
+- **7a. When riddl's next release ships, update the "Fixed by" cell for
+  `type-reference-to-is-id`** in both deprecation tables
+  (`language-reference.md` § Deprecated Constructs, `migration/1.x-to-2.0.md`
+  § 2). riddl `42f582ccc` gave it a computed `--fix` after 2.7.0. Probe first:
+  `riddlc validate --fix` on a model containing `reference to entity E`.
+- **7b. D1, deferred: rule ids for behaviour the prose already describes.**
+  The 2.3.0 repository Errors (`repo-*`, `stmt-store-*`, `stmt-update-*`,
+  `stmt-upsert-needs-key`, `value-query-outside-repository`,
+  `value-not-a-collection`, `value-membership-type-mismatch`) and 2.2.0
+  `handler-duplicate-special-clause`. The rules are documented; only the ids
+  are missing. The site has never promised an id per rule. Reid ruled on D2,
+  which became M10 and is done, but did not rule on D1.
+- **7c. Three riddl reports still open**, each in `riddl/task/`:
+  - **R5**: prettify joins definitions onto one line.
+  - **R6**: a processor reference's keyword is not checked against the
+    target's kind. The docs say "prefer `streamlet`" because of it; revisit
+    that wording if riddl adds the check.
+  - **R7**: a domain's `option external` deprecation advises a context
+    prefix. `concepts/option.md` lists the domain form as deprecated without
+    a replacement until riddl decides one.
