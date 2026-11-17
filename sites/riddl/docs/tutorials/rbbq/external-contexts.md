@@ -7,10 +7,10 @@ description: "Third-party system integrations in the Reactive BBQ model"
 
 The Reactive BBQ model includes six external contexts — bounded
 contexts that represent third-party systems the business depends
-on but doesn't own. These are marked with `option is external`
-to signal that the implementation is outside the model boundary.
+on but doesn't own. Each is declared with the `external` prefix,
+`external context PaymentGateway`, to signal that the implementation is outside the model boundary.
 
-## The `option is external` Pattern
+## The `external context` Pattern
 
 In RIDDL, external contexts define the *interface* to a
 third-party system without modeling its internals. The context
@@ -34,7 +34,7 @@ external context PaymentGateway is {
 }
 ```
 
-The `option is external` metadata tells the compiler and any code
+The `external` prefix tells the compiler and any code
 generators that this context won't be implemented — it's a
 boundary definition only.
 

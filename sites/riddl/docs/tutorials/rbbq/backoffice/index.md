@@ -83,7 +83,7 @@ asynchronously from events and never compete with production
 workloads.
 
 **Why separate Scheduling from HR?** The HR system is modeled
-as an external context (`option is external`). Scheduling owns
+as an external context (`external context HRSystem`). Scheduling owns
 the operational shift data while HR owns the master employee
 records. This separation means scheduling works independently
 even if the HR system is down.

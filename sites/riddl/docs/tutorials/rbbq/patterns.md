@@ -332,7 +332,7 @@ external context PaymentGateway as flow is {
 }
 ```
 
-The `option is external` metadata marks the context as
+The `external` prefix marks the context as
 externally implemented. Only the interface is modeled.
 
 **Appears in:** [External Contexts](external-contexts.md) —
@@ -387,5 +387,5 @@ LoyaltyEnrollment.
 | Repository | `repository`, `schema`, `index` | 11 repositories |
 | Projector / CQRS | `projector`, `updates`, event handlers | 5 projectors |
 | Adaptor | `adaptor to`, `adaptor from` | 14 adaptors |
-| External Context | `option is external` | 6 contexts |
+| External Context | `external context` | 6 contexts |
 | Epic | `epic`, `case`, `step`, `user` | 4 epics |
