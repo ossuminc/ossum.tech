@@ -43,6 +43,10 @@ and `on passivate` bracket each *residency*: an entity that is evicted from
 memory and later rehydrated passivates and activates repeatedly without ever
 being initialized or terminated again.
 
+A new instance runs **`on init` only**. A [`create`](value.md#create) puts it in
+memory, but that is not an activation — `on activate` is reserved for an
+instance that already existed and is coming back.
+
 <!-- riddl: in-entity -->
 ```riddl
 handler OrderHandler is {
@@ -107,7 +111,7 @@ projector, repository or streamlet. Two rules bound it:
   projector-specific spelling of the same idea.
 
 !!! note "Unlike `on activate` and `on passivate`, this is an effect block"
-    `yield`, `tell`, `send`, `terminate`, `morph` and `initiate` are all legal
+    `yield`, `tell`, `send`, `terminate`, `morph` and `create` are all legal
     inside `on quiescence`. Timing out is a real business event — a cart is
     abandoned, a session expires — and saying so usually means emitting
     something.

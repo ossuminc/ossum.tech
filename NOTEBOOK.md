@@ -11,21 +11,15 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-11-11
+## HANDOFF — as of 2026-11-17
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins the released `2.6.0`, Scala `3.9.0`.** Grammar md5
-`aa423f29`, equal to riddl's at the `2.6.0` tag — unchanged since 2.4.0, since
-2.5.0 and 2.6.0 added validation rules only.
+**`build.sbt` pins the released `2.7.0`, Scala `3.9.0`.** Grammar md5
+`25914cd3`, `cmp`-identical to riddl's at the `2.7.0` tag.
 
-**Gate: GREEN, 390 / 52 / 0.** `task/` is empty — both upgrade tasks (2.5.0,
-superseded, and 2.6.0) went to `task/done/` with Results on 2026-11-11.
-
-**`../bin/riddlc` and PATH BOTH print `2.6.0`** — the first agreement since
-2.0.0, because Homebrew finally shipped a working macOS binary. That is a
-coincidence of timing and will not last past riddl's next commit, so
-**measure, never remember**:
+**`../bin/riddlc` prints `2.7.0`; PATH still prints `2.6.0`.** Gate against
+`../bin/riddlc`. **Measure, never remember**:
 
 ```bash
 riddlc version && ../bin/riddlc version
@@ -36,7 +30,17 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 ### In flight
 
-Nothing half-edited; `task/` is empty.
+**The 2.7.0 language-docs audit** —
+`task/2026-11-17-audit-language-docs-against-riddl-2.7.0.md`, which also
+closes `task/upgrade-riddl-2.7.0.md`. The delta is **BACKLOG 7**; Reid set the
+order on 2026-11-17: (1) S1+M1+M4 `create` — **done**; (2) S2+S4 deprecation
+tables; (3) S5, S6, M2; (4) M3, M5, M6, M7 (probe first); (5) S7, M8, M9, M10;
+(6) proofs. Neither task closes until step 6.
+
+**S3 was withdrawn by Reid:** a deprecated spelling lasts until the NEXT
+MAJOR, so "removed in 3.0" is correct. riddl's own CLAUDE.md, grammar comments
+and RuleId comments say "forever" and are WRONG — filed as
+`riddl/task/2026-11-17-deprecations-last-until-the-next-major.md`.
 
 ### Traps a fresh session would hit
 

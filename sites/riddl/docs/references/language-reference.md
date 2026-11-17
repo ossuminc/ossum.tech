@@ -1061,6 +1061,13 @@ that match specific message kinds and execute statements.
 must be side-effect free: `send`, `tell`, `yield`, `morph` and `become` are
 rejected inside them at parse time.
 
+**Creation runs `on init`, never `on activate`.** A
+[`create`](#create-bring-an-instance-into-being) puts the new instance in
+memory, but that is not an activation: `on activate` runs only when an
+instance that *already exists* re-enters memory after a passivation. Nor does
+a message addressed to an instance that was never created bring one into
+being — activation recovers an instance, it never makes one.
+
 #### `on quiescence <window>`
 
 Fires when the processor **instance** has handled no message for the whole
@@ -1087,7 +1094,7 @@ Legal on any handler-bearing processor. **At most one per handler**
 `times out after`.
 
 Unlike `on activate` / `on passivate` it is an **effect block**: `yield`,
-`tell`, `send`, `terminate`, `morph` and `initiate` are all legal. In an
+`tell`, `send`, `terminate`, `morph` and `create` are all legal. In an
 event-sourced entity the usual rule holds — change state only through a
 yielded event, which is also what keeps replay from re-firing the timer.
 
@@ -1893,7 +1900,7 @@ processor, by naming a value typed [`Id(...)`](#instance-identity):
 
 <!-- riddl: in-handler -->
 ```riddl
-let fresh = initiate entity ExampleEntity
+let fresh = create entity ExampleEntity
 tell command ExampleWelcome(target = fresh) to fresh
 ```
 
@@ -2444,30 +2451,49 @@ The field set is **closed**. Adding to it is a language change, and the test is
 *runtime-only*: anything a generator can know statically it should inline,
 which is why `version` qualifies and, say, cluster placement does not.
 
-#### `initiate` — bring an instance into being
+#### `create` — bring an instance into being
 
-`initiate` is a **value**: it yields the new instance's `Id`, so it is used
-through `let`.
+`create` is a **value**: it creates an instance of an entity, runs that
+entity's [`on init`](#lifecycle-clauses-take-parameters) clause, and yields the
+new instance's `Id`, so it is used through `let`.
 
 <!-- riddl: in-handler -->
 ```riddl
-let fresh = initiate entity ExampleEntity
+let fresh = create entity ExampleEntity
 tell command ExampleWelcome(target = fresh) to fresh
 ```
 
-It does **not** add a second way for an instance to exist — construction still
-completes only when [`on init`](#on-clause-types) finishes. Without it, no
-`Id(P)` value could ever come into being and the whole addressing story would
-be inert.
+Arguments in parentheses are bound to `on init`'s parameters, positionally or
+by name — `create entity Order("A-1001")`, or
+`create entity Order(code = "A-1001")`. Supplying a different number of
+arguments than `on init` declares parameters is an **Error**
+(`handler-clause-wrong-arity`).
 
-`initiate` and [`terminate`](#terminate-statement) are **entity-only**, by an
-explicit check rather than as a side effect of the type system. Both are
-**effects**, so both are banned in a function body, in `on activate` /
-`on passivate`, and in a correlation fold. Both are legal in a saga step.
+Creation is **instantiation**: the instance is given a place for its values
+and an `Id`. **Initialization** is the job of its `on init` clause, which
+creation then runs — and only that clause; `on activate` is not run. It does
+not add a second way for an instance to exist: construction completes only
+when `on init` finishes. Without it, no `Id(P)` value could ever come into
+being and the whole addressing story would be inert.
+
+`create` and [`terminate`](#terminate-statement) are **entity-only**, by an
+explicit check rather than as a side effect of the type system — `create` of a
+projector, repository or any other singleton is an **Error**
+(`stmt-not-instantiable`). Both are **effects**, so both are banned in a
+function body, in `on activate` / `on passivate`, and in a correlation fold.
+Both are legal in a saga step. Binding the id and never using it is a warning
+(`stmt-initiate-id-unused` — the code keeps its original spelling): the
+instance was created and immediately made unreachable.
+
+!!! warning "Spelled `initiate` before 2.7.0"
+    `initiate` is the deprecated spelling of the same value and builds the
+    same AST. It draws `[deprecated] [value-initiate-keyword]`, and
+    `riddlc validate --fix` rewrites it to `create`. It will be removed in
+    3.0.
 
 !!! note "The asymmetry is the design"
-    `initiate` names a **type** and yields an id; `terminate` consumes an
-    **id** and yields nothing. So `initiate` is a value and `terminate` is a
+    `create` names a **type** and yields an id; `terminate` consumes an
+    **id** and yields nothing. So `create` is a value and `terminate` is a
     statement, and `on term` needs no parameter naming the instance — `self`
     is in scope for the whole body and stays live to its very end, so
     `self.id` already says which one is ending.

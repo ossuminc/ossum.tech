@@ -248,7 +248,7 @@ Lexer check: clean, `create` was already a keyword.
 
 ### Stale — teaches something wrong
 
-- **S1. `initiate` taught as current** (2.7.0). 17 lines outside the grammar:
+- **DONE 2026-11-17.** **S1. `initiate` taught as current** (2.7.0). 17 lines outside the grammar:
   `concepts/value.md`, `concepts/onclause.md`,
   `references/language-reference.md`, `references/cheat-sheet.md`,
   `introduction/what-is-riddl-based-on.md`.
@@ -285,7 +285,7 @@ Lexer check: clean, `create` was already a keyword.
 
 ### Missing — the language has it, the site does not
 
-- **M1. `create`** (2.7.0): the value, `create entity Order(…)` yielding
+- **DONE 2026-11-17.** **M1. `create`** (2.7.0): the value, `create entity Order(…)` yielding
   the new instance's `Id`, and that it runs `on init`. Language reference
   § values, `concepts/value.md`, cheat-sheet.
 - **M2. Streamlet references** (2.7.0): `streamlet_ref` keyword set is
@@ -299,7 +299,7 @@ Lexer check: clean, `create` was already a keyword.
   2026-11-16): the refusal does not recall a prior `send`/`tell`/`yield`/
   `put`. Add to the "Refusals before effects" boxes (`cheat-sheet.md:787`,
   language reference) and `guides/authors/authoring-riddl.md:564`.
-- **M4. Creation runs `on init`, never `on activate`** (CM §4.5/§13.7,
+- **DONE 2026-11-17.** **M4. Creation runs `on init`, never `on activate`** (CM §4.5/§13.7,
   2026-11-16). `language-reference.md:1059`, `concepts/onclause.md:41`.
 - **M5. Both legs of an `ask` must be wired** (CM §40.7, 2026-09-10;
   `msg-ask-target-unreachable` Error, `msg-ask-reply-unreachable`, 2.2.0).

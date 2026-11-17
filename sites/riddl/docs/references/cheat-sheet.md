@@ -447,7 +447,7 @@ messages, states, and parameters in RIDDL.
       processor: adaptor, context, entity, projector, repository or
       streamlet. `Id(entity Order)` is canonical, `Id(Order)`
       shorthand; a keyword contradicting the referent's kind is an
-      **Error**. Only entities can be `initiate`d and `terminate`d,
+      **Error**. Only entities can be `create`d and `terminate`d,
       but every processor can be named
     - `URL(scheme)` — URL with a specific scheme
     - `Range(min, max)` — bounded integer range
@@ -701,7 +701,7 @@ Wherever a statement needs a value, any of these is accepted:
 | Prompt | `prompt("compute the discount") [as <type name>]` | A typed hole: the type is checked at compile time, the computation is prose an AI fills in. The ascription is a type NAME (`as Real`, `as Recipes`), never an expression like `as String(1,30)` |
 | Boolean | `a > b and not c` | A structured boolean expression. `!` is a synonym for `not`; prettify emits `not`. Unrelated to `!=`. |
 | Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it. **Never inside a saga.** |
-| Initiate | `initiate entity Order` | Creates an instance; the value is its `Id`. Entity-only; an effect. |
+| Create | `create entity Order("A-1001")` | Creates an instance and runs its `on init` with the arguments; the value is its `Id`. Entity-only; an effect. Formerly `initiate` (deprecated). |
 | Self | `self`, `self.id` | The instance running now (`id`, `version`). Pass `self.id`, never `self`. |
 | Arithmetic | `subtotal + amount * rate` | `+ - * /` on numbers, `+` on two strings, timestamp ± duration. No power or roots — those stay a `prompt`. |
 | Duration literal | `30 days`, `1.50 hours` | Unit words, singular or plural. Not `30d`, not `PT30M` — those remain the strings used by `on quiescence` and `times out after`. |

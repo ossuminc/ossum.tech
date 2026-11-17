@@ -47,7 +47,7 @@ pseudo-code remains available where structure would be false precision.
 | Prompt | `prompt("compute the discount") [as <type>]` | A value computed by AI at generation time; the ascription states its type |
 | Boolean | `a > b and not c` | A structured boolean expression |
 | Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it |
-| Initiate | `initiate entity Order` | Brings an instance into being; **yields its `Id`** |
+| Create | `create entity Order("A-1001")` | Brings an instance into being, runs its `on init`; **yields its `Id`** |
 | Self | `self`, `self.id` | The instance executing right now |
 
 ## Value References
@@ -302,28 +302,39 @@ everywhere else in the language.
     `true` and `false` remain valid boolean *atoms* — usable with `and`, `or`,
     `not`, and standalone — just not as comparison operands.
 
-## Initiate
+## Create
 
-`initiate` brings a new instance of an entity into being, and its **value is
+`create` brings a new instance of an entity into being, and its **value is
 that instance's identity**:
 
 <!-- riddl: in-handler -->
 ```riddl
-let fresh = initiate entity ExampleEntity
+let fresh = create entity ExampleEntity
 tell command ExampleWelcome(target = fresh) to fresh
 ```
 
-It is not a second way to exist — construction still completes only when
-`on init` finishes. But without it no `Id` value could ever come into being,
-so nothing could be addressed.
+Creation is two steps with one name. The instance is **created** — given a
+place for its values and an `Id` — and then **initialized** by its
+[`on init`](onclause.md) clause, which receives any arguments you pass:
+`create entity Order("A-1001")`. Only `on init` runs; `on activate` is for an
+instance that already exists coming back into memory, never a new one.
 
-`initiate` and [`terminate`](statement.md) are **entity-only** and are both
+It is not a second way to exist — construction completes only when `on init`
+finishes. But without it no `Id` value could ever come into being, so nothing
+could be addressed.
+
+`create` and [`terminate`](statement.md) are **entity-only** and are both
 **effects**: banned in a function body, in `on activate`/`on passivate`, and
 in a correlation fold; legal in a saga step.
 
 !!! warning "Discarding the id is a warning"
-    The id is the only thing `initiate` produces, so binding it and never
+    The id is the only thing `create` produces, so binding it and never
     using it means the instance was created and immediately made unreachable.
+
+!!! note "Formerly `initiate`"
+    Before 2.7.0 this value was spelled `initiate`. That spelling still
+    parses, as a deprecation (`value-initiate-keyword`) that
+    `riddlc validate --fix` rewrites to `create`, until 3.0.
 
 ## Self
 
