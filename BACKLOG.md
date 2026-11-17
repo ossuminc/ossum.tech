@@ -219,14 +219,7 @@ recorded in NOTEBOOK.md § "2.7.0 language-docs audit". What remains:
   (`language-reference.md` § Deprecated Constructs, `migration/1.x-to-2.0.md`
   § 2). riddl `42f582ccc` gave it a computed `--fix` after 2.7.0. Probe first:
   `riddlc validate --fix` on a model containing `reference to entity E`.
-- **7b. D1, deferred: rule ids for behaviour the prose already describes.**
-  The 2.3.0 repository Errors (`repo-*`, `stmt-store-*`, `stmt-update-*`,
-  `stmt-upsert-needs-key`, `value-query-outside-repository`,
-  `value-not-a-collection`, `value-membership-type-mismatch`) and 2.2.0
-  `handler-duplicate-special-clause`. The rules are documented; only the ids
-  are missing. The site has never promised an id per rule. Reid ruled on D2,
-  which became M10 and is done, but did not rule on D1.
-- **7c. Three riddl reports still open**, each in `riddl/task/`:
+- **7c. Four riddl reports still open**, each in `riddl/task/`:
   - **R5**: prettify joins definitions onto one line.
   - **R6**: a processor reference's keyword is not checked against the
     target's kind. The docs say "prefer `streamlet`" because of it; revisit
@@ -234,3 +227,6 @@ recorded in NOTEBOOK.md § "2.7.0 language-docs audit". What remains:
   - **R7**: a domain's `option external` deprecation advises a context
     prefix. `concepts/option.md` lists the domain form as deprecated without
     a replacement until riddl decides one.
+  - **R8**: `value-membership-type-mismatch` is never emitted, and
+    `repo-link-type-mismatch` did not fire on an `Integer`-to-`String` link.
+    Neither id is on the site; add them if riddl makes them fire.

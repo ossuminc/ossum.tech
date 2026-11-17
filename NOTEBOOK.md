@@ -32,8 +32,8 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 **Nothing half-done.** The 2.7.0 audit and upgrade tasks are closed (in
 `task/done/` with Results), and `task/` is empty. Open follow-ups are
-**BACKLOG 7a–7c**: a `--fix` table cell owed at riddl's next release, the D1
-deferral, and three riddl reports.
+**BACKLOG 7a and 7c**: a `--fix` table cell owed at riddl's next release,
+and four riddl reports. 7b (D1) was ruled on and is done.
 
 **A deprecated spelling lasts until the NEXT MAJOR** (Reid, 2026-11-17).
 "Removed in 3.0" is correct. riddl has since reworded its "forever" rule
@@ -98,6 +98,40 @@ same rule.
   model, the lexer drift trap, and the version-differences table.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
+
+---
+
+### 2.7.0 D1: rule ids where the prose already said the rule ✅ **2026-11-17**
+
+Reid ruled "do it, don't defer it". Every id was taken from `RuleId.scala` at
+tag `2.7.0` and **probed** against `../bin/riddlc` before it went on a page.
+22 of the 25 candidate ids now appear, plus
+`handler-repository-handles-events`, on the language reference, the
+repository, on-clause and domain concepts, the cheat sheet and the RBBQ
+kitchen page.
+
+**Two ids are not documented, on purpose**, and went to riddl as R8:
+`value-membership-type-mismatch` is defined and never emitted, and
+`repo-link-type-mismatch` could not be made to fire on a link between an
+`Integer` and a `String` field. Documenting either would promise a check that
+does not happen. `repo-schema-history-unknown-data` is reachable only through
+JSON or BAST, so it was left out too.
+
+**The probes found a fourth stale example, the `compensate` pattern again.**
+The language reference's Repositories example handled `on event
+CartCreated`, which draws `handler-repository-handles-events`, and the cheat
+sheet said repository handlers "typically react to events". riddl's position
+is the opposite: a repository is changed by commands and read by queries, and
+an inlet carrying an event is an Error. The fence now stores a `SaveCart`
+command. It stayed green for the same reason `compensate` did: the gate
+cannot see a Warning.
+
+The "only suggestive" schema kinds turned out to carry eight shape warnings
+(`repo-*-no-links` and kin); the language reference now tables them under
+Schema Clauses.
+
+Proofs: gate 392 / 52 / 0, EXIT 0; five strict builds clean; 80 cross-site
+links, 0 broken.
 
 ---
 
