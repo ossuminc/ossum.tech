@@ -273,7 +273,7 @@ Lexer check: clean, `create` was already a keyword.
   numeric constant `"5"` → `5`, single-alternative `one of { A }`,
   `option is package` → `namespace`. The migration table lacks most of the
   same. Each row should name its rule id and whether `--fix` handles it.
-- **S5. The RBBQ tutorial teaches `option is external`** as the current
+- **DONE 2026-11-17.** **S5. The RBBQ tutorial teaches `option is external`** as the current
   form (`opt-deprecated` since 2.0.0) in 6 places:
   `tutorials/rbbq/external-contexts.md:10,13,37`,
   `tutorials/rbbq/patterns.md:335,390`,
@@ -288,7 +288,7 @@ Lexer check: clean, `create` was already a keyword.
 - **DONE 2026-11-17.** **M1. `create`** (2.7.0): the value, `create entity Order(…)` yielding
   the new instance's `Id`, and that it runs `on init`. Language reference
   § values, `concepts/value.md`, cheat-sheet.
-- **M2. Streamlet references** (2.7.0): `streamlet_ref` keyword set is
+- **DONE 2026-11-17.** **M2. Streamlet references** (2.7.0): `streamlet_ref` keyword set is
   `source | sink | merge | split | void | flow | router | streamlet`
   (+ deprecated `processor`); and the one exception: in an epic step's
   `send … from`, `flow X` is a GROUP (`flow_group_ref`) — write
@@ -353,6 +353,18 @@ line by line.
 
 ### Reported to riddl (`riddl/task/`)
 
+**R1–R4 are done in riddl** (`42f582ccc`, after 2.7.0; task in
+`riddl/task/done/`). Reid also ruled there that API and binary
+compatibility follow the same rule: stable within a major, fair game at the
+next. When the release after 2.7.0 ships, the deprecation tables' "Fixed by"
+cell for `type-reference-to-is-id` gains `--fix`.
+
+- **R5. `prettify` joins definitions onto one line** and drops a function's
+  `???` body. Filed `riddl/task/2026-11-17-prettify-joins-definitions-onto-one-line.md`.
+- **R6. A processor reference's keyword is not kind-checked.**
+  `tell … to repository F` validates silently when `F` is a streamlet. The
+  docs now say "prefer `streamlet`" rather than promise a check. Filed
+  `riddl/task/2026-11-17-processor-ref-keyword-not-kind-checked.md`.
 - **R1.** `type-reference-to-is-id` and `opt-deprecated` are emitted as
   deprecations but lack `deprecates = true`, so `RuleId.deprecations`
   omits them — the exact failure mode `RuleId`'s doc comment says the enum

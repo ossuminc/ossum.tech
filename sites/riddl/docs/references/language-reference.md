@@ -306,6 +306,28 @@ suppressible **StyleWarning** nudging you to say what you meant.
     Write `streamlet <id> as <shape>` instead; `riddlc prettify` does it for
     you. They are slated for removal in 3.0.
 
+#### Referring to a streamlet
+
+A reference to a streamlet, such as the target of a `tell` or a use-case
+step, is keyword-led like every processor reference. Any of these keywords
+works: `streamlet`, or any shape keyword (`source`, `sink`, `flow`, `merge`,
+`split`, `router`, `void`). The deprecated `processor` also still works. So
+`tell … to streamlet OrderEnricher` and `tell … to flow OrderEnricher` name the
+same thing. `flow`, `router`, `streamlet` and `processor` became reference
+keywords in 2.7.0. Before that, a flow or router streamlet could not be
+referred to at all.
+
+Prefer `streamlet`. The keyword is not checked against the streamlet's shape,
+or even against its kind, so a `source` keyword on a flow draws no message.
+`streamlet` is the spelling that is always right.
+
+!!! warning "`flow X` in a use-case step is a group"
+    `flow` is also an alias for a UI [group](#element-aliases). In the
+    positions where a use-case step names who acts (`send … from`, `for`,
+    `refuses`, and both ends of an arbitrary step), `flow X` is parsed as a
+    **group** reference. To name a flow-shaped streamlet there, write
+    `streamlet X`.
+
 ### Domain Hierarchy
 
 RIDDL models are organized hierarchically:
@@ -1906,7 +1928,9 @@ tell command ExampleWelcome(target = fresh) to fresh
 ```
 
 The two forms are told apart by the **keyword**: every processor reference is
-keyword-led (`to entity Order`), so a bare path is unambiguously a value. The
+keyword-led (`to entity Order`, `to streamlet Enricher`; see
+[Referring to a streamlet](#referring-to-a-streamlet)), so a bare path is
+unambiguously a value. The
 instance is deliberately **never resolved** — a model cannot know *which*
 `Order` an `Id(entity Order)` holds, that being a runtime value, and nothing
 needs to: every question asked of a `tell` target is answered by the processor

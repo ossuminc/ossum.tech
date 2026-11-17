@@ -130,6 +130,15 @@ streamlet OrderEnricher as flow is {
 }
 ```
 
+## Referring to a Streamlet
+
+Elsewhere in a model, such as in a `tell` or a use-case step, a streamlet is
+named with `streamlet` or with any shape keyword: `tell … to streamlet
+Enricher` and `tell … to flow Enricher` mean the same. Prefer `streamlet`:
+the keyword is not checked against the shape. And in a use-case step's
+`send … from`, `flow X` means a UI *group*, not a streamlet. See
+[Referring to a streamlet](../references/language-reference.md#referring-to-a-streamlet).
+
 ## Connecting Processors
 
 Processors are wired together with [Connectors](connector.md), which link an
