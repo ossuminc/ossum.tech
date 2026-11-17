@@ -275,6 +275,19 @@ Creates a `.bast` file next to the input file. BAST files can be loaded
 significantly faster than parsing RIDDL source, making them useful for
 large models.
 
+!!! warning "A `.bast` is tied to its format revision"
+    Each `.bast` records the BAST format revision it was written with, and
+    riddlc reads only its own. riddlc 2.7.0 is revision **31**, so a `.bast`
+    written by 2.6.0 or earlier fails to load with exit status 7:
+
+    ```
+    Invalid BAST file: BAST format revision 30 does not match expected
+    revision 31; regenerate .bast files with the current riddlc
+    ```
+
+    Re-run `bastify` on the source after upgrading. A `.bast` is a cache,
+    never a source of truth.
+
 ### unbastify
 
 Convert a BAST file back to RIDDL source:
@@ -368,7 +381,7 @@ stub. That is the difference between it and `grep`.
 
 | Predicate | Matches |
 |---|---|
-| `-type <kind>` | definitions of that kind — `entity`, `context`, `command`, `handler`, … |
+| `-type <kind>` | nodes of that kind: definitions (`entity`, `context`, `command`, `handler`, …), statements, and since 2.7.0 composite **values** (`create`, `ask`, …) |
 | `-name <glob>` | identifier matches the glob; `-iname` is the case-insensitive form |
 | `-path <glob>` | full path matches the glob; `-ipath` case-insensitive |
 | `-regex <re>` | identifier matches the regex; `-iregex` case-insensitive |
@@ -388,6 +401,18 @@ stub. That is the difference between it and `grep`.
 | `-stub` | the body is `???` |
 | `-empty` | the body is empty |
 | `-unresolved` | holds a reference that does not resolve |
+
+**Values are selectable since 2.7.0.** Before then `find` visited definitions
+and statements but never a value held inside one, so a search for every
+`create`, or every `ask`, matched nothing. Now every composite value is a node
+`-type` can name. Plain literals and bare value references are not:
+
+```bash
+riddlc find model.riddl -- -type create
+riddlc find model.riddl -- -type ask -location
+```
+
+`-type initiate` still works and means `create`.
 
 #### Combining them
 
