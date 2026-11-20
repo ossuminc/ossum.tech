@@ -326,9 +326,12 @@ same thing. `flow`, `router`, `streamlet` and `processor` became reference
 keywords in 2.7.0. Before that, a flow or router streamlet could not be
 referred to at all.
 
-Prefer `streamlet`. The keyword is not checked against the streamlet's shape,
-or even against its kind, so a `source` keyword on a flow draws no message.
-`streamlet` is the spelling that is always right.
+The keyword **is** checked against the kind it resolves to (since 2.8.0):
+`tell … to repository F`, where `F` is a streamlet, is the Error
+`ref-wrong-keyword`. For a streamlet, `streamlet`, `processor` and every shape
+keyword are all accepted — the shape keyword is *not* compared with the
+streamlet's actual shape, so `source F` on a flow draws nothing. `streamlet` is
+the spelling that is always right.
 
 !!! warning "`flow X` in a use-case step is a group"
     `flow` is also an alias for a UI [group](#element-aliases). In the
@@ -2167,7 +2170,9 @@ the usual reading of "every element satisfies it" when there are no elements.
 Every one of these forms — the quantifiers, a filter, `count of` and
 `contains` — needs a collection: a `T*` or `T+` field, a `set of`,
 `sequence of`, mapping or table. Anything else, such as a `String`, is the
-Error `value-not-a-collection`.
+Error `value-not-a-collection`. The value `contains` tests must be of the
+element type: `tags contains 5` on a `String*` is the Error
+`value-membership-type-mismatch`.
 
 Dropping the quantifier gives a **filter**, whose value is the matching
 elements rather than a boolean:
@@ -3701,7 +3706,9 @@ meaning of "the same row". A keyed schema counts as indexed on that field, so
 there is no need to write both for one field. There are no **composite** keys:
 a key names exactly one field of the stored record. A key on a field of some
 record the schema does *not* store is the Error
-`repo-schema-key-not-stored-field`.
+`repo-schema-key-not-stored-field`. A `link` joins two fields of the **same
+type**; linking an `Integer` to a `String` is the Error
+`repo-link-type-mismatch`.
 
 `with history` asks the generator for an append-only history of the table —
 every version retained rather than each write overwriting the last. It states
@@ -4656,7 +4663,7 @@ it is slated for removal in 3.0.
 | `prompt "..."` statement | `do "..."` | `prompt-statement` | `--fix`, prettify |
 | `Abstract` | `Anything` | `abstract-type` | `--fix`, prettify |
 | a quoted numeric constant, `= "5"` | `= 5` | `quoted-constant-literal` | `--fix`, prettify |
-| `reference to entity E` | `Id(entity E)` | `type-reference-to-is-id` | prettify |
+| `reference to entity E` | `Id(entity E)` | `type-reference-to-is-id` | `--fix`, prettify |
 | `type C is command { … }` (any message kind) | `command C is { … }` | `type-first-aggregate` | prettify |
 | `state X is record R`, or no introducer | `state X of record R` | `state-is-record` | prettify |
 | entity `option is event-sourced`/`aggregate`/`transient`/`consistent`/`available` | that word before `entity` | `entity-option-to-intention` | prettify |

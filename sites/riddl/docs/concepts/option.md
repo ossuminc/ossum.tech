@@ -119,6 +119,7 @@ checked against riddl 2.7.0's option registry.
     | Deprecated | Replacement | Since |
     |------------|-------------|-------|
     | `gateway`, `service`, `external` on a Context | the [context intention prefix](context.md#intention) | 2.0.0 |
+    | `external` on a Domain | `external` before each of the domain's contexts: `domain D is { external context C is { … } }` | 2.0.0 |
     | `wrapper` | an [adaptor](adaptor.md) | 2.0.0 |
     | `package` | `namespace` | 1.15.0 |
 

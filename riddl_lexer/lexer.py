@@ -125,6 +125,15 @@ class RiddlLexer(RegexLexer):
         'section', 'selector', 'selects', 'sequence', 'show', 'shown',
         'shows', 'starts', 'story', 'submits', 'tab', 'title', 'triggers',
         'updates', 'url', 'value', 'where', 'window', 'writes', 'yields',
+        # 2.8.0 value forms: `sum of xs`, `x otherwise y`. Both are keywords
+        # but NOT reserved -- a field may still be named `sum` -- so, like
+        # `quiescence`, highlighting them is best-effort.
+        'otherwise', 'sum',
+        # 2.8.0 clauses and schedules: `on every <period>`, `on entry`,
+        # `every cron "…"`. riddl does not list these three in
+        # Keyword.allKeywords, so check-lexer-keywords.py cannot ask for them;
+        # they are added by hand, best-effort, like `quiescence`.
+        'every', 'entry', 'cron',
     )
 
     # Readability words - prepositions, connectors, and the user-story modal

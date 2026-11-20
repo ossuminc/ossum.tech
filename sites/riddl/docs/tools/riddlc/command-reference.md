@@ -277,12 +277,13 @@ large models.
 
 !!! warning "A `.bast` is tied to its format revision"
     Each `.bast` records the BAST format revision it was written with, and
-    riddlc reads only its own. riddlc 2.7.0 is revision **31**, so a `.bast`
-    written by 2.6.0 or earlier fails to load with exit status 7:
+    riddlc reads only its own. riddlc 2.8.0 is revision **37** (2.7.0 was
+    31), so a `.bast` written by any earlier release fails to load with exit
+    status 7:
 
     ```
     Invalid BAST file: BAST format revision 30 does not match expected
-    revision 31; regenerate .bast files with the current riddlc
+    revision 37; regenerate .bast files with the current riddlc
     ```
 
     Re-run `bastify` on the source after upgrading. A `.bast` is a cache,
@@ -414,6 +415,17 @@ riddlc find model.riddl -- -type ask -location
 ```
 
 `-type initiate` still works and means `create`.
+
+2.8.0's new values are kinds too, named in kebab case with a `-value` suffix
+where the node has one: `sum-value`, `otherwise-value`, `calendar-schedule`,
+`cron-schedule`, `calendar-period-literal`. The new `on every` and `on entry`
+clauses have no `-type` kind of their own; their names are fixed, so
+`-name every` and `-name entry` find them:
+
+```bash
+riddlc find model.riddl -- -type cron-schedule
+riddlc find model.riddl -- -name every
+```
 
 #### Combining them
 
