@@ -39,7 +39,9 @@ entity Order is {
   state Shipped of record ShippedData is {
     handler ShippedHandler is { ??? }
   }
-  handler DispatchHandler is { ??? }
+  handler DispatchHandler is {
+    on init(start: ShippedData) is { morph entity Order to state Packing with start }
+  }
 }
 -->
 

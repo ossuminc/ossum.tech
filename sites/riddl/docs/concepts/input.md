@@ -14,6 +14,9 @@ page SignupPage is {
   form Signup accepts record SignupDetails
 }
 entity Account is {
+  handler AccountLifecycle is {
+    on init(start: AccountData) is { morph entity Account to state Registered with start }
+  }
   state Registered of record AccountData is {
     handler AccountHandler is { on command CreateAccount { ??? } }
   }

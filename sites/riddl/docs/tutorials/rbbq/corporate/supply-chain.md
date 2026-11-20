@@ -75,7 +75,10 @@ event-sourced entity PurchaseOrder as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state ActivePurchaseOrder of record PurchaseOrderData is {
+  handler PurchaseOrderLifecycle is {
+    on init(start: PurchaseOrderData) is { morph entity PurchaseOrder to state ActivePurchaseOrder with start }
+  }
+  state ActivePurchaseOrder of record PurchaseOrderData is {
     handler ActivePurchaseOrderHandler is {
       on cmd: command ApproveOrder is {
         yield event OrderApproved(purchaseOrderId = cmd.purchaseOrderId)

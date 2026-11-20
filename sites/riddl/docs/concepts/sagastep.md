@@ -18,6 +18,9 @@ command RefundCharge is { transactionId is String }
 command CreateOrder is { customerId is String }
 command CancelOrder is { orderId is String }
 entity Inventory is {
+  handler InventoryLifecycle is {
+    on init(start: InventoryData) is { morph entity Inventory to state Held with start }
+  }
   state Held of record InventoryData is {
     handler InventoryHandler is {
       on command ReserveItems { ??? }
@@ -26,6 +29,9 @@ entity Inventory is {
   }
 }
 entity PaymentService is {
+  handler PaymentServiceLifecycle is {
+    on init(start: InventoryData) is { morph entity PaymentService to state Charging with start }
+  }
   state Charging of record InventoryData is {
     handler PaymentHandler is {
       on command ProcessCharge { ??? }
@@ -34,6 +40,9 @@ entity PaymentService is {
   }
 }
 entity OrderService is {
+  handler OrderServiceLifecycle is {
+    on init(start: InventoryData) is { morph entity OrderService to state Placing with start }
+  }
   state Placing of record InventoryData is {
     handler OrderHandler is {
       on command CreateOrder { ??? }

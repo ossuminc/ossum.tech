@@ -101,6 +101,9 @@ context Fulfillment is {
   }
 
   entity Monitor is {
+    handler MonitorLifecycle is {
+      on init(start: FulfillmentRow) is { morph entity Monitor to state Watching with start }
+    }
     state Watching of record FulfillmentRow is {
       handler MonitorHandler is { on command ReportStalled { ??? } }
     }

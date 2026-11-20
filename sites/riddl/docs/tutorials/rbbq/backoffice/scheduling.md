@@ -66,7 +66,10 @@ event-sourced entity Shift as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state ActiveShift of record ShiftData is {
+  handler ShiftLifecycle is {
+    on init(start: ShiftData) is { morph entity Shift to state ActiveShift with start }
+  }
+  state ActiveShift of record ShiftData is {
     handler ActiveShiftHandler is {
       on cmd: command AssignEmployee is {
         yield event EmployeeAssigned(shiftId = cmd.shiftId)

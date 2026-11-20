@@ -7,7 +7,7 @@ description: >-
 <!-- riddl-prelude
     type Price is Decimal(10, 2)
     type OrderId is String   // String, to match the shared wrapper's orderId
-    type ProductId is UUID
+    type ProductId is String   // String, to match the shared wrapper's productId
     type CartId is UUID
     type Tags is String*
     // Declared as EVENTS to match the domain prelude: an `on event X`
@@ -90,11 +90,13 @@ description: >-
     type OrderLifecycle is OrderPlaced | OrderPaymentReceived
     outlet OrderEvents is type OrderLifecycle
     entity Cart is {
+      handler CartLifecycle is { on init(start: CartData) is { morph entity Cart to state Filling with start } }
       state Filling of record CartData is {
         handler CartHandler is { on event ItemAdded { ??? } }
       }
     }
     entity Catalog is {
+      handler CatalogLifecycle is { on init(start: ProductRecord) is { morph entity Catalog to state Listed with start } }
       state Listed of record ProductRecord is {
         handler CatalogHandler is {
           on query GetProduct { reply result ProductInfo(ProductRecord.id, ProductRecord.price) }
@@ -102,6 +104,7 @@ description: >-
       }
     }
     entity Review is {
+      handler ReviewLifecycle is { on init(start: OrderData) is { morph entity Review to state Reviewing with start } }
       state Reviewing of record OrderData is {
         handler ReviewHandler is { on command EscalateReview { ??? } }
       }
@@ -121,7 +124,10 @@ description: >-
       state Done of record DoneData is {
         handler DoneHandler is { on command ConfirmOrder { ??? } }
       }
-      handler DispatchHandler is { on command ShipOrder { ??? } }
+      handler DispatchHandler is {
+        on init(start: OrderData) is { morph entity Order to state Placed with start }
+        on command ShipOrder { ??? }
+      }
       // Fences on this page `tell` Order these, so it must receive them.
       handler ShippedHandler is {
         on command ShipOrder { ??? }
@@ -180,6 +186,9 @@ description: >-
       record ShoppingCartData is { sku is String }
       command AddToCart is { sku is String }
       entity Cart is {
+        handler CartLifecycle is {
+          on init(start: ShoppingCartData) is { morph entity Cart to state Filling with start }
+        }
         state Filling of record ShoppingCartData is {
           handler CartHandler is { on command AddToCart { ??? } }
         }
@@ -902,7 +911,10 @@ and invariants that apply while the entity is in that state:
 <!-- riddl: in-context no-prelude=Product -->
 ```riddl
 entity Product is {
-  initial state ProductData of record ProductRecord is {
+  handler ProductLifecycle is {
+    on init(start: ProductRecord) is { morph entity Product to state ProductData with start }
+  }
+  state ProductData of record ProductRecord is {
     invariant PriceIsPositive is price > MinimumPrice
 
     handler ProductHandler is {
@@ -927,7 +939,9 @@ entity level instead:
 ```riddl
 entity SimpleProduct is {
   state ProductData of record ProductRecord
-  handler ProductHandler is { ??? }
+  handler ProductHandler is {
+    on init(start: ProductRecord) is { morph entity SimpleProduct to state ProductData with start }
+  }
 }
 ```
 
@@ -939,7 +953,10 @@ starting state, and the handler that is live after a `morph`:
 <!-- riddl: skip reason="its `state Active` is elided to `???`, and RIDDL 2.0 requires every state to have a handler" -->
 ```riddl
 entity Order is {
-  initial state Pending of record PendingData is {
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start }
+  }
+  state Pending of record PendingData is {
     initial handler PendingHandler is { ??? }
   }
   state Active of record ActiveData is { ??? }
@@ -962,7 +979,10 @@ statement transitions between states:
 <!-- riddl: skip reason="`record ActiveOrderData()` is an empty constructor for a record that must have at least one field; the fence elides the arguments" -->
 ```riddl
 entity Order is {
-  initial state PendingOrder of record PendingOrderData is {
+  handler OrderLifecycle is {
+    on init(start: PendingOrderData) is { morph entity Order to state PendingOrder with start }
+  }
+  state PendingOrder of record PendingOrderData is {
     handler PendingHandler is {
       on command ConfirmOrder {
         morph entity Order to state Order.ActiveOrder
@@ -1145,9 +1165,25 @@ yielded event, which is also what keeps replay from re-firing the timer.
 
 `on init` and `on term` may declare a parameter list. Neither is required to:
 
-<!-- riddl: in-clauses -->
+<!-- riddl: in-context -->
 ```riddl
-on init (startedAt: TimeStamp) is { do "seed the new instance" }
+record TicketData is { number: String, rush: Boolean }
+
+entity Ticket is {
+  handler Lifecycle is {
+    on init(ticketNumber: String, rush: Boolean) is {
+      when rush then
+        morph entity Ticket to state Expedited
+          with record TicketData(number = ticketNumber, rush = rush)
+      else
+        morph entity Ticket to state Queued
+          with record TicketData(number = ticketNumber, rush = rush)
+      end
+    }
+  }
+  state Queued of record TicketData is { handler QueuedHandler is { ??? } }
+  state Expedited of record TicketData is { handler ExpeditedHandler is { ??? } }
+}
 ```
 
 `on init`'s parameters are how a **business key** — an order number, an email —
@@ -1679,6 +1715,9 @@ record HamperData is { total is Natural }
 command AddItem is { sku is String }
 
 entity Hamper is {
+  handler HamperLifecycle is {
+    on init(start: HamperData) is { morph entity Hamper to state Collecting with start }
+  }
   state Collecting of record HamperData is {
     handler HamperHandler is {
       on command AddItem {
@@ -1946,7 +1985,7 @@ processor, by naming a value typed [`Id(...)`](#instance-identity):
 
 <!-- riddl: in-handler -->
 ```riddl
-let fresh = create entity ExampleEntity
+let fresh = create entity ExampleEntity(cart)
 tell command ExampleWelcome(target = fresh) to fresh
 ```
 
@@ -2198,6 +2237,7 @@ event-sourced entity Basket is {
   event LabelDropped is { label: String }
   state Live of record Basket.BasketData
   handler Folds is {
+    on init(start: Basket.BasketData) is { morph entity Basket to state Live with start }
     // append: the value goes on the END of the collection
     on added: event Basket.LineAdded {
       append added.line to field Basket.BasketData.lines
@@ -2408,7 +2448,7 @@ statement, so it is used through `let`:
 
 <!-- riddl: in-handler -->
 ```riddl
-let answer = ask query GetProduct of entity Catalog
+let answer = ask query GetProduct(id = productId) of entity Catalog
 ```
 
 Before `ask`, a model could say a message was sent (`tell`) and what handling
@@ -2465,7 +2505,7 @@ entity Storefront is {
   outlet Questions is query GetStock
   handler Shop is {
     on c: command CheckStock {
-      let level = ask query GetStock of entity Warehouse
+      let level = ask query GetStock(sku = c.sku) of entity Warehouse
       do "decide what to show from level"
     }
     on result StockLevel { do "the answer arrives here" }
@@ -2569,7 +2609,7 @@ new instance's `Id`, so it is used through `let`.
 
 <!-- riddl: in-handler -->
 ```riddl
-let fresh = create entity ExampleEntity
+let fresh = create entity ExampleEntity(cart)
 tell command ExampleWelcome(target = fresh) to fresh
 ```
 
@@ -3152,9 +3192,12 @@ record Cart is { items: many CartLine }
 command SaveCart is { cart: Cart }
 
 repository CartRepository is {
-  schema CartData is relational of
-    cart as record Cart
-    link cartItems as field Cart.items.id to field Product.id
+  // A link joins two STORED records' fields; it cannot reach inside a
+  // collection, so the lines are a table of their own.
+  schema CartData is relational
+    of cart as record Cart
+    of lines as record CartLine
+    link cartItems as field CartLine.id to field Product.id
 
   inlet Saves is command SaveCart
 
@@ -3773,6 +3816,9 @@ domain Garibaldi is {
     record OrderState is { status is String }
     entity Order is {
       version 3
+      handler OrderLifecycle is {
+        on init(start: OrderState) is { morph entity Order to state Open with start }
+      }
       state Open of record OrderState is {
         handler OrderHandler is { on command Reorder { ??? } }
       }

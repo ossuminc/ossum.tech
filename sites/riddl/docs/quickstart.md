@@ -113,11 +113,17 @@ context Catalog is {
 
     outlet ProductEvents is event ProductCreated
 
-    initial state Active of record ProductInfo is {
+    handler ProductLifecycle is {
+      on init(start: ProductInfo) is {
+        morph entity Catalog.Product to state Catalog.Product.Active with start
+      }
+    }
+    state Active of record ProductInfo is {
       handler Main is {
-        on command CreateProduct {
+        on cmd: command CreateProduct {
           do "work out the new product's ID"
-          yield event ProductCreated(id = "a value", name = "a value", price = 1.00, at = "a value")
+          yield event ProductCreated(id = self.id, name = cmd.name, price = cmd.price,
+            at = system.now)
         }
         on event ProductCreated {
           set field Active.name to ProductCreated.name
@@ -198,11 +204,17 @@ context Shopping is {
 
     outlet CartEvents is event ItemAdded
 
-    initial state Active of record CartState is {
+    handler CartLifecycle is {
+      on init(start: CartState) is {
+        morph entity Shopping.Cart to state Shopping.Cart.Active with start
+      }
+    }
+    state Active of record CartState is {
       handler Main is {
-        on command AddItem {
+        on add: command AddItem {
           do "work out where the item belongs in the cart"
-          yield event ItemAdded(cartId = "a value", productId = "a value", quantity = 1, at = "a value")
+          yield event ItemAdded(cartId = self.id, productId = add.productId,
+            quantity = add.quantity, at = system.now)
         }
         on event ItemAdded {
           do "add or update the item in the cart"
@@ -256,11 +268,17 @@ domain OnlineShop is {
 
       outlet ProductEvents is event ProductCreated
 
-      initial state Active of record ProductInfo is {
+      handler ProductLifecycle is {
+        on init(start: ProductInfo) is {
+          morph entity Catalog.Product to state Catalog.Product.Active with start
+        }
+      }
+      state Active of record ProductInfo is {
         handler Main is {
-          on command CreateProduct {
+          on cmd: command CreateProduct {
             do "work out the new product's ID"
-            yield event ProductCreated(id = "a value", name = "a value", price = 1.00, at = "a value")
+            yield event ProductCreated(id = self.id, name = cmd.name, price = cmd.price,
+              at = system.now)
           }
           on event ProductCreated {
             set field Active.name to ProductCreated.name
@@ -307,11 +325,17 @@ domain OnlineShop is {
 
       outlet CartEvents is event ItemAdded
 
-      initial state Active of record CartState is {
+      handler CartLifecycle is {
+        on init(start: CartState) is {
+          morph entity Shopping.Cart to state Shopping.Cart.Active with start
+        }
+      }
+      state Active of record CartState is {
         handler Main is {
-          on command AddItem {
+          on add: command AddItem {
             do "work out where the item belongs in the cart"
-            yield event ItemAdded(cartId = "a value", productId = "a value", quantity = 1, at = "a value")
+            yield event ItemAdded(cartId = self.id, productId = add.productId,
+              quantity = add.quantity, at = system.now)
           }
           on event ItemAdded {
             do "add or update the item in the cart"

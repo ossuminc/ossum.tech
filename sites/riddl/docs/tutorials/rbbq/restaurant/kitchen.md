@@ -149,7 +149,10 @@ event-sourced entity KitchenTicket as flow is {
     receivedAt: TimeStamp
   }
 
-  initial state Received of record KitchenTicketData is {
+  handler KitchenTicketLifecycle is {
+    on init(start: KitchenTicketData) is { morph entity KitchenTicket to state Received with start }
+  }
+  state Received of record KitchenTicketData is {
     handler ReceivedHandler is {
       on assignStation: command AssignStation is {
         yield event StationAssigned(

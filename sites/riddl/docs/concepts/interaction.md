@@ -29,6 +29,9 @@ ten step forms:
 record HamperData is { onHand: Natural }
 entity Hamper is {
   invariant MustHaveStock is "the item must be in stock"
+  handler HamperLifecycle is {
+    on init(start: HamperData) is { morph entity Hamper to state Holding with start }
+  }
   state Holding of record HamperData is { handler HamperHandler is { ??? } }
 }
 record OrderData is { confirmationNumber is String }

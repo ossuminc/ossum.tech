@@ -43,6 +43,9 @@ domain Garibaldi is {
     entity Order is {
       version 3
 
+      handler OrderLifecycle is {
+        on init(start: OrderData) is { morph entity Order to state Placed with start }
+      }
       state Placed of record OrderData is {
         handler OrderHandler is { on command PlaceOrder { ??? } }
       }

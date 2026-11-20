@@ -98,6 +98,9 @@ domain Banking is {
 
     // Entity: Internal system component
     entity Account is {
+      handler AccountLifecycle is {
+        on init(start: AccountState) is { morph entity Account to state Active with start }
+      }
       state Active of record AccountState is {
         handler Operations is {
           on command Deposit { ??? }

@@ -40,7 +40,8 @@ all eight.
 repository CartRepository is {
   schema CartData is relational
     of cart as record Cart
-    link cartItems as field Cart.items.id to field Product.id
+    of items as record CartItem
+    link cartItems as field CartItem.id to field Product.id
     index on field Cart.id
 }
 ```

@@ -452,8 +452,8 @@ domain ECommerce is {
       on command StartCheckout {
         do "move the user to the CheckoutFlow group"
       }
-      on command ProcessPayment {
-        send command ChargePayment(amount = 1.00) to outlet PaymentsOut
+      on pay: command ProcessPayment {
+        send command ChargePayment(amount = pay.amount) to outlet PaymentsOut
       }
     }
   }

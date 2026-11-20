@@ -40,6 +40,9 @@ the message to a downstream inlet:
 entity Thermometer is {
   outlet alerts is event TemperatureAlert
 
+  handler ThermometerLifecycle is {
+    on init(start: ReadingData) is { morph entity Thermometer to state Watching with start }
+  }
   state Watching of record ReadingData is {
     handler WatchTemperature is {
       on reading: event TemperatureReading {

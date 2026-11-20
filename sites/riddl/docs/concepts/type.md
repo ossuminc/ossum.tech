@@ -166,6 +166,9 @@ event OrderPlaced is { cartId is CartId }
 result OrderInfo is { orderId is OrderId }
 command LookUp is { headword is String }
 entity AnEntity is {
+  handler AnEntityLifecycle is {
+    on init(start: DictionaryEntry) is { morph entity AnEntity to state AnEntityState with start }
+  }
   state AnEntityState of record DictionaryEntry is {
     handler AnEntityHandler is { on command LookUp { ??? } }
   }

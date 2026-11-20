@@ -62,6 +62,9 @@ domain Greeting is {
       inlet Hellos is command SayHello
       outlet Greetings is event HelloSaid
 
+      handler GreeterLifecycle is {
+        on init(start: GreeterState) is { morph entity Greeter to state Active with start }
+      }
       state Active of record GreeterState is {
         handler GreeterHandler is {
           // `hello:` binds the handled message, so its fields are in scope.

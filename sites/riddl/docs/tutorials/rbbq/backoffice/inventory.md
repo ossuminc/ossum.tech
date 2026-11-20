@@ -71,7 +71,10 @@ event-sourced entity InventoryItem as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state TrackedItem of record InventoryItemData is {
+  handler InventoryItemLifecycle is {
+    on init(start: InventoryItemData) is { morph entity InventoryItem to state TrackedItem with start }
+  }
+  state TrackedItem of record InventoryItemData is {
     handler TrackedItemHandler is {
       on cmd: command ConsumeStock is {
         yield event StockConsumed(inventoryItemId = cmd.inventoryItemId)

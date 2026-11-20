@@ -86,7 +86,10 @@ event-sourced entity MenuItem as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state ActiveMenuItem of record MenuItemData is {
+  handler MenuItemLifecycle is {
+    on init(start: MenuItemData) is { morph entity MenuItem to state ActiveMenuItem with start }
+  }
+  state ActiveMenuItem of record MenuItemData is {
     handler ActiveMenuItemHandler is {
       on cmd: command SetPrice is {
         yield event PriceSet(menuItemId = cmd.menuItemId)
@@ -142,7 +145,10 @@ event-sourced entity MenuRelease as flow is {
 
   record MenuReleaseData is { releaseId: UUID }
 
-  initial state ActiveRelease of record MenuReleaseData is {
+  handler MenuReleaseLifecycle is {
+    on init(start: MenuReleaseData) is { morph entity MenuRelease to state ActiveRelease with start }
+  }
+  state ActiveRelease of record MenuReleaseData is {
     handler ActiveReleaseHandler is {
       on cmd: command PublishRelease is {
         yield event ReleasePublished(releaseId = cmd.releaseId)

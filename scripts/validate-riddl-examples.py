@@ -197,6 +197,17 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
     # An author may only be DEFINED in a Module or Domain, so a context-level
     # page prelude cannot supply one -- yet `by author X` appears on many
     # pages. Every wrapper therefore defines one at domain level.
+    # 2.8.0: `on init` is CREATION. An entity with states starts in the state
+    # its entity-level `on init` morphs into; without one, every wrapped
+    # fence drew `entity-init-no-morph` (500 of them at once). This is the
+    # shape of riddl's own `language/input/entity-creation.riddl`.
+    INIT_MORPH = (
+        "      handler ExampleLifecycle is {\n"
+        "        on init(start: ExampleData) is {\n"
+        "          morph entity ExampleEntity to state ExampleState with start\n"
+        "        }\n"
+        "      }\n"
+    )
     AUTHOR = '  author Reid is { name is "Reid Spencer" email is "reid@ossuminc.com" }\n'
 
     if kind == "in-function":
@@ -264,6 +275,12 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             # `get from input X` and `get from state Y` are documented together,
             # so an application wrapper needs a state to read as well as a form.
             "    entity ExampleAccount is {\n"
+            # 2.8.0: an entity with states starts where its `on init` morphs.
+            "      handler ExampleAccountLifecycle is {\n"
+            "        on init(start: ExampleData) is {\n"
+            "          morph entity ExampleAccount to state Active with start\n"
+            "        }\n"
+            "      }\n"
             "      state Active of record ExampleData is { handler H is { ??? } }\n"
             "    }\n"
             "    handler ExampleHandler is {\n"
@@ -375,7 +392,7 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "    record ExampleData is { note is String, balance is Natural }\n"
             "    command ExampleCommand is { note is String, amount is Natural }\n"
             "    entity ExampleEntity is {\n"
-            + entity_outlets +
+            + entity_outlets + INIT_MORPH +
             "      invariant BalanceNonNegative is balance >= ExampleZero\n"
             "      invariant UnderLimit requires ExampleLimit is \"under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
@@ -426,10 +443,10 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
                "    command ExampleCommand is { note is String, cart is ExampleData,\n")
             + "      order is ExampleOrder, orderId is String, amount is Natural,\n"
             "      limits is ExampleLimit, rate is Natural, subtotal is Natural,\n"
-            "      count is Natural, user is ExampleUser }\n"
+            "      count is Natural, user is ExampleUser, productId is String }\n"
             "    command ExampleWelcome is { target is Id(entity ExampleEntity) }\n"
             "    entity ExampleEntity is {\n"
-            + entity_outlets +
+            + entity_outlets + INIT_MORPH +
             "      invariant BalanceNonNegative is \"the balance must not go negative\"\n"
             "      invariant UnderLimit requires ExampleLimit is \"must stay under the limit\"\n"
             "      state ExampleState of record ExampleData is {\n"
@@ -460,6 +477,9 @@ def wrap(kind: str, body: str, prelude: str, domain_prelude: str = "") -> str:
             "          on command ExampleEntityCommand { ??? }\n"
             "        }\n      }\n"
             "      handler ExampleEntityLifecycle is {\n"
+            "        on init(start: ExampleEntityData) is {\n"
+            "          morph entity ExampleEntity to state ExampleEntityState with start\n"
+            "        }\n"
             "        on command ExampleEntityCommand { ??? }\n"
             "      }\n"
             "    }\n  }\n}\n"

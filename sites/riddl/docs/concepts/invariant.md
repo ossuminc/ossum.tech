@@ -40,6 +40,9 @@ use turns it on:
 entity Account is {
   invariant BalanceNonNegative is balance >= Zero
 
+  handler AccountLifecycle is {
+    on init(start: OpenData) is { morph entity Account to state Open with start }
+  }
   state Open of record OpenData is {
     handler Transacting is {
       on command Withdraw {
@@ -135,7 +138,10 @@ nothing:
 <!-- riddl: in-context -->
 ```riddl
 entity Account is {
-  initial state Open of record OpenData is {
+  handler AccountLifecycle is {
+    on init(start: OpenData) is { morph entity Account to state Open with start }
+  }
+  state Open of record OpenData is {
     invariant BalanceNonNegative is balance >= Zero
 
     handler Transacting is { ??? }
@@ -155,10 +161,13 @@ related rules together where an author would rather read them side by side:
 <!-- riddl: in-context -->
 ```riddl
 entity Account is {
+  handler AccountLifecycle is {
+    on init(start: OpenData) is { morph entity Account to state Open with start }
+  }
   invariant BalanceNonNegative requires state Open   is balance >= Zero
   invariant BalanceIsZero      requires state Closed is balance == Zero
 
-  initial state Open   of record OpenData   is { handler Transacting is { ??? } }
+  state Open   of record OpenData   is { handler Transacting is { ??? } }
   state         Closed of record ClosedData is { handler Settling    is { ??? } }
 }
 ```

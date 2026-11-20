@@ -214,7 +214,10 @@ events into a stream:
 entity Order is {
   outlet OrderEvents is event OrderPlaced
 
-  initial state Active of record OrderData is {
+  handler OrderLifecycle is {
+    on init(start: OrderData) is { morph entity Order to state Active with start }
+  }
+  state Active of record OrderData is {
     handler H is {
       on cmd: command PlaceOrder {
         send event OrderPlaced(cmd.id) to outlet OrderEvents

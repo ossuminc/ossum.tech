@@ -89,7 +89,10 @@ event-sourced entity LoyaltyAccount as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state Active of record LoyaltyAccountData is {
+  handler LoyaltyAccountLifecycle is {
+    on init(start: LoyaltyAccountData) is { morph entity LoyaltyAccount to state Active with start }
+  }
+  state Active of record LoyaltyAccountData is {
     handler ActiveHandler is {
       on cmd: command SuspendAccount is {
         yield event AccountSuspended(loyaltyAccountId = cmd.loyaltyAccountId)

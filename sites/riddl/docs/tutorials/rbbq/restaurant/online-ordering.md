@@ -88,7 +88,10 @@ event-sourced entity OnlineOrder as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state Browsing of record OnlineOrderData is {
+  handler OnlineOrderLifecycle is {
+    on init(start: OnlineOrderData) is { morph entity OnlineOrder to state Browsing with start }
+  }
+  state Browsing of record OnlineOrderData is {
     handler BrowsingHandler is {
       on cmd: command AddToCart is {
         yield event ItemAddedToCart(onlineOrderId = cmd.onlineOrderId)

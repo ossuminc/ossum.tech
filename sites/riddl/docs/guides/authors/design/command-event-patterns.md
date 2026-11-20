@@ -105,6 +105,9 @@ Throughout this guide, we'll use this Organization entity:
 <!-- riddl: in-context no-prelude=Info,Contacts -->
 ```riddl
 entity Organization is {
+  handler OrganizationLifecycle is {
+    on init(start: OrganizationState) is { morph entity Organization to state Active with start }
+  }
   state Active of record OrganizationState is {
     handler OrganizationHandler is {
       on command AddMembers { ??? }

@@ -135,6 +135,9 @@ application context Storefront is {
     document Dashboard shows record DashboardData
   }
   entity AuthService is {
+    handler AuthServiceLifecycle is {
+      on init(start: Credential) is { morph entity AuthService to state Ready with start }
+    }
     state Ready of record Credential is {
       handler AuthHandler is { on command Authenticate { ??? } }
     }

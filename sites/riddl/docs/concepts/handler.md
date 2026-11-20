@@ -10,7 +10,10 @@ record ActiveOrderData is { total is Natural }
 record ShippedOrderData is { trackingNumber is String }
 command ShipOrder is { trackingNumber is String }
 entity Order is {
-  initial state PendingOrder of record PendingData is {
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state PendingOrder with start }
+  }
+  state PendingOrder of record PendingData is {
     handler PendingOrderHandler is { on command ShipOrder { ??? } }
   }
   state ShippedOrder of record ShippedOrderData is {
@@ -120,9 +123,12 @@ rather than a per-state choice:
 <!-- riddl: in-context no-prelude=Order -->
 ```riddl
 entity Order is {
+  handler Lifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start }
+  }
   initial handler Common is { ??? }   // initial for Shipped, and any state
                                       // that declares no initial of its own
-  initial state Pending of record PendingData is {
+  state Pending of record PendingData is {
     initial handler PendingHandler is { ??? }
   }
   state Shipped of record ShippedData

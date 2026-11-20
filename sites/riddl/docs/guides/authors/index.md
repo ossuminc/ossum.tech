@@ -52,6 +52,11 @@ weight: 5
       record ProductListing is { name is String }
       command ListProduct is { name is String }
       entity Product is {
+        handler ProductLifecycle is {
+          on init(start: ProductListing) is {
+            morph entity Inventory.Product to state Inventory.Product.Listed with start
+          }
+        }
         state Listed of record ProductListing is {
           handler ProductHandler is { on command ListProduct { ??? } }
         }
@@ -241,6 +246,11 @@ context Catalog is {
       name is String,
       price is Money,
       category is CategoryId
+    }
+    handler ProductLifecycle is {
+      on init(start: ActiveData) is {
+        morph entity Catalog.Product to state Catalog.Product.Active with start
+      }
     }
     state Active of record ActiveData is {
       handler ActiveHandler is {
@@ -519,16 +529,21 @@ entity Account is {
   outlet AccountEvents is type AccountEvent
 
   record ActiveData is { balance is Money }
+  handler AccountLifecycle is {
+    on init(start: ActiveData) is { morph entity Account to state Active with start }
+  }
   state Active of record ActiveData is {
     handler ActiveHandler is {
-      on command Deposit {
+      on dep: command Deposit {
         do "add amount to balance"
-        send event Deposited(amount = 1.00, balance = 1.00, at = "a value") to outlet AccountEvents
+        send event Deposited(amount = dep.amount, balance = Active.balance, at = system.now)
+          to outlet AccountEvents
       }
-      on command Withdraw {
+      on wd: command Withdraw {
         when prompt("sufficient balance") then {
           do "subtract amount from balance"
-          send event Withdrawn(amount = 1.00, balance = 1.00, at = "a value") to outlet AccountEvents
+          send event Withdrawn(amount = wd.amount, balance = Active.balance, at = system.now)
+            to outlet AccountEvents
         } else {
           error "Insufficient funds"
         } end
@@ -561,16 +576,19 @@ entity Order is {
   record ShippedData is { orderId is OrderId, shippedAt is TimeStamp }
   record CancelledData is { orderId is OrderId }
 
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start }
+  }
   state Pending of record PendingData is {
     handler PendingHandler is {
-      on command ConfirmPayment {
+      on paid: command ConfirmPayment {
         morph entity Order to state Paid
-          with record PaidData(orderId = "a value", paidAt = "a value")
-        send event PaymentConfirmed(orderId = "a value") to outlet OrderEvents
+          with record PaidData(orderId = paid.orderId, paidAt = system.now)
+        send event PaymentConfirmed(orderId = paid.orderId) to outlet OrderEvents
       }
-      on command Cancel {
+      on cancel: command Cancel {
         morph entity Order to state Cancelled
-          with record CancelledData(orderId = "a value")
+          with record CancelledData(orderId = cancel.orderId)
         send event OrderCancelled(note = "a value") to outlet OrderEvents
       }
     }
@@ -578,10 +596,10 @@ entity Order is {
 
   state Paid of record PaidData is {
     handler PaidHandler is {
-      on command Ship {
+      on ship: command Ship {
         morph entity Order to state Shipped
-          with record ShippedData(orderId = "a value", shippedAt = "a value")
-        send event OrderShipped(orderId = "a value") to outlet OrderEvents
+          with record ShippedData(orderId = ship.orderId, shippedAt = system.now)
+        send event OrderShipped(orderId = ship.orderId) to outlet OrderEvents
       }
     }
   }

@@ -413,6 +413,9 @@ event-sourced entity Order is {
   event Placed is { total is Integer }
   command Place yields event Placed is { total is Integer }
   record OrderData is { total is Integer }
+  handler OrderLifecycle is {
+    on init(start: OrderData) is { morph entity Order to state Active with start }
+  }
   state Active of record OrderData is {
     handler OrderHandler is {
       on command Place { yield event Placed(total = 1) }
@@ -483,6 +486,9 @@ and all five apply only when the entity is `event-sourced`.
       command Post yields event Posted is { amount: Integer }
       event Posted is { amount: Integer, at: TimeStamp }
 
+      handler LedgerLifecycle is {
+        on init(start: Ledger.Fields) is { morph entity Ledger to state Main with start }
+      }
       state Main of record Ledger.Fields is {
         handler Behavior is {
           on post: command Ledger.Post {
@@ -512,6 +518,9 @@ event-sourced entity Order is {
   command Place yields event Placed is { total: Integer }
   event Placed is { total: Integer }
 
+  handler OrderLifecycle is {
+    on init(start: Order.Fields) is { morph entity Order to state Main with start }
+  }
   state Main of record Order.Fields is {
     handler Behavior is {
       on command Order.Place { yield event Order.Placed(total = 1) }
@@ -539,6 +548,9 @@ event-sourced entity Account is {
   command Withdraw yields event Withdrawn is { amount: Integer }
   event Withdrawn is { amount: Integer }
 
+  handler AccountLifecycle is {
+    on init(start: Account.Fields) is { morph entity Account to state Main with start }
+  }
   state Main of record Account.Fields is {
     handler H is {
       on command Account.Withdraw {
@@ -685,14 +697,14 @@ aggregate entity Account is {
   }
 
   handler Commands is {
-    on command Deposit {
+    on dep: command Deposit {
       when prompt("amount is positive") then {
-        send event MoneyDeposited(amount = 1.00) to outlet Events
+        send event MoneyDeposited(amount = dep.amount) to outlet Events
       } end
     }
-    on command Withdraw {
+    on wd: command Withdraw {
       when prompt("balance >= amount") then {
-        send event MoneyWithdrawn(amount = 1.00) to outlet Events
+        send event MoneyWithdrawn(amount = wd.amount) to outlet Events
       } else {
         error "Insufficient funds"
       } end

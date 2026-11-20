@@ -12,7 +12,10 @@ record ShippedData is { trackingNumber is String }
 command CancelOrder is { orderId is String }
 command ShipOrder is { trackingNumber is String }
 entity Order is {
-  initial state Pending of record PendingData is {
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start }
+  }
+  state Pending of record PendingData is {
     handler PendingHandler is { on command CancelOrder { ??? } }
   }
   state Shipped of record ShippedData is {
@@ -49,7 +52,7 @@ are active.
 
 <!-- riddl: in-entity -->
 ```riddl
-initial state ActiveOrder of record ActiveOrderData is {
+state ActiveOrder of record ActiveOrderData is {
   invariant TotalIsPositive is total > Zero
 
   handler ActiveOrderHandler is {
@@ -81,11 +84,12 @@ An optional `initial` keyword marks the entity's starting state:
 <!-- riddl: in-context no-prelude=Order -->
 ```riddl
 entity Order is {
-  initial state Pending of record PendingData is { ??? }
+  state Pending of record PendingData is { ??? }
   state Active  of record ActiveData  is { ??? }
   state Shipped of record ShippedData is { ??? }
 
-  handler OrderLifecycle is { on command CancelOrder { ??? } }
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start } on command CancelOrder { ??? } }
 }
 ```
 

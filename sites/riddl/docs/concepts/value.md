@@ -19,6 +19,9 @@ function Pricing is {
   function CalculateTotal is { requires record PricingInput returns record PricingInput ??? }
 }
 entity Order is {
+  handler OrderLifecycle is {
+    on init(start: DoneData) is { morph entity Order to state Started with start }
+  }
   state Started of record DoneData is { handler StartedHandler is { ??? } }
   state Done of record DoneData is { handler DoneHandler is { ??? } }
 }
@@ -96,6 +99,9 @@ record BasketData is { total is Natural }
 command AddItem is { sku is String }
 
 entity Basket is {
+  handler BasketLifecycle is {
+    on init(start: BasketData) is { morph entity Basket to state Filling with start }
+  }
   state Filling of record BasketData is {
     handler BasketHandler is {
       on command AddItem {
@@ -309,7 +315,7 @@ that instance's identity**:
 
 <!-- riddl: in-handler -->
 ```riddl
-let fresh = create entity ExampleEntity
+let fresh = create entity ExampleEntity(cart)
 tell command ExampleWelcome(target = fresh) to fresh
 ```
 

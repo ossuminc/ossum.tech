@@ -81,7 +81,10 @@ event-sourced entity DrinkOrder as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state Received of record DrinkOrderData is {
+  handler DrinkOrderLifecycle is {
+    on init(start: DrinkOrderData) is { morph entity DrinkOrder to state Received with start }
+  }
+  state Received of record DrinkOrderData is {
     handler ReceivedHandler is {
       on cmd: command PrepareDrink is {
         yield event DrinkPrepared(drinkOrderId = cmd.drinkOrderId)

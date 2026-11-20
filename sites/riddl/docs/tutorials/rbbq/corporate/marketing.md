@@ -79,7 +79,10 @@ event-sourced entity Campaign as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state ActiveCampaign of record CampaignData is {
+  handler CampaignLifecycle is {
+    on init(start: CampaignData) is { morph entity Campaign to state ActiveCampaign with start }
+  }
+  state ActiveCampaign of record CampaignData is {
     handler ActiveCampaignHandler is {
       on cmd: command LaunchCampaign is {
         yield event CampaignLaunched(campaignId = cmd.campaignId)

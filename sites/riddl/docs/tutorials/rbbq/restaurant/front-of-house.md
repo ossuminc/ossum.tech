@@ -103,7 +103,10 @@ event-sourced entity Reservation as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state Requested of record ReservationData is {
+  handler ReservationLifecycle is {
+    on init(start: ReservationData) is { morph entity Reservation to state Requested with start }
+  }
+  state Requested of record ReservationData is {
     handler RequestedHandler is {
       on cmd: command ConfirmReservation is {
         yield event ReservationConfirmed(reservationId = cmd.reservationId)

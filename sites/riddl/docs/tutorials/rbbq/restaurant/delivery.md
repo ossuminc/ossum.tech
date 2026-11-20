@@ -87,7 +87,10 @@ event-sourced entity DeliveryOrder as flow is {
 
   // Lifecycle phases are named STATES, not a status field: each state
   // declares the commands it accepts, so the compiler knows the machine.
-  initial state Pending of record DeliveryOrderData is {
+  handler DeliveryOrderLifecycle is {
+    on init(start: DeliveryOrderData) is { morph entity DeliveryOrder to state Pending with start }
+  }
+  state Pending of record DeliveryOrderData is {
     handler PendingHandler is {
       on cmd: command AssignDriver is {
         yield event DriverAssigned(deliveryId = cmd.deliveryId)
