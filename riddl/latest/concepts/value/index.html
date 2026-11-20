@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -258,7 +258,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#the-eleven-forms" class="md-skip">
+        <a href="#the-forms" class="md-skip">
           Skip to content
         </a>
       
@@ -3747,10 +3747,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-eleven-forms" class="md-nav__link">
+  <a href="#the-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Eleven Forms
+        The Forms
       
     </span>
   </a>
@@ -5522,10 +5522,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-eleven-forms" class="md-nav__link">
+  <a href="#the-forms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Eleven Forms
+        The Forms
       
     </span>
   </a>
@@ -5771,6 +5771,9 @@ function Pricing is {
   function CalculateTotal is { requires record PricingInput returns record PricingInput ??? }
 }
 entity Order is {
+  handler OrderLifecycle is {
+    on init(start: DoneData) is { morph entity Order to state Started with start }
+  }
   state Started of record DoneData is { handler StartedHandler is { ??? } }
   state Done of record DoneData is { handler DoneHandler is { ??? } }
 }
@@ -5784,7 +5787,7 @@ implementation.</p>
 <p>RIDDL 2.0 replaced what had been a mostly-opaque quoted string with a real
 value-expression system. A literal string is still accepted everywhere, so
 pseudo-code remains available where structure would be false precision.</p>
-<h2 id="the-eleven-forms">The Eleven Forms<a class="headerlink" href="#the-eleven-forms" title="Permanent link">&para;</a></h2>
+<h2 id="the-forms">The Forms<a class="headerlink" href="#the-forms" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -5836,8 +5839,8 @@ pseudo-code remains available where structure would be false precision.</p>
 </tr>
 <tr>
 <td>Ask</td>
-<td><code>ask query GetInfo of entity Catalog</code></td>
-<td>A query paired with the reply that answers it</td>
+<td><code>ask query GetInfo(sku = s) of entity Catalog</code></td>
+<td>A query paired with the reply that answers it; the arguments say what is asked</td>
 </tr>
 <tr>
 <td>Create</td>
@@ -5851,6 +5854,12 @@ pseudo-code remains available where structure would be false precision.</p>
 </tr>
 </tbody>
 </table>
+<p>These are the atoms. Values also combine: arithmetic, comparisons, collection
+predicates and counts, and — since 2.8.0 — <code>sum of</code>, <code>one of … where</code>,
+<code>x otherwise y</code>, a conditional <code>when c then a else b end</code>, <code>&lt;unit&gt; of d</code>, and
+optional chaining through a <code>T?</code> field. The
+<a href="../../references/language-reference/#totals-matches-defaults-and-choices">language reference</a>
+gives each its type and precedence.</p>
 <h2 id="value-references">Value References<a class="headerlink" href="#value-references" title="Permanent link">&para;</a></h2>
 <p>A value reference names something in scope. Four sources are consulted, in
 order:</p>
@@ -5885,14 +5894,17 @@ requiring it be assembled elsewhere first:</p>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">command</span> <span class="n">AddItem</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">sku</span> <span class="kp">is</span> <span class="nb">String</span> <span class="p">}</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kd">entity</span> <span class="n">Basket</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="kd">state</span> <span class="n">Filling</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">BasketData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="kd">handler</span> <span class="n">BasketHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">AddItem</span> <span class="p">{</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Filling</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>      <span class="p">}</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="p">}</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  <span class="p">}</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="kd">handler</span> <span class="n">BasketLifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">BasketData</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Basket</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Filling</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  <span class="p">}</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">state</span> <span class="n">Filling</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">BasketData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="kd">handler</span> <span class="n">BasketHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">AddItem</span> <span class="p">{</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="k">let</span> <span class="n">current</span> <span class="o">=</span> <span class="k">get</span> <span class="kp">from</span> <span class="kd">state</span> <span class="n">Filling</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>      <span class="p">}</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="p">}</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  <span class="p">}</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The two forms cannot appear in the same clause. An <code>input</code> exists only inside
 an <code>application</code> context, and <strong>state may be read only inside the entity that
@@ -6041,7 +6053,7 @@ type on both sides.</p>
 <p><code>create</code> brings a new instance of an entity into being, and its <strong>value is
 that instance's identity</strong>:</p>
 <!-- riddl: in-handler -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="kr">create</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">let</span> <span class="n">fresh</span> <span class="o">=</span> <span class="kr">create</span> <span class="kd">entity</span> <span class="n">ExampleEntity</span><span class="p">(</span><span class="n">cart</span><span class="p">)</span>
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">tell</span> <span class="kd">command</span> <span class="n">ExampleWelcome</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">fresh</span><span class="p">)</span> <span class="kp">to</span> <span class="n">fresh</span>
 </span></code></pre></div>
 <p>Creation is two steps with one name. The instance is <strong>created</strong> — given a

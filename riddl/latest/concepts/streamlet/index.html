@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5766,8 +5766,10 @@ send notifications, update external systems, or log and archive data.</p>
 <h2 id="referring-to-a-streamlet">Referring to a Streamlet<a class="headerlink" href="#referring-to-a-streamlet" title="Permanent link">&para;</a></h2>
 <p>Elsewhere in a model, such as in a <code>tell</code> or a use-case step, a streamlet is
 named with <code>streamlet</code> or with any shape keyword: <code>tell … to streamlet
-Enricher</code> and <code>tell … to flow Enricher</code> mean the same. Prefer <code>streamlet</code>:
-the keyword is not checked against the shape. And in a use-case step's
+Enricher</code> and <code>tell … to flow Enricher</code> mean the same. Naming a streamlet with
+another kind's keyword, such as <code>repository Enricher</code>, is the Error
+<code>ref-wrong-keyword</code>; but a shape keyword is not compared with the actual
+shape, so prefer <code>streamlet</code>, which is always right. And in a use-case step's
 <code>send … from</code>, <code>flow X</code> means a UI <em>group</em>, not a streamlet. See
 <a href="../../references/language-reference/#referring-to-a-streamlet">Referring to a streamlet</a>.</p>
 <h2 id="connecting-processors">Connecting Processors<a class="headerlink" href="#connecting-processors" title="Permanent link">&para;</a></h2>
@@ -5817,6 +5819,12 @@ schedule-to-yourself idiom is legal — in</p>
 </span></code></pre></div>
 <p>the emitting clause handles <code>Book</code> and sends <code>ReminderDue</code>, so the event it
 sends can never re-enter it.</p>
+<p>Since 2.8.0 a clause may even re-send <strong>its own</strong> message, so long as it does
+so <code>at &lt;instant&gt; + &lt;duration&gt;</code>: <code>on command Tick { send command Tick(…) to
+outlet Out at system.now + 1 hour }</code> is a recurrence, not a cycle. Any other
+instant is still a loop, because a past instant is delivered immediately. A
+fixed recurrence is usually clearer as
+<a href="../onclause/"><code>on every</code></a> or a recurring <code>send … every</code> in <code>on init</code>.</p>
 <h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Event Processing</strong>: React to events in real time</li>

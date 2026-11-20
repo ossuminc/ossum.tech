@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5459,6 +5459,9 @@ page SignupPage is {
   form Signup accepts record SignupDetails
 }
 entity Account is {
+  handler AccountLifecycle is {
+    on init(start: AccountData) is { morph entity Account to state Registered with start }
+  }
   state Registered of record AccountData is {
     handler AccountHandler is { on command CreateAccount { ??? } }
   }

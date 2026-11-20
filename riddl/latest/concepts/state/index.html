@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -3086,10 +3086,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-initial-marker" class="md-nav__link">
+  <a href="#where-an-entity-starts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The initial Marker
+        Where an Entity Starts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entry-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entry Actions
       
     </span>
   </a>
@@ -5389,10 +5400,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-initial-marker" class="md-nav__link">
+  <a href="#where-an-entity-starts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The initial Marker
+        Where an Entity Starts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entry-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entry Actions
       
     </span>
   </a>
@@ -5479,7 +5501,10 @@ record ShippedData is { trackingNumber is String }
 command CancelOrder is { orderId is String }
 command ShipOrder is { trackingNumber is String }
 entity Order is {
-  initial state Pending of record PendingData is {
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start }
+  }
+  state Pending of record PendingData is {
     handler PendingHandler is { on command CancelOrder { ??? } }
   }
   state Shipped of record ShippedData is {
@@ -5512,7 +5537,7 @@ entity from one state to another, changing which handlers
 are active.</p>
 <h3 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h3>
 <!-- riddl: in-entity -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">initial</span> <span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span> <span class="kp">is</span> <span class="p">{</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">state</span> <span class="n">ActiveOrder</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveOrderData</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">invariant</span> <span class="n">TotalIsPositive</span> <span class="kp">is</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="n">Zero</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">handler</span> <span class="n">ActiveOrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
@@ -5534,22 +5559,38 @@ covers it. Handlers may sit at either level, and an entity may carry
 both: a state-scoped handler for behavior that differs by state, and an
 entity-level handler for behavior that does not.</p>
 </div>
-<h2 id="the-initial-marker">The <code>initial</code> Marker<a class="headerlink" href="#the-initial-marker" title="Permanent link">&para;</a></h2>
-<p>An optional <code>initial</code> keyword marks the entity's starting state:</p>
+<h2 id="where-an-entity-starts">Where an Entity Starts<a class="headerlink" href="#where-an-entity-starts" title="Permanent link">&para;</a></h2>
+<p>An entity has <strong>no initial state</strong>. It is created without one, and its
+<a href="../onclause/#on-init-is-creation"><code>on init</code></a> clause — an entity-level clause,
+run once at creation — <code>morph</code>s it into the state it starts in:</p>
 <!-- riddl: in-context no-prelude=Order -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="kd">state</span> <span class="n">Active</span>  <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveData</span>  <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="kd">state</span> <span class="n">Shipped</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ShippedData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">handler</span> <span class="n">OrderLifecycle</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">on</span> <span class="kd">command</span> <span class="n">CancelOrder</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="kd">handler</span> <span class="n">OrderLifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">PendingData</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">on</span> <span class="kd">command</span> <span class="n">CancelOrder</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="p">}</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="kd">state</span> <span class="n">Pending</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">PendingData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  <span class="kd">state</span> <span class="n">Active</span>  <span class="kp">of</span> <span class="kd">record</span> <span class="n">ActiveData</span>  <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  <span class="kd">state</span> <span class="n">Shipped</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ShippedData</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Without the marker, the first state <em>declared</em> is the starting state — which
-means reordering states silently changes behavior. Marking it explicitly makes
-the model safe to refactor, and is fully backward compatible with models that
-omit it.</p>
-<p>Declaring more than one <code>initial</code> state in an entity is an <strong>Error</strong>.</p>
+<p>Because <code>on init</code> takes the creation arguments, it can choose among states, and
+which state is <em>declared</em> first decides nothing — reordering them is safe.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>initial state</code> is deprecated (since 2.8.0)</p>
+<p>Through 2.7, an entity started in the state marked <code>initial</code>, or else the
+first one declared. Both still work, with that meaning, until 3.0: an
+<code>initial state</code> draws <code>entity-initial-state-marker</code>, and an entity with
+states but no <code>on init</code> that morphs draws <code>entity-init-no-morph</code>. Two
+<code>initial</code> states are an <strong>Error</strong> (<code>entity-multiple-initial-states</code>).</p>
+<p><code>initial</code> on a <strong>handler</strong> is unaffected: it picks which of a state's
+handlers is live on entry. See <a href="../handler/#the-initial-marker">Handler</a>.</p>
+</div>
+<h2 id="entry-actions">Entry Actions<a class="headerlink" href="#entry-actions" title="Permanent link">&para;</a></h2>
+<p>A state's <a href="../onclause/#on-entry-a-states-entry-action"><code>on entry</code></a> clause runs
+each time a <code>morph</code> moves the entity <em>into</em> that state — but not at creation,
+not for a <code>morph</code> into the state it is already in, and never on replay or
+rehydration.</p>
 <h2 id="state-scoped-invariants">State-Scoped Invariants<a class="headerlink" href="#state-scoped-invariants" title="Permanent link">&para;</a></h2>
 <p>A state body may hold <a href="../invariant/">invariants</a> constraining that state's
 record data. This is what lets different states carry different rules — an

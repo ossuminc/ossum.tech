@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -6240,8 +6240,8 @@ the <code>shown by</code> syntax to link to external UX artifacts:</p>
 </span><span id="__span-14-64"><a id="__codelineno-14-64" name="__codelineno-14-64" href="#__codelineno-14-64"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">StartCheckout</span> <span class="p">{</span>
 </span><span id="__span-14-65"><a id="__codelineno-14-65" name="__codelineno-14-65" href="#__codelineno-14-65"></a>        <span class="k">do</span> <span class="s2">"move the user to the CheckoutFlow group"</span>
 </span><span id="__span-14-66"><a id="__codelineno-14-66" name="__codelineno-14-66" href="#__codelineno-14-66"></a>      <span class="p">}</span>
-</span><span id="__span-14-67"><a id="__codelineno-14-67" name="__codelineno-14-67" href="#__codelineno-14-67"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">ProcessPayment</span> <span class="p">{</span>
-</span><span id="__span-14-68"><a id="__codelineno-14-68" name="__codelineno-14-68" href="#__codelineno-14-68"></a>        <span class="k">send</span> <span class="kd">command</span> <span class="n">ChargePayment</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="m">1.00</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentsOut</span>
+</span><span id="__span-14-67"><a id="__codelineno-14-67" name="__codelineno-14-67" href="#__codelineno-14-67"></a>      <span class="k">on</span> <span class="n">pay</span><span class="p">:</span> <span class="kd">command</span> <span class="n">ProcessPayment</span> <span class="p">{</span>
+</span><span id="__span-14-68"><a id="__codelineno-14-68" name="__codelineno-14-68" href="#__codelineno-14-68"></a>        <span class="k">send</span> <span class="kd">command</span> <span class="n">ChargePayment</span><span class="p">(</span><span class="n">amount</span> <span class="o">=</span> <span class="n">pay</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span> <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">PaymentsOut</span>
 </span><span id="__span-14-69"><a id="__codelineno-14-69" name="__codelineno-14-69" href="#__codelineno-14-69"></a>      <span class="p">}</span>
 </span><span id="__span-14-70"><a id="__codelineno-14-70" name="__codelineno-14-70" href="#__codelineno-14-70"></a>    <span class="p">}</span>
 </span><span id="__span-14-71"><a id="__codelineno-14-71" name="__codelineno-14-71" href="#__codelineno-14-71"></a>  <span class="p">}</span>

@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5621,19 +5621,22 @@ knowledge area or business capability:</p>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>      <span class="kd">inlet</span> <span class="n">Hellos</span> <span class="kp">is</span> <span class="kd">command</span> <span class="n">SayHello</span>
 </span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>      <span class="kd">outlet</span> <span class="n">Greetings</span> <span class="kp">is</span> <span class="kd">event</span> <span class="n">HelloSaid</span>
 </span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>      <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">GreeterState</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="kd">handler</span> <span class="n">GreeterHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>          <span class="c1">// `hello:` binds the handled message, so its fields are in scope.</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>          <span class="k">on</span> <span class="n">hello</span><span class="p">:</span> <span class="kd">command</span> <span class="n">SayHello</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>            <span class="k">send</span> <span class="kd">event</span> <span class="n">HelloSaid</span><span class="p">(</span><span class="kp">to</span> <span class="o">=</span> <span class="n">hello</span><span class="p">.</span><span class="kp">to</span><span class="p">,</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>              <span class="kr">message</span> <span class="o">=</span> <span class="k">prompt</span><span class="p">(</span><span class="s2">"a greeting addressed to this name"</span><span class="p">))</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>              <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Greetings</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>          <span class="p">}</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>        <span class="p">}</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>      <span class="p">}</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="p">}</span>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>  <span class="p">}</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="p">}</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>      <span class="kd">handler</span> <span class="n">GreeterLifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">GreeterState</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Greeter</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Active</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>      <span class="p">}</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>      <span class="kd">state</span> <span class="n">Active</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">GreeterState</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>        <span class="kd">handler</span> <span class="n">GreeterHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>          <span class="c1">// `hello:` binds the handled message, so its fields are in scope.</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>          <span class="k">on</span> <span class="n">hello</span><span class="p">:</span> <span class="kd">command</span> <span class="n">SayHello</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>            <span class="k">send</span> <span class="kd">event</span> <span class="n">HelloSaid</span><span class="p">(</span><span class="kp">to</span> <span class="o">=</span> <span class="n">hello</span><span class="p">.</span><span class="kp">to</span><span class="p">,</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>              <span class="kr">message</span> <span class="o">=</span> <span class="k">prompt</span><span class="p">(</span><span class="s2">"a greeting addressed to this name"</span><span class="p">))</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>              <span class="kp">to</span> <span class="kd">outlet</span> <span class="n">Greetings</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>          <span class="p">}</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>        <span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>      <span class="p">}</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="p">}</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>  <span class="p">}</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="key-concepts-illustrated">Key Concepts Illustrated<a class="headerlink" href="#key-concepts-illustrated" title="Permanent link">&para;</a></h2>
 <h3 id="domains">Domains<a class="headerlink" href="#domains" title="Permanent link">&para;</a></h3>

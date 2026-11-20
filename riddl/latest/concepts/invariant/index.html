@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5678,15 +5678,18 @@ use turns it on:</p>
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="c1">// BalanceNonNegative is checked here, before anything below runs</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="gr">???</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="p">}</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="p">}</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  <span class="p">}</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">handler</span> <span class="n">AccountLifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">OpenData</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Account</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="p">}</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      <span class="k">on</span> <span class="kd">command</span> <span class="n">Withdraw</span> <span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="c1">// BalanceNonNegative is checked here, before anything below runs</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="gr">???</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>      <span class="p">}</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="p">}</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  <span class="p">}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Changed in RIDDL 2.0</p>
@@ -5789,29 +5792,35 @@ account may hold any non-negative balance, while a closed one must hold exactly
 nothing:</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="p">}</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="kd">handler</span> <span class="n">AccountLifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">OpenData</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Account</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="p">}</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
 </span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="kd">invariant</span> <span class="n">BalanceIsZero</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  <span class="p">}</span>
 </span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="kd">handler</span> <span class="n">Settling</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  <span class="p">}</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p">}</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="kd">invariant</span> <span class="n">BalanceIsZero</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="kd">handler</span> <span class="n">Settling</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  <span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The same narrowing can be written from the entity level instead, which keeps
 related rules together where an author would rather read them side by side:</p>
 <!-- riddl: in-context -->
 <div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">entity</span> <span class="n">Account</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kr">requires</span> <span class="kd">state</span> <span class="n">Open</span>   <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="kd">invariant</span> <span class="n">BalanceIsZero</span>      <span class="kr">requires</span> <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  <span class="k">initial</span> <span class="kd">state</span> <span class="n">Open</span>   <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span>   <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="kd">state</span>         <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">Settling</span>    <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="kd">handler</span> <span class="n">AccountLifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">OpenData</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Account</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  <span class="p">}</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  <span class="kd">invariant</span> <span class="n">BalanceNonNegative</span> <span class="kr">requires</span> <span class="kd">state</span> <span class="n">Open</span>   <span class="kp">is</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">Zero</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="kd">invariant</span> <span class="n">BalanceIsZero</span>      <span class="kr">requires</span> <span class="kd">state</span> <span class="n">Closed</span> <span class="kp">is</span> <span class="n">balance</span> <span class="o">==</span> <span class="n">Zero</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  <span class="kd">state</span> <span class="n">Open</span>   <span class="kp">of</span> <span class="kd">record</span> <span class="n">OpenData</span>   <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">Transacting</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  <span class="kd">state</span>         <span class="n">Closed</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">ClosedData</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">Settling</span>    <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="the-intersection-rule">The Intersection Rule<a class="headerlink" href="#the-intersection-rule" title="Permanent link">&para;</a></h3>
 <p>An entity-level invariant reading <code>balance</code> forces <strong>every</strong> state record of that

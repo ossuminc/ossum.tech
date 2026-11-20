@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5915,7 +5915,9 @@ entity Order is {
   state Shipped of record ShippedData is {
     handler ShippedHandler is { ??? }
   }
-  handler DispatchHandler is { ??? }
+  handler DispatchHandler is {
+    on init(start: ShippedData) is { morph entity Order to state Packing with start }
+  }
 }
 -->
 
@@ -6082,8 +6084,8 @@ Wherever a statement needs a value, any of these forms is accepted:</p>
 </tr>
 <tr>
 <td>Ask</td>
-<td><code>ask query GetInfo of entity Catalog</code></td>
-<td>A query paired with the reply that answers it</td>
+<td><code>ask query GetInfo(sku = s) of entity Catalog</code></td>
+<td>A query paired with the reply that answers it; the arguments say what is asked</td>
 </tr>
 <tr>
 <td>Prompt</td>

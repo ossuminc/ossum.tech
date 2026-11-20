@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -2978,6 +2978,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#on-init-is-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on init is creation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-entry-a-states-entry-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on entry: a state's entry action
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#on-quiescence-when-nothing-arrived" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3013,6 +3035,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-every-on-a-clock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on every — on a clock
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5445,6 +5478,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#on-init-is-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on init is creation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-entry-a-states-entry-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on entry: a state's entry action
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#on-quiescence-when-nothing-arrived" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5480,6 +5535,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-every-on-a-clock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on every — on a clock
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5616,7 +5682,7 @@ the message and the sender of any statements that send messages.</p>
 </tr>
 <tr>
 <td><code>on init</code></td>
-<td>Creation and initialization — once, ever</td>
+<td>Creation — once, ever; an entity <code>morph</code>s into its starting state</td>
 </tr>
 <tr>
 <td><code>on term</code></td>
@@ -5629,6 +5695,10 @@ the message and the sender of any statements that send messages.</p>
 <tr>
 <td><code>on passivate</code></td>
 <td>Entity eviction — every time</td>
+</tr>
+<tr>
+<td><code>on entry</code></td>
+<td>A <code>morph</code> moved the entity into this state</td>
 </tr>
 <tr>
 <td><code>on quiescence &lt;window&gt;</code></td>
@@ -5652,22 +5722,79 @@ several outcomes are needed.</p>
 <p>A new instance runs <strong><code>on init</code> only</strong>. A <a href="../value/#create"><code>create</code></a> puts it in
 memory, but that is not an activation — <code>on activate</code> is reserved for an
 instance that already existed and is coming back.</p>
-<!-- riddl: in-entity -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  <span class="k">on</span> <span class="kr">init</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">"load configuration"</span> <span class="p">}</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  <span class="k">on</span> <span class="kr">activate</span>  <span class="p">{</span> <span class="k">do</span> <span class="s2">"warm the pricing cache for this order"</span> <span class="p">}</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="k">on</span> <span class="kr">passivate</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"flush the pricing cache"</span> <span class="p">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="k">on</span> <span class="kd">term</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">"archive the order record"</span> <span class="p">}</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">record</span> <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="n">note</span><span class="p">:</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">entity</span> <span class="n">Order</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="kd">handler</span> <span class="n">OrderHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">OrderData</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">morph</span> <span class="kd">entity</span> <span class="n">Order</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Open</span> <span class="kp">with</span> <span class="n">start</span> <span class="p">}</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">on</span> <span class="kr">activate</span>  <span class="p">{</span> <span class="k">do</span> <span class="s2">"warm the pricing cache for this order"</span> <span class="p">}</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">on</span> <span class="kr">passivate</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"flush the pricing cache"</span> <span class="p">}</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">on</span> <span class="kd">term</span>      <span class="p">{</span> <span class="k">do</span> <span class="s2">"archive the order record"</span> <span class="p">}</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  <span class="p">}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  <span class="kd">state</span> <span class="n">Open</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">OrderData</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">OpenHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
 </span></code></pre></div>
+<h2 id="on-init-is-creation"><code>on init</code> is creation<a class="headerlink" href="#on-init-is-creation" title="Permanent link">&para;</a></h2>
+<p><code>on init</code> runs once, when <a href="../value/#create"><code>create</code></a> makes the instance, and
+takes the creation arguments as its parameters. In an entity it belongs to an
+<strong>entity-level</strong> handler — not to any state — and, if the entity has states,
+it <code>morph</code>s into the one the entity starts in. It may choose among them:</p>
+<!-- riddl: in-context -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span> <span class="n">TableNumber</span> <span class="kp">is</span> <span class="nb">Integer</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">record</span> <span class="n">TicketData</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">table</span><span class="p">:</span> <span class="n">TableNumber</span><span class="p">,</span> <span class="n">note</span><span class="p">:</span> <span class="nb">String</span> <span class="p">}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="kd">handler</span> <span class="n">Lifecycle</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">on</span> <span class="kr">init</span><span class="p">(</span><span class="n">atTable</span><span class="p">:</span> <span class="n">TableNumber</span><span class="p">,</span> <span class="n">rush</span><span class="p">:</span> <span class="nb">Boolean</span><span class="p">)</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>      <span class="k">when</span> <span class="n">rush</span> <span class="k">then</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Submitted</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">TicketData</span><span class="p">(</span><span class="kd">table</span> <span class="o">=</span> <span class="n">atTable</span><span class="p">,</span> <span class="n">note</span> <span class="o">=</span> <span class="s2">"rush"</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>      <span class="k">else</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="k">morph</span> <span class="kd">entity</span> <span class="n">KitchenTicket</span> <span class="kp">to</span> <span class="kd">state</span> <span class="n">Draft</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>          <span class="kp">with</span> <span class="kd">record</span> <span class="n">TicketData</span><span class="p">(</span><span class="kd">table</span> <span class="o">=</span> <span class="n">atTable</span><span class="p">,</span> <span class="n">note</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>      <span class="kr">end</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="p">}</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  <span class="p">}</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  <span class="kd">state</span> <span class="n">Draft</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">TicketData</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">DraftHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>  <span class="kd">state</span> <span class="n">Submitted</span> <span class="kp">of</span> <span class="kd">record</span> <span class="n">TicketData</span> <span class="kp">is</span> <span class="p">{</span> <span class="kd">handler</span> <span class="n">SubmittedHandler</span> <span class="kp">is</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span> <span class="p">}</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>There is no initial state (since 2.8.0). An entity that still starts by
+declaration order or by an <code>initial state</code> marker, or that has an <code>on init</code>
+inside a state, draws a deprecation until 3.0: <code>entity-init-no-morph</code>,
+<code>entity-initial-state-marker</code>, <code>entity-init-in-state</code>.</p>
+<p>In an <code>event-sourced</code> entity the <code>on init</code> invocation is the <strong>first journal
+entry</strong>, and replay re-runs it. So it may <code>set</code> and <code>morph</code> like an <code>on event</code>
+fold, and like a fold it may not read <code>system.now</code> or <code>system.random</code>: a
+creation time arrives as a parameter.</p>
+<h2 id="on-entry-a-states-entry-action"><code>on entry</code>: a state's entry action<a class="headerlink" href="#on-entry-a-states-entry-action" title="Permanent link">&para;</a></h2>
+<p><code>on entry</code> runs each time a <strong>live</strong> <code>morph</code> moves an entity that already has a
+state into this one — whichever clause did the moving. It is how a model says
+"whenever the entity enters <code>Submitted</code>, open a ticket" once, instead of in
+every clause that morphs there. It does <strong>not</strong> run:</p>
+<ol>
+<li>at creation — <code>on init</code>'s <code>morph</code> places the entity, it does not enter a
+   state;</li>
+<li>for a <code>morph</code> into the state the entity is already in
+   (<code>stmt-morph-to-current-state</code> warns where that is evident);</li>
+<li>on replay or recovery — so in an event-sourced entity it may not <code>set</code> or
+   <code>morph</code>;</li>
+<li>on rehydration — that is <code>on activate</code>;</li>
+<li>in a chain — it may not <code>morph</code> at all (<code>entity-entry-morphs</code>).</li>
+</ol>
+<p>It goes in the state's <strong>initial</strong> handler, the one live on entry; anywhere
+else it never runs and is an Error (<code>entity-entry-misplaced</code>). It is legal only
+in an entity. The <a href="../../references/language-reference/#on-entry-a-states-entry-action">language reference</a>
+has a full example.</p>
 <h2 id="on-quiescence-when-nothing-arrived"><code>on quiescence</code> — when nothing arrived<a class="headerlink" href="#on-quiescence-when-nothing-arrived" title="Permanent link">&para;</a></h2>
 <p>Every other clause fires because a message came in. <code>on quiescence</code> fires
 because <strong>none did</strong>:</p>
 <!-- riddl: in-entity -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">handler</span> <span class="n">CartHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="k">on</span> <span class="kd">command</span> <span class="n">ExampleEntityCommand</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"add the item to the cart"</span> <span class="p">}</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="k">on</span> <span class="kr">quiescence</span> <span class="s2">"PT30M"</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"treat the cart as abandoned"</span> <span class="p">}</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">handler</span> <span class="n">CartHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  <span class="k">on</span> <span class="kd">command</span> <span class="n">ExampleEntityCommand</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"add the item to the cart"</span> <span class="p">}</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="k">on</span> <span class="kr">quiescence</span> <span class="s2">"PT30M"</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"treat the cart as abandoned"</span> <span class="p">}</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>It is <strong>instance-scoped</strong>: the window is measured per processor instance, and
 the clock restarts on every message that instance handles. Inside a
@@ -5678,13 +5805,13 @@ state change disarms it.</p>
 value — a <a href="../constant/">constant</a>, a state field, or a field of the handled
 message:</p>
 <!-- riddl: in-context -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">constant</span> <span class="n">IdleWindow</span> <span class="kp">is</span> <span class="nb">Duration</span> <span class="o">=</span> <span class="s2">"PT10M"</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kd">repository</span> <span class="n">Sessions</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="kd">handler</span> <span class="n">SessionHandler</span> <span class="kp">is</span> <span class="p">{</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">on</span> <span class="kr">quiescence</span> <span class="n">IdleWindow</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"compact the session store"</span> <span class="p">}</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="p">}</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">constant</span> <span class="n">IdleWindow</span> <span class="kp">is</span> <span class="nb">Duration</span> <span class="o">=</span> <span class="s2">"PT10M"</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kd">repository</span> <span class="n">Sessions</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="kd">handler</span> <span class="n">SessionHandler</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">on</span> <span class="kr">quiescence</span> <span class="n">IdleWindow</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"compact the session store"</span> <span class="p">}</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="p">}</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>A <code>let</code> cannot be named here: a <code>let</code> is clause-local and the window is part of
 the clause <em>header</em>, evaluated before any body runs. The literal is validated
@@ -5717,18 +5844,34 @@ re-firing the timer.</p>
 <p>It is contextual — recognised only after <code>on</code>. Existing models that use it
 as a name keep working.</p>
 </div>
+<h2 id="on-every-on-a-clock"><code>on every</code> — on a clock<a class="headerlink" href="#on-every-on-a-clock" title="Permanent link">&para;</a></h2>
+<p><code>on every &lt;period&gt;</code> fires <strong>once per period</strong>, and unlike <code>on quiescence</code> a
+handled message does not reset it (since 2.8.0). A handler may hold several:</p>
+<!-- riddl: in-entity -->
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">handler</span> <span class="n">Billing</span> <span class="kp">is</span> <span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  <span class="k">on</span> <span class="kd">command</span> <span class="n">ExampleEntityCommand</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"record the usage"</span> <span class="p">}</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  <span class="k">on</span> <span class="kr">every</span> <span class="m">1</span> <span class="n">hour</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"checkpoint the usage"</span> <span class="p">}</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  <span class="k">on</span> <span class="kr">every</span> <span class="n">month</span> <span class="k">on</span> <span class="n">day</span> <span class="m">1</span> <span class="kp">at</span> <span class="m">09</span><span class="p">:</span><span class="m">00</span> <span class="kp">in</span> <span class="s2">"America/Toronto"</span> <span class="kp">is</span> <span class="p">{</span> <span class="k">do</span> <span class="s2">"send the invoice"</span> <span class="p">}</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The period is a positive Duration — a fixed span, so <code>30 days</code> is not
+"monthly" — a calendar schedule such as <code>month on last day</code> or
+<code>weekday at 08:30</code>, or a five-field <code>cron "…"</code> text. The
+<a href="../../references/language-reference/#periods-and-calendar-schedules">language reference</a>
+lists every cadence and its rules. To send a message on a schedule instead,
+use a recurring <code>send … every</code> in <code>on init</code>.</p>
 <h2 id="binding-the-handled-message">Binding the Handled Message<a class="headerlink" href="#binding-the-handled-message" title="Permanent link">&para;</a></h2>
 <p>An <code>on</code> clause may bind a local name to the message it is handling, using
 ordinary type ascription — the same rule as <code>let x: T = ...</code> and a field
 declaration <code>p1: String</code>, read as "<code>ord</code> has type <code>command PlaceOrder</code>":</p>
 <!-- riddl: in-clauses -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">on</span> <span class="n">ord</span><span class="p">:</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  <span class="k">when</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span> <span class="o">&gt;</span> <span class="n">MinimumOrder</span> <span class="k">then</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="k">else</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">error</span> <span class="s2">"an order must reach the minimum"</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="kr">end</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">on</span> <span class="n">ord</span><span class="p">:</span> <span class="kd">command</span> <span class="n">PlaceOrder</span> <span class="p">{</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="k">when</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span> <span class="o">&gt;</span> <span class="n">MinimumOrder</span> <span class="k">then</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">yield</span> <span class="kd">event</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">ord</span><span class="p">.</span><span class="n">total</span><span class="p">)</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  <span class="k">else</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="k">error</span> <span class="s2">"an order must reach the minimum"</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  <span class="kr">end</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Within the body the bound name denotes the <strong>whole message</strong>; a dotted path
 reaches its fields. The binding is optional, so every model written without it
@@ -5749,8 +5892,8 @@ parses to exactly the same structure.</p>
 <p>An <code>on</code> clause may also name where the message came from, optionally binding a
 local name to the origin:</p>
 <!-- riddl: skip reason="two spellings of the SAME clause, which cannot share a handler (duplicate content names), and the origin is a sibling context no wrapper can supply" -->
-<div class="language-riddl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="n">di</span><span class="p">:</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+<div class="language-riddl highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">on</span> <span class="kd">command</span> <span class="n">DoIt</span> <span class="kp">from</span> <span class="n">di</span><span class="p">:</span> <span class="kd">context</span> <span class="n">Other</span> <span class="p">{</span> <span class="gr">???</span> <span class="p">}</span>
 </span></code></pre></div>
 <p>An origin may be an <a href="../inlet/">inlet</a>, a <a href="../processor/">processor</a>, a
 <a href="../user/">user</a>, or an <a href="../epic/">epic</a>.</p>
@@ -5776,6 +5919,10 @@ cannot enter the model at all:</p>
 <tr>
 <td><code>on activate</code> / <code>on passivate</code></td>
 <td><a href="../entity/">Entity</a>-only, and side-effect free: <code>send</code>, <code>tell</code>, <code>yield</code>, <code>morph</code> and <code>become</code> are rejected.</td>
+</tr>
+<tr>
+<td><code>on entry</code></td>
+<td><a href="../entity/">Entity</a> states only; anywhere else is a parse error.</td>
 </tr>
 <tr>
 <td><code>on quiescence</code></td>

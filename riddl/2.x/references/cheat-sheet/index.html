@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -7303,10 +7303,17 @@ in the <code>with { }</code> metadata block, not in the body.)</em></p>
 <p><strong>Key details</strong>:</p>
 <ul>
 <li>Entities have one or more named States, each backed by a <strong>record</strong></li>
-<li>An optional <code>initial</code> marker names the starting state and, on a state
-  handler, the one live on entering that state; on an entity-scope handler
-  it is the initial handler for every state declaring none of its own.
-  Without a marker, the first declared wins</li>
+<li><strong>No initial state</strong> (2.8.0): one entity-level <code>on init</code> <code>morph</code>s into the
+  starting state, chosen from its parameters. <code>initial state</code> and starting
+  in the first declared state are deprecated until 3.0
+  (<code>entity-initial-state-marker</code>, <code>entity-init-no-morph</code>), as is <code>on init</code>
+  inside a state (<code>entity-init-in-state</code>)</li>
+<li><code>initial</code> on a <strong>handler</strong> still picks the one live on entering a state;
+  on an entity-scope handler it is the initial handler for every state
+  declaring none of its own</li>
+<li><code>on entry</code> in a state's initial handler runs on each live <code>morph</code> INTO the
+  state — never at creation, for a morph to the current state, on replay or
+  on rehydration, and it may not <code>morph</code></li>
 <li>Supports <code>morph</code> (change state) and <code>become</code> (change handler)</li>
 <li><code>on activate</code> / <code>on passivate</code> handle rehydration and eviction, and must
   be side-effect free</li>
@@ -7321,7 +7328,7 @@ in the <code>with { }</code> metadata block, not in the body.)</em></p>
   <strong>Error</strong> on an entity that is not event-sourced</li>
 <li>The primary unit of consistency in a reactive system</li>
 </ul>
-<p><strong>Syntax</strong>: <code>entity Order is { initial state Active of record OrderData ... }</code></p>
+<p><strong>Syntax</strong>: <code>entity Order is { handler H is { on init(d: OrderData) is { morph entity Order to state Active with d } } state Active of record OrderData ... }</code></p>
 <blockquote>
 <p><em><a href="../../concepts/entity/">For more details →</a></em></p>
 </blockquote>
@@ -7521,12 +7528,15 @@ states to model lifecycle stages (e.g., Draft, Active, Archived).</p>
 <strong>Contains</strong>: Handler (state-specific message handling), Invariant.</p>
 <p><strong>Key details</strong>:</p>
 <ul>
-<li>Syntax: <code>[initial] state X of record RecordName</code></li>
+<li>Syntax: <code>state X of record RecordName</code> (<code>initial state</code> is deprecated)</li>
 <li>The data type must be a <strong>record</strong> — a state is record-shaped data</li>
 <li>A state body may hold Invariants constraining that state's data</li>
 <li>The entity transitions between states via <code>morph</code></li>
 <li>Each state can have its own handlers that override entity defaults</li>
-<li>More than one <code>initial</code> state in an entity is an <strong>Error</strong></li>
+<li>More than one <code>initial</code> state in an entity is an <strong>Error</strong>
+  (<code>entity-multiple-initial-states</code>)</li>
+<li><code>on entry</code> in the state's initial handler runs each time a <code>morph</code> moves
+  the entity into it</li>
 </ul>
 <blockquote>
 <p><em><a href="../../concepts/state/">For more details →</a></em></p>
@@ -7683,7 +7693,7 @@ type.</p>
 </tr>
 <tr>
 <td><code>on init</code></td>
-<td>Processor initialization (once ever)</td>
+<td>Creation (once ever); an entity <code>morph</code>s into its starting state</td>
 </tr>
 <tr>
 <td><code>on term</code></td>
@@ -7696,6 +7706,18 @@ type.</p>
 <tr>
 <td><code>on passivate</code></td>
 <td>Entity eviction (every time)</td>
+</tr>
+<tr>
+<td><code>on entry</code></td>
+<td>A <code>morph</code> moved the entity into this state (entity states only)</td>
+</tr>
+<tr>
+<td><code>on quiescence &lt;window&gt;</code></td>
+<td>Nothing arrived for the window (a message resets it)</td>
+</tr>
+<tr>
+<td><code>on every &lt;period&gt;</code></td>
+<td>Once per period; a message does <strong>not</strong> reset it. Several per handler</td>
 </tr>
 <tr>
 <td><code>on other</code></td>
@@ -7716,6 +7738,21 @@ type.</p>
   happened and must always be accepted</li>
 <li>Two clauses in one handler handling the same message draw a
   <strong>StyleWarning</strong>; the later one is unreachable</li>
+<li>A <strong>period</strong> (after <code>every</code>) is a positive Duration (<code>30 days</code>, <code>"PT15M"</code>:
+  a fixed span), a calendar schedule — <code>month on day 1 at 09:00 in
+  "America/Toronto"</code>, <code>month on last day</code>, <code>month on the third wednesday</code>,
+  <code>3 months on day 1</code>, <code>year on march 31</code>, <code>year on the first monday of
+  september</code>, <code>day at 06:00</code>, <code>weekday</code>, <code>monday, wednesday and friday</code> — or
+  <code>cron "&lt;five fields&gt;"</code>. Zone defaults to <strong>UTC</strong>, time to midnight; a day a
+  month lacks is <strong>skipped</strong> (Advisory <code>value-schedule-day-skips-months</code>;
+  use <code>on last day</code>)</li>
+<li><code>send m to outlet O every &lt;period&gt; [starting [at] &lt;instant&gt;]</code> recurs; legal
+  <strong>only in <code>on init</code></strong> (<code>stmt-send-every-not-in-init</code>), re-evaluates <code>m</code> at
+  each firing, never cancels. An <code>on X</code> re-sending <code>X</code> <code>at &lt;instant&gt; +
+  &lt;duration&gt;</code> is a recurrence, not <code>stream-graph-cycle</code></li>
+<li><code>date + 1 month</code> / <code>- 2 years</code>: calendar periods, only on
+  <code>Date</code>/<code>DateTime</code>/<code>ZonedDateTime</code>/<code>TimeStamp</code>; month-end <strong>clamps</strong>
+  (Jan 31 + 1 month = Feb 28/29)</li>
 </ul>
 <blockquote>
 <p><em><a href="../../concepts/onclause/">For more details →</a></em></p>
@@ -7807,8 +7844,8 @@ interactions between definitions, not full implementations.</p>
 </tr>
 <tr>
 <td>Ask</td>
-<td><code>ask query GetInfo of entity Catalog</code></td>
-<td>A query paired with the reply that answers it. <strong>Never inside a saga.</strong></td>
+<td><code>ask query GetInfo(sku = s) of entity Catalog</code></td>
+<td>A query paired with the reply that answers it; supplies every field like a constructor (a bare ask of a query with fields is deprecated). <strong>Never inside a saga.</strong></td>
 </tr>
 <tr>
 <td>Create</td>
@@ -7851,12 +7888,55 @@ interactions between definitions, not full implementations.</p>
 <td>Whether the collection holds that value</td>
 </tr>
 <tr>
+<td>Sum</td>
+<td><code>sum of lines as l by l.qty</code></td>
+<td>Total of the elements, or of a per-element <strong>product</strong> (parenthesize a sum: <code>by (l.a + l.b)</code>). Empty sums to zero; <code>Natural</code> sums to <code>Whole</code></td>
+</tr>
+<tr>
+<td>One of</td>
+<td><code>one of lines as l where l.sku == s</code></td>
+<td>The matching element (first in a sequence), or <code>empty</code>; its type is the element made optional</td>
+</tr>
+<tr>
+<td>Default</td>
+<td><code>nick otherwise "guest"</code></td>
+<td>Left side unless empty, else the right (evaluated only then). <strong>Loosest</strong> operator: <code>(x otherwise 0) + 1</code></td>
+</tr>
+<tr>
+<td>Conditional value</td>
+<td><code>when c then a else b end</code></td>
+<td>Only the chosen branch runs; <code>else</code> mandatory; nest for multi-way</td>
+</tr>
+<tr>
+<td>Duration units</td>
+<td><code>minutes of grace</code></td>
+<td><code>nanoseconds</code> … <code>weeks</code>; whole units, truncated, an <code>Integer</code>; binds tighter than arithmetic</td>
+</tr>
+<tr>
+<td>Optional chaining</td>
+<td><code>line.quantity</code> with <code>line: Line?</code></td>
+<td>Reaches an optional value. Collections do not chain</td>
+</tr>
+<tr>
 <td>Query</td>
 <td><code>query one bookings where id == q.id</code></td>
 <td>Reads stored rows. Repository handlers only; without <code>one</code>, every match in <strong>unspecified</strong> order.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">A literal must fit its position (2.8.0)</p>
+<p>A number is refused for a <code>String</code>, <code>Currency</code>, <code>DateTime</code> or record
+(<code>value-type-mismatch</code>); a range applies everywhere (<code>-3</code> for a <code>Natural</code>
+is <code>value-not-natural</code>). A <code>Boolean</code> takes <code>true</code>/<code>false</code> or <code>0</code>/<code>1</code>, and
+a Boolean fills an <code>Integer</code>. Time strings are ISO-8601: <code>"2026-11-18"</code>
+for a <code>Date</code>, <code>"2026-11-18T10:30"</code> (optionally <code>:ss</code>, a fraction, <code>Z</code> or
+<code>±hh:mm</code>) for a <code>DateTime</code> or <code>TimeStamp</code>, else
+<code>value-time-literal-not-iso8601</code>. No literal fills a <code>Currency</code>.
+<code>system.now</code> fills a <code>Date</code> or <code>DateTime</code>. An optional value where one is
+required is only an Advisory (<code>value-optional-for-required</code>), silenced by
+a stated <code>!= empty</code> guard.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Comparisons are type-CHECKED, not reference-only</p>
 <p>Either operand may be any expression — a reference, a literal, a
@@ -7948,7 +8028,7 @@ non-exhaustive match over a closed subject without <code>default</code> draws a
 </tr>
 <tr>
 <td><code>ask</code></td>
-<td><code>let a = ask query GetInfo of entity Catalog</code></td>
+<td><code>let a = ask query GetInfo(sku = s) of entity Catalog</code></td>
 <td>A value: a query paired with the reply that answers it. <strong>Never inside a saga.</strong></td>
 </tr>
 </tbody>

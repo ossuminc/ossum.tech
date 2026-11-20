@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5567,6 +5567,9 @@ ten step forms:</p>
 record HamperData is { onHand: Natural }
 entity Hamper is {
   invariant MustHaveStock is "the item must be in stock"
+  handler HamperLifecycle is {
+    on init(start: HamperData) is { morph entity Hamper to state Holding with start }
+  }
   state Holding of record HamperData is { handler HamperHandler is { ??? } }
 }
 record OrderData is { confirmationNumber is String }
