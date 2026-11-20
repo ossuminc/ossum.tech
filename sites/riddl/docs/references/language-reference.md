@@ -945,10 +945,80 @@ entity SimpleProduct is {
 }
 ```
 
-### The `initial` Marker
+### Creation: `on init` chooses the starting state
 
-An optional `initial` keyword before `state` or `handler` marks the entity's
-starting state, and the handler that is live after a `morph`:
+**An entity has no initial state** (since 2.8.0). It is created *without* a
+state, and its `on init` clause — the creation clause, run once by
+[`create`](#create-bring-an-instance-into-being) — `morph`s it into the state it
+starts in. Because `on init` takes the creation arguments, the starting state
+can be **chosen** from them:
+
+<!-- riddl: in-context -->
+```riddl
+type TableNumber is Integer
+record TicketData is { table: TableNumber, note: String }
+command Submit is { note: String }
+
+entity KitchenOrder is {
+  inlet Orders is command Submit
+  handler Lifecycle is {
+    on init(atTable: TableNumber, rush: Boolean) is {
+      when rush then
+        morph entity KitchenOrder to state Submitted
+          with record TicketData(table = atTable, note = "rush")
+      else
+        morph entity KitchenOrder to state Draft
+          with record TicketData(table = atTable, note = "")
+      end
+    }
+  }
+  state Draft of record TicketData is {
+    handler DraftHandler is {
+      on s: command Submit {
+        morph entity KitchenOrder to state Submitted
+          with record TicketData(table = Draft.table, note = s.note)
+      }
+    }
+  }
+  state Submitted of record TicketData is {
+    handler SubmittedHandler is { ??? }
+  }
+}
+```
+
+The rules:
+
+- **One `on init` per entity, in an entity-level handler.** It belongs to the
+  entity, not to any state.
+- **An entity with states must `morph` into one.** A *stateless* entity has
+  nothing to morph into and is exempt.
+- **Declaration order means nothing.** Which state is written first no longer
+  decides anything; the `morph` does.
+- **In an `event-sourced` entity, the `on init` invocation is the first journal
+  entry**, and replay re-runs it with the same arguments. So `on init` may
+  `set` and `morph` exactly as an `on event` fold may, and — like a fold — it
+  may not read `system.now` or `system.random`
+  (`entity-event-sourced-fold-nondeterministic`). A creation timestamp arrives
+  as an `on init` parameter, supplied by whoever creates the instance. The old
+  idiom of yielding a `Created` event from `on init` only so that a fold could
+  `morph` is no longer needed.
+
+!!! warning "The old forms are deprecated, and keep their meaning until 3.0"
+    | Deprecated | Rule id | What it still means |
+    |------------|---------|---------------------|
+    | `initial state X` | `entity-initial-state-marker` | The entity starts in `X` |
+    | An entity with states whose `on init` does not `morph` (or that has no `on init`) | `entity-init-no-morph` | It starts in the `initial` state, or the first one declared |
+    | `on init` inside a state's handler | `entity-init-in-state` | It runs only if that is the starting state |
+
+    The fix for all three is the same: one entity-level `on init` that
+    morphs into the starting state. Two `initial` states remain an **Error**
+    (`entity-multiple-initial-states`).
+
+### Initial Handlers
+
+A state may have several handlers, switched between with `become`. An optional
+`initial` marker says which of them is live when the entity **enters** the
+state:
 
 <!-- riddl: skip reason="its `state Active` is elided to `???`, and RIDDL 2.0 requires every state to have a handler" -->
 ```riddl
@@ -958,17 +1028,91 @@ entity Order is {
   }
   state Pending of record PendingData is {
     initial handler PendingHandler is { ??? }
+    handler AuditHandler is { ??? }
   }
   state Active of record ActiveData is { ??? }
 }
 ```
 
-Unmarked models keep the previous "first one declared wins" behavior, so this
-is fully backward compatible. Marking it explicitly makes the model safe to
-reorder.
+Without the marker the first handler declared is the initial one, so marking it
+makes the model safe to reorder. More than one `initial` handler in a state is
+an **Error**. The marker is about **handlers** only: on a state it is the
+deprecated form above.
 
-Declaring more than one `initial` state in an entity, or more than one
-`initial` handler in a state, is an **Error**.
+### `on entry`: a state's entry action
+
+Some things must happen *whenever* the entity enters a state, whichever clause
+moved it there. Writing that into every clause that morphs into the state works
+only until someone adds a clause and forgets. `on entry` states it once:
+
+<!-- riddl: in-context -->
+```riddl
+type TableNumber is Integer
+record TicketData is { table: TableNumber, note: String }
+command Submit is { note: String }
+command Reopen is { note: String }
+type TicketCommand is Submit | Reopen
+event TicketOpened is { table: TableNumber }
+
+entity KitchenTicket is {
+  inlet Requests is type TicketCommand
+  outlet Tickets is event TicketOpened
+  handler Lifecycle is {
+    on init(atTable: TableNumber) is {
+      morph entity KitchenTicket to state Draft
+        with record TicketData(table = atTable, note = "")
+    }
+  }
+  state Draft of record TicketData is {
+    handler DraftHandler is {
+      on s: command Submit {
+        morph entity KitchenTicket to state Submitted
+          with record TicketData(table = Draft.table, note = s.note)
+      }
+    }
+  }
+  state Submitted of record TicketData is {
+    handler SubmittedHandler is {
+      on entry is {
+        send event TicketOpened(table = Submitted.table) to outlet Tickets
+      }
+      on r: command Reopen {
+        morph entity KitchenTicket to state Draft
+          with record TicketData(table = Submitted.table, note = r.note)
+      }
+    }
+  }
+}
+```
+
+`on entry` runs once, after the `morph` completes, each time a **live**
+`morph` moves an entity that already has a state into this one. It does
+**not** run:
+
+1. **At creation.** The `morph` inside `on init` places a new instance in its
+   starting state; that is part of creating it, not an entry. Work the
+   starting state needs at creation belongs in `on init`, which already knows
+   which state it chose.
+2. **For a `morph` into the state the entity is already in.** Nothing changed,
+   so nothing was entered. The record is still replaced. riddlc warns where
+   this is evident (`stmt-morph-to-current-state`).
+3. **On replay or recovery.** In an event-sourced entity a fold's `morph` is
+   re-run to rebuild state, and that re-run is not an entry. For the same
+   reason `on entry` may not `set` or `morph` there
+   (`entity-event-sourced-mutation-scope`): nothing it changed would be
+   reproduced by replay.
+4. **On rehydration.** An instance re-entering memory runs
+   [`on activate`](#on-clause-types), not `on entry`.
+5. **In a chain.** `on entry` may not `morph` (`entity-entry-morphs`): an
+   entry that moved on at once would run the next state's entry, and so on,
+   with nothing to stop it.
+
+It belongs in the handler that is live when the state is entered — the state's
+**initial** handler. Anywhere else it never runs, and is an Error
+(`entity-entry-misplaced`): in an entity-level handler there is no state to
+enter, and a state's other handlers are reached only by a later `become`.
+Outside an entity it does not parse. Unlike `on activate` it is an **effect
+block**: it may `send` and `tell`.
 
 ### Finite State Machines
 
@@ -1009,15 +1153,20 @@ entity Order is {
 !!! warning "Entity Validation"
     **Errors:**
 
-    - More than one `initial` state, or more than one `initial` handler in a
-      state
+    - More than one `initial` state (`entity-multiple-initial-states`), or
+      more than one `initial` handler in a state
+    - `on entry` anywhere but a state's initial handler
+      (`entity-entry-misplaced`), or an `on entry` that `morph`s
+      (`entity-entry-morphs`)
     - Defining a type whose name exactly matches a predefined type
-    - An entity with no handlers and no states that have handlers
-      (`entity-no-handlers-or-states`)
-    - A state with no handler, where the entity declares none to cover it
-      either (`entity-state-no-handlers`)
     - An entity with `option finite-state-machine` and fewer than two states
       (`entity-fsm-too-few-states`)
+
+    **Deprecations** (until 3.0): `initial state`
+    (`entity-initial-state-marker`), an entity with states but no `on init`
+    that morphs (`entity-init-no-morph`), and `on init` inside a state
+    (`entity-init-in-state`). See
+    [Creation](#creation-on-init-chooses-the-starting-state).
 
     **Warnings:**
 
@@ -1027,11 +1176,12 @@ entity Order is {
     - Entity Id type not defined at all
     - An entity whose handlers are all empty (`entity-empty-handlers`, a
       missing-content warning)
+    - A `morph` into the state the clause is already in
+      (`stmt-morph-to-current-state`): it changes no state, so no `on entry`
+      runs
 
     **Completeness Warnings:**
 
-    - States without an `on init` clause
-    - `on init` without a `set` statement
     - Command handlers that neither `send` nor `yield` an event, **and do
       not refuse**. A clause that refuses with `error` or `require` has
       processed the command — it decided, it declined, and there is nothing
@@ -1041,8 +1191,15 @@ entity Order is {
       it rewarded exactly the dead code a modeller should avoid.
     - Query handlers that don't `yield` or `send` a result
     - Entities without any `on query` clause
-    - Entities with no handlers at all
+    - Entities with no handlers at all (`entity-no-handlers`). Since 2.8.0
+      this is reported once, here; the `entity-no-handlers-or-states` Error
+      is no longer emitted
+    - A state with no handler, where the entity declares none to cover it
+      either (`entity-state-no-handlers`), reported only when some other
+      state does have one
     - FSM entities (2+ states) without `morph` or `become` statements
+      (`entity-fsm-no-transitions`, which replaced `entity-fsm-single-state`
+      in 2.8.0 and now sees a `morph` inside a state's handler)
     - Empty handlers (no statements or only `???`)
     - Handlers containing only `do` statements
     - Empty `on other` clauses (silently discards messages)
@@ -1106,10 +1263,11 @@ that match specific message kinds and execute statements.
 | `on event X` | Handle a specific event | `on event OrderCreated { ... }` |
 | `on query X` | Handle a query and yield a result | `on query GetOrder { ... }` |
 | `on result X` | Handle a result | `on result OrderInfo { ... }` |
-| `on init` | Execute when the processor initializes | `on init { ... }` |
+| `on init` | Create the instance; an entity `morph`s into its starting state | `on init(n: String) { ... }` |
 | `on term` | Execute when the processor terminates | `on term { ... }` |
 | `on activate` | Execute when an entity is rehydrated | `on activate { ... }` |
 | `on passivate` | Execute when an entity is evicted | `on passivate { ... }` |
+| `on entry` | Execute when a `morph` moves the entity into this state | `on entry { ... }` |
 | `on quiescence <window>` | Execute when nothing arrived for the window | `on quiescence "PT30M" { ... }` |
 | `on other` | Handle any unmatched message | `on other { ... }` |
 
@@ -1163,26 +1321,19 @@ yielded event, which is also what keeps replay from re-firing the timer.
 
 #### Lifecycle clauses take parameters
 
-`on init` and `on term` may declare a parameter list. Neither is required to:
+`on init` and `on term` may declare a parameter list. Neither is required to.
+In an entity with states, `on init`'s parameters are what it chooses the
+starting state from — see
+[Creation](#creation-on-init-chooses-the-starting-state). A processor with no
+states takes them just as well:
 
 <!-- riddl: in-context -->
 ```riddl
-record TicketData is { number: String, rush: Boolean }
-
-entity Ticket is {
+streamlet Meter as source is {
+  outlet Readings is event RawEvent
   handler Lifecycle is {
-    on init(ticketNumber: String, rush: Boolean) is {
-      when rush then
-        morph entity Ticket to state Expedited
-          with record TicketData(number = ticketNumber, rush = rush)
-      else
-        morph entity Ticket to state Queued
-          with record TicketData(number = ticketNumber, rush = rush)
-      end
-    }
+    on init(sensorName: String) is { do "open the sensor named by sensorName" }
   }
-  state Queued of record TicketData is { handler QueuedHandler is { ??? } }
-  state Expedited of record TicketData is { handler ExpeditedHandler is { ??? } }
 }
 ```
 
@@ -2624,7 +2775,9 @@ and an `Id`. **Initialization** is the job of its `on init` clause, which
 creation then runs — and only that clause; `on activate` is not run. It does
 not add a second way for an instance to exist: construction completes only
 when `on init` finishes. Without it, no `Id(P)` value could ever come into
-being and the whole addressing story would be inert.
+being and the whole addressing story would be inert. A new instance has no
+state until `on init` `morph`s it into one, so the arguments are what decide
+where it [starts](#creation-on-init-chooses-the-starting-state).
 
 `create` and [`terminate`](#terminate-statement) are **entity-only**, by an
 explicit check rather than as a side effect of the type system — `create` of a
@@ -4004,8 +4157,10 @@ addressed before considering a model ready for translation or code generation.
    means; the number alone does not.
 5. **Declare `yields`**: A command or query that declares its response gives
    generators a precise signature and lets the validator check conformance.
-6. **Mark `initial`**: Marking the starting state and handler explicitly makes
-   a model safe to reorder.
+6. **Start explicitly**: Give each entity with states an entity-level
+   `on init` that `morph`s into its starting state, and mark a state's
+   `initial` handler when it has several. Neither depends on declaration
+   order, so the model is safe to reorder.
 7. **Refuse First**: Put every `require` and `error` ahead of every effect.
 8. **End When Statements**: Always terminate `when` with `end`.
 9. **Use Match for Multiple Conditions**: Prefer `match` over a chain of `when`
@@ -4223,6 +4378,9 @@ it is slated for removal in 3.0.
 | `requires { … }` / `returns { … }` inline aggregation | `requires <TypeRef>` / `returns <TypeRef>` | `func-inline-aggregation` | by hand |
 | `one of { A }`, an alternation of one | a second alternative, or `A` itself | `single-alternation` | by hand |
 | an anonymous *nebula* (definitions with no wrapper) | `module <Name> is { … }` | `anonymous-nebula` | by hand |
+| `initial state X` | an entity-level `on init` that `morph`s into `X` | `entity-initial-state-marker` | by hand |
+| an entity with states whose `on init` does not `morph`, or that has none | `on init(…) is { morph entity E to state S with … }` | `entity-init-no-morph` | by hand |
+| `on init` inside a state's handler | the entity-level `on init`; a per-state action is `on entry` | `entity-init-in-state` | by hand |
 
 **Fixed by** says what migrates it mechanically. `--fix` is `riddlc validate --fix`, which
 rewrites the file in place; prettify is `riddlc prettify`, which writes a normalized copy.

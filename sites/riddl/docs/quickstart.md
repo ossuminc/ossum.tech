@@ -157,8 +157,9 @@ Three details that are easy to get wrong:
   is deprecated and will be removed in RIDDL 3.0.
 - **`do "..."`** describes work for a human or AI to implement later. A bare
   quoted string on its own is not a statement.
-- **`initial`** marks the starting state. Without it the first state declared
-  wins, so reordering states would silently change behavior.
+- **`on init`** runs once, when the product is created, and `morph`s it into
+  the state it starts in. An entity has no "initial state": its `on init`
+  chooses one, so the order states are written in does not matter.
 
 ---
 

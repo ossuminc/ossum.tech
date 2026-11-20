@@ -77,28 +77,44 @@ state ActiveOrder of record ActiveOrderData
     both: a state-scoped handler for behavior that differs by state, and an
     entity-level handler for behavior that does not.
 
-## The `initial` Marker
+## Where an Entity Starts
 
-An optional `initial` keyword marks the entity's starting state:
+An entity has **no initial state**. It is created without one, and its
+[`on init`](onclause.md#on-init-is-creation) clause — an entity-level clause,
+run once at creation — `morph`s it into the state it starts in:
 
 <!-- riddl: in-context no-prelude=Order -->
 ```riddl
 entity Order is {
+  handler OrderLifecycle is {
+    on init(start: PendingData) is { morph entity Order to state Pending with start }
+    on command CancelOrder { ??? }
+  }
   state Pending of record PendingData is { ??? }
   state Active  of record ActiveData  is { ??? }
   state Shipped of record ShippedData is { ??? }
-
-  handler OrderLifecycle is {
-    on init(start: PendingData) is { morph entity Order to state Pending with start } on command CancelOrder { ??? } }
 }
 ```
 
-Without the marker, the first state *declared* is the starting state — which
-means reordering states silently changes behavior. Marking it explicitly makes
-the model safe to refactor, and is fully backward compatible with models that
-omit it.
+Because `on init` takes the creation arguments, it can choose among states, and
+which state is *declared* first decides nothing — reordering them is safe.
 
-Declaring more than one `initial` state in an entity is an **Error**.
+!!! warning "`initial state` is deprecated (since 2.8.0)"
+    Through 2.7, an entity started in the state marked `initial`, or else the
+    first one declared. Both still work, with that meaning, until 3.0: an
+    `initial state` draws `entity-initial-state-marker`, and an entity with
+    states but no `on init` that morphs draws `entity-init-no-morph`. Two
+    `initial` states are an **Error** (`entity-multiple-initial-states`).
+
+    `initial` on a **handler** is unaffected: it picks which of a state's
+    handlers is live on entry. See [Handler](handler.md#the-initial-marker).
+
+## Entry Actions
+
+A state's [`on entry`](onclause.md#on-entry-a-states-entry-action) clause runs
+each time a `morph` moves the entity *into* that state — but not at creation,
+not for a `morph` into the state it is already in, and never on replay or
+rehydration.
 
 ## State-Scoped Invariants
 

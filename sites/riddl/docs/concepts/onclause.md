@@ -31,10 +31,11 @@ the message and the sender of any statements that send messages.
 | `on event X` | A specific event message |
 | `on query X` | A specific query message |
 | `on result X` | A specific result message |
-| `on init` | Creation and initialization — once, ever |
+| `on init` | Creation — once, ever; an entity `morph`s into its starting state |
 | `on term` | Termination — once, ever |
 | `on activate` | Entity rehydration — every time |
 | `on passivate` | Entity eviction — every time |
+| `on entry` | A `morph` moved the entity into this state |
 | `on quiescence <window>` | Nothing arrived for the whole window |
 | `on other` | A message not otherwise handled |
 
@@ -53,15 +54,80 @@ A new instance runs **`on init` only**. A [`create`](value.md#create) puts it in
 memory, but that is not an activation — `on activate` is reserved for an
 instance that already existed and is coming back.
 
-<!-- riddl: in-entity -->
+<!-- riddl: in-context -->
 ```riddl
-handler OrderHandler is {
-  on init      { do "load configuration" }
-  on activate  { do "warm the pricing cache for this order" }
-  on passivate { do "flush the pricing cache" }
-  on term      { do "archive the order record" }
+record OrderData is { note: String }
+
+entity Order is {
+  handler OrderHandler is {
+    on init(start: OrderData) is { morph entity Order to state Open with start }
+    on activate  { do "warm the pricing cache for this order" }
+    on passivate { do "flush the pricing cache" }
+    on term      { do "archive the order record" }
+  }
+  state Open of record OrderData is { handler OpenHandler is { ??? } }
 }
 ```
+
+## `on init` is creation
+
+`on init` runs once, when [`create`](value.md#create) makes the instance, and
+takes the creation arguments as its parameters. In an entity it belongs to an
+**entity-level** handler — not to any state — and, if the entity has states,
+it `morph`s into the one the entity starts in. It may choose among them:
+
+<!-- riddl: in-context -->
+```riddl
+type TableNumber is Integer
+record TicketData is { table: TableNumber, note: String }
+
+entity KitchenTicket is {
+  handler Lifecycle is {
+    on init(atTable: TableNumber, rush: Boolean) is {
+      when rush then
+        morph entity KitchenTicket to state Submitted
+          with record TicketData(table = atTable, note = "rush")
+      else
+        morph entity KitchenTicket to state Draft
+          with record TicketData(table = atTable, note = "")
+      end
+    }
+  }
+  state Draft of record TicketData is { handler DraftHandler is { ??? } }
+  state Submitted of record TicketData is { handler SubmittedHandler is { ??? } }
+}
+```
+
+There is no initial state (since 2.8.0). An entity that still starts by
+declaration order or by an `initial state` marker, or that has an `on init`
+inside a state, draws a deprecation until 3.0: `entity-init-no-morph`,
+`entity-initial-state-marker`, `entity-init-in-state`.
+
+In an `event-sourced` entity the `on init` invocation is the **first journal
+entry**, and replay re-runs it. So it may `set` and `morph` like an `on event`
+fold, and like a fold it may not read `system.now` or `system.random`: a
+creation time arrives as a parameter.
+
+## `on entry`: a state's entry action
+
+`on entry` runs each time a **live** `morph` moves an entity that already has a
+state into this one — whichever clause did the moving. It is how a model says
+"whenever the entity enters `Submitted`, open a ticket" once, instead of in
+every clause that morphs there. It does **not** run:
+
+1. at creation — `on init`'s `morph` places the entity, it does not enter a
+   state;
+2. for a `morph` into the state the entity is already in
+   (`stmt-morph-to-current-state` warns where that is evident);
+3. on replay or recovery — so in an event-sourced entity it may not `set` or
+   `morph`;
+4. on rehydration — that is `on activate`;
+5. in a chain — it may not `morph` at all (`entity-entry-morphs`).
+
+It goes in the state's **initial** handler, the one live on entry; anywhere
+else it never runs and is an Error (`entity-entry-misplaced`). It is legal only
+in an entity. The [language reference](../references/language-reference.md#on-entry-a-states-entry-action)
+has a full example.
 
 ## `on quiescence` — when nothing arrived
 
@@ -184,6 +250,7 @@ cannot enter the model at all:
 | [Projector](projector.md) | **Event-only**: `on command`, `on query` and `on record` are rejected. `on event` and `on result` are valid. |
 | `on event` (anywhere) | `require` and `error` are forbidden — an event has already happened and must always be accepted. |
 | `on activate` / `on passivate` | [Entity](entity.md)-only, and side-effect free: `send`, `tell`, `yield`, `morph` and `become` are rejected. |
+| `on entry` | [Entity](entity.md) states only; anywhere else is a parse error. |
 | `on quiescence` | At most one per handler, and never inside a `correlation` — which bounds itself with `times out after`. |
 | [Adaptor](adaptor.md) | A handler with no `on other` clause is an **Error**. |
 

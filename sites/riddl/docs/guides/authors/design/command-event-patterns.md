@@ -346,8 +346,10 @@ event MembersAdded is {
 
 4. **Size vs. simplicity** - Larger events are simpler but may impact performance
 
-5. **Separate creation from modification** - Creation events should always
-   contain complete initial state
+5. **Separate creation from modification** - Creation carries the complete
+   starting state. In an event-sourced entity creation is the `on init`
+   invocation itself, journalled with its arguments, so those arguments are
+   where the starting state belongs
 
 ## Related Concepts
 

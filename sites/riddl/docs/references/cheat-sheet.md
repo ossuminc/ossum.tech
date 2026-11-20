@@ -248,10 +248,17 @@ in the `with { }` metadata block, not in the body.)*
 **Key details**:
 
 - Entities have one or more named States, each backed by a **record**
-- An optional `initial` marker names the starting state and, on a state
-  handler, the one live on entering that state; on an entity-scope handler
-  it is the initial handler for every state declaring none of its own.
-  Without a marker, the first declared wins
+- **No initial state** (2.8.0): one entity-level `on init` `morph`s into the
+  starting state, chosen from its parameters. `initial state` and starting
+  in the first declared state are deprecated until 3.0
+  (`entity-initial-state-marker`, `entity-init-no-morph`), as is `on init`
+  inside a state (`entity-init-in-state`)
+- `initial` on a **handler** still picks the one live on entering a state;
+  on an entity-scope handler it is the initial handler for every state
+  declaring none of its own
+- `on entry` in a state's initial handler runs on each live `morph` INTO the
+  state — never at creation, for a morph to the current state, on replay or
+  on rehydration, and it may not `morph`
 - Supports `morph` (change state) and `become` (change handler)
 - `on activate` / `on passivate` handle rehydration and eviction, and must
   be side-effect free
@@ -266,7 +273,7 @@ in the `with { }` metadata block, not in the body.)*
   **Error** on an entity that is not event-sourced
 - The primary unit of consistency in a reactive system
 
-**Syntax**: `entity Order is { initial state Active of record OrderData ... }`
+**Syntax**: `entity Order is { handler H is { on init(d: OrderData) is { morph entity Order to state Active with d } } state Active of record OrderData ... }`
 
 > *[For more details →](../concepts/entity.md)*
 
@@ -495,12 +502,15 @@ states to model lifecycle stages (e.g., Draft, Active, Archived).
 
 **Key details**:
 
-- Syntax: `[initial] state X of record RecordName`
+- Syntax: `state X of record RecordName` (`initial state` is deprecated)
 - The data type must be a **record** — a state is record-shaped data
 - A state body may hold Invariants constraining that state's data
 - The entity transitions between states via `morph`
 - Each state can have its own handlers that override entity defaults
 - More than one `initial` state in an entity is an **Error**
+  (`entity-multiple-initial-states`)
+- `on entry` in the state's initial handler runs each time a `morph` moves
+  the entity into it
 
 > *[For more details →](../concepts/state.md)*
 
@@ -630,10 +640,11 @@ type.
 | `on event X` | A specific event message |
 | `on query X` | A specific query message (use `reply` to produce the result) |
 | `on result X` | A specific result message |
-| `on init` | Processor initialization (once ever) |
+| `on init` | Creation (once ever); an entity `morph`s into its starting state |
 | `on term` | Processor termination (once ever) |
 | `on activate` | Entity rehydration (every time) |
 | `on passivate` | Entity eviction (every time) |
+| `on entry` | A `morph` moved the entity into this state (entity states only) |
 | `on other` | Any unmatched message (catch-all) |
 
 **Key details**:

@@ -457,9 +457,13 @@ and all five apply only when the entity is `event-sourced`.
 2. **Every event named by such a `yields` has an `on event` clause**, so replay
    has something to apply.
 
-3. **`set`, `morph` and `become` appear only in `on event` clauses.** There is
-   no exemption for `on init`: an initial state must come from an event like
-   any other change. Commands *decide*; events *apply*.
+3. **`set`, `morph` and `become` appear only in `on event` clauses — and in
+   `on init`.** Commands *decide*; events *apply*. `on init` is the exception
+   because it is journalled too (since 2.8.0): the creation itself, with its
+   arguments, is the instance's first journal entry and replay re-runs it. So
+   `on init` morphs straight into the starting state, and like a fold it may
+   not read `system.now` or `system.random`. Yielding a `Created` event only
+   so that a fold can morph is no longer needed.
 
 4. **A foreign event may not change state.** An event declared outside the
    entity must first be turned into one of the entity's own:

@@ -183,22 +183,37 @@ different things:
 
 | Clause | Fires |
 |--------|-------|
-| `on init` / `on term` | Once ever, at creation and destruction |
+| `on init` / `on term` | Once ever, at creation and destruction. `on init` `morph`s into the starting state |
 | `on activate` / `on passivate` | Every time, at rehydration and eviction |
 
 An entity that is evicted from memory and later rehydrated passivates and
 activates repeatedly without ever being initialized or terminated again. That
 distinction matters for anything cached or connection-scoped.
 
-<!-- riddl: in-entity -->
+<!-- riddl: in-context -->
 ```riddl
-handler Lifecycle is {
-  on init      { do "assign the account number" }
-  on activate  { do "warm the pricing cache" }
-  on passivate { do "flush the pricing cache" }
-  on term      { do "archive the account record" }
+record AccountData is { accountNumber: String }
+
+entity Account is {
+  handler Lifecycle is {
+    on init(number: String) is {
+      morph entity Account to state Open
+        with record AccountData(accountNumber = number)
+    }
+    on activate  { do "warm the pricing cache" }
+    on passivate { do "flush the pricing cache" }
+    on term      { do "archive the account record" }
+  }
+  state Open of record AccountData is { handler OpenHandler is { ??? } }
 }
 ```
+
+**An entity has no initial state** (since 2.8.0). It is created with none, and
+its entity-level `on init` `morph`s it into the state it starts in, chosen from
+the creation arguments. The `initial state` marker and starting in the first
+declared state are deprecated until 3.0; see
+[State](state.md#where-an-entity-starts). A state can also run an action each
+time it is entered, with [`on entry`](onclause.md#on-entry-a-states-entry-action).
 
 `on activate` and `on passivate` are **entity-only** and must be side-effect
 free: `send`, `tell`, `yield`, `morph` and `become` are rejected at parse time.

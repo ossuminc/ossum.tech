@@ -98,7 +98,8 @@ placements a handler can occupy.
 
 `initial` marks the handler that becomes active when the entity transitions
 **into** that state, whether by [morph](statement.md#morph-and-become-entity-only)
-or at creation:
+or at creation. It is also where that state's
+[`on entry`](onclause.md#on-entry-a-states-entry-action) clause must live:
 
 <!-- riddl: in-entity -->
 ```riddl
