@@ -93,7 +93,7 @@ Wherever a statement needs a value, any of these forms is accepted:
 | Constructor | `OrderPlaced(id, total = x)` | Builds a message or record |
 | Get | `get from input SignupForm` | Reads a UI input or an entity state |
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
-| Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it |
+| Ask | `ask query GetInfo(sku = s) of entity Catalog` | A query paired with the reply that answers it; the arguments say what is asked |
 | Prompt | `prompt("compute the discount")` | A value computed by AI at generation time |
 | Boolean | `a > b and not c` | A structured boolean expression |
 

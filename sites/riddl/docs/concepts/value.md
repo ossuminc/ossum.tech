@@ -49,7 +49,7 @@ pseudo-code remains available where structure would be false precision.
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount") [as <type>]` | A value computed by AI at generation time; the ascription states its type |
 | Boolean | `a > b and not c` | A structured boolean expression |
-| Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it |
+| Ask | `ask query GetInfo(sku = s) of entity Catalog` | A query paired with the reply that answers it; the arguments say what is asked |
 | Create | `create entity Order("A-1001")` | Brings an instance into being, runs its `on init`; **yields its `Id`** |
 | Self | `self`, `self.id` | The instance executing right now |
 

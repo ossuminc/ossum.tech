@@ -1617,6 +1617,65 @@ needs a value, it accepts any of these forms:
 | Membership | `tags contains "urgent"` | Whether the collection holds that value |
 | Query | `query one reservations where id == q.id` | Reads stored rows; legal only in a repository |
 
+### A Literal Is Held to Its Position's Type
+
+A written number or string has a type its text decides, and since 2.8.0 it
+must **fit the position it is written in** — a field, a constructor or call
+argument, a `let` with a declared type:
+
+<!-- riddl: in-context -->
+```riddl
+record Booking is {
+  guests: Natural, vip: Boolean, onDate: Date, startsAt: DateTime, madeAt: TimeStamp
+}
+command Book is { name: String }
+event Booked is { booking: Booking }
+
+entity Reservation is {
+  inlet Requests is command Book
+  outlet Bookings is event Booked
+  handler Desk is {
+    on command Book {
+      send event Booked(booking = record Booking(
+        guests = 4, vip = 0, onDate = "2026-11-18",
+        startsAt = "2026-11-18T19:30", madeAt = system.now
+      )) to outlet Bookings
+    }
+  }
+}
+```
+
+| Position | Accepts | Refused (an Error) |
+|----------|---------|--------------------|
+| A number of a constrained range | a number in range | `-3` for a `Natural` (`value-not-natural`) |
+| `Boolean` | `true`, `false`, and the integers `0` and `1` | any other number (`value-type-mismatch`) |
+| `Integer` | a number, or a Boolean (`true` = 1, `false` = 0) | a string |
+| `String`, `Currency`, a record | a value of that type | a number (`value-type-mismatch`) |
+| `Date` | `"2026-11-18"` | any other string shape (`value-time-literal-not-iso8601`) |
+| `DateTime`, `TimeStamp` | `"2026-11-18T10:30"`, optionally with `:ss`, a fraction, and `Z` or `±hh:mm` | a date alone, or anything not ISO-8601 |
+
+Three details:
+
+- **No literal fills a `Currency`.** A number, `"1.00"` and `"USD 1.00"` are
+  all refused; pass a `Currency`-typed reference, such as the handled
+  command's own amount.
+- **A String-typed *reference* is still accepted for a time field.** Its value
+  is invisible to the validator, so only a written string is checked.
+- **`TimeStamp` → `Date` and `TimeStamp` → `DateTime` are intended
+  conversions.** `onDate = system.now` is correct: the generator takes the date
+  part, or keeps the instant.
+
+!!! info "An optional value where one is required is an Advisory"
+    Supplying a `T?`, `T*` or `T{0,n}` value where the position's minimum is
+    one is **legal**, and draws the Advisory `value-optional-for-required`:
+    whether the value is empty is a run-time fact, so the generator decides
+    how the empty case is handled. A guard the model **states** settles it —
+    inside `when x != empty then`, the `else` of `x == empty`, each conjunct
+    of an `and`, and everything after `require x != empty` or after a
+    `when x == empty then error … end`, the value is proven present and draws
+    nothing. [`x otherwise y`](#otherwise-a-default-for-empty) supplies the
+    default inline instead.
+
 ### Arithmetic
 
 `+ - * /` apply to numbers; `+` also concatenates two strings; and a timestamp
@@ -2601,6 +2660,24 @@ statement, so it is used through `let`:
 ```riddl
 let answer = ask query GetProduct(id = productId) of entity Catalog
 ```
+
+**An `ask` states what it asks** (since 2.8.0). It supplies the query's field
+values exactly as a [constructor](#constructors) does: named or positional
+(positional first), **every** field supplied — an optional one too, as
+`empty` if nothing — none twice, and each of its field's type. Inside a
+`foreach`, an argument may name the element, so the model says which element
+is being asked about. The bare `ask query Q of P` remains the spelling for a
+query with **no** fields.
+
+!!! warning "A bare ask of a query with fields is deprecated until 3.0"
+    `ask query GetProduct of entity Catalog`, where `GetProduct` has fields,
+    says nothing about *what* is asked. It draws `[deprecated]
+    [value-ask-bare-query]` through 2.x and becomes an Error at 3.0 — the same
+    Error a bare `send` of such a message already is. `--fix` and `prettify`
+    do not migrate it, because only the author knows which values to supply.
+    Mistakes in the argument list draw the constructor's own rules:
+    `value-constructor-missing-fields`, `value-argument-duplicated`,
+    `value-not-a-field`, `value-type-mismatch`.
 
 Before `ask`, a model could say a message was sent (`tell`) and what handling
 one produces (`yields`/`replies`), but not that a caller awaits a particular
@@ -4379,6 +4456,7 @@ it is slated for removal in 3.0.
 | `one of { A }`, an alternation of one | a second alternative, or `A` itself | `single-alternation` | by hand |
 | an anonymous *nebula* (definitions with no wrapper) | `module <Name> is { … }` | `anonymous-nebula` | by hand |
 | `initial state X` | an entity-level `on init` that `morph`s into `X` | `entity-initial-state-marker` | by hand |
+| `ask query Q of P` where `Q` has fields | `ask query Q(f = v, …) of P` | `value-ask-bare-query` | by hand |
 | an entity with states whose `on init` does not `morph`, or that has none | `on init(…) is { morph entity E to state S with … }` | `entity-init-no-morph` | by hand |
 | `on init` inside a state's handler | the entity-level `on init`; a per-state action is `on entry` | `entity-init-in-state` | by hand |
 

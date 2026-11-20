@@ -715,7 +715,7 @@ Wherever a statement needs a value, any of these is accepted:
 | Call | `call function Pricing.Total(a, b)` | Invokes a pure function for its result |
 | Prompt | `prompt("compute the discount") [as <type name>]` | A typed hole: the type is checked at compile time, the computation is prose an AI fills in. The ascription is a type NAME (`as Real`, `as Recipes`), never an expression like `as String(1,30)` |
 | Boolean | `a > b and not c` | A structured boolean expression. `!` is a synonym for `not`; prettify emits `not`. Unrelated to `!=`. |
-| Ask | `ask query GetInfo of entity Catalog` | A query paired with the reply that answers it. **Never inside a saga.** |
+| Ask | `ask query GetInfo(sku = s) of entity Catalog` | A query paired with the reply that answers it; supplies every field like a constructor (a bare ask of a query with fields is deprecated). **Never inside a saga.** |
 | Create | `create entity Order("A-1001")` | Creates an instance and runs its `on init` with the arguments; the value is its `Id`. Entity-only; an effect. Formerly `initiate` (deprecated). |
 | Self | `self`, `self.id` | The instance running now (`id`, `version`). Pass `self.id`, never `self`. |
 | Arithmetic | `subtotal + amount * rate` | `+ - * /` on numbers, `+` on two strings, timestamp ± duration. No power or roots — those stay a `prompt`. |
@@ -725,6 +725,18 @@ Wherever a statement needs a value, any of these is accepted:
 | Count | `count of items` | How many elements, as a `Whole`. Binds tighter than arithmetic. |
 | Membership | `tags contains "urgent"` | Whether the collection holds that value |
 | Query | `query one bookings where id == q.id` | Reads stored rows. Repository handlers only; without `one`, every match in **unspecified** order. |
+
+!!! warning "A literal must fit its position (2.8.0)"
+    A number is refused for a `String`, `Currency`, `DateTime` or record
+    (`value-type-mismatch`); a range applies everywhere (`-3` for a `Natural`
+    is `value-not-natural`). A `Boolean` takes `true`/`false` or `0`/`1`, and
+    a Boolean fills an `Integer`. Time strings are ISO-8601: `"2026-11-18"`
+    for a `Date`, `"2026-11-18T10:30"` (optionally `:ss`, a fraction, `Z` or
+    `±hh:mm`) for a `DateTime` or `TimeStamp`, else
+    `value-time-literal-not-iso8601`. No literal fills a `Currency`.
+    `system.now` fills a `Date` or `DateTime`. An optional value where one is
+    required is only an Advisory (`value-optional-for-required`), silenced by
+    a stated `!= empty` guard.
 
 !!! warning "Comparisons are type-CHECKED, not reference-only"
     Either operand may be any expression — a reference, a literal, a
@@ -770,7 +782,7 @@ non-exhaustive match over a closed subject without `default` draws a
 | `yield` | `yield event ProductAdded(id)` | Produce a **command's** declared event, without knowing the sender. |
 | `reply` | `reply result ProductInfo(id, name)` | Answer a **query** with its declared result. |
 | `forward` | `forward ord to entity Payments` | Pass the handled message on and **discharge** its `yields`/`replies` obligation. Portlet or processor target. Only in a clause handling a command with `yields` or a query with `replies`. |
-| `ask` | `let a = ask query GetInfo of entity Catalog` | A value: a query paired with the reply that answers it. **Never inside a saga.** |
+| `ask` | `let a = ask query GetInfo(sku = s) of entity Catalog` | A value: a query paired with the reply that answers it. **Never inside a saga.** |
 
 The message operand may be a bare reference or an inline constructor.
 
