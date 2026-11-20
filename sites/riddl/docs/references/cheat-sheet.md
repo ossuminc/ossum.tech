@@ -724,6 +724,12 @@ Wherever a statement needs a value, any of these is accepted:
 | Filter | `items as i where i.qty > Zero` | The matching **elements**, not a boolean — so `when <filter>` does not parse. There is deliberately no `map`. |
 | Count | `count of items` | How many elements, as a `Whole`. Binds tighter than arithmetic. |
 | Membership | `tags contains "urgent"` | Whether the collection holds that value |
+| Sum | `sum of lines as l by l.qty` | Total of the elements, or of a per-element **product** (parenthesize a sum: `by (l.a + l.b)`). Empty sums to zero; `Natural` sums to `Whole` |
+| One of | `one of lines as l where l.sku == s` | The matching element (first in a sequence), or `empty`; its type is the element made optional |
+| Default | `nick otherwise "guest"` | Left side unless empty, else the right (evaluated only then). **Loosest** operator: `(x otherwise 0) + 1` |
+| Conditional value | `when c then a else b end` | Only the chosen branch runs; `else` mandatory; nest for multi-way |
+| Duration units | `minutes of grace` | `nanoseconds` … `weeks`; whole units, truncated, an `Integer`; binds tighter than arithmetic |
+| Optional chaining | `line.quantity` with `line: Line?` | Reaches an optional value. Collections do not chain |
 | Query | `query one bookings where id == q.id` | Reads stored rows. Repository handlers only; without `one`, every match in **unspecified** order. |
 
 !!! warning "A literal must fit its position (2.8.0)"

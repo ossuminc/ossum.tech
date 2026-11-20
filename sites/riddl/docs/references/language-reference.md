@@ -1615,6 +1615,11 @@ needs a value, it accepts any of these forms:
 | Filter | `items as i where i.quantity > Zero` | The matching **elements** — not a boolean |
 | Count | `count of items` | How many elements, as a `Whole` |
 | Membership | `tags contains "urgent"` | Whether the collection holds that value |
+| Sum | `sum of lines as l by l.quantity` | The total, of the elements or of a per-element product |
+| One of | `one of lines as l where l.sku == s` | The matching element, or `empty` |
+| Default | `nick otherwise "guest"` | The left side unless it is empty |
+| Conditional | `when c then a else b end` | One of two values; only the chosen one is evaluated |
+| Duration units | `minutes of grace` | A `Duration` as a whole number of units |
 | Query | `query one reservations where id == q.id` | Reads stored rows; legal only in a repository |
 
 ### A Literal Is Held to Its Position's Type
@@ -2085,6 +2090,69 @@ parse. Pass it to `count of`, bind it with `let`, or quantify it.
     exactly the thing RIDDL refuses to synthesise. Filtering and counting
     narrow what a model already declares; transforming would invent something
     it does not.
+
+#### Totals, matches, defaults and choices
+
+Since 2.8.0 a value can also total a collection, pick one element of it, fall
+back when something is empty, and choose between two values:
+
+<!-- riddl: in-handler -->
+```riddl
+let units = sum of order.lines as l by l.quantity
+let line = one of order.lines as l where l.sku == note
+let wanted = line.quantity otherwise 1
+let greeting = cart.nickname otherwise "guest"
+let size = when units > MinimumOrder then "large" else "small" end
+let hoursLeft = hours of (order.dueAt - system.now)
+```
+
+| Form | Value | Type |
+|------|-------|------|
+| `sum of xs` | The total of the elements; an empty collection sums to zero | The element's type; numbers, `Duration` and `Currency` add, and `Natural` sums to `Whole` |
+| `sum of xs as e by <expr>` | The total of `<expr>` per element | `<expr>`'s type, as above |
+| `one of xs as e where p` | The element satisfying `p` — the first match in a sequence — or `empty` when none does | The element type, made optional |
+| `x otherwise y` | `x`, unless it is empty; then `y`, evaluated only in that case | `x`'s type, without the optionality |
+| `when c then a else b end` | `a` if `c` holds, else `b`; only the chosen branch is evaluated | The branches' common type |
+| `minutes of d` (any plural unit, `nanoseconds` … `weeks`) | A `Duration` in whole units, truncated toward zero | `Integer` |
+
+**Optional chaining.** A path may pass through an optional field, and what it
+reaches is optional: with `line: Line?`, `line.quantity` is an optional
+quantity — which is how `one of` composes with the field after it. Collections
+do not chain, and a `foreach … in` path through an optional is still refused.
+
+**Precedence.** `<unit> of d` and `sum of` bind tighter than arithmetic, so
+`minutes of d + 1` is `(minutes of d) + 1`. The projection after `by` is a
+*product*, so one that adds is parenthesized: `by (e.a + e.b)`. `otherwise` is
+the **loosest** value operator: `a + b otherwise c` is `(a + b) otherwise c`,
+and its result is used in an expression only inside parentheses:
+`(x otherwise 0) + 1`. **Parentheses accept any value**, not only a boolean.
+A conditional value is closed by `end`, so it needs none; its `else` is
+mandatory, and a multi-way choice nests another `when` in it.
+
+**None of the words is reserved.** `sum`, `count`, `hours` and `days` remain
+legal field names.
+
+!!! warning "Validation"
+    - `<unit> of` something that is not a `Duration`:
+      `value-duration-units-not-duration`.
+    - `sum of` elements that do not add (a record, a string):
+      `value-sum-not-summable`.
+    - `x otherwise y` where `y` cannot stand in for `x`:
+      `value-otherwise-mismatch`. A literal default is checked like any
+      [literal](#a-literal-is-held-to-its-positions-type), so `maybeN otherwise
+      "x"` for an integer is `value-type-mismatch`.
+    - `x otherwise y` where `x` can never be empty draws the style warning
+      `value-otherwise-never-empty`: the default is dead.
+    - Conditional branches with no common type:
+      `value-conditional-branch-mismatch`. Numbers of different kinds join; a
+      bare `empty` branch makes the result optional.
+
+##### `otherwise`: a default for empty
+
+`otherwise` is also what the `value-optional-for-required` Advisory suggests
+first, before a `when x != empty` guard: supplying an optional value where one
+is required, with the default stated inline, settles what the empty case
+means.
 
 ## Statement Syntax
 

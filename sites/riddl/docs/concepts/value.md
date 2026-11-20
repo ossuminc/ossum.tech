@@ -37,7 +37,7 @@ RIDDL 2.0 replaced what had been a mostly-opaque quoted string with a real
 value-expression system. A literal string is still accepted everywhere, so
 pseudo-code remains available where structure would be false precision.
 
-## The Eleven Forms
+## The Forms
 
 | Form | Syntax | Meaning |
 |------|--------|---------|
@@ -52,6 +52,13 @@ pseudo-code remains available where structure would be false precision.
 | Ask | `ask query GetInfo(sku = s) of entity Catalog` | A query paired with the reply that answers it; the arguments say what is asked |
 | Create | `create entity Order("A-1001")` | Brings an instance into being, runs its `on init`; **yields its `Id`** |
 | Self | `self`, `self.id` | The instance executing right now |
+
+These are the atoms. Values also combine: arithmetic, comparisons, collection
+predicates and counts, and — since 2.8.0 — `sum of`, `one of … where`,
+`x otherwise y`, a conditional `when c then a else b end`, `<unit> of d`, and
+optional chaining through a `T?` field. The
+[language reference](../references/language-reference.md#totals-matches-defaults-and-choices)
+gives each its type and precedence.
 
 ## Value References
 
