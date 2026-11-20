@@ -645,6 +645,8 @@ type.
 | `on activate` | Entity rehydration (every time) |
 | `on passivate` | Entity eviction (every time) |
 | `on entry` | A `morph` moved the entity into this state (entity states only) |
+| `on quiescence <window>` | Nothing arrived for the window (a message resets it) |
+| `on every <period>` | Once per period; a message does **not** reset it. Several per handler |
 | `on other` | Any unmatched message (catch-all) |
 
 **Key details**:
@@ -660,6 +662,21 @@ type.
   happened and must always be accepted
 - Two clauses in one handler handling the same message draw a
   **StyleWarning**; the later one is unreachable
+- A **period** (after `every`) is a positive Duration (`30 days`, `"PT15M"`:
+  a fixed span), a calendar schedule — `month on day 1 at 09:00 in
+  "America/Toronto"`, `month on last day`, `month on the third wednesday`,
+  `3 months on day 1`, `year on march 31`, `year on the first monday of
+  september`, `day at 06:00`, `weekday`, `monday, wednesday and friday` — or
+  `cron "<five fields>"`. Zone defaults to **UTC**, time to midnight; a day a
+  month lacks is **skipped** (Advisory `value-schedule-day-skips-months`;
+  use `on last day`)
+- `send m to outlet O every <period> [starting [at] <instant>]` recurs; legal
+  **only in `on init`** (`stmt-send-every-not-in-init`), re-evaluates `m` at
+  each firing, never cancels. An `on X` re-sending `X` `at <instant> +
+  <duration>` is a recurrence, not `stream-graph-cycle`
+- `date + 1 month` / `- 2 years`: calendar periods, only on
+  `Date`/`DateTime`/`ZonedDateTime`/`TimeStamp`; month-end **clamps**
+  (Jan 31 + 1 month = Feb 28/29)
 
 > *[For more details →](../concepts/onclause.md)*
 

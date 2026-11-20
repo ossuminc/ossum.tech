@@ -1319,6 +1319,26 @@ yielded event, which is also what keeps replay from re-firing the timer.
 
 `quiescence` remains a legal identifier; it is recognised only after `on`.
 
+#### `on every <period>`
+
+Fires **once per period**, whatever else happens (since 2.8.0):
+
+<!-- riddl: in-entity -->
+```riddl
+handler MeteringBoundary is {
+  on command ExampleEntityCommand { do "count the usage" }
+  on every 30 days is { do "roll this period's usage up" }
+  on every month on last day at 23:00 is { do "close the month" }
+}
+```
+
+The difference from `on quiescence` is the point: **handling a message does
+not reset it.** It is legal wherever `on quiescence` is, a handler may hold
+several, and it is an effect block with the same event-sourcing rule — change
+state only through a yielded event. The period is any of the shapes in
+[Periods and Calendar Schedules](#periods-and-calendar-schedules); a plain
+Duration is a fixed span, so `on every 30 days` is not "monthly".
+
 #### Lifecycle clauses take parameters
 
 `on init` and `on term` may declare a parameter list. Neither is required to.
@@ -1725,6 +1745,83 @@ correlation's `times out after "<duration>"`.
 `system.now` is the only spelling of the current instant. Added to or
 subtracted from a duration it gives another instant, which is what makes
 `send … at system.now + 30 days` work.
+
+### Periods and Calendar Schedules
+
+A **period** says how often something recurs. It is what follows `every`, in
+both recurring forms — a [timer clause](#on-every-period) and a
+[recurring send](#recurring-delivery-send-every-period) — and since 2.8.0 it
+takes one of three shapes:
+
+| Shape | Examples | Means |
+|-------|----------|-------|
+| A positive `Duration` | `30 days`, `1 hour`, `"PT15M"`, `"30 minutes"`, a `Duration` constant or field | A **fixed span**: every 30 days, not "monthly" |
+| A calendar schedule | `month on day 1`, `weekday at 08:30` | A **calendar** cadence, read in local time |
+| A cron text | `cron "0 9 1 * *"` | Exactly the standard five-field cron, for what the words cannot say |
+
+The calendar cadences:
+
+<!-- riddl: in-clauses -->
+```riddl
+on every month on day 1 at 09:00 in "America/Toronto" is { do "open the billing cycle" }
+on every month on last day is { do "close the books" }
+on every month on the third wednesday at 10:00 is { do "hold the review" }
+on every 3 months on day 1 is { do "report the quarter" }
+on every year on march 31 at 17:00 is { do "close the fiscal year" }
+on every year on the first monday of september is { do "start the season" }
+on every day at 06:00 is { do "open the kitchen" }
+on every weekday at 08:30 is { do "send the stand-up digest" }
+on every monday, wednesday and friday is { do "restock" }
+on every cron "0 9 1 * *" in "UTC" is { do "the same as the first line, in UTC" }
+```
+
+- **`at HH:MM[:SS]` is optional**, and defaults to midnight.
+- **`in "<zone>"` is optional, and defaults to UTC.** The schedule is read in
+  that zone's **local** time, so `day at 06:00 in "Europe/Paris"` stays at six
+  in the morning across a daylight-saving change. A zone is an IANA name or an
+  offset; riddlc checks the *form* (`value-time-zone-malformed`), not that the
+  zone exists.
+- **A day a month lacks is skipped, not moved.** `on day 31` fires in seven
+  months a year and `february 29` only in leap years. riddlc gives the
+  Advisory `value-schedule-day-skips-months` and recommends **`on last day`**,
+  the month-end idiom.
+- **None of the words is reserved.** A whole schedule wins over a value of
+  the same name (`every day` is daily even beside a constant `day`), but
+  `every month` with no `on …` anchor still names a value.
+
+!!! warning "Schedule validation"
+    Each is an **Error**: a non-positive Duration
+    (`value-non-positive-duration`), or a Duration with no unit
+    (`value-vague-duration`); a period that is not a Duration at all
+    (`handler-every-not-duration` in `on every`, `stmt-send-every-not-duration`
+    in a `send`); a day of the month outside 1–31
+    (`value-schedule-day-out-of-range`); a date no year has, such as
+    `february 30` (`value-schedule-date-never-exists`); an interval of zero
+    (`value-schedule-interval-not-positive`); a weekday named twice
+    (`value-schedule-duplicate-weekday`); a time past 23:59:59
+    (`value-schedule-time-out-of-range`); a cron text without exactly five
+    fields (`value-cron-malformed`); and a malformed zone
+    (`value-time-zone-malformed`).
+
+#### Calendar periods in arithmetic
+
+`1 month` and `2 years` are **calendar periods**, not Durations — a month has
+no fixed length. They are legal only added to or subtracted from a `Date`,
+`DateTime`, `ZonedDateTime` or `TimeStamp`, and the result keeps the operand's
+type:
+
+<!-- riddl: in-handler -->
+```riddl
+let renewal = order.dueAt + 1 month
+let review = order.dueAt - 2 years + 3 days
+```
+
+**Month-end clamps:** January 31 + 1 month is the last day of February, and
+February 29 + 1 year is February 28. `TimeStamp` arithmetic is in UTC, a
+`ZonedDateTime`'s in its own zone. Note the contrast with a *schedule*: a
+schedule **skips** a missing day, while arithmetic **clamps** to the month's
+last day. A period anywhere else — `count + 1 month` — is
+`value-arithmetic-operand-mismatch`.
 
 ### Constants
 
@@ -2233,6 +2330,56 @@ does not take `at`. Everything else about `send` is unchanged: it is a
 transmission rather than a local state change, it does **not** discharge a
 `yields` obligation, and outlet ownership and portlet typing apply exactly as
 above.
+
+#### Recurring delivery: `send … every <period>`
+
+`every` in place of `at` makes a send **recur** (since 2.8.0):
+
+<!-- riddl: in-context -->
+```riddl
+command CloseMonth is { periodEnd: TimeStamp }
+constant FirstClose: TimeStamp = "2026-12-01T00:00:00Z"
+record MeterData is { count: Integer }
+
+entity Meter is {
+  inlet Closes is command CloseMonth
+  outlet Clock is command CloseMonth
+  handler Lifecycle is {
+    on init is {
+      send command CloseMonth(periodEnd = system.now + 30 days) to outlet Clock
+        every 30 days starting at FirstClose
+      send command CloseMonth(periodEnd = system.now) to outlet Clock
+        every month on day 1 at 09:00
+      morph entity Meter to state Counting with record MeterData(count = 0)
+    }
+  }
+  state Counting of record MeterData is {
+    handler CountingHandler is {
+      on command CloseMonth { do "close the month" }
+    }
+  }
+}
+connector MonthClock is { from outlet Meter.Clock to inlet Meter.Closes }
+```
+
+`send <msg> to <outlet> every <period> [starting [at] <instant>]`:
+
+- **Only in `on init`.** Anywhere else it is an Error
+  (`stmt-send-every-not-in-init`): every message the clause handled would
+  register one more recurrence.
+- **Without `starting`, the first delivery is one period after the `send`
+  runs.** `starting` is typed exactly as `at` is — `TimeStamp`, `DateTime` or
+  `ZonedDateTime` — and with a calendar schedule it means the first
+  occurrence at or after that instant.
+- **The message is re-evaluated at every firing**, so `system.now` in it is
+  the time of each delivery.
+- **There is no cancellation:** it ends with the instance.
+
+!!! info "A rescheduling clause is not a loop"
+    An `on X` clause that sends `X` again `at <instant> + <duration>` is a
+    recurrence, and `stream-graph-cycle` no longer reports it (2.8.0). Any
+    other instant still counts as a loop, since a past instant is delivered
+    immediately.
 
     Both portlet kinds are checked, and both sides expand through alias chains.
     To carry more than one message on an outlet, declare its type as an

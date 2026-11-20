@@ -201,6 +201,13 @@ on event ReminderDue { … }
 the emitting clause handles `Book` and sends `ReminderDue`, so the event it
 sends can never re-enter it.
 
+Since 2.8.0 a clause may even re-send **its own** message, so long as it does
+so `at <instant> + <duration>`: `on command Tick { send command Tick(…) to
+outlet Out at system.now + 1 hour }` is a recurrence, not a cycle. Any other
+instant is still a loop, because a past instant is delivered immediately. A
+fixed recurrence is usually clearer as
+[`on every`](onclause.md) or a recurring `send … every` in `on init`.
+
 ## Use Cases
 
 - **Event Processing**: React to events in real time

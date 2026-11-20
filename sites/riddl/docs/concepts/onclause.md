@@ -196,6 +196,27 @@ projector, repository or streamlet. Two rules bound it:
     It is contextual — recognised only after `on`. Existing models that use it
     as a name keep working.
 
+## `on every` — on a clock
+
+`on every <period>` fires **once per period**, and unlike `on quiescence` a
+handled message does not reset it (since 2.8.0). A handler may hold several:
+
+<!-- riddl: in-entity -->
+```riddl
+handler Billing is {
+  on command ExampleEntityCommand { do "record the usage" }
+  on every 1 hour is { do "checkpoint the usage" }
+  on every month on day 1 at 09:00 in "America/Toronto" is { do "send the invoice" }
+}
+```
+
+The period is a positive Duration — a fixed span, so `30 days` is not
+"monthly" — a calendar schedule such as `month on last day` or
+`weekday at 08:30`, or a five-field `cron "…"` text. The
+[language reference](../references/language-reference.md#periods-and-calendar-schedules)
+lists every cadence and its rules. To send a message on a schedule instead,
+use a recurring `send … every` in `on init`.
+
 ## Binding the Handled Message
 
 An `on` clause may bind a local name to the message it is handling, using
