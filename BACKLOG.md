@@ -209,24 +209,15 @@ confirmed; several predate the per-product versioning migration.
 
 ---
 
-## 7. Follow-ups from the 2.7.0 language-docs audit
+## 7. One riddl report open from the 2.8.0 upgrade
 
-The audit itself is done (2026-11-17). Its full delta, S1–S10 and M1–M10, is
-recorded in NOTEBOOK.md § "2.7.0 language-docs audit". What remains:
+The 2.7.0 audit's follow-ups (7a, R5–R8) all closed with riddl 2.8.0 and are
+recorded in NOTEBOOK.md. What remains:
 
-- **7a. When riddl's next release ships, update the "Fixed by" cell for
-  `type-reference-to-is-id`** in both deprecation tables
-  (`language-reference.md` § Deprecated Constructs, `migration/1.x-to-2.0.md`
-  § 2). riddl `42f582ccc` gave it a computed `--fix` after 2.7.0. Probe first:
-  `riddlc validate --fix` on a model containing `reference to entity E`.
-- **7c. Four riddl reports still open**, each in `riddl/task/`:
-  - **R5**: prettify joins definitions onto one line.
-  - **R6**: a processor reference's keyword is not checked against the
-    target's kind. The docs say "prefer `streamlet`" because of it; revisit
-    that wording if riddl adds the check.
-  - **R7**: a domain's `option external` deprecation advises a context
-    prefix. `concepts/option.md` lists the domain form as deprecated without
-    a replacement until riddl decides one.
-  - **R8**: `value-membership-type-mismatch` is never emitted, and
-    `repo-link-type-mismatch` did not fire on an `Integer`-to-`String` link.
-    Neither id is on the site; add them if riddl makes them fire.
+- **R9**: `on every` and `on entry` have no `find -type` kind, and
+  `every`/`entry`/`cron` are missing from riddl's `Keyword.allKeywords`
+  (`riddl/task/2026-11-20-on-every-on-entry-not-findable-by-kind.md`).
+  `tools/riddlc/command-reference.md` tells readers to use `-name every` and
+  `-name entry`, and `riddl_lexer/lexer.py` lists the three words by hand.
+  When riddl adds the kinds, replace that advice; when it adds the keywords,
+  the hand-added lexer entries become redundant but harmless.

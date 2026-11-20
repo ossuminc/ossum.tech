@@ -493,6 +493,8 @@ not carry an answer forward from a previous session; measure it.
 | 2.3.1 shipped (2026-09-25) | **`../bin/riddlc`** — rebuilt, and now prints `2.3.1` | one substantive commit past 2.3.0; PATH still serves **2.0.0** |
 | 2.4.0 shipped (2026-10-07) | **`../bin/riddlc`** — rebuilt at the tag, prints a clean `2.4.0` | tag, binary and GitHub Packages artifact all agree; PATH still serves **2.0.0** |
 | 2.6.0 shipped (2026-11-07) | **either** — both print `2.6.0` | **PATH caught up for the first time since 2.0.0**: Homebrew stable and installed are 2.6.0 (2.5.0's macOS binary aborted at load on an `openssl@4` link, fixed in 2.6.0). Tag `95537470`, artifact on GitHub Packages. This agreement is a coincidence of timing, not a new rule |
+| 2.7.0 shipped (2026-11-17) | **`../bin/riddlc`** — prints `2.7.0` | PATH stayed on **2.6.0**; the agreement lasted ten days |
+| 2.8.0 shipped (2026-11-20) | **`../bin/riddlc`** — prints `2.8.0` | Tag `6004d0e9d`; PATH still **2.6.0**. Grammar md5 `6681d872` |
 
 Each of those was written down as emphatically as this one. The instruction
 inverted twice **without a word of it changing**, and validating with the wrong
@@ -580,7 +582,7 @@ resolved: an upgrade request is not evidence that any of the three has moved.
 
 ```bash
 # 2.0 -- sites/riddl/. WHICH BINARY changes; see the table above and measure.
-# As of 2026-11-11 both `../bin/riddlc` and PATH print 2.6.0. They will
+# As of 2026-11-20 `../bin/riddlc` prints 2.8.0 and PATH 2.6.0. They will
 # drift apart again at the next riddl commit; measure, do not assume.
 python3 scripts/validate-riddl-examples.py ../bin/riddlc \
   sites/riddl/docs/quickstart.md
@@ -644,8 +646,8 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 **Do not pipe it into `tail`** — `$?` then reports `tail`'s status and a red
 gate reads green. Redirect to a file, check `$?`, then read the file.
 
-**Status** (2026-11-11, riddl **2.6.0**): the whole 2.0 tree
-is **390 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
+**Status** (2026-11-20, riddl **2.8.0**): the whole 2.0 tree
+is **402 validated / 52 skipped / 0 failed**, exit 0, and **every blanket skip
 is gone** — both the 118 `"illustrative fragment"` ones and the 73
 `tutorials/rbbq/` ones. Every remaining skip states its own reason.
 
@@ -797,6 +799,13 @@ compilers):
 | connector across domains | Error | permitted between **related** domains (sharing an ancestor); an Error only between unrelated ones |
 | chain end | a `sink` shape | where the message is **consumed**. Sending a *different* type is a write, not a continuation; a handler-less processor is a tail whatever its shape |
 | `stream-graph-cycle` | — | an infinite **message** loop, not a connector ring. A request/response pair is two chains |
+| recurrence loop | — | An `on X` re-sending `X` `at <instant> + <duration>` is a recurrence, not `stream-graph-cycle` (2.8.0) |
+| entity start | first declared, or `initial state` | **`on init` is CREATION** (2.8.0): one entity-level `on init` `morph`s into the starting state, chosen from its parameters. `initial state` (`entity-initial-state-marker`), starting by declaration (`entity-init-no-morph`) and `on init` in a state (`entity-init-in-state`) are deprecations until 3.0. Event-sourced: `on init` is the first journal entry, may `set`/`morph`, may not read `system.now`. The gate's entity wrappers carry `on init(start: R) is { morph … with start }` |
+| `on entry` | ❌ | ✅ 2.8.0 — a state's entry action, in its INITIAL handler only (`entity-entry-misplaced`); runs on a live `morph` into the state, never at creation, for `S -> S` (`stmt-morph-to-current-state`), on replay or rehydration; may not `morph` (`entity-entry-morphs`). Parse error outside an entity |
+| literals | loosely checked | **held to the position's type** (2.8.0): a number in a `String`/`Currency`/`DateTime`/record is `value-type-mismatch`; time strings ISO-8601 (`value-time-literal-not-iso8601`); `0`/`1` fill a Boolean and a Boolean fills an Integer. **No literal fills a `Currency`** — pass a reference |
+| `ask` arguments | `ask query Q of P` | `ask query Q(f = v) of P` (2.8.0), constructor rules — EVERY field, an optional one as `empty`. A bare ask of a query with fields is `value-ask-bare-query` until 3.0 |
+| value forms | — | 2.8.0: `sum of xs [as e by <product>]`, `one of xs as e where p` (optional), `x otherwise y` (loosest), `when c then a else b end`, `<unit> of d`, optional chaining. A bare name may not bind to a state (`value-ref-not-a-value`) |
+| recurrence | — | 2.8.0: `on every <period>` (a message does not reset it); `send … every <period> [starting [at] t]` only in `on init`. Period = positive Duration, calendar schedule (zone default UTC, a missing day is SKIPPED) or `cron "…"`. `date + 1 month` CLAMPS |
 
 **The grammar's comment on `empty` overstates what 2.0.0 enforces.** It says
 `empty` is "an error on `T+`, `T{1,n}` or a bare `T`". Probed against the
@@ -1124,7 +1133,7 @@ without CSS.
 | Build the cross-site search index | `./scripts/build-search-index.sh <site-root>` |
 | Generate robots.txt | `./scripts/build-robots-txt.sh <site-root>` |
 | Check RIDDL code blocks | `python3 scripts/check-riddl-blocks.py sites/riddl/docs` |
-| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (both the staged binary and PATH are `2.6.0` as of 2026-11-11 — re-measure, see § "Compiling RIDDL examples") |
+| Compile RIDDL examples (2.0) | `python3 scripts/validate-riddl-examples.py ../bin/riddlc sites/riddl/docs/quickstart.md` (the staged binary is `2.8.0` and PATH `2.6.0` as of 2026-11-20 — re-measure, see § "Compiling RIDDL examples") |
 | Compile RIDDL examples (1.31) | `python3 scripts/validate-riddl-examples.py /opt/homebrew/Cellar/riddlc/1.31.0/bin/riddlc sites/riddl-1x/docs/quickstart.md` — **the 1.31 keg is gone; this gate cannot run (2026-08-31)** |
 | Run the **whole** 2.0 gate | see § "Compiling RIDDL examples" — the scope is a file list, not a directory |
 | Preview the whole site | `scripts/preview-versioned-site.sh` |

@@ -11,14 +11,14 @@ to the task file and note completion in this notebook.
 
 ---
 
-## HANDOFF — as of 2026-11-17
+## HANDOFF — as of 2026-11-20
 
 **Branch `main`.** Run `git status` for tree and push state.
 
-**`build.sbt` pins the released `2.7.0`, Scala `3.9.0`.** Grammar md5
-`25914cd3`, `cmp`-identical to riddl's at the `2.7.0` tag.
+**`build.sbt` pins the released `2.8.0`, Scala `3.9.0`.** Grammar md5
+`6681d872`, identical to riddl's at the `2.8.0` tag.
 
-**`../bin/riddlc` prints `2.7.0`; PATH still prints `2.6.0`.** Gate against
+**`../bin/riddlc` prints `2.8.0`; PATH still prints `2.6.0`.** Gate against
 `../bin/riddlc`. **Measure, never remember**:
 
 ```bash
@@ -30,10 +30,9 @@ echo "EXIT=$?"; tail -2 /tmp/gate.txt
 
 ### In flight
 
-**Nothing half-done.** The 2.7.0 audit and upgrade tasks are closed (in
-`task/done/` with Results), and `task/` is empty. Open follow-ups are
-**BACKLOG 7a and 7c**: a `--fix` table cell owed at riddl's next release,
-and four riddl reports. 7b (D1) was ruled on and is done.
+**Nothing half-done.** The seven 2.8.0 tasks are closed (in `task/done/`
+with Results), and `task/` is empty. The only open follow-up is
+**BACKLOG 7, R9**, a riddl report about `find` kinds and keywords.
 
 **A deprecated spelling lasts until the NEXT MAJOR** (Reid, 2026-11-17).
 "Removed in 3.0" is correct. riddl has since reworded its "forever" rule
@@ -73,31 +72,82 @@ same rule.
   implied-port abolition was paused on feasibility and told the next
   session not to pre-empt it; riddl `2c2b8d5b2` had already landed that
   day. Verify the sender's claim against riddl's log, not the memory of it.
+- **A scan that matches `[error] [rule-id]` misses PARSE errors**, which
+  carry no rule id. In the 2.8.0 upgrade a binding named `create` (now a
+  value keyword) slipped past a hand scan and was caught only by the gate.
+  Match `\[(error|severe|deprecated)\] (\[id\] )?` or use the gate itself.
+- **Placeholder values now fail.** 2.8.0 holds literals to their type:
+  `"a value"` in a `TimeStamp` and `1.00` in a `Currency` are Errors, and
+  NO literal fills a `Currency`. Use `system.now` and the handled message's
+  own fields.
 - **`sbt extractGrammar` hangs because `sbtn` attaches to IntelliJ's sbt
   shell.** `sbt --server -batch extractGrammar` finishes in seconds. CLAUDE.md
   has the `lsof` diagnosis.
 
 ### Certainty
 
-- **Verified by running, 2026-11-17:**
-  - The whole-tree gate on `../bin/riddlc` 2.7.0: 392 / 52 / 0, exit 0.
+- **Verified by running, 2026-11-20:**
+  - The whole-tree gate on `../bin/riddlc` 2.8.0: 402 / 52 / 0, exit 0, no
+    deprecations.
   - All five strict builds are clean, and cross-site links show 80 checked,
     0 broken.
-  - The lexer check passes, and `create` tokenizes as a keyword.
+  - The lexer check passes; `sum`, `otherwise`, `every`, `entry`, `cron`
+    tokenize as keywords.
   - The grammar md5 equals the tag's.
-  - Every severity and `--fix`/prettify claim made in the audit was probed;
-    the NOTEBOOK entry below names each one.
+  - Every rule id put on a page in the upgrade was made to fire first; the
+    NOTEBOOK entry below lists the surprises.
 - **Assumed, not verified:** that `1037313f6` ("at most one of each special
   on-clause") does not change the `on quiescence` one-per-handler rule.
 
 ### Pointers
 
-- **BACKLOG.md** — **7a–7c** (2.7.0 audit follow-ups), **1e-remnant**
+- **BACKLOG.md** — **7** (R9, a riddl report), **1e-remnant**
   (`group.md:42` is still false), **3b** (the 1.x gate has no compiler).
 - **CLAUDE.md** — the gate-compiler flip table, the evolving-lines versioning
   model, the lexer drift trap, and the version-differences table.
 
 **Run `/ossuminc-skills:check-tasks` in the new session.**
+
+---
+
+### riddl 2.8.0: seven tasks, one upgrade ✅ **2026-11-20**
+
+Seven task files arrived for one release: the upgrade itself and six
+language changes (`on init` as creation and `on entry`, typed literals,
+`ask` arguments, the value forms, recurrence, calendar schedules). They were
+done in seven commits, `725b6ae` .. `b910cdc`, gate green after each.
+
+**The gate went from 199 failing fences to 0, and most of the cure was
+scaffolding.** Against 2.8.0 the docs drew 530 deprecations over 199 fences —
+a ratio of 2.7, the signal to fix wrappers before fences. The gate's four
+entity wrappers and four language-reference prelude entities had states and
+no `on init`; giving them `on init(start: R) is { morph … with start }`
+removed about 400. The remaining 45 entities were migrated by a one-off
+transformer (insert the clause, drop `initial`), read back by hand. Two
+things it got wrong: an `initial handler` one-liner whose comment layout it
+broke, and two entities whose new `morph` named an ambiguous state.
+
+**What the probes found that the task files did not say:**
+- No literal fills a `Currency` — not `1.00`, `"1.00"` or `"USD 1.00"`.
+- An `ask`, like a constructor, must supply EVERY field, an optional one as
+  `empty`.
+- A repository `link` cannot reach into a collection (`Cart.items.id`), now
+  that links resolve (the R8 fix); the line records became tables.
+- A zero Duration is `value-non-positive-duration`; the task's
+  `stmt-send-every-not-duration` is for a non-Duration period.
+- The zone check is of form only: `"Mars/Olympus"` passes.
+- `prettify` drops an `initial` state marker only when it is redundant;
+  with a marked second state it keeps it, so it never moves the start.
+- `find` names the new values `sum-value`, `otherwise-value`,
+  `calendar-schedule`, `cron-schedule`; `on every`/`on entry` have no kind
+  (R9).
+
+**The 2.7.0 audit's follow-ups all closed here**: 7a (`--fix` for
+`reference to`), R6 (`ref-wrong-keyword` on every processor reference), R7
+(an external domain marks each context `external`), R8 (both ids fire).
+
+Proofs: gate 402 / 52 / 0; five strict builds clean; 80 cross-site links, 0
+broken; lexer clean; grammar md5 `6681d872` equals the tag's.
 
 ---
 
